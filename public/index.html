@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Paseo de los libros</title>
+</head>
+<body>
+  <h1>Paseo de los libros</h1>
+
+  <section>
+    <h2>Añadir ejemplar por ISBN</h2>
+
+    <label for="usuario">Usuario:</label>
+    <select id="usuario"></select>
+
+    <br /><br />
+
+    <label for="isbn">ISBN:</label>
+    <input type="text" id="isbn" placeholder="978..." />
+
+    <button id="btn-escanear">Escanear código de barras</button>
+
+    <br /><br />
+
+    <div id="scanner" style="display:none; margin-top: 1rem;">
+      <p>Apunta la cámara al código de barras del libro</p>
+      <video id="video" width="300" height="200" style="border:1px solid #ccc;"></video>
+      <br />
+      <button id="btn-detener">Detener escaneo</button>
+    </div>
+
+    <br />
+
+    <label for="ubicacion">Ubicación:</label>
+    <input type="text" id="ubicacion" placeholder="Salón - Estantería 1" />
+
+    <br /><br />
+
+    <label for="notas">Notas:</label>
+    <input type="text" id="notas" placeholder="Comentario opcional" />
+
+    <br /><br />
+
+    <button id="btn-crear">Crear ejemplar</button>
+
+    <p id="mensaje"></p>
+
+    <pre id="resultado"></pre>
+  </section>
+
+  <!-- 🔽 NUEVA SECCIÓN: EJEMPLARES DEL USUARIO -->
+  <section>
+    <h2>Ejemplares del usuario</h2>
+    <p id="info-ejemplares"></p>
+    <table id="tabla-ejemplares" border="1" cellpadding="4" cellspacing="0">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Título</th>
+      <th>ISBN</th>
+      <th>Estado</th>
+      <th>Ubicación</th>
+      <th>Notas</th>
+      <th>Acciones</th> <!-- NUEVA COLUMNA -->
+    </tr>
+  </thead>
+  <tbody>
+    <!-- aquí se llenará por JS -->
+  </tbody>
+</table>
+<section>
+  <h2>Lecturas del libro seleccionado</h2>
+  <p id="info-lecturas"></p>
+  <pre id="lecturas-detalle"></pre>
+</section>
+<section>
+  <h2>Préstamos del libro seleccionado</h2>
+  <p id="info-prestamos"></p>
+  <table id="tabla-prestamos" border="1" cellpadding="4" cellspacing="0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Prestador</th>
+        <th>Receptor</th>
+        <th>Fecha préstamo</th>
+        <th>Fecha límite</th>
+        <th>Fecha devolución</th>
+        <th>Estado</th>
+        <th>Notas</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- JS -->
+    </tbody>
+  </table>
+</section>
+
+  </section>
+
+  <script src="https://unpkg.com/@zxing/library@latest"></script>
+  <script src="main.js"></script>
+</body>
+
+</html>
