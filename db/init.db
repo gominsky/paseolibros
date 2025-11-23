@@ -1,0 +1,125 @@
+BEGIN;
+
+-- Borramos tablas en el orden correcto (por dependencias)
+DROP TABLE IF EXISTS loans CASCADE;
+DROP TABLE IF EXISTS reading_sessions CASCADE;
+DROP TABLE IF EXISTS user_books CASCADE;
+DROP TABLE IF EXISTS books CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
+-- =========================
+-- Tabla: users (perfiles)
+-- =========================
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(50) UNIQUE NOT NULL,
+  email VARCHAR(100),
+  password_hash TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- =========================
+-- Tabla: books (ficha general)
+-- =========================
+CREATE TABLE books (
+  id SERIAL PRIMARY KEY,
+  isbn VARCHAR(20) UNIQUE NOT NULL,
+  title TEXT NOT NULL,
+  authors TEXT,
+  publisher TEXT,
+  published_date VARCHAR(20),
+  page_count INT,
+  description TEXT,
+  thumbnail_url TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- =========================
+-- Tabla: user_books (ejemplares de un usuario)
+-- =========================
+CREATE TABLE user_books (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  book_id INT NOT NULL REFERENCES books(id) ON DELETE CASCADE,
+  status VARCHAR(20),         -- 'owned', 'borrowed', 'wishlist', etc.
+  location VARCHAR(100),
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_user_books_user_id ON user_books(user_id);
+CREATE INDEX idx_user_books_book_id ON user_books(book_id);
+
+-- =========================
+-- Tabla: reading_sessions (histórico de lecturas)
+-- =========================
+CREATE TABLE reading_sessions (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  book_id INT NOT NULL REFERENCES books(id) ON DELETE CASCADE,
+  user_book_id INT REFERENCES user_books(id) ON DELETE SET NULL,
+  status VARCHAR(20) NOT NULL,         -- 'reading', 'completed', 'abandoned'...
+  started_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  finished_at TIMESTAMP,
+  current_page INT,
+  rating INT CHECK (rating BETWEEN 1 AND 5),
+  notes TEXT
+);
+
+CREATE INDEX idx_reading_sessions_user_id ON reading_sessions(user_id);
+CREATE INDEX idx_reading_sessions_book_id ON reading_sessions(book_id);
+
+-- =========================
+-- Tabla: loans (histórico de préstamos)
+-- =========================
+CREATE TABLE loans (
+  id SERIAL PRIMARY KEY,
+  user_book_id INT NOT NULL REFERENCES user_books(id) ON DELETE CASCADE,
+  lender_user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  borrower_user_id INT REFERENCES users(id) ON DELETE SET NULL,
+  borrower_name VARCHAR(100),
+  loaned_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  due_date DATE,
+  returned_at TIMESTAMP,
+  status VARCHAR(20) NOT NULL DEFAULT 'ongoing',  -- 'ongoing', 'returned', 'lost', etc.
+  notes TEXT
+);
+
+CREATE INDEX idx_loans_lender_user_id ON loans(lender_user_id);
+CREATE INDEX idx_loans_borrower_user_id ON loans(borrower_user_id);
+
+-- =========================
+-- Seeds iniciales
+-- =========================
+
+-- Usuarios de ejemplo
+INSERT INTO users (username, email, password_hash) VALUES
+  ('ana',    'ana@example.com',    'dummy-hash-ana'),
+  ('carlos', 'carlos@example.com', 'dummy-hash-carlos');
+
+-- Libros de ejemplo
+INSERT INTO books (isbn, title, authors, publisher, published_date, page_count, description, thumbnail_url) VALUES
+  ('9788497592208', 'El Señor de los Anillos', 'J. R. R. Tolkien', 'Minotauro', '2002', 1200, 'Edición de ejemplo para pruebas.', NULL),
+  ('9788498382662', 'Juego de Tronos', 'George R. R. Martin', 'Gigamesh', '2002', 800, 'Libro 1 de Canción de Hielo y Fuego.', NULL),
+  ('9788420471839', 'Cien años de soledad', 'Gabriel García Márquez', 'Sudamericana', '1967', 500, 'Clásico de la literatura latinoamericana.', NULL);
+
+-- Ejemplares de usuarios
+-- users: ana = 1, carlos = 2
+-- books: lotr = 1, got = 2, cien = 3
+INSERT INTO user_books (user_id, book_id, status, location, notes) VALUES
+  (1, 1, 'owned',   'Salón - Estantería 1', 'Edición tapa dura.'),
+  (1, 2, 'owned',   'Salón - Estantería 2', NULL),
+  (2, 3, 'owned',   'Habitación - Estantería', 'Regalo.');
+
+-- Lecturas de ejemplo
+INSERT INTO reading_sessions (user_id, book_id, user_book_id, status, started_at, finished_at, current_page, rating, notes) VALUES
+  (1, 1, 1, 'completed', NOW() - INTERVAL '30 days', NOW() - INTERVAL '25 days', 1200, 5, 'Primera lectura de prueba.');
+
+INSERT INTO reading_sessions (user_id, book_id, user_book_id, status, started_at, current_page, notes) VALUES
+  (2, 2, 2, 'reading', NOW() - INTERVAL '5 days', 150, 'Leyendo poco a poco.');
+
+-- Préstamo de ejemplo (Ana -> Carlos del ejemplar GOT)
+INSERT INTO loans (user_book_id, lender_user_id, borrower_user_id, borrower_name, loaned_at, due_date, returned_at, status, notes) VALUES
+  (2, 1, 2, NULL, NOW() - INTERVAL '10 days', (NOW() + INTERVAL '20 days')::date, NULL, 'ongoing', 'Préstamo de prueba.');
+
+COMMIT;
