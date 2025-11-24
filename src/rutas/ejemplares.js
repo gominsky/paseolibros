@@ -107,11 +107,20 @@ async function crearLibroEnBD(datosLibro) {
  *    "notas": "Comprado en 2025"
  *  }
  */
-router.post('/', async (req, res) => {
-  let { usuario_id, isbn, estado, ubicacion, notas } = req.body;
+// src/rutas/ejemplares.js (solo el POST)
 
-  if (!usuario_id || !isbn) {
-    return res.status(400).json({ error: 'usuario_id e isbn son obligatorios' });
+// Crear un ejemplar a partir de un ISBN
+router.post('/', async (req, res) => {
+  // usuario viene del token, NO del body
+  const usuario_id = req.usuario?.id;
+  let { isbn, estado, ubicacion, notas } = req.body;
+
+  if (!usuario_id) {
+    return res.status(401).json({ error: 'Usuario no autenticado' });
+  }
+
+  if (!isbn) {
+    return res.status(400).json({ error: 'isbn es obligatorio' });
   }
 
   const isbnLimpio = limpiarIsbn(isbn);
@@ -124,11 +133,10 @@ router.post('/', async (req, res) => {
     // 1. ¿El libro ya existe en la BD?
     let libro = await buscarLibroEnBD(isbnLimpio);
 
-    // 2. Si no existe, lo intentamos obtener de la API
+    // 2. Si no existe, lo obtenemos de la API o creamos mínimo
     if (!libro) {
       let datosLibro = await obtenerDatosLibroDeApi(isbnLimpio);
 
-      // Si no encontramos datos, creamos un libro mínimo
       if (!datosLibro) {
         datosLibro = {
           isbn: isbnLimpio,
@@ -138,14 +146,14 @@ router.post('/', async (req, res) => {
           fecha_publicacion: null,
           numero_paginas: null,
           descripcion: null,
-          url_portada: null
+          url_portada: null,
         };
       }
 
       libro = await crearLibroEnBD(datosLibro);
     }
 
-    // 3. Crear el ejemplar para el usuario
+    // 3. Crear el ejemplar para el usuario autenticado
     const resultadoEjemplar = await pool.query(
       `INSERT INTO ejemplares (usuario_id, libro_id, estado, ubicacion, notas)
        VALUES ($1, $2, COALESCE($3, 'propio'), $4, $5)
@@ -155,7 +163,7 @@ router.post('/', async (req, res) => {
         libro.id,
         estado || null,
         ubicacion || null,
-        notas || null
+        notas || null,
       ]
     );
 
@@ -167,6 +175,7 @@ router.post('/', async (req, res) => {
     res.status(500).json({ error: 'Error creando ejemplar a partir del ISBN' });
   }
 });
+
 // Listar ejemplares (opcionalmente filtrando por usuario_id ?usuario_id=1)
 router.get('/', async (req, res) => {
   const { usuario_id } = req.query;

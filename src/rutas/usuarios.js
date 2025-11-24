@@ -1,7 +1,7 @@
 // src/rutas/usuarios.js
 import { Router } from 'express';
 import pool from '../bd.js';
-
+import bcrypt from 'bcryptjs';
 const router = Router();
 
 // Listar usuarios: GET /api/usuarios
@@ -18,6 +18,7 @@ router.get('/', async (req, res) => {
 });
 
 // Crear usuario: POST /api/usuarios
+// Crear usuario: POST /api/usuarios
 router.post('/', async (req, res) => {
   const { nombre_usuario, correo, contrasena } = req.body;
 
@@ -26,11 +27,15 @@ router.post('/', async (req, res) => {
   }
 
   try {
+    // generar hash seguro
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(contrasena, salt);
+
     const resultado = await pool.query(
       `INSERT INTO usuarios (nombre_usuario, correo, contrasena_hash)
        VALUES ($1, $2, $3)
        RETURNING id, nombre_usuario, correo, creado_en`,
-      [nombre_usuario, correo || null, contrasena]
+      [nombre_usuario, correo || null, hash]
     );
     res.status(201).json(resultado.rows[0]);
   } catch (error) {
