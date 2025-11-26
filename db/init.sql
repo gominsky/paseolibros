@@ -39,12 +39,13 @@ CREATE TABLE libros (
 -- =========================
 CREATE TABLE ejemplares (
   id SERIAL PRIMARY KEY,
-  usuario_id INT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
-  libro_id INT NOT NULL REFERENCES libros(id) ON DELETE CASCADE,
-  estado VARCHAR(20),         -- 'propio', 'prestado', 'deseado', etc.
-  ubicacion VARCHAR(100),
+  usuario_id INTEGER REFERENCES usuarios(id),
+  libro_id INTEGER REFERENCES libros(id),
+  estado TEXT,
+  ubicacion TEXT,
   notas TEXT,
-  creado_en TIMESTAMP DEFAULT NOW()
+  activo BOOLEAN NOT NULL DEFAULT TRUE,
+  creado_en TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE INDEX idx_ejemplares_usuario_id ON ejemplares(usuario_id);
@@ -123,3 +124,6 @@ INSERT INTO prestamos (ejemplar_id, usuario_prestador_id, usuario_receptor_id, n
   (2, 1, 2, NULL, NOW() - INTERVAL '10 days', (NOW() + INTERVAL '20 days')::date, NULL, 'activo', 'Préstamo de prueba');
 
 COMMIT;
+
+ALTER TABLE ejemplares
+  ADD COLUMN activo BOOLEAN NOT NULL DEFAULT TRUE;

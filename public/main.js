@@ -2,114 +2,211 @@ const API_BASE = 'http://localhost:3011'; // ajusta puerto si cambias
 
 let codeReader = null;
 let currentStream = null;
+let token = null;
+let usuarioActual = null; // { id, nombre_usuario, ... }
 
-async function cargarUsuarios() {
-  const select = document.getElementById('usuario');
-  select.innerHTML = '<option value="">Cargando...</option>';
+// ---------- Helpers ----------
 
-  try {
-    const res = await fetch(`${API_BASE}/api/usuarios`);
-    const usuarios = await res.json();
+function getHeaders(json = true) {
+  const headers = {};
+  if (json) headers['Content-Type'] = 'application/json';
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  return headers;
+}
 
-    select.innerHTML = '<option value="">-- Selecciona usuario --</option>';
-    for (const u of usuarios) {
+function actualizarUIAutenticacion() {
+  const zonaNo = document.getElementById('zona-no-autenticado');
+  const zonaSi = document.getElementById('zona-autenticado');
+  const nombreSpan = document.getElementById('nombre-usuario-actual');
+  const selectUsuario = document.getElementById('usuario');
+
+  if (usuarioActual && token) {
+    zonaNo.style.display = 'none';
+    zonaSi.style.display = 'block';
+    nombreSpan.textContent = usuarioActual.nombre_usuario;
+
+    // rellenar select de usuario con SOLO el actual
+    if (selectUsuario) {
+      selectUsuario.innerHTML = '';
       const opt = document.createElement('option');
-      opt.value = u.id;
-      opt.textContent = u.nombre_usuario;
-      select.appendChild(opt);
+      opt.value = usuarioActual.id;
+      opt.textContent = usuarioActual.nombre_usuario;
+      selectUsuario.appendChild(opt);
     }
-  } catch (err) {
-    console.error(err);
-    select.innerHTML = '<option value="">Error cargando usuarios</option>';
+
+    // cargar ejemplares de este usuario
+    cargarEjemplares(usuarioActual.id);
+  } else {
+    zonaNo.style.display = 'block';
+    zonaSi.style.display = 'none';
+    nombreSpan.textContent = '';
+
+    if (selectUsuario) {
+      selectUsuario.innerHTML = '';
+    }
+
+    const info = document.getElementById('info-ejemplares');
+    if (info) info.textContent = 'Inicia sesión para ver tus ejemplares.';
   }
 }
+
+// ---------- Login / Logout ----------
+
+async function hacerLogin() {
+  const usuarioInput = document.getElementById('login-usuario');
+  const passInput = document.getElementById('login-contrasena');
+  const mensaje = document.getElementById('login-mensaje');
+
+  mensaje.textContent = '';
+
+  const nombre_usuario = usuarioInput.value.trim();
+  const contrasena = passInput.value;
+
+  if (!nombre_usuario || !contrasena) {
+    mensaje.textContent = 'Introduce usuario y contraseña';
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/login`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ nombre_usuario, contrasena })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      mensaje.textContent = data.error || 'Error al iniciar sesión';
+      return;
+    }
+
+    token = data.token;
+    usuarioActual = data.usuario;
+
+    mensaje.textContent = 'Login correcto ✅';
+
+    // limpiar campos
+    usuarioInput.value = '';
+    passInput.value = '';
+
+    actualizarUIAutenticacion();
+  } catch (err) {
+    console.error(err);
+    mensaje.textContent = 'Error de red al iniciar sesión';
+  }
+}
+
+function hacerLogout() {
+  token = null;
+  usuarioActual = null;
+  actualizarUIAutenticacion();
+
+  const mensaje = document.getElementById('login-mensaje');
+  if (mensaje) mensaje.textContent = 'Sesión cerrada';
+}
+
+// ---------- Cargar ejemplares ----------
 
 async function cargarEjemplares(usuarioId) {
   const info = document.getElementById('info-ejemplares');
   const tbody = document.querySelector('#tabla-ejemplares tbody');
 
+  if (!tbody) return;
+
   tbody.innerHTML = '';
   if (!usuarioId) {
-    info.textContent = 'Selecciona un usuario para ver sus ejemplares.';
+    if (info) info.textContent = 'Inicia sesión para ver tus ejemplares.';
     return;
   }
 
-  info.textContent = 'Cargando ejemplares...';
+  if (info) info.textContent = 'Cargando ejemplares...';
 
   try {
-    const res = await fetch(`${API_BASE}/api/usuarios/${usuarioId}/ejemplares`);
+    const res = await fetch(`${API_BASE}/api/usuarios/${usuarioId}/ejemplares`, {
+      headers: getHeaders(false)
+    });
     const ejemplares = await res.json();
 
     if (!Array.isArray(ejemplares) || ejemplares.length === 0) {
-      info.textContent = 'Este usuario no tiene ejemplares todavía.';
+      if (info) info.textContent = 'No tienes ejemplares todavía.';
       return;
     }
 
-    info.textContent = `Total ejemplares: ${ejemplares.length}`;
+    if (info) info.textContent = `Total ejemplares: ${ejemplares.length}`;
 
     for (const e of ejemplares) {
       const tr = document.createElement('tr');
 
       tr.innerHTML = `
-        <td>${e.ejemplar_id}</td>
         <td>${e.titulo || ''}</td>
+         <td>${e.autores || ''}</td>
         <td>${e.isbn || ''}</td>
         <td>${e.estado || ''}</td>
         <td>${e.ubicacion || ''}</td>
         <td>${e.notas || ''}</td>
-        <td>
-          <button 
-            class="btn-leer" 
-            data-libro-id="${e.libro_id}" 
-            data-ejemplar-id="${e.ejemplar_id}"
-          >
-            Empezar lectura
-          </button>
-          <button 
-            class="btn-ver-lecturas" 
-            data-libro-id="${e.libro_id}"
-          >
-            Ver lecturas
-          </button>
-          <button
-            class="btn-prestar"
-            data-libro-id="${e.libro_id}"
-            data-ejemplar-id="${e.ejemplar_id}"
-          >
-            Prestar
-          </button>
-          <button
-            class="btn-ver-prestamos"
-            data-libro-id="${e.libro_id}"
-          >
-            Ver préstamos
-          </button>
-        </td>
-      `;
-
+          <td>
+    <button 
+      class="btn-leer" 
+      data-libro-id="${e.libro_id}" 
+      data-ejemplar-id="${e.ejemplar_id}"
+    >
+      Empezar lectura
+    </button>
+    <button 
+      class="btn-ver-lecturas" 
+      data-libro-id="${e.libro_id}"
+    >
+      Ver lecturas
+    </button>
+    <button
+      class="btn-prestar"
+      data-libro-id="${e.libro_id}"
+      data-ejemplar-id="${e.ejemplar_id}"
+    >
+      Prestar
+    </button>
+    <button
+      class="btn-ver-prestamos"
+      data-libro-id="${e.libro_id}"
+    >
+      Ver préstamos
+    </button>
+    <button
+      class="btn-eliminar"
+      data-ejemplar-id="${e.ejemplar_id}"
+    >
+      Eliminar
+    </button>
+  </td>
+`;
+      
       tbody.appendChild(tr);
     }
   } catch (err) {
     console.error(err);
-    info.textContent = 'Error al cargar los ejemplares.';
+    if (info) info.textContent = 'Error al cargar los ejemplares.';
   }
 }
 
+// ---------- Crear ejemplar ----------
+
 async function crearEjemplar() {
-  const usuarioId = document.getElementById('usuario').value;
-  const isbn = document.getElementById('isbn').value.trim();
-  const ubicacion = document.getElementById('ubicacion').value.trim();
-  const notas = document.getElementById('notas').value.trim();
   const mensaje = document.getElementById('mensaje');
   const resultado = document.getElementById('resultado');
 
   mensaje.textContent = '';
   resultado.textContent = '';
 
-  if (!usuarioId) {
-    mensaje.textContent = 'Selecciona un usuario';
+  if (!token || !usuarioActual) {
+    mensaje.textContent = 'Debes iniciar sesión para crear ejemplares';
     return;
   }
+
+  const isbn = document.getElementById('isbn').value.trim();
+  const ubicacion = document.getElementById('ubicacion').value.trim();
+  const notas = document.getElementById('notas').value.trim();
+
   if (!isbn) {
     mensaje.textContent = 'Introduce un ISBN (o escanéalo)';
     return;
@@ -118,11 +215,8 @@ async function crearEjemplar() {
   try {
     const res = await fetch(`${API_BASE}/api/ejemplares`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: getHeaders(),
       body: JSON.stringify({
-        usuario_id: Number(usuarioId),
         isbn,
         estado: 'propio',
         ubicacion: ubicacion || null,
@@ -139,36 +233,34 @@ async function crearEjemplar() {
 
     mensaje.textContent = 'Ejemplar creado correctamente ✅';
     resultado.textContent = JSON.stringify(data, null, 2);
-
     document.getElementById('isbn').value = '';
 
-    await cargarEjemplares(usuarioId);
+    await cargarEjemplares(usuarioActual.id);
   } catch (err) {
     console.error(err);
     mensaje.textContent = 'Error de red al crear el ejemplar';
   }
 }
 
-// ---------- LECTURAS ----------
+// ---------- LECTURAS Y PRÉSTAMOS ----------
+// (no cambio aquí la lógica de negocio, solo añado getHeaders() y uso usuarioActual.id)
 
-async function empezarLectura(libroId, ejemplarId, usuarioId) {
+async function empezarLectura(libroId, ejemplarId) {
   const mensaje = document.getElementById('mensaje');
 
   mensaje.textContent = '';
 
-  if (!usuarioId) {
-    mensaje.textContent = 'Selecciona un usuario antes de empezar una lectura.';
+  if (!token || !usuarioActual) {
+    mensaje.textContent = 'Debes iniciar sesión para registrar lecturas';
     return;
   }
 
   try {
     const res = await fetch(`${API_BASE}/api/lecturas`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: getHeaders(),
       body: JSON.stringify({
-        usuario_id: Number(usuarioId),
+        usuario_id: usuarioActual.id, // de momento sigue yendo en el body
         libro_id: Number(libroId),
         ejemplar_id: Number(ejemplarId),
         estado: 'leyendo',
@@ -201,7 +293,9 @@ async function cargarLecturas(libroId) {
   detalle.textContent = '';
 
   try {
-    const res = await fetch(`${API_BASE}/api/libros/${libroId}/lecturas`);
+    const res = await fetch(`${API_BASE}/api/libros/${libroId}/lecturas`, {
+      headers: getHeaders(false)
+    });
     const lecturas = await res.json();
 
     if (!Array.isArray(lecturas) || lecturas.length === 0) {
@@ -234,19 +328,16 @@ async function cargarLecturas(libroId) {
   }
 }
 
-// ---------- PRÉSTAMOS ----------
-
-async function crearPrestamo(libroId, ejemplarId, usuarioPrestadorId) {
+async function crearPrestamo(libroId, ejemplarId) {
   const mensaje = document.getElementById('mensaje');
 
   mensaje.textContent = '';
 
-  if (!usuarioPrestadorId) {
-    mensaje.textContent = 'Selecciona un usuario (propietario) antes de prestar.';
+  if (!token || !usuarioActual) {
+    mensaje.textContent = 'Debes iniciar sesión para prestar libros';
     return;
   }
 
-  // Esto es simple con prompts; más adelante se puede hacer un formulario bonito
   const receptorIdStr = prompt(
     'ID del usuario receptor (si usa la app). Deja vacío si es alguien externo.'
   );
@@ -271,12 +362,10 @@ async function crearPrestamo(libroId, ejemplarId, usuarioPrestadorId) {
   try {
     const res = await fetch(`${API_BASE}/api/prestamos`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: getHeaders(),
       body: JSON.stringify({
         ejemplar_id: Number(ejemplarId),
-        usuario_prestador_id: Number(usuarioPrestadorId),
+        usuario_prestador_id: usuarioActual.id, // de momento sigue yendo en el body
         usuario_receptor_id: usuarioReceptorId || null,
         nombre_receptor: nombreReceptor || null,
         fecha_limite: fechaLimiteStr || null,
@@ -308,7 +397,9 @@ async function cargarPrestamos(libroId) {
   tbody.innerHTML = '';
 
   try {
-    const res = await fetch(`${API_BASE}/api/libros/${libroId}/prestamos`);
+    const res = await fetch(`${API_BASE}/api/libros/${libroId}/prestamos`, {
+      headers: getHeaders(false)
+    });
     const prestamos = await res.json();
 
     if (!Array.isArray(prestamos) || prestamos.length === 0) {
@@ -365,9 +456,7 @@ async function marcarPrestamoDevuelto(prestamoId, libroId) {
   try {
     const res = await fetch(`${API_BASE}/api/prestamos/${prestamoId}/devolver`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: getHeaders(),
       body: JSON.stringify({ notas })
     });
 
@@ -448,11 +537,226 @@ function detenerEscaneo() {
 
   scannerDiv.style.display = 'none';
 }
+async function eliminarEjemplar(ejemplarId) {
+  const mensaje = document.getElementById('mensaje');
+
+  if (!token || !usuarioActual) {
+    mensaje.textContent = 'Debes iniciar sesión para eliminar ejemplares';
+    return;
+  }
+
+  const confirmar = confirm('¿Seguro que quieres eliminar este ejemplar?');
+  if (!confirmar) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/ejemplares/${ejemplarId}`, {
+      method: 'DELETE',
+      headers: getHeaders(false),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      mensaje.textContent = data.error || 'Error eliminando ejemplar';
+      return;
+    }
+
+    mensaje.textContent = 'Ejemplar eliminado ✅';
+
+    // recargar la lista
+    await cargarEjemplares(usuarioActual.id);
+  } catch (err) {
+    console.error(err);
+    mensaje.textContent = 'Error de red al eliminar ejemplar';
+  }
+}
+async function cargarFormEdicion() {
+  const msg = document.getElementById('edit-mensaje');
+  if (!libroSeleccionadoId || !ejemplarSeleccionadoId) {
+    if (msg) msg.textContent = 'Selecciona un ejemplar en la tabla para editar.';
+    return;
+  }
+
+  if (msg) msg.textContent = '';
+
+  try {
+    const [resLibro, resEjemplar] = await Promise.all([
+      fetch(`${API_BASE}/api/libros/${libroSeleccionadoId}`, {
+        headers: getHeaders(false),
+      }),
+      fetch(`${API_BASE}/api/ejemplares/${ejemplarSeleccionadoId}`, {
+        headers: getHeaders(false),
+      }),
+    ]);
+
+    const libro = await resLibro.json();
+    const ejemplar = await resEjemplar.json();
+
+    if (!resLibro.ok) {
+      msg.textContent = libro.error || 'Error cargando datos del libro.';
+      return;
+    }
+    if (!resEjemplar.ok) {
+      msg.textContent = ejemplar.error || 'Error cargando datos del ejemplar.';
+      return;
+    }
+
+    // Libro
+    document.getElementById('edit-libro-titulo').value =
+      libro.titulo || '';
+    document.getElementById('edit-libro-autores').value =
+      libro.autores || '';
+    document.getElementById('edit-libro-editorial').value =
+      libro.editorial || '';
+    document.getElementById('edit-libro-fecha').value =
+      libro.fecha_publicacion || '';
+    document.getElementById('edit-libro-paginas').value =
+      libro.numero_paginas || '';
+    document.getElementById('edit-libro-portada').value =
+      libro.url_portada || '';
+    document.getElementById('edit-libro-descripcion').value =
+      libro.descripcion || '';
+
+    // Ejemplar
+    document.getElementById('edit-ejemplar-estado').value =
+      ejemplar.estado || '';
+    document.getElementById('edit-ejemplar-ubicacion').value =
+      ejemplar.ubicacion || '';
+    document.getElementById('edit-ejemplar-notas').value =
+      ejemplar.notas || '';
+  } catch (err) {
+    console.error(err);
+    if (msg) msg.textContent = 'Error de red al cargar datos de edición.';
+  }
+}
+async function guardarLibroEditado() {
+  const msg = document.getElementById('edit-mensaje');
+  msg.textContent = '';
+
+  if (!token || !usuarioActual) {
+    msg.textContent = 'Debes iniciar sesión para editar libros.';
+    return;
+  }
+
+  if (!libroSeleccionadoId) {
+    msg.textContent = 'Selecciona un libro desde la tabla de ejemplares.';
+    return;
+  }
+
+  const titulo = document.getElementById('edit-libro-titulo').value.trim();
+  const autores = document.getElementById('edit-libro-autores').value.trim();
+  const editorial = document
+    .getElementById('edit-libro-editorial')
+    .value.trim();
+  const fecha_publicacion = document
+    .getElementById('edit-libro-fecha')
+    .value.trim();
+  const paginasStr = document
+    .getElementById('edit-libro-paginas')
+    .value.trim();
+  const url_portada = document
+    .getElementById('edit-libro-portada')
+    .value.trim();
+  const descripcion = document
+    .getElementById('edit-libro-descripcion')
+    .value.trim();
+
+  const numero_paginas = paginasStr ? Number(paginasStr) : null;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/libros/${libroSeleccionadoId}`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify({
+        titulo: titulo || null,
+        autores: autores || null,
+        editorial: editorial || null,
+        fecha_publicacion: fecha_publicacion || null,
+        numero_paginas: Number.isNaN(numero_paginas) ? null : numero_paginas,
+        descripcion: descripcion || null,
+        url_portada: url_portada || null,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      msg.textContent = data.error || 'Error guardando datos del libro.';
+      return;
+    }
+
+    msg.textContent = 'Datos del libro guardados ✅';
+
+    // recargar la tabla para reflejar cambios de título/autores
+    if (usuarioActual) {
+      cargarEjemplares(usuarioActual.id);
+    }
+  } catch (err) {
+    console.error(err);
+    msg.textContent = 'Error de red al guardar datos del libro.';
+  }
+}
+
+async function guardarEjemplarEditado() {
+  const msg = document.getElementById('edit-mensaje');
+  msg.textContent = '';
+
+  if (!token || !usuarioActual) {
+    msg.textContent = 'Debes iniciar sesión para editar ejemplares.';
+    return;
+  }
+
+  if (!ejemplarSeleccionadoId) {
+    msg.textContent = 'Selecciona un ejemplar desde la tabla.';
+    return;
+  }
+
+  const estado = document
+    .getElementById('edit-ejemplar-estado')
+    .value.trim();
+  const ubicacion = document
+    .getElementById('edit-ejemplar-ubicacion')
+    .value.trim();
+  const notas = document
+    .getElementById('edit-ejemplar-notas')
+    .value.trim();
+
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/ejemplares/${ejemplarSeleccionadoId}`,
+      {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify({
+          estado: estado || null,
+          ubicacion: ubicacion || null,
+          notas: notas || null,
+        }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      msg.textContent = data.error || 'Error guardando datos del ejemplar.';
+      return;
+    }
+
+    msg.textContent = 'Datos del ejemplar guardados ✅';
+
+    if (usuarioActual) {
+      cargarEjemplares(usuarioActual.id);
+    }
+  } catch (err) {
+    console.error(err);
+    msg.textContent = 'Error de red al guardar datos del ejemplar.';
+  }
+}
 
 // ---------- Inicialización ----------
 
 document.addEventListener('DOMContentLoaded', () => {
-  cargarUsuarios();
+  actualizarUIAutenticacion();
 
   document
     .getElementById('btn-crear')
@@ -467,22 +771,48 @@ document.addEventListener('DOMContentLoaded', () => {
     .addEventListener('click', detenerEscaneo);
 
   document
-    .getElementById('usuario')
-    .addEventListener('change', (e) => {
-      const usuarioId = e.target.value;
-      cargarEjemplares(usuarioId);
-    });
+    .getElementById('btn-login')
+    .addEventListener('click', hacerLogin);
 
-  // delegación de eventos en la tabla de ejemplares
+  document
+    .getElementById('btn-logout')
+    .addEventListener('click', hacerLogout);
+  const btnGuardarLibro = document.getElementById('btn-guardar-libro');
+  if (btnGuardarLibro) {
+    btnGuardarLibro.addEventListener('click', guardarLibroEditado);
+  }
+
+  const btnGuardarEjemplar = document.getElementById('btn-guardar-ejemplar');
+  if (btnGuardarEjemplar) {
+    btnGuardarEjemplar.addEventListener('click', guardarEjemplarEditado);
+  }
+  // Eventos delegados en la tabla de ejemplares
   const tbodyEjemplares = document.querySelector('#tabla-ejemplares tbody');
   tbodyEjemplares.addEventListener('click', (e) => {
     const target = e.target;
+    const fila = target.closest('tr');
 
+  if (fila) {
+    libroSeleccionadoId = fila.dataset.libroId
+      ? Number(fila.dataset.libroId)
+      : null;
+    ejemplarSeleccionadoId = fila.dataset.ejemplarId
+      ? Number(fila.dataset.ejemplarId)
+      : null;
+
+    // marcar visualmente la fila
+    Array.from(tbodyEjemplares.querySelectorAll('tr')).forEach((tr) =>
+      tr.classList.remove('fila-seleccionada')
+    );
+    fila.classList.add('fila-seleccionada');
+
+    // cargar formulario de edición
+    cargarFormEdicion();
+  }
     if (target.classList.contains('btn-leer')) {
       const libroId = target.getAttribute('data-libro-id');
       const ejemplarId = target.getAttribute('data-ejemplar-id');
-      const usuarioId = document.getElementById('usuario').value;
-      empezarLectura(libroId, ejemplarId, usuarioId);
+      empezarLectura(libroId, ejemplarId);
     }
 
     if (target.classList.contains('btn-ver-lecturas')) {
@@ -493,17 +823,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (target.classList.contains('btn-prestar')) {
       const libroId = target.getAttribute('data-libro-id');
       const ejemplarId = target.getAttribute('data-ejemplar-id');
-      const usuarioId = document.getElementById('usuario').value;
-      crearPrestamo(libroId, ejemplarId, usuarioId);
+      crearPrestamo(libroId, ejemplarId);
     }
 
     if (target.classList.contains('btn-ver-prestamos')) {
       const libroId = target.getAttribute('data-libro-id');
       cargarPrestamos(libroId);
     }
+
+    if (target.classList.contains('btn-eliminar')) {
+      const ejemplarId = target.getAttribute('data-ejemplar-id');
+      eliminarEjemplar(ejemplarId);
+    }
   });
 
-  // delegación de eventos en la tabla de préstamos
+  // Eventos delegados en la tabla de préstamos
   const tbodyPrestamos = document.querySelector('#tabla-prestamos tbody');
   tbodyPrestamos.addEventListener('click', (e) => {
     const target = e.target;
@@ -515,5 +849,3 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
-
-

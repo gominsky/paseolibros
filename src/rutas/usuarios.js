@@ -70,6 +70,7 @@ router.get('/:usuarioId/ejemplares', async (req, res) => {
        FROM ejemplares e
        JOIN libros l ON l.id = e.libro_id
        WHERE e.usuario_id = $1
+      AND e.activo = TRUE
        ORDER BY e.creado_en DESC`,
       [usuarioId]
     );

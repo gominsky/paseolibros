@@ -9,6 +9,7 @@ import prestamosRouter from './rutas/prestamos.js';
 import ejemplaresRouter from './rutas/ejemplares.js';
 import authRouter from './rutas/auth.js';
 import { verificarToken } from './middlewares/auth.js';
+import librosRouter from './rutas/libros.js';
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.use('/api/auth', authRouter);
 // 🔒 Rutas protegidas (todas pasan por verificarToken)
 app.use('/api/ejemplares', verificarToken, ejemplaresRouter);
 app.use('/api/usuarios', verificarToken, usuariosRouter);
+app.use('/api/libros', verificarToken, librosRouter);
 app.use('/api', verificarToken, lecturasRouter);
 app.use('/api', verificarToken, prestamosRouter);
 

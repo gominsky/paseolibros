@@ -213,5 +213,109 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: 'Error obteniendo ejemplares' });
   }
 });
+// Eliminar (borrado lógico) un ejemplar
+router.delete('/:id', async (req, res) => {
+  const ejemplarId = Number(req.params.id);
+
+  if (!ejemplarId) {
+    return res.status(400).json({ error: 'ID de ejemplar no válido' });
+  }
+
+  try {
+    // Solo puedes eliminar ejemplares tuyos
+    const resultado = await pool.query(
+      `UPDATE ejemplares
+       SET activo = FALSE
+       WHERE id = $1
+         AND usuario_id = $2
+         AND activo = TRUE
+       RETURNING *`,
+      [ejemplarId, req.usuario.id]
+    );
+
+    if (resultado.rowCount === 0) {
+      return res
+        .status(404)
+        .json({ error: 'Ejemplar no encontrado o ya eliminado' });
+    }
+
+    res.json({ ok: true, ejemplar: resultado.rows[0] });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error eliminando ejemplar' });
+  }
+});
+// Obtener un ejemplar concreto (del usuario autenticado)
+router.get('/:id', async (req, res) => {
+  const ejemplarId = Number(req.params.id);
+  if (!ejemplarId) {
+    return res.status(400).json({ error: 'ID de ejemplar no válido' });
+  }
+
+  try {
+    const resultado = await pool.query(
+      `SELECT 
+         e.id,
+         e.usuario_id,
+         e.libro_id,
+         e.estado,
+         e.ubicacion,
+         e.notas,
+         e.activo,
+         e.creado_en
+       FROM ejemplares e
+       WHERE e.id = $1
+         AND e.usuario_id = $2`,
+      [ejemplarId, req.usuario.id]
+    );
+
+    if (resultado.rowCount === 0) {
+      return res
+        .status(404)
+        .json({ error: 'Ejemplar no encontrado o no pertenece al usuario' });
+    }
+
+    res.json(resultado.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error obteniendo ejemplar' });
+  }
+});
+
+// Actualizar un ejemplar (estado / ubicación / notas)
+router.put('/:id', async (req, res) => {
+  const ejemplarId = Number(req.params.id);
+  if (!ejemplarId) {
+    return res.status(400).json({ error: 'ID de ejemplar no válido' });
+  }
+
+  const { estado, ubicacion, notas } = req.body;
+
+  try {
+    const resultado = await pool.query(
+      `UPDATE ejemplares
+       SET
+         estado = COALESCE($1, estado),
+         ubicacion = COALESCE($2, ubicacion),
+         notas = COALESCE($3, notas)
+       WHERE id = $4
+         AND usuario_id = $5
+         AND activo = TRUE
+       RETURNING *`,
+      [estado, ubicacion, notas, ejemplarId, req.usuario.id]
+    );
+
+    if (resultado.rowCount === 0) {
+      return res
+        .status(404)
+        .json({ error: 'Ejemplar no encontrado o no editable' });
+    }
+
+    res.json(resultado.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error actualizando ejemplar' });
+  }
+});
 
 export default router;
