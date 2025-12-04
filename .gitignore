@@ -1,0 +1,28 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Entornos
+.env
+.env.local
+.env.*.local
+
+# Build / coverage
+dist/
+build/
+coverage/
+
+# Expo / React Native
+.expo/
+.expo-shared/
+movil/.expo/
+movil/.expo-shared/
+movil/node_modules/
+
+# Sistema / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

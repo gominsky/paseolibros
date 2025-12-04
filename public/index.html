@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>PaseoLibros</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Fuente Google bonita y juvenil -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- CSS propio -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="logo">
+        <div class="logo-icon">
+          <span class="logo-mark">Pdl</span>
+        </div>
+        <div class="logo-text">
+          <h1>Paseo de los libros</h1>
+          <p>Biblioteca, lecturas, préstamos...</p>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <!-- COLUMNA IZQUIERDA: LOGIN + ALTA DE EJEMPLARES -->
+      <section class="column column-left">
+        <!-- Autenticación -->
+        <div class="card">
+          <h2>Autenticación</h2>
+
+          <div id="zona-no-autenticado">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="login-usuario">Usuario</label>
+                <input id="login-usuario" placeholder="Tu usuario" />
+              </div>
+
+              <div class="form-group">
+                <label for="login-contrasena">Contraseña</label>
+                <input
+                  id="login-contrasena"
+                  type="password"
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
+
+            <button id="btn-login" class="btn btn-primary btn-full">
+              Iniciar sesión
+            </button>
+            <p id="login-mensaje" class="helper-text"></p>
+          </div>
+
+          <div id="zona-autenticado" style="display:none;">
+            <div class="user-pill">
+              <span class="user-avatar">👤</span>
+              <div>
+                <p class="user-label">Sesión iniciada como</p>
+                <p class="user-name">
+                  <strong id="nombre-usuario-actual"></strong>
+                </p>
+              </div>
+            </div>
+            <button id="btn-logout" class="btn btn-ghost btn-full">
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+
+        <!-- Alta de ejemplares -->
+        <div class="card">
+          <h2>Añadir ejemplar por ISBN</h2>
+
+          <!-- El select de usuario sigue existiendo, pero lo rellenará JS con el usuario actual -->
+          <div class="form-group">
+            <label for="usuario">Usuario actual</label>
+            <select id="usuario" disabled></select>
+            <p class="helper-text">
+              Se selecciona automáticamente al iniciar sesión.
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label for="isbn">ISBN</label>
+            <div class="input-with-button">
+              <input
+                type="text"
+                id="isbn"
+                placeholder="Escanea o escribe el código ISBN"
+              />
+              <button id="btn-escanear" class="btn btn-secondary">
+                Escanear
+              </button>
+            </div>
+          </div>
+
+          <div
+            id="scanner"
+            class="scanner"
+            style="display:none;"
+          >
+            <p class="scanner-text">
+              Apunta la cámara al código de barras del libro
+            </p>
+            <video
+              id="video"
+              width="320"
+              height="200"
+              class="scanner-video"
+            ></video>
+            <button id="btn-detener" class="btn btn-ghost btn-full">
+              Detener escaneo
+            </button>
+          </div>
+
+          <div class="form-group">
+            <label for="ubicacion">Ubicación</label>
+            <input
+              type="text"
+              id="ubicacion"
+              placeholder="Ej: Salón - Estantería 1"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="notas">Notas</label>
+            <input
+              type="text"
+              id="notas"
+              placeholder="Comentario opcional"
+            />
+          </div>
+
+          <button id="btn-crear" class="btn btn-primary btn-full">
+            Crear ejemplar
+          </button>
+
+          <p id="mensaje" class="status-message"></p>
+          <pre id="resultado" class="result-block"></pre>
+        </div>
+      </section>
+
+      <!-- COLUMNA DERECHA: EJEMPLARES + LECTURAS + PRÉSTAMOS -->
+      <section class="column column-right">
+        <!-- Ejemplares -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Ejemplares</h2>
+          </div>
+          <p id="info-ejemplares" class="helper-text">
+            Inicia sesión para ver tu biblioteca.
+          </p>
+          <div class="table-wrapper">
+            <table
+              id="tabla-ejemplares"
+              class="table"
+            >
+              <thead>
+                <tr>
+                  <th>Portada</th>
+                  <th>Título</th>
+                  <th>Autor/es</th>
+                  <th>ISBN</th>
+                  <th>Estado</th>
+                  <th>Ubicación</th>
+                  <th>Notas</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Rellenado por JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+                <!-- Editor de libro y ejemplar -->
+        <div class="card">
+          <h2>Edición de libro y ejemplar</h2>
+          <p class="helper-text">
+            Selecciona un ejemplar en la tabla para editar sus datos.
+          </p>
+
+          <div class="form-subsection">
+            <h3>Datos del libro</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="edit-libro-titulo">Título</label>
+                <input id="edit-libro-titulo" type="text" />
+              </div>
+              <div class="form-group">
+                <label for="edit-libro-autores">Autor/es</label>
+                <input id="edit-libro-autores" type="text" />
+              </div>
+              <div class="form-group">
+                <label for="edit-libro-editorial">Editorial</label>
+                <input id="edit-libro-editorial" type="text" />
+              </div>
+              <div class="form-group">
+                <label for="edit-libro-fecha">Fecha publicación</label>
+                <input
+                  id="edit-libro-fecha"
+                  type="text"
+                  placeholder="Ej: 1960"
+                />
+              </div>
+              <div class="form-group">
+                <label for="edit-libro-paginas">Nº páginas</label>
+                <input
+                  id="edit-libro-paginas"
+                  type="number"
+                  min="1"
+                />
+              </div>
+              <div class="form-group">
+                <label for="edit-libro-portada">URL portada</label>
+                <input id="edit-libro-portada" type="text" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="edit-libro-descripcion">Descripción</label>
+              <textarea id="edit-libro-descripcion" rows="3"></textarea>
+            </div>
+
+            <button id="btn-guardar-libro" class="btn btn-primary btn-full">
+              Guardar datos del libro
+            </button>
+          </div>
+
+          <hr class="divider" />
+
+          <div class="form-subsection">
+            <h3>Datos del ejemplar</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="edit-ejemplar-estado">Estado</label>
+                <input
+                  id="edit-ejemplar-estado"
+                  type="text"
+                  placeholder="propio, prestado, etc."
+                />
+              </div>
+              <div class="form-group">
+                <label for="edit-ejemplar-ubicacion">Ubicación</label>
+                <input id="edit-ejemplar-ubicacion" type="text" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="edit-ejemplar-notas">Notas</label>
+              <input id="edit-ejemplar-notas" type="text" />
+            </div>
+
+            <button
+              id="btn-guardar-ejemplar"
+              class="btn btn-secondary btn-full"
+            >
+              Guardar datos del ejemplar
+            </button>
+          </div>
+
+          <p id="edit-mensaje" class="helper-text"></p>
+        </div>
+
+        <!-- Lecturas -->
+        <!-- Lecturas -->
+<div class="grid-two">
+  <div class="card">
+    <div class="card-header-inline">
+      <h2>Lecturas del libro</h2>
+      <div class="card-header-actions">
+        <button id="btn-ver-lecturas" class="btn btn-ghost btn-sm">
+          Ver lecturas
+        </button>
+        <button id="btn-terminar-lectura" class="btn btn-secondary btn-sm">
+          Terminar lectura
+        </button>
+      </div>
+    </div>
+    <p id="info-lecturas" class="helper-text">
+      Selecciona un ejemplar en la tabla para ver o terminar tu lectura.
+    </p>
+    <pre id="lecturas-detalle" class="result-block small"></pre>
+  </div>
+
+  <!-- Préstamos -->
+  <div class="card">
+    <div class="card-header-inline">
+      <h2>Préstamos del libro</h2>
+      <div class="card-header-actions">
+        <button id="btn-ver-prestamos" class="btn btn-ghost btn-sm">
+          Ver préstamos
+        </button>
+        <button
+          id="btn-marcar-devuelto-global"
+          class="btn btn-secondary btn-sm"
+        >
+          Marcar devuelto
+        </button>
+      </div>
+    </div>
+    <p id="info-prestamos" class="helper-text">
+      Selecciona un ejemplar en la tabla para ver o cerrar préstamos.
+    </p>
+    <div class="table-wrapper">
+      <table id="tabla-prestamos" class="table">
+        <!-- aquí dejas el <thead> y <tbody> que ya tenías -->
+      </table>
+    </div>
+  </div>
+</div>
+
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>¡Ubícate!</p>
+    </footer>
+  </div>
+
+  <!-- Librería ZXing y JS de la app -->
+  <script src="https://unpkg.com/@zxing/library@latest"></script>
+  <script src="main.js"></script>
+</body>
+</html>
+
