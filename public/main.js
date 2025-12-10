@@ -224,43 +224,47 @@ async function cargarEjemplares(usuarioId) {
       tr.dataset.creadoEn = e.creado_en || '';
 
       tr.innerHTML = `
-        <td>
-          <img
-            src="${e.url_portada || ''}"
-            alt="Portada"
-            style="width:50px;height:auto;border-radius:4px;"
-            onerror="this.src='';"
-          />
-        </td>
-        <td>${e.titulo || ''}</td>
-        <td>${e.autores || ''}</td>
-        <td>${e.isbn || ''}</td>
-        <td>${e.estado || ''}</td>
-        <td>${e.ubicacion || ''}</td>
-        <td>${e.notas || ''}</td>
-        <td>
-          <button
-            class="btn btn-ghost btn-sm btn-leer"
-            data-libro-id="${e.libro_id}"
-            data-ejemplar-id="${e.ejemplar_id}"
-          >
-            Empezar lectura
-          </button>
-          <button
-            class="btn btn-ghost btn-sm btn-prestar"
-            data-libro-id="${e.libro_id}"
-            data-ejemplar-id="${e.ejemplar_id}"
-          >
-            Prestar
-          </button>
-          <button
-            class="btn btn-danger btn-sm btn-eliminar"
-            data-ejemplar-id="${e.ejemplar_id}"
-          >
-            Eliminar
-          </button>
-        </td>
-      `;
+  <td>
+    ${
+      e.url_portada
+        ? '<img src="' +
+          e.url_portada +
+          '" alt="Portada" class="portada-mini-img" />'
+        : '<div class="portada-placeholder-mini">📚</div>'
+    }
+  </td>
+  <td>${e.titulo || ''}</td>
+  <td>${e.autores || ''}</td>
+  <td>${e.isbn || ''}</td>
+  <td>${e.estado || ''}</td>
+  <td>${e.ubicacion || ''}</td>
+  <td>${e.notas || ''}</td>
+  <td class="celda-acciones">
+    <button
+      class="icon-btn btn-leer"
+      title="Empezar / ver lectura"
+      data-libro-id="${e.libro_id}"
+      data-ejemplar-id="${e.ejemplar_id}"
+    >
+      <span class="icon-circle icon-read">▶</span>
+    </button>
+    <button
+      class="icon-btn btn-prestar"
+      title="Registrar préstamo"
+      data-libro-id="${e.libro_id}"
+      data-ejemplar-id="${e.ejemplar_id}"
+    >
+      <span class="icon-circle icon-loan">⇄</span>
+    </button>
+    <button
+      class="icon-btn btn-eliminar"
+      title="Eliminar ejemplar"
+      data-ejemplar-id="${e.ejemplar_id}"
+    >
+      <span class="icon-circle icon-delete">✕</span>
+    </button>
+  </td>
+`;
 
       tbody.appendChild(tr);
     }
@@ -1294,54 +1298,52 @@ document.addEventListener('DOMContentLoaded', () => {
     tbodyEjemplares.addEventListener('click', (e) => {
       const target = e.target;
       const fila = target.closest('tr');
-
-      if (fila) {
-        libroSeleccionadoId = fila.dataset.libroId
-          ? Number(fila.dataset.libroId)
-          : null;
-        ejemplarSeleccionadoId = fila.dataset.ejemplarId
-          ? Number(fila.dataset.ejemplarId)
-          : null;
-
-        Array.from(tbodyEjemplares.querySelectorAll('tr')).forEach((tr) =>
-          tr.classList.remove('fila-seleccionada')
-        );
-        fila.classList.add('fila-seleccionada');
-
-        cargarFormEdicion();
-        abrirModalFicha();
+      // botón real de acción (aunque hagas click en el <span> interno)
+      const botonAccion = target.closest('.btn-leer, .btn-prestar, .btn-eliminar');
+  
+      if (!fila) return;
+  
+      // Actualizar selección de fila SIEMPRE que se haga click en ella
+      libroSeleccionadoId = fila.dataset.libroId
+        ? Number(fila.dataset.libroId)
+        : null;
+      ejemplarSeleccionadoId = fila.dataset.ejemplarId
+        ? Number(fila.dataset.ejemplarId)
+        : null;
+  
+      Array.from(tbodyEjemplares.querySelectorAll('tr')).forEach((tr) =>
+        tr.classList.remove('fila-seleccionada')
+      );
+      fila.classList.add('fila-seleccionada');
+  
+      // Si el click es en un botón de acción → NO abrir modal, solo hacer la acción
+      if (botonAccion) {
+        e.stopPropagation();
+  
+        if (botonAccion.classList.contains('btn-leer')) {
+          const libroId = botonAccion.getAttribute('data-libro-id');
+          const ejemplarId = botonAccion.getAttribute('data-ejemplar-id');
+          empezarLectura(libroId, ejemplarId);
+        }
+  
+        if (botonAccion.classList.contains('btn-prestar')) {
+          const libroId = botonAccion.getAttribute('data-libro-id');
+          const ejemplarId = botonAccion.getAttribute('data-ejemplar-id');
+          crearPrestamo(libroId, ejemplarId);
+        }
+  
+        if (botonAccion.classList.contains('btn-eliminar')) {
+          const ejemplarId = botonAccion.getAttribute('data-ejemplar-id');
+          eliminarEjemplar(ejemplarId);
+        }
+  
+        return; // importante: no abrir modal
       }
-
-      if (target.classList.contains('btn-leer')) {
-        const libroId = target.getAttribute('data-libro-id');
-        const ejemplarId = target.getAttribute('data-ejemplar-id');
-        empezarLectura(libroId, ejemplarId);
-      }
-
-      if (target.classList.contains('btn-prestar')) {
-        const libroId = target.getAttribute('data-libro-id');
-        const ejemplarId = target.getAttribute('data-ejemplar-id');
-        crearPrestamo(libroId, ejemplarId);
-      }
-
-      if (target.classList.contains('btn-eliminar')) {
-        const ejemplarId = target.getAttribute('data-ejemplar-id');
-        eliminarEjemplar(ejemplarId);
-      }
+  
+      // Si NO es un botón de acción (click en cualquier otra celda) → abrir modal
+      cargarFormEdicion();
+      abrirModalFicha();
     });
   }
-
-  // Eventos delegados en la tabla de préstamos
-  const tbodyPrestamos = document.querySelector('#tabla-prestamos tbody');
-  if (tbodyPrestamos) {
-    tbodyPrestamos.addEventListener('click', (e) => {
-      const target = e.target;
-
-      if (target.classList.contains('btn-devolver')) {
-        const prestamoId = target.getAttribute('data-prestamo-id');
-        const libroId = target.getAttribute('data-libro-id');
-        marcarPrestamoDevuelto(prestamoId, libroId);
-      }
-    });
-  }
+  
 });
