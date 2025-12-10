@@ -152,17 +152,21 @@
       <section class="column column-right">
         <!-- Ejemplares -->
         <div class="card">
-          <div class="card-header">
+          <div class="card-header card-header-inline">
             <h2>Ejemplares</h2>
+            <div class="table-search">
+              <input
+                id="buscador-ejemplares"
+                type="text"
+                placeholder="Buscar por título, autor, ISBN, notas..."
+              />
+            </div>
           </div>
           <p id="info-ejemplares" class="helper-text">
             Inicia sesión para ver tu biblioteca.
           </p>
           <div class="table-wrapper">
-            <table
-              id="tabla-ejemplares"
-              class="table"
-            >
+            <table id="tabla-ejemplares" class="table">
               <thead>
                 <tr>
                   <th>Portada</th>
@@ -175,7 +179,34 @@
                   <th>Acciones</th>
                 </tr>
               </thead>
+              <tbody>
+                <!-- Rellenado por JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>  
+      </div> <!-- fin card Ejemplares -->
 
+      <!-- Resumen de lecturas y préstamos abiertos -->
+      <div class="grid-two">
+        <!-- Lecturas en curso -->
+        <div class="card card-inside-modal">
+          <div class="card-header-inline">
+            <h2>Lecturas en curso</h2>
+          </div>
+          <p id="info-lecturas-abiertas" class="helper-text">
+            Inicia sesión para ver tus lecturas en curso.
+          </p>
+          <div class="table-wrapper">
+            <table
+              id="tabla-lecturas-abiertas"
+              class="table table-small"
+            >
+              <thead>
+                <tr>
+                  <th>Libro</th>
+                  <th>Página</th>
+                  <th>Inicio</th>
                 </tr>
               </thead>
               <tbody>
@@ -184,142 +215,35 @@
             </table>
           </div>
         </div>
-                <!-- Editor de libro y ejemplar -->
-        <div class="card">
-          <h2>Edición de libro y ejemplar</h2>
-          <p class="helper-text">
-            Selecciona un ejemplar en la tabla para editar sus datos.
+
+        <!-- Préstamos activos -->
+        <div class="card card-inside-modal">
+          <div class="card-header-inline">
+            <h2>Préstamos activos</h2>
+          </div>
+          <p id="info-prestamos-activos" class="helper-text">
+            Inicia sesión para ver tus préstamos activos.
           </p>
-
-          <div class="form-subsection">
-            <h3>Datos del libro</h3>
-            <div class="form-grid">
-              <div class="form-group">
-                <label for="edit-libro-titulo">Título</label>
-                <input id="edit-libro-titulo" type="text" />
-              </div>
-              <div class="form-group">
-                <label for="edit-libro-autores">Autor/es</label>
-                <input id="edit-libro-autores" type="text" />
-              </div>
-              <div class="form-group">
-                <label for="edit-libro-editorial">Editorial</label>
-                <input id="edit-libro-editorial" type="text" />
-              </div>
-              <div class="form-group">
-                <label for="edit-libro-fecha">Fecha publicación</label>
-                <input
-                  id="edit-libro-fecha"
-                  type="text"
-                  placeholder="Ej: 1960"
-                />
-              </div>
-              <div class="form-group">
-                <label for="edit-libro-paginas">Nº páginas</label>
-                <input
-                  id="edit-libro-paginas"
-                  type="number"
-                  min="1"
-                />
-              </div>
-              <div class="form-group">
-                <label for="edit-libro-portada">URL portada</label>
-                <input id="edit-libro-portada" type="text" />
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="edit-libro-descripcion">Descripción</label>
-              <textarea id="edit-libro-descripcion" rows="3"></textarea>
-            </div>
-
-            <button id="btn-guardar-libro" class="btn btn-primary btn-full">
-              Guardar datos del libro
-            </button>
-          </div>
-
-          <hr class="divider" />
-
-          <div class="form-subsection">
-            <h3>Datos del ejemplar</h3>
-            <div class="form-grid">
-              <div class="form-group">
-                <label for="edit-ejemplar-estado">Estado</label>
-                <input
-                  id="edit-ejemplar-estado"
-                  type="text"
-                  placeholder="propio, prestado, etc."
-                />
-              </div>
-              <div class="form-group">
-                <label for="edit-ejemplar-ubicacion">Ubicación</label>
-                <input id="edit-ejemplar-ubicacion" type="text" />
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="edit-ejemplar-notas">Notas</label>
-              <input id="edit-ejemplar-notas" type="text" />
-            </div>
-
-            <button
-              id="btn-guardar-ejemplar"
-              class="btn btn-secondary btn-full"
+          <div class="table-wrapper">
+            <table
+              id="tabla-prestamos-activos"
+              class="table table-small"
             >
-              Guardar datos del ejemplar
-            </button>
+              <thead>
+                <tr>
+                  <th>Libro</th>
+                  <th>A quién</th>
+                  <th>Hasta</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Rellenado por JS -->
+              </tbody>
+            </table>
           </div>
-
-          <p id="edit-mensaje" class="helper-text"></p>
         </div>
-
-        <!-- Lecturas -->
-        <!-- Lecturas -->
-<div class="grid-two">
-  <div class="card">
-    <div class="card-header-inline">
-      <h2>Lecturas del libro</h2>
-      <div class="card-header-actions">
-        <button id="btn-ver-lecturas" class="btn btn-ghost btn-sm">
-          Ver lecturas
-        </button>
-        <button id="btn-terminar-lectura" class="btn btn-secondary btn-sm">
-          Terminar lectura
-        </button>
       </div>
-    </div>
-    <p id="info-lecturas" class="helper-text">
-      Selecciona un ejemplar en la tabla para ver o terminar tu lectura.
-    </p>
-    <pre id="lecturas-detalle" class="result-block small"></pre>
-  </div>
-
-  <!-- Préstamos -->
-  <div class="card">
-    <div class="card-header-inline">
-      <h2>Préstamos del libro</h2>
-      <div class="card-header-actions">
-        <button id="btn-ver-prestamos" class="btn btn-ghost btn-sm">
-          Ver préstamos
-        </button>
-        <button
-          id="btn-marcar-devuelto-global"
-          class="btn btn-secondary btn-sm"
-        >
-          Marcar devuelto
-        </button>
-      </div>
-    </div>
-    <p id="info-prestamos" class="helper-text">
-      Selecciona un ejemplar en la tabla para ver o cerrar préstamos.
-    </p>
-    <div class="table-wrapper">
-      <table id="tabla-prestamos" class="table">
-        <!-- aquí dejas el <thead> y <tbody> que ya tenías -->
-      </table>
-    </div>
-  </div>
-</div>
-
+    
       </section>
     </main>
 
@@ -331,6 +255,194 @@
   <!-- Librería ZXing y JS de la app -->
   <script src="https://unpkg.com/@zxing/library@latest"></script>
   <script src="main.js"></script>
+  <!-- Modal ficha libro/ejemplar -->
+<div id="modal-ficha" class="modal">
+  <div id="modal-ficha-backdrop" class="modal-backdrop"></div>
+
+  <div class="modal-dialog">
+    <button id="modal-ficha-cerrar" class="modal-close">&times;</button>
+
+    <!-- Cabecera de la ficha -->
+    <div class="modal-header">
+      <div class="modal-cover">
+        <img
+          id="ficha-portada-img"
+          src=""
+          alt="Portada del libro"
+          class="modal-cover-img"
+        />
+        <label class="btn btn-secondary btn-sm modal-cover-upload">
+          Subir portada
+          <input
+            type="file"
+            id="ficha-portada-file"
+            accept="image/*"
+            hidden
+          />
+        </label>
+      </div>
+
+      <div class="modal-header-info">
+        <h2 id="ficha-titulo">Título del libro</h2>
+        <p id="ficha-autores" class="helper-text">Autor/es</p>
+        <p class="helper-text">
+          ISBN: <span id="ficha-isbn">—</span>
+        </p>
+        <p class="helper-text">
+          Incorporado a tu biblioteca:
+          <span id="ficha-creado-en">—</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Cuerpo de la ficha -->
+    <div class="modal-body">
+      <!-- Datos del libro (reutilizamos los mismos IDs que antes) -->
+      <div class="form-subsection">
+        <h3>Datos del libro</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="edit-libro-titulo">Título</label>
+            <input id="edit-libro-titulo" type="text" />
+          </div>
+          <div class="form-group">
+            <label for="edit-libro-autores">Autor/es</label>
+            <input id="edit-libro-autores" type="text" />
+          </div>
+          <div class="form-group">
+            <label for="edit-libro-editorial">Editorial</label>
+            <input id="edit-libro-editorial" type="text" />
+          </div>
+          <div class="form-group">
+            <label for="edit-libro-fecha">Fecha publicación</label>
+            <input
+              id="edit-libro-fecha"
+              type="text"
+              placeholder="Ej: 1960"
+            />
+          </div>
+          <div class="form-group">
+            <label for="edit-libro-paginas">Nº páginas</label>
+            <input id="edit-libro-paginas" type="number" min="1" />
+          </div>
+          <div class="form-group">
+            <label for="edit-libro-portada">URL portada</label>
+            <input id="edit-libro-portada" type="text" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-libro-descripcion">Descripción</label>
+          <textarea id="edit-libro-descripcion" rows="3"></textarea>
+        </div>
+
+        <button id="btn-guardar-libro" class="btn btn-primary btn-full">
+          Guardar datos del libro
+        </button>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- Datos del ejemplar -->
+      <div class="form-subsection">
+        <h3>Datos del ejemplar</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="edit-ejemplar-estado">Estado</label>
+            <input
+              id="edit-ejemplar-estado"
+              type="text"
+              placeholder="propio, prestado, etc."
+            />
+          </div>
+          <div class="form-group">
+            <label for="edit-ejemplar-ubicacion">Ubicación</label>
+            <input id="edit-ejemplar-ubicacion" type="text" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="edit-ejemplar-notas">Notas</label>
+          <input id="edit-ejemplar-notas" type="text" />
+        </div>
+
+        <button id="btn-guardar-ejemplar" class="btn btn-secondary btn-full">
+          Guardar datos del ejemplar
+        </button>
+      </div>
+
+      <p id="edit-mensaje" class="helper-text"></p>
+
+      <hr class="divider" />
+
+      <!-- Lecturas y préstamos dentro del modal -->
+      <div class="grid-two">
+        <!-- Lecturas -->
+        <div class="card card-inside-modal card-summary">
+          <div class="card-header-inline">
+            <h3>Lecturas del libro</h3>
+            <div class="card-header-actions">
+              <button id="btn-ver-lecturas" class="btn btn-ghost btn-sm">
+                Ver lecturas
+              </button>
+              <button
+                id="btn-terminar-lectura"
+                class="btn btn-secondary btn-sm"
+              >
+                Terminar lectura
+              </button>
+            </div>
+          </div>
+          <p id="info-lecturas" class="helper-text">
+            Selecciona un ejemplar en la tabla para ver o terminar tu lectura.
+          </p>
+          <pre id="lecturas-detalle" class="result-block small"></pre>
+        </div>
+
+        <!-- Préstamos -->
+        <div class="card card-inside-modal card-summary">
+          <div class="card-header-inline">
+            <h3>Préstamos del libro</h3>
+            <div class="card-header-actions">
+              <button id="btn-ver-prestamos" class="btn btn-ghost btn-sm">
+                Ver préstamos
+              </button>
+              <button
+                id="btn-marcar-devuelto-global"
+                class="btn btn-secondary btn-sm"
+              >
+                Marcar devuelto
+              </button>
+            </div>
+          </div>
+          <p id="info-prestamos" class="helper-text">
+            Selecciona un ejemplar en la tabla para ver o cerrar préstamos.
+          </p>
+          <div class="table-wrapper">
+            <table id="tabla-prestamos" class="table table-small">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Prestador</th>
+                  <th>Receptor</th>
+                  <th>Fecha préstamo</th>
+                  <th>Fecha límite</th>
+                  <th>Fecha devolución</th>
+                  <th>Estado</th>
+                  <th>Notas</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Rellenado por JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div> <!-- /modal-body -->
+  </div> <!-- /modal-dialog -->
+</div> <!-- /modal-ficha -->
+
 </body>
 </html>
 

@@ -539,3 +539,253 @@ textarea:focus {
   background: rgba(239, 68, 68, 0.18);
   transform: translateY(-1px);
 }
+/* Modal genérico (versión ultra-compacta, sin scroll interno) */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.modal.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(3px);
+}
+
+.modal-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(100% - 1rem, 620px); /* más estrecho */
+  /* sin max-height, sin overflow-y: NO scroll interno */
+  background: radial-gradient(circle at top left, #111827, #020617 60%);
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.9);
+  padding: 0.7rem 0.9rem 0.8rem;
+  font-size: 0.78rem; /* todo pequeñito dentro */
+}
+
+.modal-close {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.5rem;
+  border: none;
+  background: transparent;
+  color: var(--text-soft);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.modal-header {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+  align-items: flex-start;
+}
+
+.modal-cover {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  align-items: flex-start;
+}
+
+.modal-cover-img {
+  width: 64px;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  object-fit: cover;
+  background: #020617;
+}
+
+.modal-cover-upload .btn,
+.modal-cover-upload.btn,
+.modal-cover-upload {
+  padding: 0;
+}
+
+.modal-cover-upload .btn {
+  padding: 0.15rem 0.5rem;
+  font-size: 0.68rem;
+}
+
+.modal-header-info {
+  flex: 1;
+}
+
+.modal-header-info h2 {
+  margin: 0 0 0.1rem;
+  font-size: 0.9rem;
+}
+
+.modal-header-info .helper-text {
+  margin: 0.02rem 0;
+  font-size: 0.68rem;
+}
+
+.modal-body {
+  margin-top: 0.1rem;
+}
+
+/* Formularios ultra compactos dentro del modal */
+.modal-dialog .form-subsection {
+  margin-top: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.modal-dialog .form-subsection h3 {
+  margin: 0 0 0.2rem;
+  font-size: 0.8rem;
+}
+
+.modal-dialog .form-grid {
+  gap: 0.3rem;
+}
+
+.modal-dialog .form-group {
+  margin-bottom: 0.3rem;
+}
+
+.modal-dialog label {
+  font-size: 0.68rem;
+}
+
+.modal-dialog input,
+.modal-dialog select,
+.modal-dialog textarea {
+  font-size: 0.78rem;
+  padding: 0.25rem 0.45rem;
+}
+
+/* Botones pequeños dentro del modal */
+.modal-dialog .btn {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.6rem;
+}
+
+/* Tarjetas internas aún más ligeras */
+.card-inside-modal {
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 8px;
+  border: 1px solid rgba(31, 41, 55, 0.9);
+  box-shadow: none;
+  padding: 0.5rem;
+}
+
+.card-inside-modal .card-header-inline {
+  margin-bottom: 0.2rem;
+}
+
+.card-inside-modal h3 {
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.card-inside-modal .helper-text {
+  font-size: 0.66rem;
+  margin-bottom: 0.2rem;
+}
+
+/* Bloques de texto bajitos */
+.result-block.small {
+  max-height: 90px;
+  font-size: 0.7rem;
+}
+
+/* Tabla de préstamos muy compacta */
+.table.table-small {
+  font-size: 0.68rem;
+}
+
+.table.table-small th,
+.table.table-small td {
+  padding: 0.2rem 0.3rem;
+}
+
+/* Grid lecturas / préstamos */
+.modal-dialog .grid-two {
+  gap: 0.6rem;
+}
+
+
+@media (max-width: 720px) {
+  .modal-dialog {
+    width: min(100% - 0.8rem, 100%);
+    padding: 0.6rem 0.7rem 0.7rem;
+  }
+
+  .modal-header {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .modal-cover-img {
+    width: 58px;
+  }
+
+  .modal-dialog .grid-two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* Fichas resumen ultra compactas en la página principal */
+
+.card-summary {
+  padding: 0.5rem 0.6rem;
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+.card-summary h2 {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.card-summary .helper-text {
+  margin: 0.15rem 0 0.25rem;
+  font-size: 0.68rem;
+}
+
+/* Contenedor de widgets ultra compacto */
+.grid-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 290px;            /* 🔥 controla aquí el ancho total */
+  margin-left: auto;       /* 🔥 empuja a la derecha */
+}
+/* Contenedor de widgets ultra compacto */
+.grid-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 290px;            /* 🔥 controla aquí el ancho total */
+  margin-left: auto;       /* 🔥 empuja a la derecha */
+}
+/* Grid de 2 columnas responsive para fichas debajo de ejemplares */
+.grid-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* 50% / 50% */
+  gap: 0.8rem;
+}
+
+/* En pantallas pequeñas se apilan una debajo de otra */
+@media (max-width: 900px) {
+  .grid-two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
