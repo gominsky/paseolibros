@@ -98,5 +98,40 @@ router.patch('/lecturas/:id/finalizar', async (req, res) => {
     res.status(500).json({ error: 'Error actualizando lectura' });
   }
 });
+// Lecturas abiertas de un usuario (no terminadas)
+// GET /api/usuarios/:usuarioId/lecturas-abiertas
+router.get('/usuarios/:usuarioId/lecturas-abiertas', async (req, res) => {
+  const { usuarioId } = req.params;
+
+  try {
+    const resultado = await pool.query(
+      `SELECT
+         le.id,
+         le.usuario_id,
+         le.libro_id,
+         le.ejemplar_id,
+         le.estado,
+         le.inicio,
+         le.pagina_actual,
+         le.notas,
+         l.titulo,
+         l.autores,
+         l.isbn
+       FROM lecturas le
+       JOIN libros l ON l.id = le.libro_id
+       WHERE le.usuario_id = $1
+         AND le.estado <> 'terminado'
+       ORDER BY le.inicio DESC`,
+      [usuarioId]
+    );
+
+    res.json(resultado.rows);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: 'Error obteniendo lecturas abiertas del usuario' });
+  }
+});
 
 export default router;

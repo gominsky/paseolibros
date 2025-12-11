@@ -885,4 +885,158 @@ textarea:focus {
   display: block;
   background: rgba(15, 23, 42, 0.6);
 }
+/* Mini modal para crear préstamo con desplegable */
+
+.prestamo-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: none; /* se pasa a flex desde JS */
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(3px);
+}
+
+.prestamo-dialog {
+  width: min(100% - 2rem, 380px);
+  background: radial-gradient(circle at top left, #111827, #020617 60%);
+  border-radius: 12px;
+  border: 1px solid var(--card-border, rgba(148, 163, 184, 0.25));
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.85);
+  padding: 0.8rem 1rem 0.9rem;
+  font-size: 0.8rem;
+}
+
+.prestamo-dialog h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+}
+
+.prestamo-dialog .form-group {
+  margin-bottom: 0.4rem;
+}
+
+.prestamo-dialog label {
+  font-size: 0.72rem;
+}
+
+.prestamo-dialog input,
+.prestamo-dialog select {
+  width: 100%;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.45rem;
+  border-radius: 6px;
+  border: 1px solid rgba(55, 65, 81, 0.9);
+  background: rgba(15, 23, 42, 0.9);
+  color: #e5e7eb;
+}
+
+.prestamo-dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.prestamo-dialog .btn {
+  font-size: 0.78rem;
+  padding: 0.3rem 0.7rem;
+}
+/* ==== MODAL MÁS PEQUEÑO Y MÁS HORIZONTAL ==== */
+
+/* Caja del modal: más baja, algo más ancha y con scroll interno suave */
+.modal-dialog {
+  width: min(100% - 2rem, 780px);  /* un poco más horizontal */
+  max-height: 75vh;                /* menos alto que toda la pantalla */
+  padding: 0.8rem 1rem;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Cabecera compacta */
+.modal-header {
+  margin-bottom: 0.5rem;
+}
+
+/* El cuerpo será el que pueda hacer scroll cuando haga falta */
+.modal-body {
+  overflow-y: auto;
+  padding-right: 0.25rem;  /* pequeño margen para que no toque el borde */
+}
+
+/* Formulario del libro y del ejemplar más “en columnas” dentro del modal */
+.modal-dialog .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* 2 columnas */
+  gap: 0.45rem 0.75rem;
+}
+
+/* Para que algunas filas puedan ocupar las dos columnas si quieres:
+   (solo si usas la clase .full-row en algún form-group) */
+.modal-dialog .form-group.full-row {
+  grid-column: 1 / -1;
+}
+
+/* Secciones del formulario con menos margen vertical */
+.modal-dialog .form-subsection {
+  margin: 0.4rem 0 0.5rem;
+}
+
+.modal-dialog .form-subsection h3 {
+  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+}
+
+/* Inputs y labels un pelín más pequeños para reducir altura total */
+.modal-dialog label {
+  font-size: 0.72rem;
+}
+
+.modal-dialog input,
+.modal-dialog select,
+.modal-dialog textarea {
+  font-size: 0.8rem;
+  padding: 0.28rem 0.5rem;
+}
+
+/* Bloque inferior (lecturas / préstamos) ya está en grid-two → lo hacemos más horizontal */
+.modal-dialog .grid-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+/* Las tarjetas internas del modal, más ligeras y bajitas */
+.modal-dialog .card-inside-modal {
+  padding: 0.5rem 0.55rem;
+  border-radius: 10px;
+}
+
+/* Limitar altura del bloque de lecturas en texto para que no alargue el modal */
+.result-block.small {
+  max-height: 90px;
+  overflow-y: auto;
+  font-size: 0.72rem;
+}
+
+/* Vista en pantallas pequeñas: que el modal ocupe casi todo, pero sin agobiar */
+@media (max-width: 900px) {
+  .modal-dialog {
+    width: min(100% - 1rem, 100%);
+    max-height: 85vh;
+    padding: 0.7rem 0.8rem;
+  }
+
+  /* En móvil, lecturas y préstamos en columna (uno debajo del otro) */
+  .modal-dialog .grid-two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Form grid a una columna para no apiñar demasiado en pantallas estrechas */
+  .modal-dialog .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 

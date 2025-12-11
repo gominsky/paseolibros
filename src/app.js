@@ -1,44 +1,69 @@
 // src/app.js
 import express from 'express';
+import cors from 'cors';
+import morgan from 'morgan';
 import dotenv from 'dotenv';
-import pool from './bd.js';
+import jwt from 'jsonwebtoken';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-import usuariosRouter from './rutas/usuarios.js';
-import lecturasRouter from './rutas/lecturas.js';
-import prestamosRouter from './rutas/prestamos.js';
-import ejemplaresRouter from './rutas/ejemplares.js';
-import authRouter from './rutas/auth.js';
-import { verificarToken } from './middlewares/auth.js';
-import librosRouter from './rutas/libros.js';
+import authRutas from './rutas/auth.js';
+import usuariosRutas from './rutas/usuarios.js';
+import ejemplaresRutas from './rutas/ejemplares.js';
+import librosRutas from './rutas/libros.js';
+import lecturasRutas from './rutas/lecturas.js';
+import prestamosRutas from './rutas/prestamos.js';
 
 dotenv.config();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 
+// Middlewares básicos
+app.use(cors());
+app.use(morgan('dev'));
 app.use(express.json());
-app.use(express.static('public'));
 
-// Ruta de salud (sin proteger)
-app.get('/salud', async (req, res) => {
-  try {
-    const resultado = await pool.query('SELECT NOW()');
-    res.json({ estado: 'ok', hora_bd: resultado.rows[0].now });
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ estado: 'error', error: 'No se pudo conectar a la base de datos' });
-  }
+// Servir frontend estático desde /public (si lo estás usando así)
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
-// 🔓 Rutas públicas
-app.use('/api/auth', authRouter);
+// Middleware para sacar el usuario del JWT (si lo hay)
+app.use((req, res, next) => {
+  const auth = req.headers.authorization || '';
+  const [tipo, token] = auth.split(' ');
 
-// 🔒 Rutas protegidas (todas pasan por verificarToken)
-app.use('/api/ejemplares', verificarToken, ejemplaresRouter);
-app.use('/api/usuarios', verificarToken, usuariosRouter);
-app.use('/api/libros', verificarToken, librosRouter);
-app.use('/api', verificarToken, lecturasRouter);
-app.use('/api', verificarToken, prestamosRouter);
+  if (tipo === 'Bearer' && token) {
+    try {
+      const payload = jwt.verify(
+        token,
+        process.env.JWT_SECRETO || 'cambia_esto_en_.env'
+      );
+      req.usuario = { id: payload.id, nombre_usuario: payload.nombre_usuario };
+    } catch (e) {
+      req.usuario = null;
+    }
+  }
+
+  next();
+});
+
+// Rutas API
+app.use('/api/auth', authRutas);
+app.use('/api/usuarios', usuariosRutas);
+app.use('/api/ejemplares', ejemplaresRutas);
+app.use('/api/libros', librosRutas);
+app.use('/api', lecturasRutas);   // /api/usuarios/:id/lecturas-abiertas, etc.
+app.use('/api', prestamosRutas);  // /api/usuarios/:id/prestamos-activos, etc.
+
+// Endpoint de salud
+app.get('/api/health', (req, res) => {
+  res.json({ ok: true, mensaje: 'PaseoLibros API viva 😄' });
+});
 
 export default app;

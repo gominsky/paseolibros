@@ -112,5 +112,51 @@ router.patch('/prestamos/:id/devolver', async (req, res) => {
     res.status(500).json({ error: 'Error actualizando préstamo' });
   }
 });
+// Préstamos activos de un usuario
+// GET /api/usuarios/:usuarioId/prestamos-activos
+router.get('/usuarios/:usuarioId/prestamos-activos', async (req, res) => {
+  const { usuarioId } = req.params;
+
+  try {
+    const resultado = await pool.query(
+      `SELECT
+         p.id,
+         p.ejemplar_id,
+         p.usuario_prestador_id,
+         prestador.nombre_usuario AS nombre_prestador,
+         p.usuario_receptor_id,
+         receptor.nombre_usuario AS nombre_receptor_usuario,
+         p.nombre_receptor,
+         p.fecha_prestamo,
+         p.fecha_limite,
+         p.fecha_devolucion,
+         p.estado,
+         p.notas,
+         l.id AS libro_id,
+         l.titulo,
+         l.autores,
+         l.isbn
+       FROM prestamos p
+       JOIN ejemplares e ON e.id = p.ejemplar_id
+       JOIN libros l ON l.id = e.libro_id
+       JOIN usuarios prestador ON prestador.id = p.usuario_prestador_id
+       LEFT JOIN usuarios receptor ON receptor.id = p.usuario_receptor_id
+       WHERE
+         (p.usuario_prestador_id = $1 OR p.usuario_receptor_id = $1)
+         AND p.estado <> 'devuelto'
+       ORDER BY
+         COALESCE(p.fecha_limite, p.fecha_prestamo) ASC,
+         p.fecha_prestamo DESC`,
+      [usuarioId]
+    );
+
+    res.json(resultado.rows);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: 'Error obteniendo préstamos activos del usuario' });
+  }
+});
 
 export default router;

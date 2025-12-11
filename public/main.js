@@ -5,9 +5,15 @@ let currentStream = null;
 let token = null;
 let usuarioActual = null; // { id, nombre_usuario, ... }
 
+const TOKEN_KEY = 'paseolibros_token';
+const USER_KEY = 'paseolibros_usuario';
+
+
 // selección actual en la tabla
 let libroSeleccionadoId = null;
 let ejemplarSeleccionadoId = null;
+let usuariosPrestamo = [];
+let prestamoContexto = null;
 
 // ---------- Helpers ----------
 
@@ -24,12 +30,12 @@ function actualizarUIAutenticacion() {
   const nombreSpan = document.getElementById('nombre-usuario-actual');
   const selectUsuario = document.getElementById('usuario');
 
-  if (usuarioActual && token) {
-    zonaNo.style.display = 'none';
-    zonaSi.style.display = 'block';
-    nombreSpan.textContent = usuarioActual.nombre_usuario;
+  if (token && usuarioActual) {
+    // zona logueado
+    if (zonaNo) zonaNo.style.display = 'none';
+    if (zonaSi) zonaSi.style.display = 'block';
+    if (nombreSpan) nombreSpan.textContent = usuarioActual.nombre_usuario || '';
 
-    // rellenar select de usuario con SOLO el actual
     if (selectUsuario) {
       selectUsuario.innerHTML = '';
       const opt = document.createElement('option');
@@ -38,27 +44,41 @@ function actualizarUIAutenticacion() {
       selectUsuario.appendChild(opt);
     }
 
-    // cargar ejemplares de este usuario
-    cargarEjemplares(usuarioActual.id);
+    const info = document.getElementById('info-ejemplares');
+    if (info) info.textContent = 'Tus ejemplares:';
+
+    // 👉 aquí se cargan ejemplares y los resúmenes globales
+    if (usuarioActual.id) {
+      cargarEjemplares(usuarioActual.id);
+    }
     cargarLecturasAbiertas();
     cargarPrestamosActivos();
   } else {
-    zonaNo.style.display = 'block';
-    zonaSi.style.display = 'none';
-    nombreSpan.textContent = '';
+    // zona no logueado
+    if (zonaNo) zonaNo.style.display = 'block';
+    if (zonaSi) zonaSi.style.display = 'none';
+    if (nombreSpan) nombreSpan.textContent = '';
 
     if (selectUsuario) {
       selectUsuario.innerHTML = '';
     }
 
     const info = document.getElementById('info-ejemplares');
-    if (info) info.textContent = 'Inicia sesión para ver tus ejemplares.';
+    if (info) info.textContent = 'Inicia sesión para ver tu biblioteca.';
 
     // limpiar paneles globales
-    cargarLecturasAbiertas();
-    cargarPrestamosActivos();
+    const tbodyL = document.querySelector('#tabla-lecturas-abiertas tbody');
+    const tbodyP = document.querySelector('#tabla-prestamos-activos tbody');
+    if (tbodyL) tbodyL.innerHTML = '';
+    if (tbodyP) tbodyP.innerHTML = '';
+
+    const infoL = document.getElementById('info-lecturas-abiertas');
+    const infoP = document.getElementById('info-prestamos-activos');
+    if (infoL) infoL.textContent = 'Inicia sesión para ver tus lecturas en curso.';
+    if (infoP) infoP.textContent = 'Inicia sesión para ver tus préstamos activos.';
   }
 }
+
 
 // ---------- Login / Logout ----------
 
@@ -67,10 +87,8 @@ async function hacerLogin() {
   const passInput = document.getElementById('login-contrasena');
   const mensaje = document.getElementById('login-mensaje');
 
-  mensaje.textContent = '';
-
   const nombre_usuario = usuarioInput.value.trim();
-  const contrasena = passInput.value;
+  const contrasena = passInput.value.trim();
 
   if (!nombre_usuario || !contrasena) {
     mensaje.textContent = 'Introduce usuario y contraseña';
@@ -80,19 +98,27 @@ async function hacerLogin() {
   try {
     const res = await fetch(`${API_BASE}/api/auth/login`, {
       method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ nombre_usuario, contrasena }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre_usuario, contrasena })
     });
 
     const data = await res.json();
 
     if (!res.ok) {
-      mensaje.textContent = data.error || 'Error al iniciar sesión';
+      mensaje.textContent = data.error || 'Error en el login';
       return;
     }
 
     token = data.token;
     usuarioActual = data.usuario;
+
+    // guardar en localStorage para persistir sesión
+    try {
+      localStorage.setItem(TOKEN_KEY, data.token);
+      localStorage.setItem(USER_KEY, JSON.stringify(data.usuario));
+    } catch (e) {
+      console.warn('No se pudo guardar la sesión en localStorage', e);
+    }
 
     mensaje.textContent = 'Login correcto ✅';
 
@@ -100,21 +126,36 @@ async function hacerLogin() {
     usuarioInput.value = '';
     passInput.value = '';
 
+    // refrescar toda la UI
     actualizarUIAutenticacion();
+
+    // asegurar que se cargan paneles globales
+    cargarLecturasAbiertas();
+    cargarPrestamosActivos();
   } catch (err) {
     console.error(err);
-    mensaje.textContent = 'Error de red al iniciar sesión';
+    mensaje.textContent = 'Error de red en el login';
   }
 }
+
 
 function hacerLogout() {
   token = null;
   usuarioActual = null;
+
+  try {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+  } catch (e) {
+    console.warn('No se pudo limpiar localStorage', e);
+  }
+
   actualizarUIAutenticacion();
 
   const mensaje = document.getElementById('login-mensaje');
   if (mensaje) mensaje.textContent = 'Sesión cerrada';
 }
+
 
 // ---------- Modal ficha libro/ejemplar ----------
 
@@ -181,6 +222,184 @@ async function subirPortadaArchivo(file) {
   } catch (err) {
     console.error(err);
     if (msg) msg.textContent = 'Error de red al subir la portada.';
+  }
+}
+// ---------- UI de préstamo con desplegable de usuarios ----------
+
+function crearUIPrestamo() {
+  if (document.getElementById('prestamo-overlay')) return;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'prestamo-overlay';
+  overlay.className = 'prestamo-overlay';
+  overlay.style.display = 'none';
+
+  overlay.innerHTML = `
+    <div class="prestamo-dialog">
+      <h3>Nuevo préstamo</h3>
+
+      <div class="form-group">
+        <label for="prestamo-receptor-select">Receptor (usuario de la app)</label>
+        <select id="prestamo-receptor-select">
+          <option value="">— Persona externa —</option>
+        </select>
+        <p class="helper-text">
+          Elige un usuario de la app o deja "Persona externa" para escribir un nombre.
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label for="prestamo-receptor-nombre">Nombre receptor (si es externo)</label>
+        <input id="prestamo-receptor-nombre" type="text" placeholder="Ej: Mi madre, Carlos..." />
+      </div>
+
+      <div class="form-group">
+        <label for="prestamo-fecha-limite">Fecha límite de devolución</label>
+        <input id="prestamo-fecha-limite" type="date" />
+      </div>
+
+      <div class="form-group">
+        <label for="prestamo-notas">Notas</label>
+        <input id="prestamo-notas" type="text" placeholder="Opcional" />
+      </div>
+
+      <div class="prestamo-dialog-buttons">
+        <button id="prestamo-cancelar" class="btn btn-ghost btn-sm">Cancelar</button>
+        <button id="prestamo-confirmar" class="btn btn-secondary btn-sm">Crear préstamo</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const btnCancelar = document.getElementById('prestamo-cancelar');
+  const btnConfirmar = document.getElementById('prestamo-confirmar');
+
+  btnCancelar.addEventListener('click', () => {
+    cerrarUIPrestamo();
+  });
+
+  btnConfirmar.addEventListener('click', confirmarPrestamoDesdeUI);
+}
+
+function abrirUIPrestamo() {
+  const overlay = document.getElementById('prestamo-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+
+  // limpiar campos
+  document.getElementById('prestamo-receptor-select').value = '';
+  document.getElementById('prestamo-receptor-nombre').value = '';
+  document.getElementById('prestamo-fecha-limite').value = '';
+  document.getElementById('prestamo-notas').value = '';
+}
+
+function cerrarUIPrestamo() {
+  const overlay = document.getElementById('prestamo-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'none';
+  prestamoContexto = null;
+}
+
+async function cargarUsuariosParaPrestamo() {
+  if (usuariosPrestamo.length > 0) {
+    // ya cargados
+    rellenarSelectPrestamo();
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/usuarios`, {
+      headers: getHeaders(false)
+    });
+    const data = await res.json();
+
+    if (Array.isArray(data)) {
+      usuariosPrestamo = data;
+    } else {
+      usuariosPrestamo = [];
+    }
+  } catch (err) {
+    console.error('Error cargando usuarios para préstamo', err);
+    usuariosPrestamo = [];
+  }
+
+  rellenarSelectPrestamo();
+}
+
+function rellenarSelectPrestamo() {
+  const select = document.getElementById('prestamo-receptor-select');
+  if (!select) return;
+
+  // dejamos la primera opción "Persona externa"
+  select.innerHTML = '<option value="">— Persona externa —</option>';
+
+  for (const u of usuariosPrestamo) {
+    const opt = document.createElement('option');
+    opt.value = u.id;
+    opt.textContent = `${u.nombre_usuario} (id ${u.id})`;
+    select.appendChild(opt);
+  }
+}
+
+async function confirmarPrestamoDesdeUI() {
+  const mensaje = document.getElementById('mensaje');
+
+  if (!prestamoContexto || !usuarioActual || !token) {
+    cerrarUIPrestamo();
+    if (mensaje) mensaje.textContent = 'No hay contexto de préstamo válido.';
+    return;
+  }
+
+  const select = document.getElementById('prestamo-receptor-select');
+  const inputNombre = document.getElementById('prestamo-receptor-nombre');
+  const inputFecha = document.getElementById('prestamo-fecha-limite');
+  const inputNotas = document.getElementById('prestamo-notas');
+
+  let usuarioReceptorId = select.value ? Number(select.value) : null;
+  let nombreReceptor = inputNombre.value.trim() || null;
+
+  // Si se ha elegido usuario de la app, podemos ignorar nombreReceptor (lo tenemos en usuarios)
+  if (usuarioReceptorId) {
+    nombreReceptor = null;
+  } else if (!nombreReceptor) {
+    alert('Introduce un nombre para la persona externa.');
+    return;
+  }
+
+  const fechaLimiteStr = inputFecha.value || null;
+  const notas = inputNotas.value.trim() || null;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/prestamos`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({
+        ejemplar_id: Number(prestamoContexto.ejemplarId),
+        usuario_prestador_id: usuarioActual.id,
+        usuario_receptor_id: usuarioReceptorId || null,
+        nombre_receptor: nombreReceptor || null,
+        fecha_limite: fechaLimiteStr,
+        notas
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      if (mensaje) {
+        mensaje.textContent = `Error al crear el préstamo: ${data.error || 'Error desconocido'}`;
+      }
+      return;
+    }
+
+    if (mensaje) mensaje.textContent = 'Préstamo creado ✅';
+
+    cerrarUIPrestamo();
+    await cargarPrestamos(prestamoContexto.libroId);
+  } catch (err) {
+    console.error(err);
+    if (mensaje) mensaje.textContent = 'Error de red al crear el préstamo';
   }
 }
 
@@ -615,66 +834,25 @@ async function terminarLecturaActual() {
 async function crearPrestamo(libroId, ejemplarId) {
   const mensaje = document.getElementById('mensaje');
 
-  mensaje.textContent = '';
-
   if (!token || !usuarioActual) {
-    mensaje.textContent = 'Debes iniciar sesión para prestar libros';
+    if (mensaje) mensaje.textContent = 'Debes iniciar sesión para prestar libros';
     return;
   }
 
-  const receptorIdStr = prompt(
-    'ID del usuario receptor (si usa la app). Deja vacío si es alguien externo.'
-  );
-  let usuarioReceptorId = null;
-  let nombreReceptor = null;
+  // guardamos el contexto del préstamo actual
+  prestamoContexto = {
+    libroId: Number(libroId),
+    ejemplarId: Number(ejemplarId),
+  };
 
-  if (receptorIdStr && receptorIdStr.trim() !== '') {
-    usuarioReceptorId = Number(receptorIdStr);
-    if (Number.isNaN(usuarioReceptorId)) {
-      alert('ID de usuario receptor no válido');
-      return;
-    }
-  } else {
-    nombreReceptor = prompt('Nombre de la persona a la que prestas el libro:');
-  }
+  // nos aseguramos de que la UI existe y de que los usuarios están cargados
+  crearUIPrestamo();
+  await cargarUsuariosParaPrestamo();
 
-  const fechaLimiteStr = prompt(
-    'Fecha límite de devolución (YYYY-MM-DD, opcional):'
-  );
-  const notas = prompt('Notas del préstamo (opcional):') || null;
-
-  try {
-    const res = await fetch(`${API_BASE}/api/prestamos`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({
-        ejemplar_id: Number(ejemplarId),
-        usuario_prestador_id: usuarioActual.id,
-        usuario_receptor_id: usuarioReceptorId || null,
-        nombre_receptor: nombreReceptor || null,
-        fecha_limite: fechaLimiteStr || null,
-        notas,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      mensaje.textContent = `Error al crear el préstamo: ${
-        data.error || 'Error desconocido'
-      }`;
-      return;
-    }
-
-    mensaje.textContent = 'Préstamo creado ✅';
-
-    await cargarPrestamos(libroId);
-    await cargarPrestamosActivos();
-  } catch (err) {
-    console.error(err);
-    mensaje.textContent = 'Error de red al crear el préstamo';
-  }
+  // abrimos el mini-modal
+  abrirUIPrestamo();
 }
+
 
 async function cargarPrestamos(libroId) {
   const info = document.getElementById('info-prestamos');
@@ -1162,6 +1340,19 @@ async function guardarEjemplarEditado() {
 // ---------- Inicialización ----------
 
 document.addEventListener('DOMContentLoaded', () => {
+  // restaurar sesión si hay algo guardado
+  try {
+    const savedToken = localStorage.getItem(TOKEN_KEY);
+    const savedUser = localStorage.getItem(USER_KEY);
+
+    if (savedToken && savedUser) {
+      token = savedToken;
+      usuarioActual = JSON.parse(savedUser);
+    }
+  } catch (e) {
+    console.warn('No se pudo leer la sesión de localStorage', e);
+  }
+
   actualizarUIAutenticacion();
 
   // Botones básicos
@@ -1232,7 +1423,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnGuardarEjemplar) {
     btnGuardarEjemplar.addEventListener('click', guardarEjemplarEditado);
   }
-
+  crearUIPrestamo();
   // Modal: cerrar
   const btnCerrarModal = document.getElementById('modal-ficha-cerrar');
   const backdropModal = document.getElementById('modal-ficha-backdrop');
