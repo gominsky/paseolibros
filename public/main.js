@@ -1,4 +1,7 @@
-const API_BASE = 'http://localhost:3011'; // ajusta puerto si cambias
+const API_BASE =
+  window.location.hostname === 'localhost'
+    ? 'http://localhost:3011'
+    : '';
 
 let codeReader = null;
 let currentStream = null;
@@ -16,6 +19,32 @@ let usuariosPrestamo = [];
 let prestamoContexto = null;
 
 // ---------- Helpers ----------
+function setUserStatus(msg) {
+  const el = document.getElementById('user-status-msg');
+  if (!el) return;
+  el.textContent = msg || '';
+}
+async function refrescarHome() {
+  if (!token || !usuarioActual?.id) return;
+
+  try {
+    await Promise.all([
+      cargarLecturasAbiertas(),
+      cargarPrestamosActivos(),
+    ]);
+  } catch (e) {
+    console.warn('No se pudo refrescar la home', e);
+  }
+}
+
+function setUserStatusOk(msg) { setUserStatus(msg ? `✅ ${msg}` : ''); }
+function setUserStatusErr(msg) { setUserStatus(msg ? `❌ ${msg}` : ''); }
+
+function urlPortadaAbsoluta(url) {
+  if (!url) return '';
+  if (/^https?:\/\//i.test(url)) return url; // ya es absoluta
+  return `${API_BASE}${url}`; // ej: http://localhost:3011 + /uploads/xxx.jpg
+}
 
 function getHeaders(json = true) {
   const headers = {};
@@ -171,11 +200,19 @@ function abrirModalFicha() {
   }
 }
 
-function cerrarModalFicha() {
+async function cerrarModalFicha() {
   const modal = document.getElementById('modal-ficha');
   if (!modal) return;
+
   modal.classList.remove('is-visible');
-  document.body.classList.remove('no-scroll');
+
+  // refrescar resúmenes de la home al cerrar el modal
+  try {
+    await cargarLecturasAbiertas();
+    await cargarPrestamosActivos();
+  } catch (e) {
+    console.warn('No se pudieron refrescar lecturas/préstamos al cerrar modal', e);
+  }
 }
 
 async function subirPortadaArchivo(file) {
@@ -441,15 +478,12 @@ async function cargarEjemplares(usuarioId) {
       tr.dataset.libroId = e.libro_id;
       tr.dataset.ejemplarId = e.ejemplar_id;
       tr.dataset.creadoEn = e.creado_en || '';
-
       tr.innerHTML = `
   <td>
     ${
       e.url_portada
-        ? '<img src="' +
-          e.url_portada +
-          '" alt="Portada" class="portada-mini-img" />'
-        : '<div class="portada-placeholder-mini">📚</div>'
+        ? `<img src="${API_BASE}${e.url_portada}?t=${Date.now()}" alt="Portada" class="portada-mini-img" />`
+        : `<div class="portada-placeholder-mini">📚</div>`
     }
   </td>
   <td>${e.titulo || ''}</td>
@@ -464,21 +498,26 @@ async function cargarEjemplares(usuarioId) {
       title="Empezar / ver lectura"
       data-libro-id="${e.libro_id}"
       data-ejemplar-id="${e.ejemplar_id}"
+      type="button"
     >
       <span class="icon-circle icon-read">▶</span>
     </button>
+
     <button
       class="icon-btn btn-prestar"
       title="Registrar préstamo"
       data-libro-id="${e.libro_id}"
       data-ejemplar-id="${e.ejemplar_id}"
+      type="button"
     >
       <span class="icon-circle icon-loan">⇄</span>
     </button>
+
     <button
       class="icon-btn btn-eliminar"
       title="Eliminar ejemplar"
       data-ejemplar-id="${e.ejemplar_id}"
+      type="button"
     >
       <span class="icon-circle icon-delete">✕</span>
     </button>
@@ -496,14 +535,10 @@ async function cargarEjemplares(usuarioId) {
 // ---------- Crear ejemplar ----------
 
 async function crearEjemplar() {
-  const mensaje = document.getElementById('mensaje');
-  const resultado = document.getElementById('resultado');
-
-  mensaje.textContent = '';
-  resultado.textContent = '';
+  setUserStatus('');
 
   if (!token || !usuarioActual) {
-    mensaje.textContent = 'Debes iniciar sesión para crear ejemplares';
+    setUserStatusErr('Debes iniciar sesión para crear ejemplares.');
     return;
   }
 
@@ -512,7 +547,7 @@ async function crearEjemplar() {
   const notas = document.getElementById('notas').value.trim();
 
   if (!isbn) {
-    mensaje.textContent = 'Introduce un ISBN (o escanéalo)';
+    setUserStatusErr('Introduce un ISBN (o escanéalo).');
     return;
   }
 
@@ -531,30 +566,28 @@ async function crearEjemplar() {
     const data = await res.json();
 
     if (!res.ok) {
-      mensaje.textContent = `Error: ${data.error || 'Error desconocido'}`;
+      setUserStatusErr(data.error || 'Error desconocido creando ejemplar.');
       return;
     }
 
-    mensaje.textContent = 'Ejemplar creado correctamente ✅';
-    resultado.textContent = JSON.stringify(data, null, 2);
+    setUserStatusOk('Ejemplar creado.');
     document.getElementById('isbn').value = '';
 
     await cargarEjemplares(usuarioActual.id);
+    await refrescarHome();
   } catch (err) {
     console.error(err);
-    mensaje.textContent = 'Error de red al crear el ejemplar';
+    setUserStatusErr('Error de red al crear el ejemplar.');
   }
 }
 
 // ---------- LECTURAS Y PRÉSTAMOS ----------
 
 async function empezarLectura(libroId, ejemplarId) {
-  const mensaje = document.getElementById('mensaje');
-
-  mensaje.textContent = '';
+  setUserStatus('');
 
   if (!token || !usuarioActual) {
-    mensaje.textContent = 'Debes iniciar sesión para registrar lecturas';
+    setUserStatusErr('Debes iniciar sesión para registrar lecturas.');
     return;
   }
 
@@ -575,36 +608,39 @@ async function empezarLectura(libroId, ejemplarId) {
     const data = await res.json();
 
     if (!res.ok) {
-      mensaje.textContent = `Error al empezar la lectura: ${
-        data.error || 'Error desconocido'
-      }`;
+      setUserStatusErr(data.error || 'Error al empezar la lectura.');
       return;
     }
 
-    mensaje.textContent = 'Lectura iniciada ✅';
-
+    setUserStatusOk('Lectura iniciada.');
     await cargarLecturas(libroId);
+    await refrescarHome();
     await cargarLecturasAbiertas();
   } catch (err) {
     console.error(err);
-    mensaje.textContent = 'Error de red al empezar la lectura';
+    setUserStatusErr('Error de red al empezar la lectura.');
   }
 }
 
+
 async function cargarLecturas(libroId) {
   const infoLecturas = document.getElementById('info-lecturas');
-  const detalle = document.getElementById('lecturas-detalle');
-
-  if (!infoLecturas || !detalle) return;
+  const tbody = document.querySelector('#tabla-lecturas-libro tbody');
 
   infoLecturas.textContent = 'Cargando lecturas...';
-  detalle.textContent = '';
+  if (tbody) tbody.innerHTML = '';
 
   try {
     const res = await fetch(`${API_BASE}/api/libros/${libroId}/lecturas`, {
       headers: getHeaders(false),
     });
+
     const lecturas = await res.json();
+
+    if (!res.ok) {
+      infoLecturas.textContent = lecturas.error || 'Error al cargar las lecturas.';
+      return;
+    }
 
     if (!Array.isArray(lecturas) || lecturas.length === 0) {
       infoLecturas.textContent = 'Este libro no tiene lecturas registradas.';
@@ -613,28 +649,38 @@ async function cargarLecturas(libroId) {
 
     infoLecturas.textContent = `Total lecturas registradas: ${lecturas.length}`;
 
-    const texto = lecturas
-      .map((l) => {
-        return [
-          `ID lectura: ${l.id}`,
-          `Usuario: ${l.nombre_usuario} (id ${l.usuario_id})`,
-          `Estado: ${l.estado}`,
-          `Inicio: ${l.inicio}`,
-          `Fin: ${l.fin || '—'}`,
-          `Página actual: ${l.pagina_actual || '—'}`,
-          `Valoración: ${l.valoracion || '—'}`,
-          `Notas: ${l.notas || '—'}`,
-          '---------------------------',
-        ].join('\n');
-      })
-      .join('\n');
+    if (!tbody) return;
 
-    detalle.textContent = texto;
+    for (const l of lecturas) {
+      const tr = document.createElement('tr');
+
+      // Activa = no terminada
+      const esActiva = l.estado !== 'terminado';
+      // Activa del usuario actual (se destaca aún más)
+      const esActivaMia = esActiva && usuarioActual && l.usuario_id === usuarioActual.id;
+
+      if (esActivaMia) tr.classList.add('lectura-activa-mia');
+      else if (esActiva) tr.classList.add('lectura-activa');
+
+      const inicio = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : '—';
+      const fin = l.fin ? new Date(l.fin).toLocaleDateString('es-ES') : '—';
+
+      tr.innerHTML = `
+        <td>${l.nombre_usuario || `Usuario ${l.usuario_id}`}</td>
+        <td>${l.estado || '—'}</td>
+        <td>${l.pagina_actual ?? '—'}</td>
+        <td>${inicio}</td>
+        <td>${fin}</td>
+      `;
+
+      tbody.appendChild(tr);
+    }
   } catch (err) {
     console.error(err);
     infoLecturas.textContent = 'Error al cargar las lecturas.';
   }
 }
+
 // ---------- Resumen GLOBAL: lecturas y préstamos abiertos ----------
 
 async function cargarLecturasAbiertas() {
@@ -679,6 +725,9 @@ async function cargarLecturasAbiertas() {
       const fecha = l.inicio
         ? new Date(l.inicio).toLocaleDateString('es-ES')
         : '—';
+      tr.classList.add('row-link');
+      tr.dataset.libroId = l.libro_id;
+      if (l.ejemplar_id) tr.dataset.ejemplarId = l.ejemplar_id;
 
       tr.innerHTML = `
         <td>${l.titulo || 'Sin título'}</td>
@@ -739,6 +788,9 @@ async function cargarPrestamosActivos() {
       const fechaLimite = p.fecha_limite
         ? new Date(p.fecha_limite).toLocaleDateString('es-ES')
         : '—';
+        tr.classList.add('row-link');
+        tr.dataset.libroId = p.libro_id;
+        if (p.ejemplar_id) tr.dataset.ejemplarId = p.ejemplar_id;
 
       tr.innerHTML = `
         <td>${p.titulo || 'Sin título'}</td>
@@ -829,6 +881,7 @@ async function terminarLecturaActual() {
     console.error(err);
     mensaje.textContent = 'Error de red al terminar la lectura.';
   }
+  await refrescarHome();
 }
 
 async function crearPrestamo(libroId, ejemplarId) {
@@ -944,6 +997,7 @@ async function marcarPrestamoDevuelto(prestamoId, libroId) {
 
     await cargarPrestamos(libroId);
     await cargarPrestamosActivos();
+    await refrescarHome();
   } catch (err) {
     console.error(err);
     mensaje.textContent = 'Error de red al actualizar el préstamo';
@@ -1027,20 +1081,21 @@ async function marcarPrestamoDevueltoGlobal() {
 async function iniciarEscaneo() {
   const scannerDiv = document.getElementById('scanner');
   const video = document.getElementById('video');
-  const mensaje = document.getElementById('mensaje');
 
-  mensaje.textContent = '';
+  if (!scannerDiv || !video) {
+    setUserStatus('No se encontró el componente de escaneo en la página.');
+    return;
+  }
+
+  setUserStatus('');
   scannerDiv.style.display = 'block';
 
   try {
-    const constraints = {
-      video: {
-        facingMode: 'environment',
-      },
-    };
+    const constraints = { video: { facingMode: 'environment' } };
 
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
     currentStream = stream;
+
     video.srcObject = stream;
     video.setAttribute('playsinline', true);
     await video.play();
@@ -1050,16 +1105,14 @@ async function iniciarEscaneo() {
 
     codeReader.decodeFromVideoDevice(null, video, (result, err) => {
       if (result) {
-        console.log('Código detectado:', result.text);
         document.getElementById('isbn').value = result.text;
-        mensaje.textContent = `Código detectado: ${result.text}`;
-
+        setUserStatus(`Código detectado: ${result.text}`);
         detenerEscaneo();
       }
     });
   } catch (error) {
     console.error(error);
-    mensaje.textContent = 'No se pudo acceder a la cámara';
+    setUserStatus('No se pudo acceder a la cámara (permiso denegado o sin dispositivo).');
     scannerDiv.style.display = 'none';
   }
 }
@@ -1068,20 +1121,16 @@ function detenerEscaneo() {
   const scannerDiv = document.getElementById('scanner');
 
   if (codeReader) {
-    try {
-      codeReader.reset();
-    } catch (e) {
-      console.warn('Error al resetear codeReader', e);
-    }
+    try { codeReader.reset(); } catch {}
     codeReader = null;
   }
 
   if (currentStream) {
-    currentStream.getTracks().forEach((track) => track.stop());
+    currentStream.getTracks().forEach((t) => t.stop());
     currentStream = null;
   }
 
-  scannerDiv.style.display = 'none';
+  if (scannerDiv) scannerDiv.style.display = 'none';
 }
 
 // ---------- Eliminar ejemplar ----------
@@ -1113,6 +1162,7 @@ async function eliminarEjemplar(ejemplarId) {
     mensaje.textContent = 'Ejemplar eliminado ✅';
 
     await cargarEjemplares(usuarioActual.id);
+    await refrescarHome();
   } catch (err) {
     console.error(err);
     mensaje.textContent = 'Error de red al eliminar ejemplar';
@@ -1337,6 +1387,41 @@ async function guardarEjemplarEditado() {
   }
 }
 
+let fichaReqId = 0;
+
+async function mostrarFicha(libroId, ejemplarId) {
+  const reqId = ++fichaReqId;
+
+  libroSeleccionadoId = Number(libroId);
+  ejemplarSeleccionadoId = ejemplarId ? Number(ejemplarId) : null;
+
+  // Limpieza rápida (para que se note que está cambiando)
+  document.getElementById('ficha-titulo') && (document.getElementById('ficha-titulo').textContent = 'Cargando…');
+  document.getElementById('ficha-autores') && (document.getElementById('ficha-autores').textContent = '');
+  document.getElementById('ficha-isbn') && (document.getElementById('ficha-isbn').textContent = '—');
+  document.getElementById('ficha-creado-en') && (document.getElementById('ficha-creado-en').textContent = '—');
+  document.getElementById('info-lecturas') && (document.getElementById('info-lecturas').textContent = 'Cargando lecturas…');
+  document.querySelector('#tabla-prestamos tbody') && (document.querySelector('#tabla-prestamos tbody').innerHTML = '');
+  const pre = document.getElementById('lecturas-detalle');
+  if (pre) pre.textContent = '';
+
+  // Cargar y pintar (si llega otra petición después, ignoramos esta)
+  await cargarFormEdicion();
+  if (reqId !== fichaReqId) return;
+
+  // si tus funciones existen, recargamos también lo “relacionado”
+  if (typeof cargarLecturas === 'function') {
+    await cargarLecturas(libroSeleccionadoId);
+    if (reqId !== fichaReqId) return;
+  }
+  if (typeof cargarPrestamos === 'function') {
+    await cargarPrestamos(libroSeleccionadoId);
+    if (reqId !== fichaReqId) return;
+  }
+
+  abrirModalFicha();
+}
+
 // ---------- Inicialización ----------
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1376,6 +1461,7 @@ document.addEventListener('DOMContentLoaded', () => {
     .getElementById('btn-logout')
     .addEventListener('click', hacerLogout);
 
+  document.getElementById('btn-detener')?.addEventListener('click', detenerEscaneo);
   // Botones dentro de la ficha (modal)
   const btnVerLecturas = document.getElementById('btn-ver-lecturas');
   if (btnVerLecturas) {
@@ -1440,26 +1526,58 @@ document.addEventListener('DOMContentLoaded', () => {
       const modal = document.getElementById('modal-ficha');
       if (modal && modal.classList.contains('is-visible')) {
         cerrarModalFicha();
+        refrescarHome();
       }
     }
   });
 
   // Subida de portada desde fichero
-  const inputPortadaFile = document.getElementById('ficha-portada-file');
-  if (inputPortadaFile) {
-    inputPortadaFile.addEventListener('change', (ev) => {
-      const file = ev.target.files?.[0];
-      if (!file) return;
+const inputPortada = document.getElementById('ficha-portada-file');
+if (inputPortada) {
+  inputPortada.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-      const preview = document.getElementById('ficha-portada-img');
-      if (preview) {
-        preview.src = URL.createObjectURL(file);
+    if (!libroSeleccionadoId) {
+      alert('Selecciona un libro antes.');
+      return;
+    }
+
+    try {
+      const fd = new FormData();
+      fd.append('portada', file);
+
+      const res = await fetch(`${API_BASE}/api/libros/${libroSeleccionadoId}/portada`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`, // IMPORTANTE: no pongas Content-Type con FormData
+        },
+        body: fd,
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || 'Error subiendo portada');
+        return;
       }
 
-      subirPortadaArchivo(file);
-    });
-  }
+      // actualizar imagen de la ficha (cache-busting)
+      const img = document.getElementById('ficha-portada-img');
+      img.src = `${urlPortadaAbsoluta(data.url_portada)}?t=${Date.now()}`;
 
+      // refrescar tabla ejemplares para que se vea en el listado
+      if (usuarioActual?.id) {
+        await cargarEjemplares(usuarioActual.id);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error de red subiendo portada');
+    } finally {
+      // permitir volver a subir el mismo archivo si quieres
+      e.target.value = '';
+    }
+  });
+}
   // Buscador dinámico de ejemplares
   const buscador = document.getElementById('buscador-ejemplares');
   if (buscador) {
@@ -1482,59 +1600,67 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
+const tbodyEjemplares = document.querySelector('#tabla-ejemplares tbody');
 
-  // Eventos delegados en la tabla de ejemplares
-  const tbodyEjemplares = document.querySelector('#tabla-ejemplares tbody');
-  if (tbodyEjemplares) {
-    tbodyEjemplares.addEventListener('click', (e) => {
-      const target = e.target;
-      const fila = target.closest('tr');
-      // botón real de acción (aunque hagas click en el <span> interno)
-      const botonAccion = target.closest('.btn-leer, .btn-prestar, .btn-eliminar');
-  
-      if (!fila) return;
-  
-      // Actualizar selección de fila SIEMPRE que se haga click en ella
-      libroSeleccionadoId = fila.dataset.libroId
-        ? Number(fila.dataset.libroId)
-        : null;
-      ejemplarSeleccionadoId = fila.dataset.ejemplarId
-        ? Number(fila.dataset.ejemplarId)
-        : null;
-  
-      Array.from(tbodyEjemplares.querySelectorAll('tr')).forEach((tr) =>
-        tr.classList.remove('fila-seleccionada')
-      );
-      fila.classList.add('fila-seleccionada');
-  
-      // Si el click es en un botón de acción → NO abrir modal, solo hacer la acción
-      if (botonAccion) {
-        e.stopPropagation();
-  
-        if (botonAccion.classList.contains('btn-leer')) {
-          const libroId = botonAccion.getAttribute('data-libro-id');
-          const ejemplarId = botonAccion.getAttribute('data-ejemplar-id');
-          empezarLectura(libroId, ejemplarId);
-        }
-  
-        if (botonAccion.classList.contains('btn-prestar')) {
-          const libroId = botonAccion.getAttribute('data-libro-id');
-          const ejemplarId = botonAccion.getAttribute('data-ejemplar-id');
-          crearPrestamo(libroId, ejemplarId);
-        }
-  
-        if (botonAccion.classList.contains('btn-eliminar')) {
-          const ejemplarId = botonAccion.getAttribute('data-ejemplar-id');
-          eliminarEjemplar(ejemplarId);
-        }
-  
-        return; // importante: no abrir modal
-      }
-  
-      // Si NO es un botón de acción (click en cualquier otra celda) → abrir modal
-      cargarFormEdicion();
-      abrirModalFicha();
-    });
-  }
-  
+if (tbodyEjemplares) {
+  tbodyEjemplares.addEventListener('click', (e) => {
+    const fila = e.target.closest('tr');
+    if (!fila) return;
+
+    // Selección de fila
+    libroSeleccionadoId = fila.dataset.libroId ? Number(fila.dataset.libroId) : null;
+    ejemplarSeleccionadoId = fila.dataset.ejemplarId ? Number(fila.dataset.ejemplarId) : null;
+
+    tbodyEjemplares.querySelectorAll('tr').forEach((tr) =>
+      tr.classList.remove('fila-seleccionada')
+    );
+    fila.classList.add('fila-seleccionada');
+
+    // Si click fue en un botón de acción (aunque pinches en el <span> del icono)
+    const btnLeer = e.target.closest('.btn-leer');
+    const btnPrestar = e.target.closest('.btn-prestar');
+    const btnEliminar = e.target.closest('.btn-eliminar');
+
+    if (btnLeer) {
+      e.stopPropagation();
+      empezarLectura(btnLeer.getAttribute('data-libro-id'), btnLeer.getAttribute('data-ejemplar-id'));
+      return;
+    }
+
+    if (btnPrestar) {
+      e.stopPropagation();
+      crearPrestamo(btnPrestar.getAttribute('data-libro-id'), btnPrestar.getAttribute('data-ejemplar-id'));
+      return;
+    }
+
+    if (btnEliminar) {
+      e.stopPropagation();
+      eliminarEjemplar(btnEliminar.getAttribute('data-ejemplar-id'));
+      return;
+    }
+
+    // Click normal en la fila => abrir modal
+    mostrarFicha(fila.dataset.libroId, fila.dataset.ejemplarId);
+
+  });
+  // Click en lecturas en curso => abrir ficha
+document.querySelector('#tabla-lecturas-abiertas tbody')?.addEventListener('click', (e) => {
+  const tr = e.target.closest('tr');
+  if (!tr) return;
+  const libroId = tr.dataset.libroId;
+  const ejemplarId = tr.dataset.ejemplarId;
+  mostrarFicha(tr.dataset.libroId, tr.dataset.ejemplarId);
+});
+
+// Click en préstamos activos => abrir ficha
+document.querySelector('#tabla-prestamos-activos tbody')?.addEventListener('click', (e) => {
+  const tr = e.target.closest('tr');
+  if (!tr) return;
+  const libroId = tr.dataset.libroId;
+  const ejemplarId = tr.dataset.ejemplarId;
+  mostrarFicha(tr.dataset.libroId, tr.dataset.ejemplarId);
+});
+
+}
+   
 });

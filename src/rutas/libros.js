@@ -1,6 +1,8 @@
 // src/rutas/libros.js
 import { Router } from 'express';
 import pool from '../bd.js';
+import multer from 'multer';
+import path from 'path';
 
 const router = Router();
 
@@ -112,6 +114,44 @@ router.put('/:id', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error actualizando libro' });
+  }
+});
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, 'public/uploads'),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname || '').toLowerCase() || '.jpg';
+    cb(null, `libro_${req.params.id}_${Date.now()}${ext}`);
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 6 * 1024 * 1024 }, // 6MB
+});
+
+// Subir portada y guardar su URL en libros.url_portada
+// POST /api/libros/:id/portada
+router.post('/:id/portada', upload.single('portada'), async (req, res) => {
+  const libroId = Number(req.params.id);
+  if (!libroId) return res.status(400).json({ error: 'ID de libro no válido' });
+
+  if (!req.file) return res.status(400).json({ error: 'No se recibió archivo' });
+
+  try {
+    const urlPortada = `/uploads/${req.file.filename}`;
+
+    const result = await pool.query(
+      `UPDATE libros
+       SET url_portada = $1
+       WHERE id = $2
+       RETURNING id, url_portada`,
+      [urlPortada, libroId]
+    );
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error guardando portada' });
   }
 });
 

@@ -23,39 +23,133 @@ async function buscarLibroEnBD(isbn) {
   );
   return resultado.rows[0] || null;
 }
+function normalizarAutores(arr) {
+  if (!arr) return null;
+  if (Array.isArray(arr)) return arr.filter(Boolean).join(', ') || null;
+  return String(arr);
+}
+
+function normalizarEditorial(arr) {
+  if (!arr) return null;
+  if (Array.isArray(arr)) return arr.filter(Boolean).join(', ') || null;
+  return String(arr);
+}
 
 /**
  * Obtiene datos de un libro desde Open Library usando el ISBN.
  * Usa el endpoint de búsqueda para obtener título, autores, editorial, etc.
  */
 async function obtenerDatosLibroDeApi(isbn) {
-  const url = `https://openlibrary.org/search.json?isbn=${isbn}`;
+  // 1) GOOGLE BOOKS (gratis con cuota)
+  try {
+    const urlGoogle = `https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(isbn)}`;
+    const rG = await fetch(urlGoogle);
 
-  const respuesta = await fetch(url);
-  if (!respuesta.ok) {
-    console.warn(`Open Library devolvió estado ${respuesta.status} para ISBN ${isbn}`);
-    return null;
+    if (rG.ok) {
+      const g = await rG.json();
+      if (g.items && g.items.length > 0) {
+        // elegimos el primero; normalmente es el mejor match por ISBN
+        const v = g.items[0].volumeInfo || {};
+
+        const titulo = v.title || `Título desconocido (${isbn})`;
+        const autores = v.authors ? v.authors.join(', ') : null;
+        const editorial = v.publisher || null;
+        const fecha_publicacion = v.publishedDate ? String(v.publishedDate).slice(0, 4) : null;
+        const numero_paginas = v.pageCount || null;
+        const descripcion = v.description || null;
+
+        // imagen (si existe)
+        const img =
+          (v.imageLinks && (v.imageLinks.thumbnail || v.imageLinks.smallThumbnail)) || null;
+
+        return {
+          isbn,
+          titulo,
+          autores,
+          editorial,
+          fecha_publicacion,
+          numero_paginas,
+          descripcion,
+          url_portada: img, // a veces viene en http/https
+        };
+      }
+    }
+  } catch (e) {
+    console.warn('Google Books falló:', e?.message || e);
   }
 
-  const data = await respuesta.json();
-  if (!data.docs || data.docs.length === 0) {
-    return null;
+  // 2) OPEN LIBRARY BOOKS API (por ISBN)
+  try {
+    const urlOLBooks = `https://openlibrary.org/api/books?bibkeys=ISBN:${encodeURIComponent(isbn)}&format=json&jscmd=data`;
+    const rB = await fetch(urlOLBooks);
+
+    if (rB.ok) {
+      const b = await rB.json();
+      const key = `ISBN:${isbn}`;
+      const libro = b[key];
+
+      if (libro) {
+        const titulo = libro.title || `Título desconocido (${isbn})`;
+        const autores = libro.authors ? libro.authors.map(a => a.name) : null;
+        const editorial = libro.publishers ? libro.publishers.map(p => p.name) : null;
+
+        // fecha: puede venir en publish_date tipo "2007" o "May 2007"
+        const fecha_publicacion = libro.publish_date
+          ? String(libro.publish_date).match(/\d{4}/)?.[0] || null
+          : null;
+
+        const numero_paginas = libro.number_of_pages || null;
+
+        // cover: large/medium/small
+        const url_portada =
+          (libro.cover && (libro.cover.large || libro.cover.medium || libro.cover.small)) ||
+          `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
+
+        return {
+          isbn,
+          titulo,
+          autores: normalizarAutores(autores),
+          editorial: normalizarEditorial(editorial),
+          fecha_publicacion,
+          numero_paginas,
+          descripcion: null,
+          url_portada,
+        };
+      }
+    }
+  } catch (e) {
+    console.warn('OpenLibrary Books API falló:', e?.message || e);
   }
 
-  const libro = data.docs[0];
+  // 3) OPEN LIBRARY SEARCH (tu implementación actual, como fallback final)
+  try {
+    const url = `https://openlibrary.org/search.json?isbn=${encodeURIComponent(isbn)}`;
+    const respuesta = await fetch(url);
 
-  return {
-    isbn,
-    titulo: libro.title || `Título desconocido (${isbn})`,
-    autores: libro.author_name ? libro.author_name.join(', ') : null,
-    editorial: libro.publisher ? libro.publisher.join(', ') : null,
-    fecha_publicacion: libro.first_publish_year
-      ? String(libro.first_publish_year)
-      : null,
-    numero_paginas: libro.number_of_pages_median || null,
-    descripcion: null, // se podría enriquecer con otra llamada si quisieras
-    url_portada: `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`
-  };
+    if (!respuesta.ok) {
+      console.warn(`Open Library search devolvió estado ${respuesta.status} para ISBN ${isbn}`);
+      return null;
+    }
+
+    const data = await respuesta.json();
+    if (!data.docs || data.docs.length === 0) return null;
+
+    const libro = data.docs[0];
+
+    return {
+      isbn,
+      titulo: libro.title || `Título desconocido (${isbn})`,
+      autores: libro.author_name ? libro.author_name.join(', ') : null,
+      editorial: libro.publisher ? libro.publisher.join(', ') : null,
+      fecha_publicacion: libro.first_publish_year ? String(libro.first_publish_year) : null,
+      numero_paginas: libro.number_of_pages_median || null,
+      descripcion: null,
+      url_portada: `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`,
+    };
+  } catch (e) {
+    console.warn('OpenLibrary search falló:', e?.message || e);
+    return null;
+  }
 }
 
 /**
@@ -94,20 +188,6 @@ async function crearLibroEnBD(datosLibro) {
 
   return resultado.rows[0];
 }
-
-/**
- * Endpoint: crear un ejemplar a partir de un ISBN
- * POST /api/ejemplares
- * Body:
- *  {
- *    "usuario_id": 1,
- *    "isbn": "9788497592208",
- *    "estado": "propio",
- *    "ubicacion": "Salón - Estantería 3",
- *    "notas": "Comprado en 2025"
- *  }
- */
-// src/rutas/ejemplares.js (solo el POST)
 
 // Crear un ejemplar a partir de un ISBN
 router.post('/', async (req, res) => {
@@ -182,21 +262,24 @@ router.get('/', async (req, res) => {
 
   try {
     let consulta = `
-      SELECT 
-        e.id AS ejemplar_id,
-        e.usuario_id,
-        u.nombre_usuario,
-        e.libro_id,
-        l.titulo,
-        l.isbn,
-        e.estado,
-        e.ubicacion,
-        e.notas,
-        e.creado_en
-      FROM ejemplares e
-      JOIN usuarios u ON u.id = e.usuario_id
-      JOIN libros l ON l.id = e.libro_id
-    `;
+  SELECT 
+    e.id AS ejemplar_id,
+    e.usuario_id,
+    u.nombre_usuario,
+    e.libro_id,
+    l.titulo,
+    l.autores,
+    l.isbn,
+    l.url_portada,
+    e.estado,
+    e.ubicacion,
+    e.notas,
+    e.creado_en
+  FROM ejemplares e
+  JOIN usuarios u ON u.id = e.usuario_id
+  JOIN libros l ON l.id = e.libro_id
+`;
+
     const parametros = [];
 
     if (usuario_id) {

@@ -77,17 +77,7 @@
 
         <!-- Alta de ejemplares -->
         <div class="card">
-          <h2>Añadir ejemplar por ISBN</h2>
-
-          <!-- El select de usuario sigue existiendo, pero lo rellenará JS con el usuario actual -->
-          <div class="form-group">
-            <label for="usuario">Usuario actual</label>
-            <select id="usuario" disabled></select>
-            <p class="helper-text">
-              Se selecciona automáticamente al iniciar sesión.
-            </p>
-          </div>
-
+          <h2>Añadir ejemplar por ISBN</h2>          
           <div class="form-group">
             <label for="isbn">ISBN</label>
             <div class="input-with-button">
@@ -142,13 +132,10 @@
           <button id="btn-crear" class="btn btn-primary btn-full">
             Crear ejemplar
           </button>
-
-          <p id="mensaje" class="status-message"></p>
-          <pre id="resultado" class="result-block"></pre>
         </div>
       </section>
 
-      <!-- COLUMNA DERECHA: EJEMPLARES + RESÚMENES (LECTURAS / PRÉSTAMOS) -->
+      <!-- COLUMNA DERECHA: EJEMPLARES + LECTURAS + PRÉSTAMOS -->
       <section class="column column-right">
         <!-- Ejemplares -->
         <div class="card">
@@ -186,10 +173,10 @@
           </div>
         </div>
 
-        <!-- Resumen de lecturas y préstamos abiertos en la MISMA FILA -->
+        <!-- Resumen de lecturas y préstamos abiertos -->
         <div class="grid-two">
           <!-- Lecturas en curso -->
-          <div class="card card-inside-modal card-summary">
+          <div class="card card-inside-modal">
             <div class="card-header-inline">
               <h2>Lecturas en curso</h2>
             </div>
@@ -216,7 +203,7 @@
           </div>
 
           <!-- Préstamos activos -->
-          <div class="card card-inside-modal card-summary">
+          <div class="card card-inside-modal">
             <div class="card-header-inline">
               <h2>Préstamos activos</h2>
             </div>
@@ -296,7 +283,7 @@
 
       <!-- Cuerpo de la ficha -->
       <div class="modal-body">
-        <!-- Datos del libro -->
+        <!-- Datos del libro (reutilizamos los mismos IDs que antes) -->
         <div class="form-subsection">
           <h3>Datos del libro</h3>
           <div class="form-grid">
