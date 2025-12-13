@@ -1246,4 +1246,164 @@ textarea:focus {
       padding-bottom: 0.65rem;
     }
   }
+/* =========================
+   MOBILE PRO (<= 820px)
+   Tabla ejemplares: Portada + Título + Acciones
+   ========================= */
+   @media (max-width: 820px) {
+    /* Header de la card Ejemplares: que no se desborde el buscador */
+    .card-header-inline {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: nowrap;
+      min-width: 0;
+    }
   
+    .card-header-inline h2 {
+      flex: 0 0 auto;
+      font-size: 1rem;
+      margin: 0;
+    }
+  
+    .table-search {
+      flex: 1 1 auto;
+      min-width: 0; /* CLAVE: permite encoger dentro del flex */
+    }
+  
+    #buscador-ejemplares {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      font-size: 14px;
+      padding: 0.45rem 0.6rem;
+    }
+  
+    /* Tabla: solo Portada (1) + Título (2) + Acciones (8) */
+    #tabla-ejemplares { min-width: 0; }
+    #tabla-ejemplares thead th:nth-child(3),
+    #tabla-ejemplares thead th:nth-child(4),
+    #tabla-ejemplares thead th:nth-child(5),
+    #tabla-ejemplares thead th:nth-child(6),
+    #tabla-ejemplares thead th:nth-child(7),
+    #tabla-ejemplares tbody td:nth-child(3),
+    #tabla-ejemplares tbody td:nth-child(4),
+    #tabla-ejemplares tbody td:nth-child(5),
+    #tabla-ejemplares tbody td:nth-child(6),
+    #tabla-ejemplares tbody td:nth-child(7) {
+      display: none;
+    }
+  
+    /* Reducimos ancho mínimo para que no obligue a scroll horizontal */
+    .table-wrapper #tabla-ejemplares {
+      min-width: 0 !important;
+      width: 100%;
+    }
+  
+    /* Portada mini */
+    .portada-mini-img,
+    .portada-placeholder-mini {
+      width: 30px;
+      height: 44px;
+      border-radius: 8px;
+    }
+  
+    /* Título: dos líneas y elipsis */
+    #tabla-ejemplares tbody td:nth-child(2) {
+      max-width: 52vw;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  
+    /* Acciones: que no hagan wrap raro */
+    .celda-acciones {
+      white-space: nowrap;
+    }
+  
+    /* Iconos un pelín más grandes para dedo */
+    .icon-circle {
+      width: 30px;
+      height: 30px;
+      font-size: 0.85rem;
+    }
+  }
+  
+  /* =========================
+     MODAL MOBILE PRO (<= 820px)
+     Portada izquierda + info derecha, sin cortar portada
+     ========================= */
+  @media (max-width: 820px) {
+    .modal-dialog {
+      width: 100% !important;
+      height: 100vh !important;
+      max-height: 100vh !important;
+      border-radius: 0 !important;
+      padding: 0.7rem 0.7rem 0.85rem !important;
+    }
+  
+    /* Cabecera en 2 columnas: portada / info */
+    .modal-header {
+      display: grid !important;
+      grid-template-columns: 120px minmax(0, 1fr) !important;
+      align-items: start !important;   /* SUBE todo arriba */
+      gap: 0.7rem !important;
+      margin-bottom: 0.6rem !important;
+    }
+  
+    /* Caja de portada alineada arriba */
+    .modal-cover {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      justify-content: flex-start !important;
+      gap: 0.45rem !important;
+      padding-top: 0.15rem; /* evita “sensación de baja” */
+    }
+  
+    /* Portada: que NO se corte */
+    .modal-cover-img {
+      width: 120px !important;
+      height: 170px !important;
+      border-radius: 12px !important;
+      object-fit: contain !important;    /* CLAVE: no recorta */
+      background: rgba(15, 23, 42, 0.55); /* bonito si sobra hueco */
+      display: block;
+    }
+  
+    /* Botón subir portada: mismo ancho que la portada */
+    .modal-cover-upload {
+      width: 120px !important;
+      justify-content: center !important;
+    }
+  
+    .modal-header-info {
+      min-width: 0;
+    }
+  
+    /* Título arriba y compactito */
+    #ficha-titulo {
+      margin: 0;
+      font-size: 1.05rem;
+      line-height: 1.2;
+    }
+  
+    /* Autores / ISBN / incorporado: compactos y sin ocupar demasiado */
+    #ficha-autores,
+    .modal-header-info .helper-text {
+      margin: 0.15rem 0 0;
+      font-size: 0.82rem;
+      opacity: 0.92;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  
+    /* Cuerpo del modal: scroll suave (inevitable en móvil) */
+    .modal-body {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-right: 0.15rem;
+    }
+  }
+    
