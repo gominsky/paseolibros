@@ -25,7 +25,7 @@ const app = express();
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
-
+app.use('/uploads', express.static(path.join(__dirname, '..', 'public', 'uploads')));
 // Servir frontend estático desde /public (si lo estás usando así)
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
@@ -42,7 +42,7 @@ app.use((req, res, next) => {
     try {
       const payload = jwt.verify(
         token,
-        process.env.JWT_SECRETO || 'cambia_esto_en_.env'
+        process.env.JWT_SECRETO || 'paseolibros_JWT_$9fK2!xQmA7zR'
       );
       req.usuario = { id: payload.id, nombre_usuario: payload.nombre_usuario };
     } catch (e) {

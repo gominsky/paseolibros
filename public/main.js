@@ -482,8 +482,8 @@ async function cargarEjemplares(usuarioId) {
   <td>
     ${
       e.url_portada
-        ? `<img src="${API_BASE}${e.url_portada}?t=${Date.now()}" alt="Portada" class="portada-mini-img" />`
-        : `<div class="portada-placeholder-mini">📚</div>`
+  ? `<img src="${urlPortadaAbsoluta(e.url_portada)}?t=${Date.now()}" alt="Portada" class="portada-mini-img" />`
+  : `<div class="portada-placeholder-mini">📚</div>`
     }
   </td>
   <td>${e.titulo || ''}</td>
@@ -1229,7 +1229,7 @@ async function cargarFormEdicion() {
     // Cabecera de la ficha (modal)
     const img = document.getElementById('ficha-portada-img');
     if (img) {
-      img.src = libro.url_portada || '';
+      img.src = libro.url_portada ? `${urlPortadaAbsoluta(libro.url_portada)}?t=${Date.now()}` : '';
     }
 
     const tituloSpan = document.getElementById('ficha-titulo');
