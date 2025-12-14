@@ -575,6 +575,7 @@ async function crearEjemplar() {
 
     await cargarEjemplares(usuarioActual.id);
     await refrescarHome();
+    document.body.classList.remove('alta-visible');
   } catch (err) {
     console.error(err);
     setUserStatusErr('Error de red al crear el ejemplar.');
@@ -1531,6 +1532,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  document.getElementById('btn-toggle-alta')?.addEventListener('click', () => {
+    document.body.classList.toggle('alta-visible');
+  });
+  
   // Subida de portada desde fichero
 const inputPortada = document.getElementById('ficha-portada-file');
 if (inputPortada) {
