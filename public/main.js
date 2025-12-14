@@ -576,6 +576,8 @@ async function crearEjemplar() {
     await cargarEjemplares(usuarioActual.id);
     await refrescarHome();
     document.body.classList.remove('alta-visible');
+    const fab = document.getElementById('btn-toggle-alta');
+    if (fab) fab.textContent = '+';
   } catch (err) {
     console.error(err);
     setUserStatusErr('Error de red al crear el ejemplar.');
@@ -1532,10 +1534,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  document.getElementById('btn-toggle-alta')?.addEventListener('click', () => {
-    document.body.classList.toggle('alta-visible');
+const fab = document.getElementById('btn-toggle-alta');
+fab?.addEventListener('click', async () => {
+  const abierto = document.body.classList.toggle('alta-visible');
+  fab.textContent = abierto ? '−' : '+';
+
+  if (abierto) {
+    // 1) foco directo al ISBN
+    const isbnInput = document.getElementById('isbn');
+    if (isbnInput) {
+      // pequeño delay para asegurar reflow del layout móvil
+      setTimeout(() => isbnInput.focus(), 50);
+    }
+
+    // 2) (opcional) abrir escáner automáticamente
+    // Si prefieres que NO se abra solo, comenta estas 2 líneas:
+    setTimeout(() => {
+      try { iniciarEscaneo(); } catch (e) { /* no pasa nada */ }
+    }, 150);
+  } else {
+    // al cerrar, si estaba escaneando, cortamos cámara
+    try { detenerEscaneo(); } catch (e) {}
+  }
+});
+const desc = document.getElementById('edit-libro-descripcion');
+if (desc) {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'btn btn-ghost btn-sm';
+  btn.textContent = 'Ver más';
+
+  // lo insertamos justo después del textarea
+  desc.insertAdjacentElement('afterend', btn);
+
+  btn.addEventListener('click', () => {
+    const activo = document.body.classList.toggle('descripcion-expandida');
+    btn.textContent = activo ? 'Ver menos' : 'Ver más';
+
+    // si expandimos, aseguramos que se vea
+    if (activo) desc.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
-  
+}
+
   // Subida de portada desde fichero
 const inputPortada = document.getElementById('ficha-portada-file');
 if (inputPortada) {
