@@ -108,6 +108,38 @@ function actualizarUIAutenticacion() {
   }
 }
 
+let ejemplaresCache = [];
+let sortEjemplares = { key: 'creado_en', dir: 'desc' }; // por defecto: más nuevos primero
+
+function toSortable(v) {
+  if (v === null || v === undefined) return '';
+  return String(v).toLowerCase();
+}
+
+function compare(a, b, key, dir) {
+  const va = a?.[key];
+  const vb = b?.[key];
+
+  // fechas
+  if (key.includes('fecha') || key.includes('creado') || key.includes('inicio') || key.includes('fin')) {
+    const da = va ? new Date(va).getTime() : 0;
+    const db = vb ? new Date(vb).getTime() : 0;
+    return dir === 'asc' ? da - db : db - da;
+  }
+
+  // números
+  const na = Number(va);
+  const nb = Number(vb);
+  const bothNumeric = !Number.isNaN(na) && !Number.isNaN(nb) && va !== '' && vb !== '';
+  if (bothNumeric) return dir === 'asc' ? na - nb : nb - na;
+
+  // texto
+  const sa = toSortable(va);
+  const sb = toSortable(vb);
+  if (sa < sb) return dir === 'asc' ? -1 : 1;
+  if (sa > sb) return dir === 'asc' ? 1 : -1;
+  return 0;
+}
 
 // ---------- Login / Logout ----------
 
@@ -530,6 +562,37 @@ async function cargarEjemplares(usuarioId) {
     console.error(err);
     if (info) info.textContent = 'Error al cargar los ejemplares.';
   }
+}
+function renderEjemplares() {
+  const tbody = document.querySelector('#tabla-ejemplares tbody');
+  if (!tbody) return;
+
+  const buscador = document.getElementById('buscador-ejemplares');
+  const q = (buscador?.value || '').toLowerCase().trim();
+
+  // ordenar
+  const data = [...ejemplaresCache].sort((a, b) =>
+    compare(a, b, sortEjemplares.key, sortEjemplares.dir)
+  );
+
+  // filtrar (mismo criterio que ya usabas: texto visible + extras)
+  const filtrados = !q
+    ? data
+    : data.filter((e) => {
+        const blob = [
+          e.titulo, e.autores, e.isbn, e.estado, e.ubicacion, e.notas,
+          e.libro_id, e.ejemplar_id, e.creado_en
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return blob.includes(q);
+      });
+
+  tbody.innerHTML = '';
+
+  ejemplaresCache = ejemplares; // guarda en memoria
+  renderEjemplares();
 }
 
 // ---------- Crear ejemplar ----------
@@ -1428,6 +1491,67 @@ async function mostrarFicha(libroId, ejemplarId) {
 // ---------- Inicialización ----------
 
 document.addEventListener('DOMContentLoaded', () => {
+  function initOrdenacionEjemplares() {
+    const table = document.getElementById('tabla-ejemplares');
+    if (!table) return;
+  
+    // Mapeo por índice de columna (según tu index.html) :contentReference[oaicite:1]{index=1}
+    const map = {
+      0: null,            // Portada (no)
+      1: 'titulo',
+      2: 'autores',
+      3: 'isbn',
+      4: 'estado',
+      5: 'ubicacion',
+      6: 'notas',
+      7: null,            // Acciones (no)
+    };
+  
+    const ths = table.querySelectorAll('thead th');
+    ths.forEach((th, i) => {
+      const key = map[i];
+      if (!key) return;
+  
+      const label = th.textContent.trim();
+      th.textContent = '';
+  
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'th-sort';
+      btn.dataset.key = key;
+      btn.innerHTML = `<span>${label}</span><span class="th-sort-icon"></span>`;
+  
+      btn.addEventListener('click', () => {
+        if (sortEjemplares.key === key) {
+          sortEjemplares.dir = sortEjemplares.dir === 'asc' ? 'desc' : 'asc';
+        } else {
+          sortEjemplares.key = key;
+          sortEjemplares.dir = 'asc';
+        }
+        actualizarIconosOrden(table);
+        renderEjemplares();
+      });
+  
+      th.appendChild(btn);
+    });
+  
+    actualizarIconosOrden(table);
+  }
+  
+  function actualizarIconosOrden(table) {
+    table.querySelectorAll('.th-sort').forEach((btn) => {
+      const icon = btn.querySelector('.th-sort-icon');
+      const key = btn.dataset.key;
+      if (!icon) return;
+  
+      if (key === sortEjemplares.key) {
+        icon.textContent = sortEjemplares.dir === 'asc' ? '▲' : '▼';
+      } else {
+        icon.textContent = ''; // o '↕' si quieres
+      }
+    });
+  }
+  
   // restaurar sesión si hay algo guardado
   try {
     const savedToken = localStorage.getItem(TOKEN_KEY);
@@ -1557,24 +1681,6 @@ fab?.addEventListener('click', async () => {
     try { detenerEscaneo(); } catch (e) {}
   }
 });
-const desc = document.getElementById('edit-libro-descripcion');
-if (desc) {
-  const btn = document.createElement('button');
-  btn.type = 'button';
-  btn.className = 'btn btn-ghost btn-sm';
-  btn.textContent = 'Ver más';
-
-  // lo insertamos justo después del textarea
-  desc.insertAdjacentElement('afterend', btn);
-
-  btn.addEventListener('click', () => {
-    const activo = document.body.classList.toggle('descripcion-expandida');
-    btn.textContent = activo ? 'Ver menos' : 'Ver más';
-
-    // si expandimos, aseguramos que se vea
-    if (activo) desc.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  });
-}
 
   // Subida de portada desde fichero
 const inputPortada = document.getElementById('ficha-portada-file');

@@ -1597,4 +1597,29 @@ textarea:focus {
     overflow: auto !important;
   }
 }
+@media (max-width: 820px) {
+  #edit-libro-descripcion {
+    min-height: 160px;   /* antes era más pequeño */
+    max-height: none;    /* sin límites */
+  }
+}
+.th-sort{
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  background: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+  cursor: pointer;
+}
+
+.th-sort-icon{
+  opacity: 0.8;
+  font-size: 0.75rem;
+}
+
       

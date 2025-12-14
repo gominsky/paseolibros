@@ -60,18 +60,20 @@
           </div>
 
           <div id="zona-autenticado" style="display:none;">
-            <div class="user-pill">
+            <div class="user-pill user-pill-row">
               <span class="user-avatar">👤</span>
-              <div>
-                <p class="user-label">Sesión iniciada como</p>
+            
+              <div class="user-pill-text">
+                <p class="user-label">Sesión</p>
                 <p class="user-name">
                   <strong id="nombre-usuario-actual"></strong>
                 </p>
               </div>
-            </div>
-            <button id="btn-logout" class="btn btn-ghost btn-full">
-              Cerrar sesión
-            </button>        
+            
+              <button id="btn-logout" class="icon-btn" title="Cerrar sesión" type="button">
+                <span class="icon-circle icon-delete">⎋</span>
+              </button>
+            </div>                  
           </div>
         </div>
 
