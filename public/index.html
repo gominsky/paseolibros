@@ -56,6 +56,43 @@
             <button id="btn-login" class="btn btn-primary btn-full">
               Iniciar sesión
             </button>
+            <hr class="divider" />
+
+<div class="grid-two">
+  <div class="form-group">
+    <label for="reg-usuario">Nuevo usuario</label>
+    <input id="reg-usuario" placeholder="usuario" />
+  </div>
+  <div class="form-group">
+    <label for="reg-correo">Correo</label>
+    <input id="reg-correo" placeholder="correo@ejemplo.com" />
+  </div>
+</div>
+
+<div class="form-group">
+  <label for="reg-pass">Contraseña</label>
+  <input id="reg-pass" type="password" placeholder="••••••••" />
+</div>
+
+<button id="btn-register" class="btn btn-secondary btn-full">Crear cuenta</button>
+
+<div class="form-group" style="margin-top:.6rem;">
+  <label for="forgot-correo">¿Olvidaste tu contraseña?</label>
+  <div class="input-with-button">
+    <input id="forgot-correo" placeholder="correo@ejemplo.com" />
+    <button id="btn-forgot" class="btn btn-ghost btn-sm" type="button">Enviar</button>
+  </div>
+</div>
+
+<!-- Reset inline (se muestra solo si vienes con ?reset=TOKEN) -->
+<div id="reset-box" style="display:none;">
+  <div class="form-group">
+    <label for="reset-pass">Nueva contraseña</label>
+    <input id="reset-pass" type="password" placeholder="••••••••" />
+  </div>
+  <button id="btn-reset" class="btn btn-primary btn-full" type="button">Guardar nueva contraseña</button>
+</div>
+
             <p id="login-mensaje" class="helper-text"></p>
           </div>
 

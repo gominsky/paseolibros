@@ -1,7 +1,5 @@
-const API_BASE =
-  window.location.hostname === 'localhost'
-    ? 'http://localhost:3011'
-    : '';
+const isDev = ['localhost', '127.0.0.1'].includes(window.location.hostname) || window.location.protocol === 'file:';
+const API_BASE = isDev ? 'http://localhost:3011' : '';
 
 let codeReader = null;
 let currentStream = null;
@@ -73,6 +71,25 @@ function exportarEjemplaresCSV() {
 
 function setUserStatusOk(msg) { setUserStatus(msg ? `✅ ${msg}` : ''); }
 function setUserStatusErr(msg) { setUserStatus(msg ? `❌ ${msg}` : ''); }
+function normalizarTitulo(t) {
+  return (t || '')
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, ' ')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, ''); // quita acentos
+}
+
+function titulosDuplicadosEnCache(titulo, libroIdActual = null) {
+  const nt = normalizarTitulo(titulo);
+  if (!nt) return [];
+
+  return (ejemplaresCache || []).filter(e => {
+    if (!e?.titulo) return false;
+    if (libroIdActual && Number(e.libro_id) === Number(libroIdActual)) return false; // no compararse consigo mismo
+    return normalizarTitulo(e.titulo) === nt;
+  });
+}
 
 function setModalMsg(msg) {
   const el = document.getElementById('edit-mensaje');
@@ -1213,7 +1230,11 @@ async function guardarLibroEditado() {
   const descripcion = document.getElementById('edit-libro-descripcion').value.trim();
 
   const numero_paginas = paginasStr ? Number(paginasStr) : null;
-
+  const dups = titulosDuplicadosEnCache(titulo, libroSeleccionadoId);
+if (dups.length > 0) {
+  const ok = confirm(`Ojo: ya existe ese título en tu biblioteca (${dups.length} coincidencia/s). ¿Quieres guardar igualmente?`);
+  if (!ok) return;
+}
   try {
     const res = await fetch(`${API_BASE}/api/libros/${libroSeleccionadoId}`, {
       method: 'PUT',
@@ -1375,6 +1396,18 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-login')?.addEventListener('click', hacerLogin);
   document.getElementById('btn-logout')?.addEventListener('click', hacerLogout);
 
+  const tituloInput = document.getElementById('edit-libro-titulo');
+  tituloInput?.addEventListener('input', () => {
+    const dups = titulosDuplicadosEnCache(tituloInput.value, libroSeleccionadoId);
+
+    if (dups.length > 0) {
+      setModalMsg(`⚠️ Ojo: ya tienes ${dups.length} libro(s) con ese título en tu biblioteca.`);
+    } else {
+      // no borres otros mensajes importantes si los usas; si quieres, comenta esta línea
+      setModalMsg('');
+    }
+  });
+
   // Modal cerrar
   document.getElementById('modal-ficha-cerrar')?.addEventListener('click', cerrarModalFicha);
   document.getElementById('modal-ficha-backdrop')?.addEventListener('click', cerrarModalFicha);
@@ -1505,5 +1538,83 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!btn) return;
     marcarPrestamoDevuelto(btn.dataset.prestamoId, btn.dataset.libroId);
   });
+  async function apiPost(path, body) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  return { ok: res.ok, data };
+}
+
+function getQueryParam(name) {
+  return new URLSearchParams(window.location.search).get(name);
+}
+// --- CONFIG API BASE (opcional pero recomendado) ---
+const isDev =
+  window.location.protocol === 'file:' ||
+  ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+const API_BASE = isDev ? 'http://localhost:3011' : '';
+
+async function apiPost(path, body) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  // por si el backend no devuelve JSON
+  const data = await res.json().catch(() => ({}));
+  return { ok: res.ok, status: res.status, data };
+}
+
+// --- REGISTRO ---
+const btnRegister = document.getElementById('btn-register');
+const msg = document.getElementById('login-mensaje');
+
+btnRegister?.addEventListener('click', async (e) => {
+  e.preventDefault();
+
+  const nombre_usuario = document.getElementById('reg-usuario')?.value?.trim() || '';
+  const correo = document.getElementById('reg-correo')?.value?.trim() || '';
+  const contrasena = document.getElementById('reg-pass')?.value || '';
+
+  if (msg) msg.textContent = '';
+
+  if (!nombre_usuario || !correo || !contrasena) {
+    if (msg) msg.textContent = 'Completa usuario, correo y contraseña.';
+    return;
+  }
+
+  // evita doble click
+  btnRegister.disabled = true;
+
+  try {
+    const { ok, data, status } = await apiPost('/api/auth/register', {
+      nombre_usuario,
+      correo,
+      contrasena,
+    });
+
+    if (!ok) {
+      if (msg) msg.textContent = data?.error || `Error al registrar (HTTP ${status}).`;
+      return;
+    }
+
+    if (msg) msg.textContent = 'Cuenta creada ✅ Ya puedes iniciar sesión.';
+    // opcional: limpiar campos
+    document.getElementById('reg-usuario').value = '';
+    document.getElementById('reg-correo').value = '';
+    document.getElementById('reg-pass').value = '';
+  } catch (err) {
+    console.error(err);
+    if (msg) msg.textContent = 'No se pudo conectar con el servidor.';
+  } finally {
+    btnRegister.disabled = false;
+  }
+});
+
 });
 
