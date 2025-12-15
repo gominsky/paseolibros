@@ -143,13 +143,25 @@
         <div class="card">
           <div class="card-header card-header-inline">
             <h2>Ejemplares</h2>
+            <div class="card-header-actions">
+  <button id="btn-exportar-csv" class="icon-btn" type="button" title="Exportar CSV">
+    <span class="icon-circle">⤓</span>
+  </button>
+
+  <label class="icon-btn" title="Importar CSV">
+    <span class="icon-circle">⤒</span>
+    <input type="file" id="input-importar-csv" accept=".csv" hidden />
+  </label>
+</div>
             <div class="table-search">
+              
               <input
                 id="buscador-ejemplares"
                 type="text"
                 placeholder="Buscar por título, autor, ISBN, notas..."
               />
             </div>
+            
           </div>
           <p id="info-ejemplares" class="helper-text">
             Inicia sesión para ver tu biblioteca.

@@ -30,6 +30,46 @@ function setUserStatus(msg) {
   if (!el) return;
   el.textContent = msg || '';
 }
+function exportarEjemplaresCSV() {
+  if (!ejemplaresCache || ejemplaresCache.length === 0) {
+    alert('No hay ejemplares para exportar');
+    return;
+  }
+
+  const columnas = [
+    'titulo',
+    'autores',
+    'isbn',
+    'estado',
+    'ubicacion',
+    'notas',
+    'creado_en'
+  ];
+
+  const escapeCSV = (v) => {
+    if (v === null || v === undefined) return '';
+    const s = String(v).replace(/"/g, '""');
+    return `"${s}"`;
+  };
+
+  const filas = [
+    columnas.join(','), // cabecera
+    ...ejemplaresCache.map(e =>
+      columnas.map(c => escapeCSV(e[c])).join(',')
+    )
+  ];
+
+  const csv = filas.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `paseolibros_ejemplares_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
 
 function setUserStatusOk(msg) { setUserStatus(msg ? `✅ ${msg}` : ''); }
 function setUserStatusErr(msg) { setUserStatus(msg ? `❌ ${msg}` : ''); }
@@ -267,6 +307,64 @@ function actualizarIconosOrden(table) {
       icon.textContent = '';
     }
   });
+}
+async function importarEjemplaresCSV(file) {
+  if (!token || !usuarioActual) {
+    setUserStatusErr('Debes iniciar sesión para importar CSV');
+    return;
+  }
+
+  const texto = await file.text();
+  const lineas = texto.split(/\r?\n/).filter(l => l.trim());
+
+  if (lineas.length < 2) {
+    setUserStatusErr('CSV vacío o inválido');
+    return;
+  }
+
+  const cabeceras = lineas[0].split(',').map(h => h.trim());
+  const idx = (c) => cabeceras.indexOf(c);
+
+  if (idx('isbn') === -1) {
+    setUserStatusErr('El CSV debe tener la columna "isbn"');
+    return;
+  }
+
+  let creados = 0;
+  let errores = 0;
+
+  for (let i = 1; i < lineas.length; i++) {
+    const valores = lineas[i]
+      .match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g)
+      ?.map(v => v.replace(/^"|"$/g, '').replace(/""/g, '"')) || [];
+
+    const isbn = valores[idx('isbn')]?.trim();
+    if (!isbn) {
+      errores++;
+      continue;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/ejemplares`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({
+          isbn,
+          estado: valores[idx('estado')] || 'propio',
+          ubicacion: valores[idx('ubicacion')] || null,
+          notas: valores[idx('notas')] || null,
+        })
+      });
+
+      if (res.ok) creados++;
+      else errores++;
+    } catch {
+      errores++;
+    }
+  }
+
+  setUserStatusOk(`Importación terminada: ${creados} creados, ${errores} errores`);
+  await cargarEjemplares(usuarioActual.id);
 }
 
 // ---------- Tabla ejemplares: render (con ordenación + buscador) ----------
@@ -1280,6 +1378,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // Modal cerrar
   document.getElementById('modal-ficha-cerrar')?.addEventListener('click', cerrarModalFicha);
   document.getElementById('modal-ficha-backdrop')?.addEventListener('click', cerrarModalFicha);
+  //Exportar
+  document
+  .getElementById('btn-exportar-csv')
+  ?.addEventListener('click', exportarEjemplaresCSV);
+  //Importar
+  document
+  .getElementById('input-importar-csv')
+  ?.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await importarEjemplaresCSV(file);
+    e.target.value = '';
+  });
 
   document.addEventListener('keydown', (ev) => {
     if (ev.key === 'Escape') {

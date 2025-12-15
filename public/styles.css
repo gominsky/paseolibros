@@ -1621,5 +1621,36 @@ textarea:focus {
   opacity: 0.8;
   font-size: 0.75rem;
 }
+/* Botones extra compactos */
+.btn.btn-sm{
+  padding: 0.28rem 0.45rem;
+  border-radius: 10px;
+  font-size: 0.75rem;
+}
 
-      
+.btn.btn-ghost.btn-sm,
+.btn.btn-secondary.btn-sm{
+  padding: 0.28rem 0.45rem;
+}
+
+@media (max-width: 820px){
+  .btn.btn-sm{
+    padding: 0.24rem 0.4rem;
+    font-size: 0.72rem;
+  }
+}
+
+ /* CSV icon buttons (mini) */
+.icon-circle.icon-mini{
+  width: 26px;
+  height: 26px;
+  font-size: 0.78rem;
+}
+
+#btn-exportar-csv .icon-circle,
+label[title="Importar CSV"] .icon-circle{
+  width: 26px;
+  height: 26px;
+  font-size: 0.78rem;
+}
+     
