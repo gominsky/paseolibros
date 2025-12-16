@@ -5,26 +5,24 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
 import authRutas from './rutas/auth.js';
 import usuariosRutas from './rutas/usuarios.js';
 import ejemplaresRutas from './rutas/ejemplares.js';
 import librosRutas from './rutas/libros.js';
 import lecturasRutas from './rutas/lecturas.js';
 import prestamosRutas from './rutas/prestamos.js';
+const app = express();
 
 const uploadsDir = path.join(process.cwd(), 'uploads');
 fs.mkdirSync(uploadsDir, { recursive: true });
-
 app.use('/uploads', express.static(uploadsDir));
+
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const app = express();
-
 // Middlewares básicos
 app.use(cors());
 app.use(morgan('dev'));
