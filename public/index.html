@@ -35,54 +35,56 @@
         <!-- Autenticación -->
         <div class="card">
           <h2>Autenticación</h2>
-
           <div id="zona-no-autenticado">
-            <div class="form-grid">
-              <div class="form-group">
-                <label for="login-usuario">Usuario</label>
-                <input id="login-usuario" placeholder="Tu usuario" />
+            <!-- LOGIN -->
+            <div id="login-box">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="login-usuario">Usuario</label>
+                  <input id="login-usuario" placeholder="Tu usuario" />
+                </div>
+          
+                <div class="form-group">
+                  <label for="login-contrasena">Contraseña</label>
+                  <input id="login-contrasena" type="password" placeholder="••••••••" />
+                </div>
               </div>
-
-              <div class="form-group">
-                <label for="login-contrasena">Contraseña</label>
-                <input
-                  id="login-contrasena"
-                  type="password"
-                  placeholder="••••••••"
-                />
+          
+              <button id="btn-login" class="btn btn-primary btn-full">Iniciar sesión</button>
+          
+              <div style="margin-top:.6rem; display:flex; justify-content:space-between; gap:.75rem; flex-wrap:wrap;">
+                <a href="#" id="link-show-register">Crear cuenta</a>
+                <a href="#" id="link-forgot">¿Olvidaste tu contraseña?</a>
               </div>
             </div>
-
-            <button id="btn-login" class="btn btn-primary btn-full">
-              Iniciar sesión
-            </button>
-            <hr class="divider" />
-
-<div class="grid-two">
-  <div class="form-group">
-    <label for="reg-usuario">Nuevo usuario</label>
-    <input id="reg-usuario" placeholder="usuario" />
-  </div>
-  <div class="form-group">
-    <label for="reg-correo">Correo</label>
-    <input id="reg-correo" placeholder="correo@ejemplo.com" />
-  </div>
-</div>
-
-<div class="form-group">
-  <label for="reg-pass">Contraseña</label>
-  <input id="reg-pass" type="password" placeholder="••••••••" />
-</div>
-
-<button id="btn-register" class="btn btn-secondary btn-full">Crear cuenta</button>
-
-<div class="form-group" style="margin-top:.6rem;">
-  <label for="forgot-correo">¿Olvidaste tu contraseña?</label>
-  <div class="input-with-button">
-    <input id="forgot-correo" placeholder="correo@ejemplo.com" />
-    <button id="btn-forgot" class="btn btn-ghost btn-sm" type="button">Enviar</button>
-  </div>
-</div>
+          
+            <!-- REGISTRO (oculto al inicio) -->
+            <div id="register-box" style="display:none;">
+              <div class="grid-two">
+                <div class="form-group">
+                  <label for="reg-usuario">Nuevo usuario</label>
+                  <input id="reg-usuario" placeholder="usuario" />
+                </div>
+                <div class="form-group">
+                  <label for="reg-correo">Correo</label>
+                  <input id="reg-correo" placeholder="correo@ejemplo.com" />
+                </div>
+              </div>
+          
+              <div class="form-group">
+                <label for="reg-pass">Contraseña</label>
+                <input id="reg-pass" type="password" placeholder="••••••••" />
+              </div>
+          
+              <button id="btn-register" class="btn btn-secondary btn-full">Crear cuenta</button>
+          
+              <div style="margin-top:.6rem;">
+                <a href="#" id="link-show-login">Volver a iniciar sesión</a>
+              </div>
+            </div>
+          
+            <p id="login-mensaje" class="helper-text"></p>
+          </div>
 
 <!-- Reset inline (se muestra solo si vienes con ?reset=TOKEN) -->
 <div id="reset-box" style="display:none;">

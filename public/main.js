@@ -1556,6 +1556,43 @@ document.addEventListener('DOMContentLoaded', () => {
   const data = await res.json().catch(() => ({}));
   return { ok: res.ok, data };
 }
+function mostrarRegistro() {
+  const loginBox = document.getElementById('login-box');
+  const registerBox = document.getElementById('register-box');
+  const msg = document.getElementById('login-mensaje');
+  if (msg) msg.textContent = '';
+
+  if (loginBox) loginBox.style.display = 'none';
+  if (registerBox) registerBox.style.display = 'block';
+
+  setUserStatus?.(''); // si existe en tu código
+}
+
+function mostrarLogin() {
+  const loginBox = document.getElementById('login-box');
+  const registerBox = document.getElementById('register-box');
+  const msg = document.getElementById('login-mensaje');
+  if (msg) msg.textContent = '';
+
+  if (registerBox) registerBox.style.display = 'none';
+  if (loginBox) loginBox.style.display = 'block';
+
+  setUserStatus?.('');
+}
+document.getElementById('link-show-register')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  mostrarRegistro();
+});
+
+document.getElementById('link-show-login')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  mostrarLogin();
+});
+document.getElementById('link-forgot')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  // “Zona en obras”
+  alert('🔧 Recuperación de contraseña: en obras (pendiente configurar SMTP).');
+});
 
 function getQueryParam(name) {
   return new URLSearchParams(window.location.search).get(name);
