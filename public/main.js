@@ -1325,12 +1325,21 @@ async function subirPortadaArchivo(file) {
       body: formData,
     });
 
-    const data = await res.json();
-    if (!res.ok) {
-      setModalMsg(data.error || 'Error subiendo la portada.');
-      return;
-    }
+    const contentType = res.headers.get('content-type') || '';
+      let data = null;
+      let raw = '';
 
+      if (contentType.includes('application/json')) {
+        data = await res.json().catch(() => null);
+      } else {
+        raw = await res.text().catch(() => '');
+      }
+
+      if (!res.ok) {
+        const msg = (data && data.error) ? data.error : `Error ${res.status}: ${raw.slice(0, 120)}`;
+        setModalMsg(msg);
+        return;
+      }
     setModalMsg('Portada actualizada ✅');
 
     const img = document.getElementById('ficha-portada-img');

@@ -6,13 +6,16 @@ import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
+import fs from 'fs';
 import authRutas from './rutas/auth.js';
 import usuariosRutas from './rutas/usuarios.js';
 import ejemplaresRutas from './rutas/ejemplares.js';
 import librosRutas from './rutas/libros.js';
 import lecturasRutas from './rutas/lecturas.js';
 import prestamosRutas from './rutas/prestamos.js';
+
+const uploadsDir = path.join(process.cwd(), 'uploads');
+fs.mkdirSync(uploadsDir, { recursive: true });
 
 dotenv.config();
 
