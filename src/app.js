@@ -14,10 +14,10 @@ import librosRutas from './rutas/libros.js';
 import lecturasRutas from './rutas/lecturas.js';
 import prestamosRutas from './rutas/prestamos.js';
 
-const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+const uploadsDir = path.join(process.cwd(), 'uploads');
 fs.mkdirSync(uploadsDir, { recursive: true });
-app.use('/uploads', express.static(uploadsDir));
 
+app.use('/uploads', express.static(uploadsDir));
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);

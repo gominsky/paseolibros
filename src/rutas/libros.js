@@ -116,8 +116,10 @@ router.put('/:id', async (req, res) => {
     res.status(500).json({ error: 'Error actualizando libro' });
   }
 });
+const uploadsDir = path.join(process.cwd(), 'uploads');
+
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'public/uploads'),
+  destination: (req, file, cb) => cb(null, uploadsDir),
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname || '').toLowerCase() || '.jpg';
     cb(null, `libro_${req.params.id}_${Date.now()}${ext}`);
