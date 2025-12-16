@@ -14,13 +14,9 @@ import librosRutas from './rutas/libros.js';
 import lecturasRutas from './rutas/lecturas.js';
 import prestamosRutas from './rutas/prestamos.js';
 
-const uploadsDir = path.join(process.cwd(), 'uploads');
+const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
 fs.mkdirSync(uploadsDir, { recursive: true });
-
-console.log('📁 uploadsDir =', uploadsDir);
-console.log('✅ uploads exists =', fs.existsSync(uploadsDir));
-console.log('🔎 uploads content =', fs.readdirSync(uploadsDir));
-
+app.use('/uploads', express.static(uploadsDir));
 
 dotenv.config();
 
@@ -33,7 +29,7 @@ const app = express();
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, '..', 'public', 'uploads')));
+
 // Servir frontend estático desde /public (si lo estás usando así)
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
