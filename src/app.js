@@ -17,6 +17,11 @@ import prestamosRutas from './rutas/prestamos.js';
 const uploadsDir = path.join(process.cwd(), 'uploads');
 fs.mkdirSync(uploadsDir, { recursive: true });
 
+console.log('📁 uploadsDir =', uploadsDir);
+console.log('✅ uploads exists =', fs.existsSync(uploadsDir));
+console.log('🔎 uploads content =', fs.readdirSync(uploadsDir));
+
+
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -67,6 +72,10 @@ app.use('/api', prestamosRutas);  // /api/usuarios/:id/prestamos-activos, etc.
 // Endpoint de salud
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, mensaje: 'PaseoLibros API viva 😄' });
+});
+app.use((err, req, res, next) => {
+  console.error('🔥 Unhandled error:', err);
+  res.status(500).json({ error: 'Error interno' });
 });
 
 export default app;
