@@ -151,42 +151,41 @@ function compare(a, b, key, dir) {
 
 // ---------- UI auth ----------
 function actualizarUIAutenticacion() {
-  const zonaNo = document.getElementById('zona-no-autenticado');
-  const zonaSi = document.getElementById('zona-autenticado');
+  const loginModal = document.getElementById('login-modal');
+  const userBar = document.getElementById('user-bar');
   const nombreSpan = document.getElementById('nombre-usuario-actual');
 
-  if (token && usuarioActual) {
-    if (zonaNo) zonaNo.style.display = 'none';
-    if (zonaSi) zonaSi.style.display = 'block';
-    if (nombreSpan) nombreSpan.textContent = usuarioActual.nombre_usuario || '';
+  const loggedIn = Boolean(token && usuarioActual);
 
-    const info = document.getElementById('info-ejemplares');
-    if (info) info.textContent = 'Tus ejemplares:';
+  // Modal de login + barra superior
+  if (loginModal) loginModal.style.display = loggedIn ? 'none' : 'flex';
+  if (userBar) userBar.style.display = loggedIn ? 'flex' : 'none';
+  if (nombreSpan) nombreSpan.textContent = loggedIn ? (usuarioActual.nombre_usuario || '') : '';
 
+  // Mensajes + datos
+  const info = document.getElementById('info-ejemplares');
+  if (info) info.textContent = loggedIn ? 'Tus ejemplares:' : 'Inicia sesión para ver tu biblioteca.';
+
+  if (loggedIn) {
     if (usuarioActual.id) cargarEjemplares(usuarioActual.id);
     cargarLecturasAbiertas();
     cargarPrestamosActivos();
-  } else {
-    if (zonaNo) zonaNo.style.display = 'block';
-    if (zonaSi) zonaSi.style.display = 'none';
-    if (nombreSpan) nombreSpan.textContent = '';
-
-    const info = document.getElementById('info-ejemplares');
-    if (info) info.textContent = 'Inicia sesión para ver tu biblioteca.';
-
-    const tbodyEj = document.querySelector('#tabla-ejemplares tbody');
-    if (tbodyEj) tbodyEj.innerHTML = '';
-
-    const tbodyL = document.querySelector('#tabla-lecturas-abiertas tbody');
-    const tbodyP = document.querySelector('#tabla-prestamos-activos tbody');
-    if (tbodyL) tbodyL.innerHTML = '';
-    if (tbodyP) tbodyP.innerHTML = '';
-
-    const infoL = document.getElementById('info-lecturas-abiertas');
-    const infoP = document.getElementById('info-prestamos-activos');
-    if (infoL) infoL.textContent = 'Inicia sesión para ver tus lecturas en curso.';
-    if (infoP) infoP.textContent = 'Inicia sesión para ver tus préstamos activos.';
+    return;
   }
+
+  // Limpieza UI cuando no hay sesión
+  const tbodyEj = document.querySelector('#tabla-ejemplares tbody');
+  if (tbodyEj) tbodyEj.innerHTML = '';
+
+  const tbodyL = document.querySelector('#tabla-lecturas-abiertas tbody');
+  const tbodyP = document.querySelector('#tabla-prestamos-activos tbody');
+  if (tbodyL) tbodyL.innerHTML = '';
+  if (tbodyP) tbodyP.innerHTML = '';
+
+  const infoL = document.getElementById('info-lecturas-abiertas');
+  const infoP = document.getElementById('info-prestamos-activos');
+  if (infoL) infoL.textContent = 'Inicia sesión para ver tus lecturas en curso.';
+  if (infoP) infoP.textContent = 'Inicia sesión para ver tus préstamos activos.';
 }
 
 // ---------- Login / Logout ----------

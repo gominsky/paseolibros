@@ -27,14 +27,26 @@
           <p>Biblioteca, lecturas, préstamos...</p>
         </div>
       </div>
+
+      <div id="user-bar" class="user-bar" style="display:none;">
+        <div class="user-bar-left">
+          <span class="user-avatar">👤</span>
+          <span id="nombre-usuario-actual" class="user-name"></span>
+        </div>
+        <button id="btn-logout" class="icon-btn" type="button" title="Cerrar sesión" aria-label="Cerrar sesión">
+          <span class="icon-circle">⏻</span>
+        </button>
+      </div>
     </header>
 
-    <main class="app-main">
-      <!-- COLUMNA IZQUIERDA: LOGIN + ALTA DE EJEMPLARES -->
-      <section class="column column-left">
-        <!-- Autenticación -->
-        <div class="card">
-          <h2>Autenticación</h2>
+    <!-- Modal de login -->
+    <div id="login-modal" class="auth-overlay" role="dialog" aria-modal="true" aria-label="Autenticación">
+      <div class="auth-dialog">
+        <div class="auth-header">
+          <h2>Accede a tu biblioteca</h2>
+          <p class="helper-text">Inicia sesión o crea una cuenta para ver tus ejemplares.</p>
+        </div>
+        <div class="auth-body">
           <div id="zona-no-autenticado">
             <!-- LOGIN -->
             <div id="login-box">
@@ -97,26 +109,14 @@
 
             <p id="login-mensaje" class="helper-text"></p>
           </div>
-
-          <div id="zona-autenticado" style="display:none;">
-            <div class="user-pill user-pill-row">
-              <span class="user-avatar">👤</span>
-            
-              <div class="user-pill-text">
-                <p class="user-label">Sesión</p>
-                <p class="user-name">
-                  <strong id="nombre-usuario-actual"></strong>
-                </p>
-              </div>
-            
-              <button id="btn-logout" class="icon-btn" title="Cerrar sesión" type="button">
-                <span class="icon-circle icon-delete">⎋</span>
-              </button>
-            </div>                  
-          </div>
+          <!-- Zona autenticado ya no se usa (el modal se oculta al iniciar sesión) -->
+          <div id="zona-autenticado" style="display:none;"></div>
         </div>
+      </div>
+    </div>
 
-        <!-- Alta de ejemplares -->
+    <main class="app-main">
+      <section class="column column-left">
         <div class="card">
           <h2>Añadir ejemplar por ISBN</h2>          
           <div class="form-group">
@@ -229,7 +229,7 @@
         <!-- Resumen de lecturas y préstamos abiertos -->
         <div class="grid-two">
           <!-- Lecturas en curso -->
-          <div class="card card-inside-modal">
+          <div class="card">
             <div class="card-header-inline">
               <h2>Lecturas en curso</h2>
             </div>
@@ -256,7 +256,7 @@
           </div>
 
           <!-- Préstamos activos -->
-          <div class="card card-inside-modal">
+          <div class="card">
             <div class="card-header-inline">
               <h2>Préstamos activos</h2>
             </div>
@@ -284,6 +284,7 @@
         </div>
       </section>
     </main>
+
 
     <footer class="app-footer">
       <p>¡Ubícate!</p>
