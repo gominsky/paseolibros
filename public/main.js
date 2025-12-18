@@ -114,7 +114,16 @@ function urlPortadaAbsoluta(url) {
 function getHeaders(json = true) {
   const headers = {};
   if (json) headers['Content-Type'] = 'application/json';
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  if (token) {
+    // Variante 1 (Bearer)
+    headers['Authorization'] = `Bearer ${token}`;
+
+    // Variante 2 (sin Bearer) + header alternativo común
+    headers['X-Access-Token'] = token;
+    headers['Authorization-Token'] = token; // opcional defensivo
+  }
+
   return headers;
 }
 
@@ -215,8 +224,8 @@ async function hacerLogin() {
       return;
     }
 
-    token = data.token;
-    usuarioActual = data.usuario;
+    token = data.token || data.access_token || data.jwt || null;
+    usuarioActual = data.usuario || data.user || null;
 
     try {
       localStorage.setItem(TOKEN_KEY, data.token);
@@ -494,7 +503,8 @@ async function crearEjemplar() {
     setUserStatusErr('Introduce un ISBN (o escanéalo).');
     return;
   }
-
+  console.log('TOKEN?', token);
+  console.log('HEADERS', getHeaders());
   try {
     const res = await fetch(`${API_BASE}/api/ejemplares`, {
       method: 'POST',
@@ -508,6 +518,11 @@ async function crearEjemplar() {
     });
 
     const data = await res.json();
+    if (res.status === 401) {
+      hacerLogout();
+      setUserStatusErr('Tu sesión ha caducado. Inicia sesión de nuevo.');
+      return;
+    }
     if (!res.ok) {
       setUserStatusErr(data.error || 'Error creando ejemplar.');
       return;
@@ -783,6 +798,9 @@ async function cargarPrestamosActivos() {
 }
 
 // ---------- Préstamos UI ----------
+// ---------- Préstamos UI (MODAL real) ----------
+let prestamoKeyHandler = null;
+
 function crearUIPrestamo() {
   if (document.getElementById('prestamo-overlay')) return;
 
@@ -792,7 +810,7 @@ function crearUIPrestamo() {
   overlay.style.display = 'none';
 
   overlay.innerHTML = `
-    <div class="prestamo-dialog">
+    <div class="prestamo-dialog" role="dialog" aria-modal="true" aria-label="Nuevo préstamo">
       <h3>Nuevo préstamo</h3>
 
       <div class="form-group">
@@ -829,27 +847,56 @@ function crearUIPrestamo() {
 
   document.body.appendChild(overlay);
 
+  // Cerrar con botón cancelar
   document.getElementById('prestamo-cancelar')?.addEventListener('click', cerrarUIPrestamo);
   document.getElementById('prestamo-confirmar')?.addEventListener('click', confirmarPrestamoDesdeUI);
+
+  // ✅ Cerrar al click fuera (solo si pinchas el overlay, no el diálogo)
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) cerrarUIPrestamo();
+  });
 }
 
 function abrirUIPrestamo() {
   const overlay = document.getElementById('prestamo-overlay');
   if (!overlay) return;
-  overlay.style.display = 'flex';
 
+  overlay.style.display = 'flex';
+  document.documentElement.style.overflow = 'hidden'; // ✅ bloquea scroll fondo
+
+  // Reset campos
   document.getElementById('prestamo-receptor-select').value = '';
   document.getElementById('prestamo-receptor-nombre').value = '';
   document.getElementById('prestamo-fecha-limite').value = '';
   document.getElementById('prestamo-notas').value = '';
+
+  // ✅ ESC para cerrar
+  prestamoKeyHandler = (e) => {
+    if (e.key === 'Escape') cerrarUIPrestamo();
+  };
+  document.addEventListener('keydown', prestamoKeyHandler);
+
+  // Foco al primer control
+  setTimeout(() => {
+    document.getElementById('prestamo-receptor-select')?.focus();
+  }, 0);
 }
 
 function cerrarUIPrestamo() {
   const overlay = document.getElementById('prestamo-overlay');
   if (!overlay) return;
+
   overlay.style.display = 'none';
+  document.documentElement.style.overflow = ''; // ✅ recupera scroll
+
+  if (prestamoKeyHandler) {
+    document.removeEventListener('keydown', prestamoKeyHandler);
+    prestamoKeyHandler = null;
+  }
+
   prestamoContexto = null;
 }
+
 
 async function cargarUsuariosParaPrestamo() {
   if (usuariosPrestamo.length > 0) {
@@ -901,6 +948,10 @@ async function confirmarPrestamoDesdeUI() {
     return;
   }
 
+  // ✅ Guardar contexto ANTES de cerrar (porque cerrarUIPrestamo lo borra)
+  const libroId = Number(prestamoContexto.libroId);
+  const ejemplarId = Number(prestamoContexto.ejemplarId);
+
   const select = document.getElementById('prestamo-receptor-select');
   const inputNombre = document.getElementById('prestamo-receptor-nombre');
   const inputFecha = document.getElementById('prestamo-fecha-limite');
@@ -920,7 +971,7 @@ async function confirmarPrestamoDesdeUI() {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify({
-        ejemplar_id: Number(prestamoContexto.ejemplarId),
+        ejemplar_id: ejemplarId,
         usuario_prestador_id: usuarioActual.id,
         usuario_receptor_id: usuarioReceptorId || null,
         nombre_receptor: nombreReceptor || null,
@@ -937,13 +988,19 @@ async function confirmarPrestamoDesdeUI() {
 
     cerrarUIPrestamo();
     setUserStatusOk('Préstamo creado.');
-    await cargarPrestamos(prestamoContexto.libroId);
+
+    // ✅ refrescar “principal” (widgets) + detalle de préstamos del libro
+    await cargarPrestamos(libroId);
     await refrescarHome();
+
+    // (opcional, por si el backend cambia estado del ejemplar al prestar)
+    // await cargarEjemplares(usuarioActual.id);
   } catch (err) {
     console.error(err);
     setUserStatusErr('Error de red al crear el préstamo.');
   }
 }
+
 
 // ---------- Préstamos (modal) ----------
 async function cargarPrestamos(libroId) {
@@ -1398,7 +1455,10 @@ document.addEventListener('DOMContentLoaded', () => {
   initOrdenacionEjemplares();
 
   // Botones básicos
-  document.getElementById('btn-crear')?.addEventListener('click', crearEjemplar);
+  document.getElementById('btn-crear')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    crearEjemplar();
+  });
   document.getElementById('btn-escanear')?.addEventListener('click', iniciarEscaneo);
   document.getElementById('btn-detener')?.addEventListener('click', detenerEscaneo);
   document.getElementById('btn-login')?.addEventListener('click', hacerLogin);
@@ -1595,24 +1655,6 @@ document.getElementById('link-forgot')?.addEventListener('click', (e) => {
 
 function getQueryParam(name) {
   return new URLSearchParams(window.location.search).get(name);
-}
-// --- CONFIG API BASE (opcional pero recomendado) ---
-const isDev =
-  window.location.protocol === 'file:' ||
-  ['localhost', '127.0.0.1'].includes(window.location.hostname);
-
-const API_BASE = isDev ? 'http://localhost:3011' : '';
-
-async function apiPost(path, body) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-
-  // por si el backend no devuelve JSON
-  const data = await res.json().catch(() => ({}));
-  return { ok: res.ok, status: res.status, data };
 }
 
 // --- REGISTRO ---

@@ -1,22 +1,19 @@
 :root{
-  --bg:#000000;
-  --ink:#ffffff;
+  /* Base */
+  --bg: #faeef3;            /* rosa muy claro (fondo general) */
+  --ink: #ffffff;           /* texto blanco */
 
-  /* Rosa palo */
-  --pink:#d6a5b5;
-  --pink-2:#c78ea1;
+  /* Rosa palo (cards + botones) */
+  --pink: #d6a5b5;
+  --pink-2: #c78ea1;
 
-  /* Superficies */
-  --card: var(--pink);
-  --card-2: rgba(214,165,181,.92);
-
-  /* Negro para todo lo demás */
-  --panel:#000000;
+  /* Negro (resto) */
+  --panel: #000000;
   --panel-2: rgba(0,0,0,.72);
 
   --muted: rgba(255,255,255,.78);
   --border: rgba(255,255,255,.16);
-  --border-dark: rgba(0,0,0,.28);
+  --border-pink: rgba(214,165,181,.55);
 
   --shadow: 0 14px 34px rgba(0,0,0,.55);
   --radius: 16px;
@@ -26,12 +23,13 @@
 
 *{box-sizing:border-box}
 html,body{height:100%}
+
 body{
   margin:0;
   font-family:"Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   background:
-    radial-gradient(1200px 700px at 15% 0%, rgba(214,165,181,.16), transparent 55%),
-    radial-gradient(1000px 700px at 85% 20%, rgba(214,165,181,.10), transparent 55%),
+    radial-gradient(1200px 700px at 15% 0%, rgba(214,165,181,.22), transparent 55%),
+    radial-gradient(1000px 700px at 85% 20%, rgba(214,165,181,.12), transparent 55%),
     var(--bg);
   color:var(--ink);
 }
@@ -39,19 +37,29 @@ body{
 a{color:var(--ink); text-decoration:none}
 a:hover{color:var(--pink); text-decoration:underline}
 
-/* Evita portadas “gigantes” por reglas globales */
+/* Evita imágenes gigantes */
 img{max-width:100%; height:auto; display:block}
 
-.app{max-width:1280px; margin:0 auto; padding:28px 28px 40px}
+/* =========================
+   CONTENEDOR + MÁRGENES LATERALES
+   ========================= */
+.app{
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-inline: clamp(14px, 3vw, 40px);   /* 👈 aire izq/dcha */
+  padding-block: 22px 34px;                /* arriba/abajo */
+}
 
-/* Header (negro) */
+/* =========================
+   HEADER
+   ========================= */
 .app-header{
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:var(--gap);
   padding:16px 16px;
-  background: rgba(0,0,0,.78);
+  background: rgba(0,0,0,.86);
   border:1px solid var(--border);
   border-radius:var(--radius);
   box-shadow: var(--shadow);
@@ -70,28 +78,30 @@ img{max-width:100%; height:auto; display:block}
 .logo-text h1{margin:0; font-size:1.25rem}
 .logo-text p{margin:.15rem 0 0; color:var(--muted); font-size:.92rem}
 
-/* User bar (solo nombre + logout) */
+/* Barra usuario (solo nombre + logout) */
 .user-bar{
   display:flex;
   align-items:center;
   gap:12px;
   padding:10px 12px;
   border-radius:999px;
-  background: rgba(0,0,0,.55);
-  border:1px solid rgba(214,165,181,.35);
+  background: rgba(0,0,0,.60);
+  border:1px solid rgba(214,165,181,.45);
 }
 .user-bar-left{display:flex; align-items:center; gap:10px}
 .user-avatar{
   width:30px; height:30px;
   display:grid; place-items:center;
   border-radius:999px;
-  background: rgba(214,165,181,.55);
-  border:1px solid rgba(214,165,181,.85);
+  background: rgba(214,165,181,.75);
+  border:1px solid rgba(214,165,181,.95);
   font-size:1.05rem;
 }
-.user-name{font-weight:700}
+.user-name{font-weight:800}
 
-/* Layout */
+/* =========================
+   LAYOUT (izq: alta | dcha: tabla + resumen)
+   ========================= */
 .app-main{
   margin-top:var(--gap);
   display:grid;
@@ -99,19 +109,20 @@ img{max-width:100%; height:auto; display:block}
   gap:var(--gap);
   align-items:start;
 }
-
 .column{min-width:0}
 .column-left{position:sticky; top:18px; align-self:start}
+
 @media (max-width: 980px){
   .app-main{grid-template-columns:1fr}
   .column-left{position:static}
 }
 
-/* Cards (rosa) */
+/* =========================
+   CARDS (rosa)
+   ========================= */
 .card{
-  background: var(--card-2);
-  color: var(--ink);
-  border: 1px solid var(--border-dark);
+  background: rgba(214,165,181,.92);
+  border: 1px solid rgba(0,0,0,.25);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding:16px;
@@ -125,20 +136,23 @@ img{max-width:100%; height:auto; display:block}
   gap:10px;
   margin-bottom:10px;
 }
-
 .card-header-actions{display:flex; gap:10px; align-items:center}
 
 h2{margin:0 0 10px; font-size:1.08rem}
-.helper-text{margin:10px 0 0; color: rgba(255,255,255,.86); font-size:.92rem}
+.helper-text{margin:10px 0 0; color: rgba(255,255,255,.90); font-size:.92rem}
 
-/* Sub-cards dentro de la columna derecha (también rosa, un pelín más sutil) */
-.card.card-inside-modal{
-  background: rgba(214,165,181,.82);
-  border: 1px solid rgba(0,0,0,.22);
-  box-shadow: none;
+/* grid de lecturas + préstamos debajo de ejemplares */
+.grid-two{
+  margin-top:var(--gap);
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:var(--gap);
 }
+@media (max-width: 980px){ .grid-two{grid-template-columns:1fr} }
 
-/* Forms (inputs negros dentro de card rosa) */
+/* =========================
+   FORMULARIOS (inputs negros dentro de card rosa)
+   ========================= */
 .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px}
 @media (max-width: 520px){ .form-grid{grid-template-columns:1fr} }
 
@@ -146,8 +160,8 @@ h2{margin:0 0 10px; font-size:1.08rem}
 label{color: rgba(255,255,255,.88); font-size:.9rem}
 
 input, select, textarea{
-  background: rgba(0,0,0,.78);
-  border: 1px solid rgba(214,165,181,.45);
+  background: rgba(0,0,0,.84);
+  border: 1px solid rgba(214,165,181,.55);
   color: var(--ink);
   padding:10px 12px;
   border-radius: var(--radius-sm);
@@ -155,17 +169,19 @@ input, select, textarea{
 }
 input::placeholder, textarea::placeholder{color: rgba(255,255,255,.62)}
 input:focus, select:focus, textarea:focus{
-  border-color: rgba(214,165,181,.9);
+  border-color: rgba(214,165,181,.95);
   box-shadow: 0 0 0 3px rgba(214,165,181,.18);
 }
 
 .input-with-button{display:flex; gap:10px}
 .input-with-button input{flex:1}
 
-/* Buttons (rosa) */
+/* =========================
+   BOTONES (rosa)
+   ========================= */
 .btn{
   border: 1px solid rgba(0,0,0,.28);
-  background: rgba(214,165,181,.95);
+  background: rgba(214,165,181,.98);
   color: #ffffff;
   padding:10px 12px;
   border-radius:999px;
@@ -177,42 +193,59 @@ input:focus, select:focus, textarea:focus{
 .btn-primary{background: rgba(214,165,181,1)}
 .btn-secondary{background: rgba(199,142,161,1)}
 .btn-ghost{
-  background: rgba(0,0,0,.72);
-  border:1px solid rgba(214,165,181,.55);
+  background: rgba(0,0,0,.78);
+  border:1px solid rgba(214,165,181,.65);
 }
 .btn-full{width:100%}
+.btn-sm{padding:8px 10px; font-size:.9rem}
 
-/* Icon buttons: negro con borde rosa */
+/* =========================
+   ICON BUTTONS (solo círculo, SIN “cuadrado dentro”)
+   ========================= */
 .icon-btn{
-  border:1px solid rgba(214,165,181,.55);
-  background: rgba(0,0,0,.72);
-  color:var(--ink);
-  border-radius:999px;
-  padding:8px;
-  cursor:pointer;
-}
-.icon-btn:hover{filter:brightness(1.06)}
-.icon-circle{
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
-  display:grid;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 999px;
+  display:inline-grid;
   place-items:center;
-  background: rgba(214,165,181,.22);
-  border: 1px solid rgba(214,165,181,.65);
-  font-size: 1rem;
+  cursor:pointer;
+
+  background: rgba(0,0,0,.78);
+  border:1px solid rgba(214,165,181,.65);
   color: var(--ink);
 }
+.icon-btn:hover{filter:brightness(1.08)}
 
-/* Tables: negras, texto blanco */
+/* El span interior NO debe dibujar otra caja */
+.icon-circle{
+  display:inline;
+  width:auto !important;
+  height:auto !important;
+  padding:0 !important;
+  border:0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow:none !important;
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* Celda de acciones: sin saltos */
+.celda-acciones{white-space:nowrap}
+
+/* =========================
+   TABLAS (negras, texto blanco)
+   ========================= */
 .table-wrapper{
   overflow:auto;
   border-radius:14px;
-  border:1px solid rgba(214,165,181,.45);
-  background: rgba(0,0,0,.72);
+  border:1px solid rgba(214,165,181,.55);
+  background: rgba(0,0,0,.78);
 }
 table{width:100%; border-collapse:collapse; min-width:760px}
 .table-small{min-width:520px}
+
 th,td{
   padding:10px 12px;
   border-bottom:1px solid rgba(255,255,255,.12);
@@ -221,12 +254,36 @@ th,td{
 th{
   position:sticky;
   top:0;
-  background: rgba(0,0,0,.92);
+  background: rgba(0,0,0,.94);
   text-align:left;
   font-size:.9rem;
-  color: rgba(255,255,255,.82);
+  color: rgba(255,255,255,.84);
 }
 tr:hover td{background: rgba(255,255,255,.06)}
+
+/* Ordenación: que NO parezca botón, pero sea clicable */
+.th-sort{
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  width:100%;
+  text-align:left;
+}
+.th-sort:hover span:first-child{ text-decoration: underline; text-decoration-thickness: 2px; }
+.th-sort-icon{ font-size:.8rem; opacity:.9; }
+.th-sort:focus-visible{
+  outline:2px solid rgba(214,165,181,.80);
+  outline-offset:2px;
+  border-radius:10px;
+}
 
 /* Mini portada en tabla */
 .portada-mini-img{
@@ -248,22 +305,13 @@ tr:hover td{background: rgba(255,255,255,.06)}
   font-size: .9rem;
 }
 
-/* Grid debajo de Ejemplares */
-.grid-two{
-  margin-top:var(--gap);
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:var(--gap);
-}
-@media (max-width: 980px){ .grid-two{grid-template-columns:1fr} }
-
-.app-footer{margin-top:var(--gap); text-align:center; color:var(--muted)}
-
-/* --- Auth modal (login) --- */
+/* =========================
+   LOGIN MODAL
+   ========================= */
 .auth-overlay{
   position:fixed;
   inset:0;
-  display:none; /* JS la muestra */
+  display:none; /* JS lo pone a flex */
   align-items:center;
   justify-content:center;
   padding:18px;
@@ -273,8 +321,8 @@ tr:hover td{background: rgba(255,255,255,.06)}
 }
 .auth-dialog{
   width:min(520px, 100%);
-  background: rgba(0,0,0,.92);
-  border:1px solid rgba(214,165,181,.55);
+  background: rgba(0,0,0,.94);
+  border:1px solid rgba(214,165,181,.60);
   border-radius:var(--radius);
   box-shadow: var(--shadow);
   overflow:hidden;
@@ -284,15 +332,19 @@ tr:hover td{background: rgba(255,255,255,.06)}
 .auth-header .helper-text{margin:6px 0 0}
 .auth-body{padding:16px}
 
-/* Modal ficha libro/ejemplar (negro, con portada controlada) */
+/* =========================
+   MODAL FICHA
+   ========================= */
 .modal{position:fixed; inset:0; display:none; z-index:5000}
+.modal.is-visible{display:block}
+
 .modal-backdrop{position:absolute; inset:0; background: rgba(0,0,0,.78); backdrop-filter: blur(6px)}
 .modal-dialog{
   position:relative;
   margin: 4vh auto;
   width: min(980px, calc(100% - 24px));
   background: rgba(0,0,0,.94);
-  border:1px solid rgba(214,165,181,.55);
+  border:1px solid rgba(214,165,181,.60);
   border-radius:var(--radius);
   box-shadow: var(--shadow);
   overflow:hidden;
@@ -322,20 +374,19 @@ tr:hover td{background: rgba(255,255,255,.06)}
   height: 200px;
   object-fit: contain;
   border-radius: 14px;
-  border: 1px solid rgba(214,165,181,.55);
+  border: 1px solid rgba(214,165,181,.60);
   background: rgba(0,0,0,.75);
 }
 .modal-cover-upload{width:140px; justify-content:center}
 .modal-header-info{min-width:0}
+
 .modal-body{
   padding:16px;
   overflow:auto;
   min-height:0;
 }
 
-/* Responsive */
 @media (max-width: 820px){
-  .app{padding:14px}
   table{min-width:720px}
   .modal-dialog{margin:0; width:100%; height:100vh; border-radius:0}
   .modal-header{
@@ -348,44 +399,116 @@ tr:hover td{background: rgba(255,255,255,.06)}
   .modal-cover-upload{width:120px}
 }
 
-
-@media (max-width: 520px){ .app{padding:14px} }
-
-
-.modal.is-visible{display:block}
-
-
-
-/* Ordenación en cabecera: que NO parezca un botón, pero sea clicable */
-.th-sort{
-  background: transparent;
-  border: 0;
-  padding: 0;
-  margin: 0;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  width:100%;
-  text-align:left;
-}
-.th-sort:hover span:first-child{ text-decoration: underline; text-decoration-thickness: 2px; }
-.th-sort-icon{ font-size:.8rem; opacity:.9; }
-.th-sort:focus-visible{
-  outline:2px solid rgba(214,165,181,.75);
-  outline-offset:2px;
-  border-radius:10px;
+@media (max-width: 520px){
+  table{min-width:720px}
+  .portada-mini-img,.portada-placeholder-mini{width:28px; height:40px}
 }
 
+/* Footer */
+.app-footer{margin-top:var(--gap); text-align:center; color:rgba(0,0,0,.55)}
+/* ✅ Márgenes laterales reales (izq/dcha) también en pantallas MUY grandes */
+.app{
+  /* mantiene tu padding vertical actual */
+  padding-top: 1.5rem !important;
+  padding-bottom: 2rem !important;
 
-
-
-/* Botón + solo para móvil (lo usaremos más adelante) */
-.fab-plus{display:none}
-@media (max-width: 980px){
-  .fab-plus{display:grid}
+  /* esto es lo importante: gutter lateral adaptable */
+  padding-left: clamp(24px, 6vw, 140px) !important;
+  padding-right: clamp(24px, 6vw, 140px) !important;
+}
+/* Igualar tamaño visual de iconos texto (↑ ↓ etc.) */
+.icon-circle{
+  display: inline-grid;
+  place-items: center;
+  width: 1em;
+  height: 1em;
+  font-size: 16px;     /* ajusta si quieres */
+  line-height: 1;
+  
+}
+/* ✅ Modal préstamos: overlay pantalla completa SIEMPRE */
+#prestamo-overlay{
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+  display: none;
+  align-items: center;
+  justify-content: center;
 }
 
+/* Se abre añadiendo clase */
+#prestamo-overlay.is-open{
+  display: flex !important;
+}
+
+/* Por si algún contenedor tiene transform y fastidia el fixed */
+body, html{
+  transform: none !important;
+}
+/* ✅ Backdrop del modal de préstamos */
+#prestamo-overlay{
+  background: rgba(0, 0, 0, 0.65) !important;
+  backdrop-filter: blur(2px);
+}
+/* Modal préstamo: caja negra */
+.prestamo-dialog{
+  background: #000 !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+  box-shadow: 0 18px 45px rgba(0,0,0,.75) !important;
+  color: #fff;
+}
+/* Modal préstamo: más pro (compacto + menos recto) */
+.prestamo-dialog{
+  width: min(440px, calc(100vw - 32px)) !important;
+  padding: 18px 18px 14px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(255,255,255,.16) !important;
+  box-shadow: 0 24px 70px rgba(0,0,0,.72) !important;
+}
+
+/* Título más compacto */
+.prestamo-dialog h3{
+  margin: 0 0 12px !important;
+  font-size: 1.05rem;
+}
+
+/* Menos aire entre campos */
+.prestamo-dialog .form-group{
+  margin-bottom: 10px !important;
+}
+
+.prestamo-dialog label{
+  margin-bottom: 6px !important;
+  font-size: .92rem;
+  opacity: .92;
+}
+
+.prestamo-dialog input,
+.prestamo-dialog select{
+  padding: 9px 10px !important;
+  border-radius: 12px !important;
+}
+
+/* Helper text más discreto */
+.prestamo-dialog .helper-text{
+  margin-top: 6px !important;
+  font-size: .82rem;
+  opacity: .8;
+}
+
+/* Botones alineados y compactos */
+.prestamo-dialog-buttons{
+  margin-top: 12px !important;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.prestamo-dialog-buttons .btn{
+  padding: 8px 12px !important;
+  border-radius: 12px !important;
+}
