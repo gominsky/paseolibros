@@ -1381,3 +1381,37 @@ html, body{ max-width: 100%; overflow-x: hidden; }
     border-color: rgba(232,170,196,.6) !important;
   }
 }
+@media (max-width: 820px){
+  /* 🔧 Revertir el hide global (si existe en tu CSS anterior) */
+  .table-wrapper{ display: block !important; }
+
+  /* ✅ Ocultar solo la tabla de ejemplares (y su wrapper) en móvil */
+  #tabla-ejemplares{ display: none !important; }
+  #tabla-ejemplares{ visibility: hidden !important; } /* extra defensivo */
+
+  /* Si quieres ocultar también el “marco” vacío de su wrapper */
+  #tabla-ejemplares{ height: 0 !important; }
+}
+@media (max-width: 820px){
+  /* 🎨 Cards de ejemplares más elegantes */
+  .ej-card{
+    background: #0b0b0d !important;
+    color: #fff !important;
+    border: 1.5px solid rgba(232,170,196,.55) !important;
+    box-shadow: 0 18px 55px rgba(0,0,0,.55) !important;
+  }
+
+  .ej-pill{
+    background: rgba(255,255,255,.06) !important;
+    border-color: rgba(255,255,255,.12) !important;
+    color: #fff !important;
+  }
+
+  .ej-author{ opacity: .88 !important; }
+  .ej-meta{ opacity: .9 !important; }
+
+  /* Portada placeholder más integrado */
+  .ej-cover{
+    border-color: rgba(255,255,255,.12) !important;
+  }
+}
