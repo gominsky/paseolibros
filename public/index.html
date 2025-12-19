@@ -17,27 +17,50 @@
 </head>
 <body>
   <div class="app">
-    <header class="app-header">
-      <div class="logo">
-        <div class="logo-icon">
-          <span class="logo-mark">Pdl</span>
-        </div>
-        <div class="logo-text">
-          <h1>Paseo de los libros</h1>
-          <p>Biblioteca, lecturas, préstamos...</p>
-        </div>
-      </div>
+      <header class="app-header">
+  <div class="header-left"></div>
 
-      <div id="user-bar" class="user-bar" style="display:none;">
-        <div class="user-bar-left">
-          <span class="user-avatar">👤</span>
-          <span id="nombre-usuario-actual" class="user-name"></span>
-        </div>
-        <button id="btn-logout" class="icon-btn" type="button" title="Cerrar sesión" aria-label="Cerrar sesión">
-          <span class="icon-circle">⏻</span>
-        </button>
+  <div class="logo header-center">
+    <div class="logo-icon">
+      <span class="logo-mark">Pdl</span>
+    </div>
+    <div class="logo-text">
+      <h1>Paseo de los libros</h1>
+      <p>Biblioteca, lecturas, préstamos...</p>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <div id="user-bar" class="user-bar" style="display:none;">
+      <div class="user-bar-left">
+        <span class="user-avatar">👤</span>
+        <span id="nombre-usuario-actual" class="user-name"></span>
       </div>
-    </header>
+    </div>
+
+    <!-- Herramientas (dropdown) -->
+    <div class="tools-menu">
+      <button id="btn-tools" class="icon-btn" type="button" aria-label="Herramientas" title="Herramientas">
+        <span class="icon-circle">⚙</span>
+      </button>
+
+      <div id="tools-dropdown" class="tools-dropdown" aria-hidden="true">
+        <button id="btn-exportar-csv" class="tools-item" type="button">Exportar CSV</button>
+
+        <label class="tools-item tools-item-file">
+          Importar CSV
+          <input type="file" id="input-importar-csv" accept=".csv" hidden />
+        </label>
+
+        <div class="tools-sep" aria-hidden="true"></div>
+
+        <!-- Logout aquí (mantenemos el ID para tu JS) -->
+        <button id="btn-logout" class="tools-item tools-danger" type="button">Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+</header>
+
 
     <!-- Modal de login -->
     <div id="login-modal" class="auth-overlay" role="dialog" aria-modal="true" aria-label="Autenticación">
@@ -183,19 +206,7 @@
         <div class="card">
           <div class="card-header card-header-inline">
             <h2>Ejemplares</h2>
-            <div class="card-header-actions">
-              <button id="btn-exportar-csv" class="icon-btn" type="button" title="Exportar CSV">
-                <span class="icon-circle">↓</span>
-              </button>
-              
-              <label class="icon-btn" title="Importar CSV">
-                <span class="icon-circle">↑</span>
-                <input type="file" id="input-importar-csv" accept=".csv" hidden />
-              </label>            
-              
-</div>
             <div class="table-search">
-              
               <input
                 id="buscador-ejemplares"
                 type="text"
@@ -226,6 +237,7 @@
               </tbody>
             </table>
           </div>
+
         </div>
 
         <!-- Resumen de lecturas y préstamos abiertos -->
@@ -423,16 +435,10 @@
             <div class="card-header-inline">
               <h3>Lecturas del libro</h3>
               <div class="card-header-actions">
-                <button id="btn-ver-lecturas" class="btn btn-ghost btn-sm">
-                  Ver lecturas
-                </button>
-                <button
-                  id="btn-terminar-lectura"
-                  class="btn btn-secondary btn-sm"
-                >
-                  Terminar lectura
-                </button>
-              </div>
+  <button id="btn-terminar-lectura" class="icon-btn" type="button" title="Terminar lectura" aria-label="Terminar lectura">
+    <span class="icon-circle">✓</span>
+  </button>
+</div>
             </div>
             <p id="info-lecturas" class="helper-text">
               Selecciona un ejemplar en la tabla para ver o terminar tu lectura.
@@ -444,41 +450,17 @@
           <div class="card card-inside-modal card-summary">
             <div class="card-header-inline">
               <h3>Préstamos del libro</h3>
-              <div class="card-header-actions">
-                <button id="btn-ver-prestamos" class="btn btn-ghost btn-sm">
-                  Ver préstamos
-                </button>
-                <button
-                  id="btn-marcar-devuelto-global"
-                  class="btn btn-secondary btn-sm"
-                >
-                  Marcar devuelto
-                </button>
-              </div>
+             <div class="card-header-actions">
+  <button id="btn-marcar-devuelto-global" class="icon-btn" type="button" title="Marcar devuelto" aria-label="Marcar devuelto">
+    <span class="icon-circle">✓</span>
+  </button>
+</div>
+
             </div>
             <p id="info-prestamos" class="helper-text">
               Selecciona un ejemplar en la tabla para ver o cerrar préstamos.
             </p>
-            <div class="table-wrapper">
-              <table id="tabla-prestamos" class="table table-small">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Prestador</th>
-                    <th>Receptor</th>
-                    <th>Fecha préstamo</th>
-                    <th>Fecha límite</th>
-                    <th>Fecha devolución</th>
-                    <th>Estado</th>
-                    <th>Notas</th>
-                    <th>Acción</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <!-- Rellenado por JS -->
-                </tbody>
-              </table>
-            </div>
+           <pre id="prestamos-detalle" class="result-block small"></pre>
           </div>
         </div>
       </div> <!-- /modal-body -->

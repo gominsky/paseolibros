@@ -485,6 +485,10 @@ async function cargarEjemplares(usuarioId) {
     if (info) info.textContent = 'Error al cargar los ejemplares.';
   }
 }
+function resolverEjemplarIdDesdeCache(libroId) {
+  const fila = (ejemplaresCache || []).find(e => Number(e.libro_id) === Number(libroId));
+  return fila ? Number(fila.ejemplar_id) : null;
+}
 
 // ---------- Crear ejemplar ----------
 async function crearEjemplar() {
@@ -1005,17 +1009,22 @@ async function confirmarPrestamoDesdeUI() {
 // ---------- Préstamos (modal) ----------
 async function cargarPrestamos(libroId) {
   const info = document.getElementById('info-prestamos');
-  const tbody = document.querySelector('#tabla-prestamos tbody');
-  if (!info || !tbody) return;
+  const pre = document.getElementById('prestamos-detalle');
+  if (!info || !pre) return;
 
   info.textContent = 'Cargando préstamos...';
-  tbody.innerHTML = '';
+  pre.textContent = '';
 
   try {
     const res = await fetch(`${API_BASE}/api/libros/${libroId}/prestamos`, {
       headers: getHeaders(false),
     });
     const prestamos = await res.json();
+
+    if (!res.ok) {
+      info.textContent = prestamos.error || 'Error al cargar los préstamos.';
+      return;
+    }
 
     if (!Array.isArray(prestamos) || prestamos.length === 0) {
       info.textContent = 'Este libro no tiene préstamos registrados.';
@@ -1024,32 +1033,19 @@ async function cargarPrestamos(libroId) {
 
     info.textContent = `Préstamos: ${prestamos.length}`;
 
-    for (const p of prestamos) {
-      const tr = document.createElement('tr');
-      const nombreReceptor = p.nombre_receptor_usuario || p.nombre_receptor || '—';
+    const lineas = prestamos.map((p) => {
+      const activo = p.estado !== 'devuelto' && !p.fecha_devolucion;
+      const badge = activo ? '🟡' : '⚪';
 
-      tr.innerHTML = `
-        <td>${p.id}</td>
-        <td>${p.nombre_prestador || ''}</td>
-        <td>${nombreReceptor}</td>
-        <td>${p.fecha_prestamo || ''}</td>
-        <td>${p.fecha_limite || ''}</td>
-        <td>${p.fecha_devolucion || ''}</td>
-        <td>${p.estado || ''}</td>
-        <td>${p.notas || ''}</td>
-        <td>
-          ${
-            p.estado !== 'devuelto'
-              ? `<button class="btn btn-secondary btn-sm btn-devolver"
-                   data-prestamo-id="${p.id}" data-libro-id="${libroId}" type="button">
-                   Marcar devuelto
-                 </button>`
-              : '—'
-          }
-        </td>
-      `;
-      tbody.appendChild(tr);
-    }
+      const receptor = p.nombre_receptor_usuario || p.nombre_receptor || '—';
+      const prestado = p.fecha_prestamo ? new Date(p.fecha_prestamo).toLocaleDateString('es-ES') : '—';
+      const limite = p.fecha_limite ? new Date(p.fecha_limite).toLocaleDateString('es-ES') : '—';
+      const dev = p.fecha_devolucion ? new Date(p.fecha_devolucion).toLocaleDateString('es-ES') : '—';
+
+      return `${badge} #${p.id} · a ${receptor} · ${p.estado || '—'} · ${prestado} → ${limite} · dev: ${dev}`;
+    });
+
+    pre.textContent = lineas.join('\n');
   } catch (err) {
     console.error(err);
     info.textContent = 'Error al cargar los préstamos.';
@@ -1425,8 +1421,8 @@ async function mostrarFicha(libroId, ejemplarId) {
   if (t) t.textContent = 'Cargando…';
   const pre = document.getElementById('lecturas-detalle');
   if (pre) pre.textContent = '';
-  const tbP = document.querySelector('#tabla-prestamos tbody');
-  if (tbP) tbP.innerHTML = '';
+  const preP = document.getElementById('prestamos-detalle');
+  if (preP) preP.textContent = '';
 
   await cargarFormEdicion();
   if (reqId !== fichaReqId) return;
@@ -1522,20 +1518,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Botones modal
-  document.getElementById('btn-ver-lecturas')?.addEventListener('click', () => {
-    if (!libroSeleccionadoId) return;
-    cargarLecturas(libroSeleccionadoId);
-  });
-
   document.getElementById('btn-terminar-lectura')?.addEventListener('click', terminarLecturaActual);
-
-  document.getElementById('btn-ver-prestamos')?.addEventListener('click', () => {
-    if (!libroSeleccionadoId) return;
-    cargarPrestamos(libroSeleccionadoId);
-  });
-
   document.getElementById('btn-marcar-devuelto-global')?.addEventListener('click', marcarPrestamoDevueltoGlobal);
-
   document.getElementById('btn-guardar-libro')?.addEventListener('click', guardarLibroEditado);
   document.getElementById('btn-guardar-ejemplar')?.addEventListener('click', guardarEjemplarEditado);
 
@@ -1587,25 +1571,63 @@ document.addEventListener('DOMContentLoaded', () => {
     mostrarFicha(fila.dataset.libroId, fila.dataset.ejemplarId);
   });
 
-  // Click en lecturas/préstamos home => abrir ficha
-  document.querySelector('#tabla-lecturas-abiertas tbody')?.addEventListener('click', (e) => {
-    const tr = e.target.closest('tr');
-    if (!tr) return;
-    mostrarFicha(tr.dataset.libroId, tr.dataset.ejemplarId);
-  });
+  // Click en lecturas/préstamos home => abrir ficha (resuelve ejemplar si falta)
+document.querySelector('#tabla-lecturas-abiertas tbody')?.addEventListener('click', (e) => {
+  const tr = e.target.closest('tr');
+  if (!tr) return;
 
-  document.querySelector('#tabla-prestamos-activos tbody')?.addEventListener('click', (e) => {
-    const tr = e.target.closest('tr');
-    if (!tr) return;
-    mostrarFicha(tr.dataset.libroId, tr.dataset.ejemplarId);
-  });
+  const libroId = Number(tr.dataset.libroId);
+  const ejId = tr.dataset.ejemplarId ? Number(tr.dataset.ejemplarId) : resolverEjemplarIdDesdeCache(libroId);
+
+  if (!ejId) {
+    setUserStatusErr('No encuentro el ejemplar de ese libro en tu lista (¿tienes algún ejemplar cargado?).');
+    return;
+  }
+  mostrarFicha(libroId, ejId);
+});
+
+document.querySelector('#tabla-prestamos-activos tbody')?.addEventListener('click', (e) => {
+  const tr = e.target.closest('tr');
+  if (!tr) return;
+
+  const libroId = Number(tr.dataset.libroId);
+  const ejId = tr.dataset.ejemplarId ? Number(tr.dataset.ejemplarId) : resolverEjemplarIdDesdeCache(libroId);
+
+  if (!ejId) {
+    setUserStatusErr('No encuentro el ejemplar de ese libro en tu lista (¿tienes algún ejemplar cargado?).');
+    return;
+  }
+  mostrarFicha(libroId, ejId);
+});
+
+  // --- Dropdown Herramientas ---
+const btnTools = document.getElementById('btn-tools');
+const toolsDropdown = document.getElementById('tools-dropdown');
+
+function cerrarTools() {
+  if (!toolsDropdown) return;
+  toolsDropdown.classList.remove('is-open');
+  toolsDropdown.setAttribute('aria-hidden', 'true');
+}
+
+function toggleTools() {
+  if (!toolsDropdown) return;
+  const open = toolsDropdown.classList.toggle('is-open');
+  toolsDropdown.setAttribute('aria-hidden', open ? 'false' : 'true');
+}
+
+btnTools?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  toggleTools();
+});
+
+document.addEventListener('click', cerrarTools);
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') cerrarTools();
+});
 
   // Delegación: marcar devuelto desde tabla préstamos modal
-  document.querySelector('#tabla-prestamos tbody')?.addEventListener('click', (e) => {
-    const btn = e.target.closest('.btn-devolver');
-    if (!btn) return;
-    marcarPrestamoDevuelto(btn.dataset.prestamoId, btn.dataset.libroId);
-  });
+
   async function apiPost(path, body) {
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
