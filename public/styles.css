@@ -1043,3 +1043,116 @@ body{
   background: #000;
   z-index: -1;
 }
+/* =========================================================
+   PRO MAX MÓVIL: layout a ancho completo + cards uniformes
+   ========================================================= */
+@media (max-width: 820px){
+
+  /* Más “pantalla completa”: menos gutter lateral en móvil */
+  body{
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  /* Cards al 100% del ancho disponible */
+  .app,
+  .app-main,
+  .column,
+  .card{
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  /* Que todas las cards respiren igual */
+  .card{
+    border-radius: 18px;
+  }
+
+  /* Header más “importante” en móvil */
+  .logo .logo-text h1{
+    font-size: 1.15rem !important;
+    line-height: 1.15;
+  }
+  .logo-icon{
+    transform: scale(1.05);
+  }
+
+  /* Card de “Ejemplares” un poco más grande/densa */
+  #tabla-ejemplares th,
+  #tabla-ejemplares td{
+    padding: 12px 12px !important;
+  }
+  .table-search input{
+    padding: 12px 12px !important;
+    border-radius: 14px;
+  }
+  #buscador-ejemplares{
+    font-size: 1rem;
+  }
+
+  /* La cabecera de Ejemplares más cómoda */
+  .card-header-inline h2{
+    font-size: 1.1rem;
+  }
+}
+
+/* =========================================================
+   FAB (+) PRO: tamaño, color, sombra, safe-area, animación
+   ========================================================= */
+@media (max-width: 820px){
+  #btn-toggle-alta.fab-plus{
+    width: 58px !important;
+    height: 58px !important;
+    border-radius: 999px !important;
+
+    position: fixed !important;
+    right: 16px !important;
+    bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+
+    display: grid !important;
+    place-items: center !important;
+
+    background: rgba(232,170,196,.92) !important; /* rosa palo */
+    color: #000 !important;
+    border: 1px solid rgba(0,0,0,.22) !important;
+
+    box-shadow:
+      0 16px 40px rgba(0,0,0,.55),
+      0 0 0 4px rgba(232,170,196,.18) !important;
+
+    font-size: 30px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+
+    z-index: 9200 !important;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #btn-toggle-alta.fab-plus:active{
+    transform: scale(.98);
+  }
+
+  /* Cuando está abierto, que se note */
+  body.alta-visible #btn-toggle-alta.fab-plus{
+    background: #000 !important;
+    color: #fff !important;
+    border-color: rgba(232,170,196,.6) !important;
+    box-shadow:
+      0 16px 40px rgba(0,0,0,.55),
+      0 0 0 4px rgba(232,170,196,.24) !important;
+  }
+}
+
+/* =========================================================
+   PRO MAX: que el panel de alta (sheet) se vea premium
+   ========================================================= */
+@media (max-width: 820px){
+  body.alta-visible .column-left .card{
+    border-radius: 20px !important;
+    border: 1.5px solid rgba(232,170,196,.85) !important;
+    box-shadow:
+      0 24px 70px rgba(0,0,0,.72),
+      0 0 0 3px rgba(232,170,196,.18) !important;
+  }
+}
