@@ -427,8 +427,20 @@ function renderEjemplares() {
             : `<div class="portada-placeholder-mini">📚</div>`
         }
       </td>
-      <td>${e.titulo || ''}</td>
-      <td>${e.autores || ''}</td>
+      <td class="cell-title">
+  <div class="title-main">${e.titulo || ''}</div>
+  <div class="title-meta">
+    <span class="meta-item">ISBN: ${e.isbn || '—'}</span>
+    <span class="meta-dot">·</span>
+    <span class="meta-item">${e.estado || '—'}</span>
+    <span class="meta-dot">·</span>
+    <span class="meta-item">${e.ubicacion || '—'}</span>
+    ${e.notas ? `<span class="meta-dot">·</span><span class="meta-item">${e.notas}</span>` : ''}
+  </div>
+</td>
+
+<td class="cell-author">${e.autores || ''}</td>
+
       <td>${e.isbn || ''}</td>
       <td>${e.estado || ''}</td>
       <td>${e.ubicacion || ''}</td>
