@@ -1156,3 +1156,228 @@ body{
       0 0 0 3px rgba(232,170,196,.18) !important;
   }
 }
+/* =========================
+   PRO MAX móvil: lista de cards + evitar desbordes
+   ========================= */
+*{ box-sizing: border-box; }
+html, body{ overflow-x: hidden; }
+
+@media (max-width: 820px){
+  /* En móvil: ocultamos la tabla y mostramos la lista */
+  .table-wrapper{ display:none !important; }
+  .ejemplares-list{ display:grid; gap:12px; }
+
+  .ej-card{
+    width: 100%;
+    background: rgba(232,170,196,.92);   /* rosa palo */
+    color: #000;
+    border-radius: 18px;
+    padding: 12px;
+    border: 1px solid rgba(0,0,0,.12);
+    box-shadow: 0 16px 40px rgba(0,0,0,.35);
+    display: grid;
+    grid-template-columns: 46px 1fr auto;
+    gap: 12px;
+    align-items: start;
+  }
+
+  .ej-cover{
+    width: 46px; height: 66px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: #000;
+  }
+
+  .ej-main{ min-width: 0; } /* clave para ellipsis */
+  .ej-title{
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ej-author{
+    margin-top: 4px;
+    font-size: .9rem;
+    opacity: .9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ej-meta{
+    margin-top: 8px;
+    font-size: .82rem;
+    opacity: .85;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+  }
+  .ej-pill{
+    background: rgba(0,0,0,.08);
+    border: 1px solid rgba(0,0,0,.12);
+    border-radius: 999px;
+    padding: 5px 10px;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Acciones a la derecha, compactas */
+  .ej-actions{
+    display: grid;
+    gap: 8px;
+    align-content: start;
+  }
+
+  /* Botones de icono dentro de la card (mantiene tu estilo actual) */
+  .ej-actions .icon-btn{
+    width: 36px;
+    height: 36px;
+  }
+
+  /* Para que el panel/otras cards no “se salgan” */
+  .card, .column, .app-main{ min-width: 0; }
+}
+/* =========================================================
+   OVERRIDE FINAL MÓVIL (PRO MAX) – pegar al final del CSS
+   Objetivo: móvil = lista cards / desktop = tabla
+   ========================================================= */
+*{ box-sizing: border-box; }
+html, body{ max-width: 100%; overflow-x: hidden; }
+
+@media (max-width: 820px){
+
+  /* Layout: una columna, todo encaja */
+  .app{ padding: 0 !important; }
+  body{
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .app-main{
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+  .column, .card, .column-left, .column-right{ min-width: 0 !important; width: 100% !important; }
+
+  /* Header más full */
+  .app-header{
+    padding: 10px 12px !important;
+    border-radius: 18px !important;
+  }
+  .logo .logo-text p{ display:none !important; }
+
+  /* ✅ MÓVIL: ocultar TABLA y mostrar LISTA */
+  .table-wrapper{ display: none !important; }
+  #ejemplares-list{ display: grid !important; gap: 12px; }
+
+  /* Cards de ejemplar */
+  .ej-card{
+    width: 100%;
+    border-radius: 18px;
+    padding: 12px;
+    background: rgba(232,170,196,.92);
+    color: #000;
+    border: 1px solid rgba(0,0,0,.14);
+    box-shadow: 0 16px 40px rgba(0,0,0,.35);
+
+    display: grid;
+    grid-template-columns: 48px minmax(0,1fr) auto;
+    gap: 12px;
+    align-items: start;
+  }
+  .ej-cover{
+    width: 48px; height: 70px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: #000;
+    border: 1px solid rgba(0,0,0,.12);
+  }
+  .ej-main{ min-width: 0; }
+  .ej-title{
+    font-weight: 800;
+    font-size: 1rem;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ej-author{
+    margin-top: 4px;
+    font-size: .9rem;
+    opacity: .9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ej-meta{
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+    font-size: .82rem;
+    opacity: .9;
+    min-width: 0;
+  }
+  .ej-pill{
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    background: rgba(0,0,0,.08);
+    border: 1px solid rgba(0,0,0,.12);
+    border-radius: 999px;
+    padding: 5px 10px;
+  }
+
+  .ej-actions{
+    display: grid;
+    gap: 8px;
+    align-content: start;
+  }
+
+  /* ✅ Sheet alta: NO ocultar la derecha, solo overlay + card fixed */
+  .column-left{ display: none !important; }
+  body.alta-visible .column-left{ display: block !important; }
+
+  body.alta-visible::before{
+    content:"";
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    z-index: 8500;
+  }
+
+  body.alta-visible .column-left .card{
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 84px;
+    max-height: calc(100vh - 140px);
+    overflow: auto;
+    z-index: 9000;
+    border-radius: 20px !important;
+    border: 1.5px solid rgba(232,170,196,.85) !important;
+  }
+
+  /* FAB (+) */
+  #btn-toggle-alta.fab-plus{
+    width: 58px !important;
+    height: 58px !important;
+    right: 16px !important;
+    bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+    background: rgba(232,170,196,.92) !important;
+    color: #000 !important;
+    border: 1px solid rgba(0,0,0,.22) !important;
+    box-shadow: 0 16px 40px rgba(0,0,0,.55), 0 0 0 4px rgba(232,170,196,.18) !important;
+  }
+  body.alta-visible #btn-toggle-alta.fab-plus{
+    background:#000 !important;
+    color:#fff !important;
+    border-color: rgba(232,170,196,.6) !important;
+  }
+}

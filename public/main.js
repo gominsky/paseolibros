@@ -68,6 +68,14 @@ function exportarEjemplaresCSV() {
 
   URL.revokeObjectURL(url);
 }
+function escapeHtml(s){
+  return String(s ?? '')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;')
+    .replaceAll("'","&#039;");
+}
 
 function setUserStatusOk(msg) { setUserStatus(msg ? `✅ ${msg}` : ''); }
 function setUserStatusErr(msg) { setUserStatus(msg ? `❌ ${msg}` : ''); }
@@ -462,6 +470,48 @@ function renderEjemplares() {
     `;
     tbody.appendChild(tr);
   }
+    // ✅ PRO MAX: también pinta la lista móvil (con los mismos filtrados/orden)
+  renderEjemplaresMobileList(filtrados);
+
+}
+function renderEjemplaresMobileList(filtrados){
+  const list = document.getElementById('ejemplares-list');
+  if (!list) return;
+
+  const isMobile = window.matchMedia && window.matchMedia('(max-width: 820px)').matches;
+  if (!isMobile) { list.innerHTML = ''; return; }
+
+  list.innerHTML = (filtrados || []).map(e => {
+    const portada = e.url_portada ? `${urlPortadaAbsoluta(e.url_portada)}?t=${Date.now()}` : '';
+    const notas = (e.notas || '').trim();
+
+    return `
+      <div class="ej-card" data-libro-id="${e.libro_id}" data-ejemplar-id="${e.ejemplar_id}">
+        ${portada
+          ? `<img class="ej-cover" src="${portada}" alt="Portada" />`
+          : `<div class="ej-cover" style="display:grid;place-items:center;color:#fff;background:#000;border-radius:12px;">📚</div>`
+        }
+
+        <div class="ej-main">
+          <div class="ej-title">${escapeHtml(e.titulo || '—')}</div>
+          <div class="ej-author">${escapeHtml(e.autores || '—')}</div>
+
+          <div class="ej-meta">
+            <span class="ej-pill">ISBN: ${escapeHtml(e.isbn || '—')}</span>
+            <span class="ej-pill">${escapeHtml(e.estado || '—')}</span>
+            <span class="ej-pill">${escapeHtml(e.ubicacion || '—')}</span>
+            ${notas ? `<span class="ej-pill">${escapeHtml(notas)}</span>` : ''}
+          </div>
+        </div>
+
+        <div class="ej-actions">
+          <button class="icon-btn m-open" type="button" title="Abrir ficha"><span class="icon-circle">⌁</span></button>
+          <button class="icon-btn m-read" type="button" title="Lectura"><span class="icon-circle">▶</span></button>
+          <button class="icon-btn m-loan" type="button" title="Préstamo"><span class="icon-circle">⇄</span></button>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 // ---------- Cargar ejemplares (rellena caché y renderiza) ----------
@@ -1471,6 +1521,28 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-detener')?.addEventListener('click', detenerEscaneo);
   document.getElementById('btn-login')?.addEventListener('click', hacerLogin);
   document.getElementById('btn-logout')?.addEventListener('click', hacerLogout);
+  document.getElementById('ejemplares-list')?.addEventListener('click', (e) => {
+  const card = e.target.closest('.ej-card');
+  if (!card) return;
+
+  const libroId = Number(card.dataset.libroId);
+  const ejemplarId = Number(card.dataset.ejemplarId);
+
+  if (e.target.closest('.m-read')) {
+    empezarLectura(libroId, ejemplarId);
+    return;
+  }
+  if (e.target.closest('.m-loan')) {
+    crearUIPrestamo();
+    prestamoContexto = { libroId, ejemplarId };
+    abrirUIPrestamo();
+    cargarUsuariosParaPrestamo();
+    return;
+  }
+
+  // click general o botón “open”
+  mostrarFicha(libroId, ejemplarId);
+});
 
   const tituloInput = document.getElementById('edit-libro-titulo');
   tituloInput?.addEventListener('input', () => {
