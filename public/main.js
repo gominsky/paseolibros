@@ -1570,9 +1570,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // abrir ficha
     mostrarFicha(fila.dataset.libroId, fila.dataset.ejemplarId);
   });
+  // Cerrar “alta” al tocar fuera (solo móvil)
+  document.addEventListener('click', (e) => {
+    if (!document.body.classList.contains('alta-visible')) return;
+
+    const dentroPanel = e.target.closest('.column-left .card');
+    const esFab = e.target.closest('#btn-toggle-alta');
+    if (!dentroPanel && !esFab) {
+      document.body.classList.remove('alta-visible');
+      const fab = document.getElementById('btn-toggle-alta');
+      if (fab) fab.textContent = '+';
+      try { detenerEscaneo(); } catch {}
+    }
+  });
 
   // Click en lecturas/préstamos home => abrir ficha (resuelve ejemplar si falta)
-document.querySelector('#tabla-lecturas-abiertas tbody')?.addEventListener('click', (e) => {
+  document.querySelector('#tabla-lecturas-abiertas tbody')?.addEventListener('click', (e) => {
   const tr = e.target.closest('tr');
   if (!tr) return;
 
