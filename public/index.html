@@ -208,15 +208,24 @@
         <div class="card">
           <div class="card-header card-header-inline">
             <h2>Ejemplares</h2>
+          
+            <div class="view-toggle" role="group" aria-label="Vista ejemplares">
+              <button id="ej-vista-lista" type="button" class="btn btn-ghost btn-sm">Lista</button>
+              <button id="ej-vista-grid" type="button" class="btn btn-ghost btn-sm">Portadas</button>
+            </div>
+          
             <div class="table-search">
               <input
                 id="buscador-ejemplares"
                 type="text"
-                placeholder="Buscar por título, autor, ISBN, notas..."
+                placeholder="Buscar por título, autor, ISBN, notas."
               />
             </div>
-            
           </div>
+          
+          <!-- 👇 IMPORTANTE: el grid va fuera del header -->
+          <div id="ejemplares-grid" class="ej-grid" style="display:none;"></div>
+          
           <p id="info-ejemplares" class="helper-text">
             Inicia sesión para ver tu biblioteca.
           </p>

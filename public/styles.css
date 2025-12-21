@@ -1512,3 +1512,61 @@ html, body{ max-width: 100%; overflow-x: hidden; }
     grid-template-columns: 1fr 1fr;
   }
 }
+/* ===== Ejemplares: grid de portadas ===== */
+.ej-grid{
+  margin-top: 12px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+}
+
+.ej-grid-item{
+  background: #0b0b0d;
+  border: 1.5px solid rgba(232,170,196,.55);
+  border-radius: 16px;
+  padding: 10px;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 18px 55px rgba(0,0,0,.40);
+}
+
+.ej-grid-cover{
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 12px;
+  object-fit: cover;
+  background: #000;
+  border: 1px solid rgba(255,255,255,.12);
+  display:block;
+}
+
+.ej-grid-title{
+  margin-top: 8px;
+  font-weight: 800;
+  font-size: .9rem;
+  line-height: 1.15;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow:hidden;
+  min-height: 2.3em;
+}
+
+.ej-grid-meta{
+  margin-top: 6px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  font-size: .75rem;
+  opacity: .9;
+}
+
+.ej-grid-pill{
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  padding: 4px 8px;
+  max-width: 100%;
+  overflow:hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

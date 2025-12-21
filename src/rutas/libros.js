@@ -12,7 +12,10 @@ router.get('/:id', async (req, res) => {
   if (!libroId) {
     return res.status(400).json({ error: 'ID de libro no válido' });
   }
-
+  if (!req.usuario?.id) {
+    return res.status(401).json({ error: 'Usuario no autenticado' });
+  }
+  
   try {
     // comprobamos que el usuario tiene al menos un ejemplar de este libro
     const tieneEjemplar = await pool.query(
@@ -45,6 +48,7 @@ router.get('/:id', async (req, res) => {
     console.error(error);
     res.status(500).json({ error: 'Error obteniendo libro' });
   }
+  
 });
 
 // Actualizar datos del libro
@@ -53,7 +57,10 @@ router.put('/:id', async (req, res) => {
   if (!libroId) {
     return res.status(400).json({ error: 'ID de libro no válido' });
   }
-
+  if (!req.usuario?.id) {
+    return res.status(401).json({ error: 'Usuario no autenticado' });
+  }
+  
   const {
     titulo,
     autores,

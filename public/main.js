@@ -6,6 +6,8 @@ let currentStream = null;
 
 let token = null;
 let usuarioActual = null; // { id, nombre_usuario, ... }
+// Vista ejemplares: 'lista' | 'grid'
+let vistaEjemplares = 'lista';
 
 const TOKEN_KEY = 'paseolibros_token';
 const USER_KEY = 'paseolibros_usuario';
@@ -472,6 +474,7 @@ function renderEjemplares() {
   }
     // ✅ PRO MAX: también pinta la lista móvil (con los mismos filtrados/orden)
   renderEjemplaresMobileList(filtrados);
+  renderEjemplaresGrid(filtrados);
 
 }
 function renderEjemplaresMobileList(filtrados){
@@ -1685,10 +1688,66 @@ function wireDeseosUI() {
     document.addEventListener('keydown', deseosKeyHandler);
   }
 }
+function renderEjemplaresGrid(lista) {
+  const grid = document.getElementById('ejemplares-grid');
+  const tablaWrap = document.querySelector('#tabla-ejemplares')?.closest('.table-wrapper');
+  const mobileList = document.getElementById('ejemplares-list'); // tu lista móvil (si existe)
+
+  if (!grid || !tablaWrap) return;
+
+  const showGrid = vistaEjemplares === 'grid';
+
+  grid.style.display = showGrid ? 'grid' : 'none';
+
+  // En modo grid ocultamos tabla y lista móvil
+  if (showGrid) {
+    tablaWrap.style.display = 'none';
+    if (mobileList) mobileList.style.display = 'none';
+  } else {
+    tablaWrap.style.display = '';
+    if (mobileList) mobileList.style.display = '';
+  }
+
+  if (!showGrid) return;
+
+  grid.innerHTML = (lista || []).map(e => {
+    const portada = e.url_portada ? `${urlPortadaAbsoluta(e.url_portada)}?t=${Date.now()}` : '';
+    return `
+      <div class="ej-grid-item" data-libro-id="${e.libro_id}" data-ejemplar-id="${e.ejemplar_id}">
+        ${portada
+          ? `<img class="ej-grid-cover" src="${portada}" alt="Portada">`
+          : `<div class="ej-grid-cover" style="display:grid;place-items:center;">📚</div>`
+        }
+        <div class="ej-grid-title">${escapeHtml(e.titulo || '—')}</div>
+        <div class="ej-grid-meta">
+          ${e.autores ? `<span class="ej-grid-pill">${escapeHtml(e.autores)}</span>` : ''}
+          ${e.tipo ? `<span class="ej-grid-pill">${escapeHtml(e.tipo)}</span>` : ''}
+          ${e.ubicacion ? `<span class="ej-grid-pill">${escapeHtml(e.ubicacion)}</span>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
 
 // ---------- Init ----------
 document.addEventListener('DOMContentLoaded', () => {
   wireDeseosUI();
+  document.getElementById('ej-vista-lista')?.addEventListener('click', () => {
+    vistaEjemplares = 'lista';
+    renderEjemplares();
+  });
+  
+  document.getElementById('ej-vista-grid')?.addEventListener('click', () => {
+    vistaEjemplares = 'grid';
+    renderEjemplares();
+  });
+  
+  document.getElementById('ejemplares-grid')?.addEventListener('click', (e) => {
+    const item = e.target.closest('.ej-grid-item');
+    if (!item) return;
+    mostrarFicha(Number(item.dataset.libroId), Number(item.dataset.ejemplarId));
+  });
+  
   // restaurar sesión
   try {
     const savedToken = localStorage.getItem(TOKEN_KEY);

@@ -334,7 +334,9 @@ router.get('/:id', async (req, res) => {
   if (!ejemplarId) {
     return res.status(400).json({ error: 'ID de ejemplar no válido' });
   }
-
+  if (!req.usuario?.id) {
+    return res.status(401).json({ error: 'Usuario no autenticado' });
+  }
   try {
     const resultado = await pool.query(
       `SELECT 
