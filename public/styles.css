@@ -1415,3 +1415,100 @@ html, body{ max-width: 100%; overflow-x: hidden; }
     border-color: rgba(255,255,255,.12) !important;
   }
 }
+/* ===== Modales Deseos (mismo estilo pro) ===== */
+.deseos-overlay{
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.65);
+  backdrop-filter: blur(2px);
+}
+
+.deseos-dialog{
+  width: min(720px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  background: #000;
+  color:#fff;
+  border-radius: 18px;
+  border: 1.5px solid rgba(232,170,196,.85);
+  box-shadow: 0 24px 70px rgba(0,0,0,.72), 0 0 0 3px rgba(232,170,196,.18);
+}
+
+.deseos-header{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  padding: 14px 14px 10px;
+}
+
+.deseos-toolbar{
+  padding: 0 14px 12px;
+  display: grid;
+  grid-template-columns: 1fr 180px 220px auto;
+  gap: 10px;
+}
+
+.deseos-toolbar input,
+.deseos-toolbar select,
+.deseo-form input,
+.deseo-form select{
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  color:#fff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  min-width: 0;
+}
+
+#info-deseos{ padding: 0 14px 10px; opacity: .85; margin:0; }
+
+.deseos-lista{
+  padding: 0 14px 14px;
+  overflow: auto;
+  min-height: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.deseo-item{
+  display:grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+.deseo-title{ font-weight: 800; }
+.deseo-meta{ margin-top: 4px; font-size: .86rem; opacity: .9; display:flex; gap:10px; flex-wrap: wrap; }
+.deseo-pill{
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(232,170,196,.14);
+  border: 1px solid rgba(232,170,196,.26);
+}
+
+.deseo-actions{ display:flex; gap: 8px; align-items:flex-start; }
+
+.deseo-form{ padding: 0 14px 14px; overflow:auto; min-height:0; }
+.deseos-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top: 10px; }
+
+@media (max-width: 820px){
+  .deseos-dialog{
+    width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  .deseos-toolbar{
+    grid-template-columns: 1fr 1fr;
+  }
+}

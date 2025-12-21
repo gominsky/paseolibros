@@ -43,7 +43,7 @@
       <button id="btn-tools" class="icon-btn" type="button" aria-label="Herramientas" title="Herramientas">
         <span class="icon-circle">⚙</span>
       </button>
-
+      
       <div id="tools-dropdown" class="tools-dropdown" aria-hidden="true">
         <button id="btn-exportar-csv" class="tools-item" type="button">Exportar CSV</button>
 
@@ -53,7 +53,9 @@
         </label>
 
         <div class="tools-sep" aria-hidden="true"></div>
+        <button id="btn-open-deseos" class="tools-item" type="button">Lista de deseos</button>
 
+<div class="tools-sep" aria-hidden="true"></div>
         <!-- Logout aquí (mantenemos el ID para tu JS) -->
         <button id="btn-logout" class="tools-item tools-danger" type="button">Cerrar sesión</button>
       </div>
@@ -468,6 +470,104 @@
     </div> <!-- /modal-dialog -->
   </div> <!-- /modal-ficha -->
   <button id="btn-toggle-alta" class="fab-plus" type="button" aria-label="Añadir ejemplar">+</button>
+  <!-- Modal Deseos -->
+<div id="deseos-overlay" class="deseos-overlay" style="display:none;">
+  <div class="deseos-dialog" role="dialog" aria-modal="true" aria-label="Lista de deseos">
+    <div class="deseos-header">
+      <h3>Lista de deseos</h3>
+      <button id="btn-cerrar-deseos" class="icon-btn" type="button" title="Cerrar" aria-label="Cerrar">
+        <span class="icon-circle">✕</span>
+      </button>
+    </div>
+
+    <div class="deseos-toolbar">
+      <input id="deseos-q" type="text" placeholder="Buscar por título o autor…" />
+      <select id="deseos-tipo">
+        <option value="">Tipo: todos</option>
+        <option value="libro">Libro</option>
+        <option value="comic">Cómic</option>
+        <option value="manga">Manga</option>
+        <option value="revista">Revista</option>
+        <option value="otro">Otro</option>
+      </select>
+      <input id="deseos-ubicacion" type="text" placeholder="Ubicación (opcional)" />
+      <button id="btn-nuevo-deseo" class="btn btn-secondary btn-sm" type="button">+ Añadir</button>
+    </div>
+
+    <p id="info-deseos" class="muted"></p>
+
+    <div id="deseos-lista" class="deseos-lista"></div>
+  </div>
+</div>
+
+<!-- Modal Form Deseo -->
+<div id="deseo-form-overlay" class="deseos-overlay" style="display:none;">
+  <div class="deseos-dialog" role="dialog" aria-modal="true" aria-label="Nuevo deseo">
+    <div class="deseos-header">
+      <h3>Nuevo deseo</h3>
+      <button id="btn-cerrar-deseo-form" class="icon-btn" type="button" title="Cerrar" aria-label="Cerrar">
+        <span class="icon-circle">✕</span>
+      </button>
+    </div>
+
+    <div class="deseo-form">
+      <div class="form-group">
+        <label for="deseo-titulo">Título</label>
+        <input id="deseo-titulo" type="text" placeholder="Ej: Sandman" />
+      </div>
+
+      <div class="form-group">
+        <label for="deseo-autores">Autor/es</label>
+        <input id="deseo-autores" type="text" placeholder="Ej: Neil Gaiman" />
+      </div>
+
+      <div class="form-group">
+        <label for="deseo-isbn">ISBN (opcional)</label>
+        <input id="deseo-isbn" type="text" placeholder="978…" />
+      </div>
+
+      <div class="form-group">
+        <label for="deseo-tipo">Tipo</label>
+        <select id="deseo-tipo">
+          <option value="libro">Libro</option>
+          <option value="comic">Cómic</option>
+          <option value="manga">Manga</option>
+          <option value="revista">Revista</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="deseo-ubicacion">Ubicación (opcional)</label>
+        <input id="deseo-ubicacion" type="text" placeholder="Ej: Salón - Estantería 2" />
+      </div>
+
+      <div class="form-group">
+        <label for="deseo-prioridad">Prioridad</label>
+        <select id="deseo-prioridad">
+          <option value="1">Alta</option>
+          <option value="2" selected>Media</option>
+          <option value="3">Baja</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="deseo-notas">Notas</label>
+        <input id="deseo-notas" type="text" placeholder="Opcional" />
+      </div>
+
+      <div class="form-group">
+        <label for="deseo-portada">URL portada (opcional)</label>
+        <input id="deseo-portada" type="text" placeholder="https://…" />
+      </div>
+
+      <div class="deseos-actions">
+        <button id="btn-cancelar-deseo" class="btn btn-ghost btn-sm" type="button">Cancelar</button>
+        <button id="btn-guardar-deseo" class="btn btn-secondary btn-sm" type="button">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
 

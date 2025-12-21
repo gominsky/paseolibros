@@ -13,6 +13,7 @@ import ejemplaresRutas from './rutas/ejemplares.js';
 import librosRutas from './rutas/libros.js';
 import lecturasRutas from './rutas/lecturas.js';
 import prestamosRutas from './rutas/prestamos.js';
+import deseosRouter from './rutas/deseos.js';
 const app = express();
 
 const uploadsDir = path.join(process.cwd(), 'uploads');
@@ -62,7 +63,7 @@ app.use('/api/ejemplares', ejemplaresRutas);
 app.use('/api/libros', librosRutas);
 app.use('/api', lecturasRutas);   // /api/usuarios/:id/lecturas-abiertas, etc.
 app.use('/api', prestamosRutas);  // /api/usuarios/:id/prestamos-activos, etc.
-
+app.use('/api', deseosRouter);
 // Endpoint de salud
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, mensaje: 'PaseoLibros API viva 😄' });

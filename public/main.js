@@ -1494,9 +1494,201 @@ async function mostrarFicha(libroId, ejemplarId) {
 
   abrirModalFicha();
 }
+// ===== Deseos (Wishlist) =====
+let deseosKeyHandler = null;
+
+function abrirOverlay(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = 'flex';
+  document.documentElement.style.overflow = 'hidden';
+}
+
+function cerrarOverlay(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = 'none';
+  document.documentElement.style.overflow = '';
+}
+
+async function cargarDeseos() {
+  if (!usuarioActual?.id) return;
+
+  const info = document.getElementById('info-deseos');
+  const lista = document.getElementById('deseos-lista');
+  if (!info || !lista) return;
+
+  const q = document.getElementById('deseos-q')?.value?.trim() || '';
+  const tipo = document.getElementById('deseos-tipo')?.value || '';
+  const ubicacion = document.getElementById('deseos-ubicacion')?.value?.trim() || '';
+
+  info.textContent = 'Cargando...';
+  lista.innerHTML = '';
+
+  const params = new URLSearchParams();
+  if (q) params.set('q', q);
+  if (tipo) params.set('tipo', tipo);
+  if (ubicacion) params.set('ubicacion', ubicacion);
+
+  const res = await fetch(`${API_BASE}/api/usuarios/${usuarioActual.id}/deseos?${params.toString()}`, {
+    headers: getHeaders(false),
+  });
+  const data = await res.json();
+
+  if (!res.ok) {
+    info.textContent = data.error || 'Error cargando deseos';
+    return;
+  }
+
+  info.textContent = `Deseos: ${data.length}`;
+  lista.innerHTML = data.map(d => `
+    <div class="deseo-item" data-id="${d.id}">
+      <div>
+        <div class="deseo-title">${escapeHtml(d.titulo || '—')}</div>
+        <div class="deseo-meta">
+          ${d.autores ? `<span>${escapeHtml(d.autores)}</span>` : ''}
+          ${d.tipo ? `<span class="deseo-pill">${escapeHtml(d.tipo)}</span>` : ''}
+          ${d.ubicacion ? `<span class="deseo-pill">${escapeHtml(d.ubicacion)}</span>` : ''}
+          <span class="deseo-pill">Prioridad: ${d.prioridad ?? 2}</span>
+        </div>
+        ${d.notas ? `<div style="margin-top:6px; opacity:.85;">${escapeHtml(d.notas)}</div>` : ''}
+      </div>
+      <div class="deseo-actions">
+        <button class="icon-btn deseo-del" type="button" title="Eliminar"><span class="icon-circle">✕</span></button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function crearDeseoDesdeForm() {
+  const titulo = document.getElementById('deseo-titulo')?.value?.trim() || '';
+  const autores = document.getElementById('deseo-autores')?.value?.trim() || '';
+  const isbn = document.getElementById('deseo-isbn')?.value?.trim() || '';
+  const tipo = document.getElementById('deseo-tipo')?.value || 'libro';
+  const ubicacion = document.getElementById('deseo-ubicacion')?.value?.trim() || '';
+  const prioridad = Number(document.getElementById('deseo-prioridad')?.value || 2);
+  const notas = document.getElementById('deseo-notas')?.value?.trim() || '';
+  const url_portada = document.getElementById('deseo-portada')?.value?.trim() || '';
+
+  if (!titulo) {
+    alert('El título es obligatorio.');
+    return;
+  }
+
+  const res = await fetch(`${API_BASE}/api/deseos`, {
+    method: 'POST',
+    headers: getHeaders(true),
+    body: JSON.stringify({
+      titulo,
+      autores: autores || null,
+      isbn: isbn || null,
+      tipo: tipo || 'libro',
+      ubicacion: ubicacion || null,
+      prioridad: Number.isFinite(prioridad) ? prioridad : 2,
+      notas: notas || null,
+      url_portada: url_portada || null
+    })
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    alert(data.error || 'Error creando deseo');
+    return;
+  }
+
+  cerrarOverlay('deseo-form-overlay');
+  abrirOverlay('deseos-overlay');
+  await cargarDeseos();
+}
+
+async function borrarDeseo(id) {
+  const res = await fetch(`${API_BASE}/api/deseos/${id}`, {
+    method: 'DELETE',
+    headers: getHeaders(false),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    alert(data.error || 'Error eliminando deseo');
+    return;
+  }
+  await cargarDeseos();
+}
+
+function wireDeseosUI() {
+  // Abrir desde herramientas
+  document.getElementById('btn-open-deseos')?.addEventListener('click', () => {
+    abrirOverlay('deseos-overlay');
+    cargarDeseos();
+  });
+
+  // Cerrar overlay lista
+  document.getElementById('btn-cerrar-deseos')?.addEventListener('click', () => cerrarOverlay('deseos-overlay'));
+
+  // Click fuera para cerrar
+  document.getElementById('deseos-overlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'deseos-overlay') cerrarOverlay('deseos-overlay');
+  });
+
+  // Buscar/filtros (debounce simple)
+  let t = null;
+  ['deseos-q', 'deseos-ubicacion'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', () => {
+      clearTimeout(t);
+      t = setTimeout(cargarDeseos, 200);
+    });
+  });
+  document.getElementById('deseos-tipo')?.addEventListener('change', cargarDeseos);
+
+  // Abrir formulario nuevo deseo
+  document.getElementById('btn-nuevo-deseo')?.addEventListener('click', () => {
+    // limpiar
+    ['deseo-titulo','deseo-autores','deseo-isbn','deseo-ubicacion','deseo-notas','deseo-portada'].forEach(id=>{
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    const pr = document.getElementById('deseo-prioridad'); if (pr) pr.value = '2';
+    const tp = document.getElementById('deseo-tipo'); if (tp) tp.value = 'libro';
+
+    cerrarOverlay('deseos-overlay');
+    abrirOverlay('deseo-form-overlay');
+    document.getElementById('deseo-titulo')?.focus();
+  });
+
+  // Cerrar formulario
+  document.getElementById('btn-cerrar-deseo-form')?.addEventListener('click', () => cerrarOverlay('deseo-form-overlay'));
+  document.getElementById('btn-cancelar-deseo')?.addEventListener('click', () => cerrarOverlay('deseo-form-overlay'));
+
+  // Click fuera en form
+  document.getElementById('deseo-form-overlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'deseo-form-overlay') cerrarOverlay('deseo-form-overlay');
+  });
+
+  // Guardar
+  document.getElementById('btn-guardar-deseo')?.addEventListener('click', crearDeseoDesdeForm);
+
+  // Delegación eliminar
+  document.getElementById('deseos-lista')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.deseo-del');
+    if (!btn) return;
+    const item = e.target.closest('.deseo-item');
+    const id = Number(item?.dataset?.id);
+    if (!id) return;
+    if (confirm('¿Eliminar este deseo?')) borrarDeseo(id);
+  });
+
+  // ESC para cerrar overlays
+  if (!deseosKeyHandler) {
+    deseosKeyHandler = (e) => {
+      if (e.key !== 'Escape') return;
+      cerrarOverlay('deseo-form-overlay');
+      cerrarOverlay('deseos-overlay');
+    };
+    document.addEventListener('keydown', deseosKeyHandler);
+  }
+}
 
 // ---------- Init ----------
 document.addEventListener('DOMContentLoaded', () => {
+  wireDeseosUI();
   // restaurar sesión
   try {
     const savedToken = localStorage.getItem(TOKEN_KEY);

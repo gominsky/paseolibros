@@ -193,7 +193,7 @@ async function crearLibroEnBD(datosLibro) {
 router.post('/', async (req, res) => {
   // usuario viene del token, NO del body
   const usuario_id = req.usuario?.id;
-  let { isbn, estado, ubicacion, notas } = req.body;
+  let { isbn, estado, ubicacion, notas, tipo } = req.body;
 
   if (!usuario_id) {
     return res.status(401).json({ error: 'Usuario no autenticado' });
@@ -233,19 +233,19 @@ router.post('/', async (req, res) => {
       libro = await crearLibroEnBD(datosLibro);
     }
 
-    // 3. Crear el ejemplar para el usuario autenticado
-    const resultadoEjemplar = await pool.query(
-      `INSERT INTO ejemplares (usuario_id, libro_id, estado, ubicacion, notas)
-       VALUES ($1, $2, COALESCE($3, 'propio'), $4, $5)
-       RETURNING *`,
-      [
-        usuario_id,
-        libro.id,
-        estado || null,
-        ubicacion || null,
-        notas || null,
-      ]
-    );
+const resultadoEjemplar = await pool.query(
+  `INSERT INTO ejemplares (usuario_id, libro_id, estado, ubicacion, notas, tipo)
+   VALUES ($1, $2, COALESCE($3, 'propio'), $4, $5, COALESCE($6, 'libro'))
+   RETURNING *`,
+  [
+    usuario_id,
+    libro.id,
+    estado || null,
+    ubicacion || null,
+    notas || null,
+    tipo || null,
+  ]
+);
 
     const ejemplar = resultadoEjemplar.rows[0];
 

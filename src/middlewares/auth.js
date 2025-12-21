@@ -2,11 +2,19 @@
 import jwt from 'jsonwebtoken';
 
 export function verificarToken(req, res, next) {
-  const cabecera = req.headers['authorization'];
-  const token = cabecera && cabecera.split(' ')[1]; // "Bearer xxx"
+  // Bearer token (Authorization: Bearer xxx)
+  const auth = req.headers.authorization || '';
+  const [tipo, bearerToken] = auth.split(' ');
+
+  // Alternativos (por compatibilidad con tu frontend actual)
+  const headerToken =
+    req.headers['x-access-token'] ||
+    req.headers['authorization-token'] ||
+    '';
+
+  const token = (tipo === 'Bearer' && bearerToken) ? bearerToken : headerToken;
 
   if (!token) {
-    // aquí se quedaría si el frontend no manda Authorization
     return res.status(401).json({ error: 'Token requerido' });
   }
 
@@ -16,7 +24,6 @@ export function verificarToken(req, res, next) {
       process.env.JWT_SECRETO || 'cambia_esto_en_.env'
     );
 
-    // guardamos los datos del usuario en la request
     req.usuario = {
       id: payload.id,
       nombre_usuario: payload.nombre_usuario,
