@@ -1598,3 +1598,92 @@ html, body{ max-width: 100%; overflow-x: hidden; }
   width: 38px;
   height: 38px;
 }
+
+
+/* =========================================================
+   Ajustes solicitados (móvil + modal + ejemplares)
+   ========================================================= */
+
+/* 1) Título con fuente elegante */
+.logo-text h1{
+  font-family: "Fraunces", "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  letter-spacing: .2px;
+}
+
+/* 2) Móvil: sin icono Pdl; título más pequeño y debajo de botones */
+@media (max-width: 820px){
+  .logo-icon{ display:none !important; }
+  .app-header{
+    display:grid;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "actions"
+      "title";
+    gap:10px;
+    padding: 12px 12px !important;
+  }
+  .header-right{ grid-area: actions; justify-self: end; display:flex; align-items:center; gap:10px; flex-wrap:nowrap; }
+  .logo.header-center{ grid-area: title; justify-self: center; text-align:center; }
+  .logo{ gap:0; }
+  .logo-text h1{ font-size: 1.0rem !important; line-height:1.15; }
+  .logo-text p{ display:none; } /* deja aire al buscador */
+}
+
+/* 3) Card de Ejemplares (home): menos oscura (sombra más suave) */
+.column-right > .card:first-child{
+  box-shadow: 0 10px 22px rgba(0,0,0,.26) !important;
+  background: rgba(214,165,181,.86) !important;
+}
+
+/* 4) Modal: botón "Añadir" centrado de verdad */
+.modal-cover-upload{
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align:center !important;
+  line-height: 1 !important;
+}
+@media (max-width: 820px){
+  .modal-cover-upload{ height: 36px; }
+}
+
+/* 5) Modal: botón cerrar siempre visible y fácil de pulsar */
+.modal-close{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  line-height: 1;
+  z-index: 5;
+  background: rgba(0,0,0,.72);
+  border: 1px solid rgba(214,165,181,.65);
+}
+.modal-close:hover{ filter: brightness(1.06); }
+
+/* 6) Modal Lecturas/Préstamos: nunca desbordar a la derecha */
+#lecturas-detalle,
+#prestamos-detalle{
+  white-space: pre-wrap !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  max-width: 100% !important;
+  display:block;
+}
+.modal-body{ overflow-x: hidden; }
+.card-inside-modal{ overflow:hidden; }
+
+/* 7) Ejemplares: máximo “5 filas visibles” y el resto scroll (lista móvil + tabla desktop) */
+#ejemplares-list{
+  max-height: 360px;          /* ~5–6 elementos según densidad */
+  overflow-y: auto;
+  padding-right: 6px;         /* para que no tape la scrollbar */
+}
+.table-wrapper{
+  max-height: 360px;
+  overflow: auto;
+}
