@@ -511,6 +511,7 @@ function renderEjemplaresMobileList(filtrados){
           <button class="icon-btn m-open" type="button" title="Abrir ficha"><span class="icon-circle">⌁</span></button>
           <button class="icon-btn m-read" type="button" title="Lectura"><span class="icon-circle">▶</span></button>
           <button class="icon-btn m-loan" type="button" title="Préstamo"><span class="icon-circle">⇄</span></button>
+          <button class="icon-btn m-del" type="button" title="Borrar"><span class="icon-circle">✕</span></button>
         </div>
       </div>
     `;
@@ -1794,7 +1795,11 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarUsuariosParaPrestamo();
     return;
   }
-
+  if (e.target.closest('.m-del')) {
+    e.stopPropagation();
+    eliminarEjemplar(ejemplarId);
+    return;
+  }
   // click general o botón “open”
   mostrarFicha(libroId, ejemplarId);
 });

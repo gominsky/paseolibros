@@ -1768,4 +1768,57 @@ html, body{ max-width: 100%; overflow-x: hidden; }
       content: none !important;
     }
   }
+/* =========================
+   EJEMPLARES (PORTADAS): scroll interno del bloque
+   ========================= */
+
+/* el contenedor del grid debe poder scrollear */
+#ejemplares-grid{
+  max-height: 62vh;        /* ajusta a gusto */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-right: 4px;      /* evita que la barra tape algo */
+}
+
+/* opcional: también limita la lista móvil cuando NO es grid */
+#ejemplares-list{
+  max-height: 62vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+/* =========================
+   HEADER MÓVIL: una sola línea, botones alineados
+   ========================= */
+   @media (max-width: 820px){
+    .app-header{
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      gap: 10px !important;
+      padding: 10px 12px !important;
+    }
   
+    .header-center{
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+    }
+  
+    /* título compacto sin romper línea */
+    .logo-text h1{
+      font-size: 1.02rem !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+  
+    .header-right{
+      flex: 0 0 auto !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      flex-wrap: nowrap !important;
+    }
+  }
+    
