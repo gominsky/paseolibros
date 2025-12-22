@@ -508,7 +508,6 @@ function renderEjemplaresMobileList(filtrados){
         </div>
 
         <div class="ej-actions">
-          <button class="icon-btn m-open" type="button" title="Abrir ficha"><span class="icon-circle">⌁</span></button>
           <button class="icon-btn m-read" type="button" title="Lectura"><span class="icon-circle">▶</span></button>
           <button class="icon-btn m-loan" type="button" title="Préstamo"><span class="icon-circle">⇄</span></button>
           <button class="icon-btn m-del" type="button" title="Borrar"><span class="icon-circle">✕</span></button>

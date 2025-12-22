@@ -1821,4 +1821,36 @@ html, body{ max-width: 100%; overflow-x: hidden; }
       flex-wrap: nowrap !important;
     }
   }
+  /* =========================
+   HEADER DESKTOP: todo en una línea (no wrap)
+   ========================= */
+@media (min-width: 821px){
+  .app-header{
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 14px !important;
+  }
+
+  .header-center{
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  /* Evita que el título empuje botones a otra fila */
+  .logo-text h1{
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .header-right{
+    flex: 0 0 auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    flex-wrap: nowrap !important; /* clave */
+  }
+}
+
     
