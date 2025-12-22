@@ -33,9 +33,18 @@
   <div class="header-right">
     <div id="user-bar" class="user-bar" style="display:none;">
       <div class="user-bar-left">
-        <span class="user-avatar">👤</span>
         <span id="nombre-usuario-actual" class="user-name"></span>
       </div>
+    </div>
+
+
+    <div class="view-toggle header-view-toggle" role="group" aria-label="Vista ejemplares">
+      <button id="ej-vista-lista" type="button" class="icon-btn" aria-label="Vista lista" title="Vista lista">
+        <span class="icon-circle">≣</span>
+      </button>
+      <button id="ej-vista-grid" type="button" class="icon-btn" aria-label="Vista portadas" title="Vista portadas">
+        <span class="icon-circle">▦</span>
+      </button>
     </div>
 
     <!-- Herramientas (dropdown) -->
@@ -208,13 +217,7 @@
         <div class="card">
           <div class="card-header card-header-inline">
             <h2>Ejemplares</h2>
-          
-            <div class="view-toggle" role="group" aria-label="Vista ejemplares">
-              <button id="ej-vista-lista" type="button" class="btn btn-ghost btn-sm">Lista</button>
-              <button id="ej-vista-grid" type="button" class="btn btn-ghost btn-sm">Portadas</button>
-            </div>
-          
-            <div class="table-search">
+<div class="table-search">
               <input
                 id="buscador-ejemplares"
                 type="text"

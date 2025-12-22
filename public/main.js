@@ -121,13 +121,21 @@ function urlPortadaAbsoluta(url) {
   return `${API_BASE}${url}`; // /uploads/xxx.jpg
 }
 
-function getHeaders(includeJson = false) {
+function getHeaders(json = true) {
   const headers = {};
-  if (includeJson) headers['Content-Type'] = 'application/json';
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (json) headers['Content-Type'] = 'application/json';
+
+  if (token) {
+    // Variante 1 (Bearer)
+    headers['Authorization'] = `Bearer ${token}`;
+
+    // Variante 2 (sin Bearer) + header alternativo común
+    headers['X-Access-Token'] = token;
+    headers['Authorization-Token'] = token; // opcional defensivo
+  }
+
   return headers;
 }
-
 
 function toSortable(v) {
   if (v === null || v === undefined) return '';
@@ -230,8 +238,8 @@ async function hacerLogin() {
     usuarioActual = data.usuario || data.user || null;
 
     try {
-      localStorage.setItem(TOKEN_KEY, token || '');
-      localStorage.setItem(USER_KEY, JSON.stringify(usuarioActual || null));
+      localStorage.setItem(TOKEN_KEY, data.token);
+      localStorage.setItem(USER_KEY, JSON.stringify(data.usuario));
     } catch {}
 
     if (mensaje) mensaje.textContent = 'Login correcto ✅';
@@ -1689,6 +1697,10 @@ function renderEjemplaresGrid(lista) {
 
   const showGrid = vistaEjemplares === 'grid';
 
+  // ✅ Estado global para CSS (móvil): evita que se vean lista + grid a la vez
+  document.body.classList.toggle('vista-ej-grid', showGrid);
+
+
   grid.style.display = showGrid ? 'grid' : 'none';
 
   // En modo grid ocultamos tabla y lista móvil
@@ -1744,13 +1756,10 @@ document.addEventListener('DOMContentLoaded', () => {
   try {
     const savedToken = localStorage.getItem(TOKEN_KEY);
     const savedUser = localStorage.getItem(USER_KEY);
-    try {
-  const savedToken = localStorage.getItem(TOKEN_KEY);
-  const savedUser = localStorage.getItem(USER_KEY);
-  token = savedToken || null;
-  usuarioActual = savedUser ? JSON.parse(savedUser) : null;
-} catch {}
-
+    if (savedToken && savedUser) {
+      token = savedToken;
+      usuarioActual = JSON.parse(savedUser);
+    }
   } catch {}
 
   actualizarUIAutenticacion();
