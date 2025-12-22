@@ -1570,3 +1570,138 @@ html, body{ max-width: 100%; overflow-x: hidden; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* ✅ Modal ficha: centrar bien el label-botón "Añadir" (móvil y desktop) */
+.modal-cover-upload{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1;
+}
+
+/* En móvil, asegura el alto y que no “baila” el texto */
+@media (max-width: 820px){
+  .modal-cover-upload{
+    height: 34px;
+    padding: 8px 10px;
+    width: 120px; /* ya lo tienes, lo reafirmamos */
+  }
+}
+/* ✅ Evitar desbordes en lecturas/préstamos dentro del modal */
+#lecturas-detalle,
+#prestamos-detalle{
+  white-space: pre-wrap;       /* permite salto de línea */
+  overflow-wrap: anywhere;     /* rompe palabras largas */
+  word-break: break-word;
+  max-width: 100%;
+}
+
+/* Asegura que las cards dentro del modal puedan “encoger” */
+.card-inside-modal,
+.card-inside-modal *{
+  min-width: 0;
+}
+/* ✅ Home: card de Ejemplares más compacta (sin tanta “pesadez”) */
+.column-right > .card:first-child{
+  padding: 14px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.28);
+}
+
+/* Un pelín menos aire en el header de Ejemplares */
+.column-right > .card:first-child .card-header-inline{
+  margin-bottom: 8px;
+  gap: 8px;
+}
+/* ✅ Móvil: toggles Lista/Portadas como iconos compactos */
+@media (max-width: 820px){
+  .view-toggle{
+    display: inline-flex;
+    gap: 6px;
+  }
+
+  .view-toggle .btn{
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border-radius: 999px;
+    font-size: 0;            /* oculta texto visualmente */
+    display: inline-grid;
+    place-items: center;
+  }
+
+  #ej-vista-lista::before{
+    content: "≣";
+    font-size: 16px;
+    line-height: 1;
+  }
+  #ej-vista-grid::before{
+    content: "▦";
+    font-size: 16px;
+    line-height: 1;
+  }
+}
+/* ✅ Header móvil más elegante y usable */
+@media (max-width: 820px){
+  .app-header{
+    padding: 10px 12px !important;
+    border-radius: 18px;
+  }
+
+  .logo-icon{
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+  }
+
+  .logo .logo-text h1{
+    font-size: 1.05rem !important;
+    line-height: 1.1;
+  }
+
+  /* User bar más minimal */
+  .user-bar{
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  .user-name{
+    display: none; /* evita que descuadre el header */
+  }
+}
+/* =========================
+   Escáner: desktop contenido / móvil PRO
+   ========================= */
+
+/* Desktop / pantallas grandes: tamaño razonable */
+@media (min-width: 821px){
+  #scanner.scanner{
+    padding: 18px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* limitar el “panel” del escáner */
+  #scanner.scanner[style*="display:block"],
+  #scanner.scanner[style*="display: block"]{
+    grid-template-rows: auto auto auto;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  /* vídeo NO gigante */
+  #scanner video#video,
+  #scanner .scanner-video{
+    height: 360px !important;
+    max-height: 360px !important;
+    width: 100% !important;
+  }
+}
+
+/* Móvil: mantenerlo grande (como te gusta) */
+@media (max-width: 820px){
+  #scanner video#video,
+  #scanner .scanner-video{
+    height: min(65vh, 520px) !important;
+    max-height: min(65vh, 520px) !important;
+    width: 100% !important;
+  }
+}
