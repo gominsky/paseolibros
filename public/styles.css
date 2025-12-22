@@ -1687,3 +1687,85 @@ html, body{ max-width: 100%; overflow-x: hidden; }
   max-height: 360px;
   overflow: auto;
 }
+
+/* =========================
+   Desktop (web): escáner integrado en la columna (no overlay)
+   ========================= */
+@media (min-width: 821px){
+  #scanner.scanner{
+    position: static !important;
+    inset: auto !important;
+    background: transparent !important;
+    z-index: auto !important;
+    padding: 0 !important;
+    margin-top: 10px;
+    border-radius: 14px;
+  }
+
+  /* Cuando tu JS lo pone a display:block, NO lo conviertas en overlay grid */
+  #scanner.scanner[style*="display:block"],
+  #scanner.scanner[style*="display: block"]{
+    display: block !important;
+  }
+
+  /* Vídeo del tamaño de la sección */
+  #scanner .scanner-video,
+  #scanner video#video{
+    width: 100% !important;
+    height: 240px !important;
+    max-height: 240px !important;
+    border-radius: 14px;
+    object-fit: cover;
+  }
+
+  /* Quita guías de overlay en desktop */
+  #scanner::before{ display: none !important; }
+  #scanner .scanner-video::before,
+  #scanner .scanner-video::after,
+  #scanner video#video::before,
+  #scanner video#video::after{ display: none !important; content: none !important; }
+
+  /* Botón detener no necesita ocupar todo */
+  #scanner #btn-detener{ width: auto; }
+}
+/* =========================
+   SCANNER: en desktop dentro de la card (no overlay)
+   ========================= */
+   @media (min-width: 761px){
+    /* mata el overlay fijo */
+    #scanner.scanner{
+      position: static !important;
+      inset: auto !important;
+      background: transparent !important;
+      padding: 0 !important;
+      z-index: auto !important;
+      border-radius: 0 !important;
+    }
+  
+    /* cuando JS pone display:block → no lo conviertas en grid overlay */
+    #scanner.scanner[style*="display:block"],
+    #scanner.scanner[style*="display: block"]{
+      display: block !important;
+      grid-template-rows: none !important;
+      gap: 0 !important;
+    }
+  
+    /* vídeo ajustado al ancho de la sección */
+    #scanner .scanner-video,
+    #scanner video#video{
+      width: 100% !important;
+      height: 240px !important;   /* ajusta si lo quieres más bajo/alto */
+      border-radius: 14px !important;
+      object-fit: cover !important;
+    }
+  
+    /* desactiva “guías” de overlay */
+    #scanner::before,
+    #scanner .scanner-video::before,
+    #scanner .scanner-video::after,
+    #scanner video#video::before,
+    #scanner video#video::after{
+      content: none !important;
+    }
+  }
+  
