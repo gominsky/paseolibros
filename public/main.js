@@ -1902,7 +1902,22 @@ document.addEventListener('DOMContentLoaded', () => {
       renderEjemplares();
     });
   }
-
+    // Ordenación compacta (móvil): título / autor / recientes
+    const sortSel = document.getElementById('sort-ejemplares');
+    if (sortSel) {
+      // valor inicial coherente con el estado actual
+      sortSel.value = `${sortEjemplares.key}:${sortEjemplares.dir}`;
+      sortSel.addEventListener('change', () => {
+        const [key, dir] = String(sortSel.value).split(':');
+        if (!key || !dir) return;
+        sortEjemplares.key = key;
+        sortEjemplares.dir = dir;
+        // actualiza iconos de cabecera (desktop) si existen
+        const table = document.getElementById('tabla-ejemplares');
+        if (table) actualizarIconosOrden(table);
+        renderEjemplares();
+      });
+    }
   // Clicks en tabla ejemplares (acciones vs abrir ficha)
   const tbodyEjemplares = document.querySelector('#tabla-ejemplares tbody');
   tbodyEjemplares?.addEventListener('click', (e) => {

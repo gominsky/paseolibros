@@ -221,6 +221,15 @@
                 placeholder="Buscar por título, autor, ISBN, notas."
               />
             </div>
+            <div class="sort-mini" aria-label="Ordenar ejemplares">
+                            <select id="sort-ejemplares" class="sort-select" title="Ordenar" aria-label="Ordenar">
+                              <option value="creado_en:desc">Recientes</option>
+                              <option value="titulo:asc">Título (A–Z)</option>
+                              <option value="titulo:desc">Título (Z–A)</option>
+                              <option value="autores:asc">Autor (A–Z)</option>
+                              <option value="autores:desc">Autor (Z–A)</option>
+                            </select>
+                          </div>
           </div>
           
           <!-- 👇 IMPORTANTE: el grid va fuera del header -->

@@ -1881,3 +1881,25 @@ select::placeholder,
 input::placeholder {
   color: rgba(255,255,255,.65);
 }
+/* Ordenación mini (móvil / discreta) */
+.sort-mini{
+  display: inline-flex;
+  align-items: center;
+}
+
+.sort-select{
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(214,165,181,65);
+  background: rgba(0,0,0,78);
+  color: #fff;
+  font-weight: 700;
+  font-size: .9rem;
+  max-width: 160px;
+}
+
+/* En desktop puedes dejarlo visible o hacerlo más sutil */
+@media (min-width: 821px){
+  .sort-select{ max-width: 190px; }
+}
