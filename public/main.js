@@ -798,7 +798,7 @@ async function cargarLecturasAbiertas() {
       return;
     }
 
-    const maxFilas = 4;
+    const maxFilas = 10;
     const aMostrar = lecturas.slice(0, maxFilas);
     info.textContent =
       lecturas.length > maxFilas
@@ -850,7 +850,7 @@ async function cargarPrestamosActivos() {
       return;
     }
 
-    const maxFilas = 4;
+    const maxFilas = 10;
     const aMostrar = prestamos.slice(0, maxFilas);
     info.textContent =
       prestamos.length > maxFilas
