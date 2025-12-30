@@ -367,6 +367,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+
 // Actualizar un ejemplar (estado / ubicación / notas)
 router.put('/:id', async (req, res) => {
   const ejemplarId = Number(req.params.id);
@@ -381,8 +382,8 @@ router.put('/:id', async (req, res) => {
       `UPDATE ejemplares
        SET
          estado = COALESCE($1, estado),
-         ubicacion = COALESCE($2, ubicacion),
-         notas = COALESCE($3, notas)
+         ubicacion = COALESCE(NULLIF($2, ''), ubicacion),
+         notas = COALESCE(NULLIF($3, ''), notas)
        WHERE id = $4
          AND usuario_id = $5
          AND activo = TRUE

@@ -1853,4 +1853,32 @@ html, body{ max-width: 100%; overflow-x: hidden; }
   }
 }
 
-    
+/* --- Fix: desplegables legibles (texto blanco sobre fondo blanco) --- */
+select,
+select:focus,
+select:active {
+  background-color: #000 !important;
+  color: #fff !important;
+  border-color: #444;
+}
+
+/* Opciones del select (en algunos navegadores aplica, en otros es limitado) */
+select option {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+
+/* Si usas inputs con datalist, esto ayuda al input (el popup depende del navegador) */
+input[list],
+input[list]:focus {
+  background-color: #000 !important;
+  color: #fff !important;
+  border-color: #444;
+}
+
+/* Placeholder legible */
+select::placeholder,
+input::placeholder {
+  color: rgba(255,255,255,.65);
+}
+   

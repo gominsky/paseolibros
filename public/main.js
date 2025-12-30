@@ -175,6 +175,17 @@ function actualizarUIAutenticacion() {
   const nombreSpan = document.getElementById('nombre-usuario-actual');
 
   const loggedIn = Boolean(token && usuarioActual);
+  // Refresco suave de portadas (1 vez por sesión)
+if (!sessionStorage.getItem('portadas_refrescadas')) {
+  sessionStorage.setItem('portadas_refrescadas', '1');
+
+  fetch(`${API_BASE}/api/ejemplares/refrescar-portadas?limite=10`, {
+    method: 'POST',
+    headers: getHeaders(false),
+  })
+    .then(() => cargarEjemplares(usuarioActual.id))
+    .catch(() => {});
+}
 
   // Modal de login + barra superior
   if (loginModal) loginModal.style.display = loggedIn ? 'none' : 'flex';
@@ -238,8 +249,10 @@ async function hacerLogin() {
     usuarioActual = data.usuario || data.user || null;
 
     try {
-      localStorage.setItem(TOKEN_KEY, data.token);
-      localStorage.setItem(USER_KEY, JSON.stringify(data.usuario));
+      // Guarda el token REAL (puede venir como token/access_token/jwt)
+      localStorage.setItem(TOKEN_KEY, token || '');
+      // Guarda el usuario REAL (puede venir como usuario/user)
+      localStorage.setItem(USER_KEY, JSON.stringify(usuarioActual || {}));
     } catch {}
 
     if (mensaje) mensaje.textContent = 'Login correcto ✅';
@@ -1307,7 +1320,19 @@ async function cargarFormEdicion() {
 
     // header modal
     const img = document.getElementById('ficha-portada-img');
-    if (img) img.src = libro.url_portada ? `${urlPortadaAbsoluta(libro.url_portada)}?t=${Date.now()}` : '';
+
+
+const portada =
+  libro.url_portada
+  || ejemplar.url_portada
+  || (ejemplaresCache || []).find(e => Number(e.libro_id) === Number(libroSeleccionadoId))?.url_portada
+  || '';
+
+if (img) {
+  img.src = portada ? `${urlPortadaAbsoluta(portada)}?t=${Date.now()}` : '';
+  img.onerror = () => { img.src = ''; }; // evita icono de imagen rota
+}
+
 
     document.getElementById('ficha-titulo').textContent = libro.titulo || 'Sin título';
     document.getElementById('ficha-autores').textContent = libro.autores || 'Autor desconocido';

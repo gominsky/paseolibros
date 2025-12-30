@@ -15,7 +15,7 @@ export function verificarToken(req, res, next) {
   const token = (tipo === 'Bearer' && bearerToken) ? bearerToken : headerToken;
 
   if (!token) {
-    return res.status(401).json({ error: 'Token requerido' });
+    return res.status(401).json({ error: 'No has iniciado sesión' });
   }
 
   try {
@@ -32,6 +32,9 @@ export function verificarToken(req, res, next) {
     next();
   } catch (err) {
     console.error('Error verificando token:', err);
-    return res.status(403).json({ error: 'Token inválido o caducado' });
+    if (err?.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Sesión caducada' });
+    }
+    return res.status(401).json({ error: 'Sesión inválida' });
   }
 }

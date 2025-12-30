@@ -7,7 +7,7 @@ const router = Router();
 // Helper: normaliza con Postgres unaccent+lower (lo hacemos en SQL, no aquí)
 
 // GET /api/usuarios/:usuarioId/deseos?q=&tipo=&ubicacion=&order=
-router.get('/usuarios/:usuarioId/deseos', async (req, res) => {
+router.get('/usuarios/:usuarioId/deseos', verificarToken, async (req, res) => {
   const { usuarioId } = req.params;
   const q = String(req.query.q || '').trim();
   const tipo = String(req.query.tipo || '').trim();
@@ -16,7 +16,7 @@ router.get('/usuarios/:usuarioId/deseos', async (req, res) => {
 
   // ✅ seguridad: solo el propio usuario (si quieres)
   // Si prefieres permitir admin, aquí lo amplías
-  if (req.usuario?.id && Number(req.usuario.id) !== Number(usuarioId)) {
+  if (Number(req.usuario.id) !== Number(usuarioId)) {
     return res.status(403).json({ error: 'No puedes ver los deseos de otro usuario' });
   }
 

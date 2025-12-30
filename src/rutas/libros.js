@@ -92,13 +92,13 @@ router.put('/:id', async (req, res) => {
    const resultado = await pool.query(
   `UPDATE libros
    SET
-     titulo = COALESCE($1, titulo),
-     autores = COALESCE($2, autores),
-     editorial = COALESCE($3, editorial),
-     fecha_publicacion = COALESCE($4, fecha_publicacion),
+     titulo = COALESCE(NULLIF($1, ''), titulo),
+     autores = COALESCE(NULLIF($2, ''), autores),
+     editorial = COALESCE(NULLIF($3, ''), editorial),
+     fecha_publicacion = COALESCE(NULLIF($4, ''), fecha_publicacion),
      numero_paginas = COALESCE($5, numero_paginas),
-     descripcion = COALESCE($6, descripcion),
-     url_portada = COALESCE($7, url_portada)
+     descripcion = COALESCE(NULLIF($6, ''), descripcion),
+     url_portada = COALESCE(NULLIF($7, ''), url_portada)
    WHERE id = $8
    RETURNING *`,
   [
