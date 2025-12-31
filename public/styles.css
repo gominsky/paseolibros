@@ -2039,3 +2039,30 @@ input::placeholder {
 #scanner{
   overflow: hidden;
 }
+#share-table-wrap{ margin-top: 10px; }
+#share-table{ width: 100%; }
+#share-table th{ white-space: nowrap; }
+#share-table{ background: rgba(0,0,0,0.0); }
+/* =========================
+   FIX: botón "Detener escaneo" visible en DESKTOP
+   ========================= */
+   @media (min-width: 821px){
+    /* cuando el scanner está abierto, que tenga layout en columna */
+    #scanner.scanner[style*="display:block"],
+    #scanner.scanner[style*="display: block"]{
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 12px !important;
+    }
+  
+    /* asegura que el botón se vea y quede accesible */
+    #scanner #btn-detener{
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+      align-self: flex-end; /* a la derecha */
+      width: auto !important;
+    }
+  }
+  

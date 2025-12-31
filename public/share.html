@@ -89,17 +89,39 @@
       .share-page .logo.header-center{ text-align:center; }
       .share-grid{ grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
     }
+    /* ===== Share: más ancho en horizontal ===== */
+.share-page .app{
+  max-width: 1400px !important;           /* sube el techo */
+  width: calc(100vw - 24px) !important;   /* casi a borde */
+  margin: 12px auto !important;
+}
+
+.share-page .app-main{
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.share-page .share-content{
+  margin-top: 12px !important;
+  padding: 0 12px !important;
+}
+
+/* la “card” que contiene la tabla a ancho completo */
+.share-page .share-card{
+  width: 100% !important;
+}
+
+/* tabla más agradable en ancho */
+#share-table-wrap{ overflow-x: auto; }
+#share-table{ width: 100%; }
+#share-table th, #share-table td{ white-space: nowrap; }
+#share-table td.col-title{ white-space: normal; min-width: 340px; }
+
   </style>
 </head>
 <body class="share-page">
   <div class="app">
     <header class="app-header">
-      <div class="header-left">
-        <a href="./" class="share-chip" style="text-decoration:none; color:inherit;">
-          ← Volver
-        </a>
-      </div>
-
       <div class="logo header-center">
         <div class="logo-icon">
           <span class="logo-mark">Pdl</span>
@@ -111,8 +133,10 @@
       </div>
 
       <div class="header-right">
+        <a href="./" class="btn btn-ghost btn-sm" style="text-decoration:none;">Volver</a>
         <button id="btn-copy-link" class="btn btn-secondary btn-sm" type="button">Copiar enlace</button>
       </div>
+      
     </header>
 
     <main class="app-main">
@@ -121,17 +145,20 @@
           <div class="card-header-inline">
             <h2 id="share-title">Cargando…</h2>
             <div class="card-header-actions">
-              <span class="share-chip" id="share-badge">👁 Solo lectura</span>
+              <span class="share-chip" id="share-badge">Solo lectura</span>
             </div>
           </div>
           <div class="card-body">
             <p id="share-info" class="helper-text">Estamos cargando la lista…</p>
 
             <!-- Deseos (lista) -->
-            <ul id="share-wishlist" class="share-list" style="display:none;"></ul>
-
-            <!-- Ejemplares (grid) -->
-            <div id="share-ejemplares" class="share-grid" style="display:none;"></div>
+            <div id="share-table-wrap" class="table-wrapper" style="display:none;">
+              <table id="share-table" class="table-small">
+                <thead id="share-thead"></thead>
+                <tbody id="share-tbody"></tbody>
+              </table>
+            </div>
+            
           </div>
         </div>
       </div>
@@ -159,60 +186,68 @@
     return url; // asumimos que el backend sirve rutas absolutas o relativas correctas
   }
 
-  function renderDeseos(items){
-    elWishlist.innerHTML = '';
-    (items || []).forEach(d => {
-      const li = document.createElement('li');
-      li.className = 'share-item';
-      const titulo = d.titulo || d.nombre || 'Sin título';
-      const autores = d.autores || d.autor || '';
-      const tipo = d.tipo || '';
-      const ubic = d.ubicacion || '';
+  const elWrap = document.getElementById('share-table-wrap');
+const elThead = document.getElementById('share-thead');
+const elTbody = document.getElementById('share-tbody');
 
-      li.innerHTML = `
-        <div class="share-title">${esc(titulo)}</div>
-        <div class="share-meta">
-          ${autores ? `<span>✍️ ${esc(autores)}</span>` : ''}
-          ${tipo ? `<span>🏷️ ${esc(tipo)}</span>` : ''}
-          ${ubic ? `<span>📍 ${esc(ubic)}</span>` : ''}
-        </div>
-      `;
-      elWishlist.appendChild(li);
-    });
+function renderTabla(headers, rowsHtml){
+  elThead.innerHTML = `<tr>${headers.map(h => `<th>${esc(h)}</th>`).join('')}</tr>`;
+  elTbody.innerHTML = rowsHtml.join('');
+  elWrap.style.display = 'block';
+}
+function renderDeseos(items){
+  const rows = (items || []).map(d => {
+    const titulo = d.titulo || d.nombre || '—';
+    const autores = d.autores || d.autor || '';
+    const tipo = d.tipo || '';
+    const ubic = d.ubicacion || '';
+    const portada = urlPortadaAbsoluta(d.url_portada || d.portada_url || '');
 
-    elWishlist.style.display = 'grid';
-    elEj.style.display = 'none';
-    elSubtitle.textContent = 'Lista de deseos · Solo lectura';
-  }
+    return `
+      <tr>
+        <td>${portada
+          ? `<img class="share-cover" src="${esc(portada)}" alt="Portada" loading="lazy">`
+          : `<div class="share-cover-ph" aria-hidden="true">📚</div>`
+        }</td>
+        <td class="col-title"><strong>${esc(titulo)}</strong></td>
+        <td>${esc(autores)}</td>
+        <td>${esc(tipo)}</td>
+        <td>${esc(ubic)}</td>
+      </tr>
+    `;
+  });
 
-  function renderEjemplares(items){
-    elEj.innerHTML = '';
-    (items || []).forEach(e => {
-      const wrap = document.createElement('div');
-      wrap.className = 'ej-grid-item';
-      const titulo = e.titulo || 'Sin título';
-      const autores = e.autores || '';
-      const estado = e.estado || '';
-      const ubic = e.ubicacion || '';
-      const portada = urlPortadaAbsoluta(e.portada_url || e.portada || e.url_portada || '');
+  renderTabla(['', 'Título', 'Autor', 'Tipo', 'Ubicación'], rows);
+  elSubtitle.textContent = 'Lista de deseos · Solo lectura';
+}
 
-      wrap.innerHTML = `
-        ${portada ? `<img class="ej-grid-cover" src="${esc(portada)}" alt="Portada" loading="lazy" />`
-                  : `<div class="ej-grid-cover" aria-hidden="true"></div>`}
-        <div class="ej-grid-title">${esc(titulo)}</div>
-        <div class="ej-grid-meta">
-          ${autores ? `<span class="ej-grid-pill">${esc(autores)}</span>` : ''}
-          ${estado ? `<span class="ej-grid-pill">${esc(estado)}</span>` : ''}
-          ${ubic ? `<span class="ej-grid-pill">${esc(ubic)}</span>` : ''}
-        </div>
-      `;
-      elEj.appendChild(wrap);
-    });
+function renderEjemplares(items){
+  const rows = (items || []).map(e => {
+    const titulo = e.titulo || '—';
+    const autores = e.autores || '';
+    const estado = e.estado || '';
+    const ubic = e.ubicacion || '';
+    const isbn = e.isbn || '';
+    const portada = urlPortadaAbsoluta(e.url_portada || e.portada_url || '');
 
-    elWishlist.style.display = 'none';
-    elEj.style.display = 'grid';
-    elSubtitle.textContent = 'Ejemplares · Solo lectura';
-  }
+    return `
+      <tr>
+        <td>${portada
+          ? `<img class="share-cover" src="${esc(portada)}" alt="Portada" loading="lazy">`
+          : `<div class="share-cover-ph" aria-hidden="true">📚</div>`
+        }</td>
+        <td class="col-title"><strong>${esc(titulo)}</strong></td>
+        <td>${esc(autores)}</td>
+        <td>${esc(isbn)}</td>
+        <td>${esc(estado)}</td>
+        <td>${esc(ubic)}</td>
+      </tr>
+    `;
+  });
+
+  renderTabla(['', 'Título', 'Autor', 'ISBN', 'Estado', 'Ubicación'], rows);
+  elSubtitle.textContent = 'Ejemplares · Solo lectura';
+}
 
   async function load(){
     if (!token){

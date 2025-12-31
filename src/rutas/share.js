@@ -65,13 +65,24 @@ router.get('/share/:token', async (req, res) => {
       items = d.rows;
     } else if (tipo === 'ejemplares') {
       const e = await pool.query(
-        `SELECT titulo, autores, estado, ubicacion, url_portada
-         FROM ejemplares
-         WHERE usuario_id = $1
-         ORDER BY creado_en DESC`,
+        `SELECT
+           e.id        AS ejemplar_id,
+           e.libro_id  AS libro_id,
+           l.titulo    AS titulo,
+           l.autores   AS autores,
+           l.isbn      AS isbn,
+           e.estado    AS estado,
+           e.ubicacion AS ubicacion,
+           e.notas     AS notas,
+           l.url_portada AS url_portada
+         FROM ejemplares e
+         JOIN libros l ON l.id = e.libro_id
+         WHERE e.usuario_id = $1
+         ORDER BY e.creado_en DESC`,
         [usuario_id]
       );
       items = e.rows;
+        
     } else {
       return res.status(400).json({ error: 'tipo inválido en token' });
     }

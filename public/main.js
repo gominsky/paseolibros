@@ -4,6 +4,10 @@ const API_BASE = isDev ? 'http://localhost:3011' : '';
 let codeReader = null;
 let currentStream = null;
 
+// estabilidad de lectura (EAN)
+let lastScanValue = null;
+let lastScanCount = 0;
+
 let token = null;
 let usuarioActual = null; // { id, nombre_usuario, ... }
 // Vista ejemplares: 'lista' | 'grid'
@@ -880,7 +884,6 @@ async function cargarPrestamosActivos() {
 }
 
 // ---------- Préstamos UI ----------
-// ---------- Préstamos UI (MODAL real) ----------
 let prestamoKeyHandler = null;
 
 function crearUIPrestamo() {
@@ -978,7 +981,6 @@ function cerrarUIPrestamo() {
 
   prestamoContexto = null;
 }
-
 
 async function cargarUsuariosParaPrestamo() {
   if (usuariosPrestamo.length > 0) {
@@ -1196,11 +1198,12 @@ async function marcarPrestamoDevueltoGlobal() {
 }
 
 // ---------- Escáner ----------
-const { BrowserEANReader, DecodeHintType, BarcodeFormat } = ZXing;
-
+const { BrowserMultiFormatReader, DecodeHintType, BarcodeFormat } = ZXing;
 async function iniciarEscaneo() {
   const scannerDiv = document.getElementById('scanner');
   const video = document.getElementById('video');
+
+  // Reset de estabilidad por sesión
   lastScanValue = null;
   lastScanCount = 0;
 
@@ -1209,6 +1212,9 @@ async function iniciarEscaneo() {
     return;
   }
 
+  // Si había una sesión anterior abierta, la cerramos primero
+  try { detenerEscaneo(); } catch {}
+
   setUserStatus('');
   scannerDiv.style.display = 'block';
 
@@ -1216,60 +1222,57 @@ async function iniciarEscaneo() {
     const constraints = {
       video: {
         facingMode: { ideal: 'environment' },
+        // No está soportado en todos, pero no rompe
         focusMode: 'continuous',
         width: { ideal: 1280 },
         height: { ideal: 720 }
       }
-    };    
+    };
+
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
     currentStream = stream;
-    // ✅ Intentar activar linterna (torch) si el dispositivo lo soporta
-try {
-  const track = stream.getVideoTracks?.()[0];
-  const caps = track?.getCapabilities?.();
-  if (caps?.torch) {
-    await track.applyConstraints({ advanced: [{ torch: true }] });
-  }
-} catch (e) {
-  // Silencioso: muchos dispositivos/navegadores no lo permiten
-}
 
     video.srcObject = stream;
-    video.setAttribute('playsinline', true);
+    video.setAttribute('playsinline', 'true');
     await video.play();
 
+    // Intentar activar linterna (torch) si el dispositivo lo soporta
+    try {
+      const track = stream.getVideoTracks()[0];
+      const caps = track.getCapabilities?.();
+      if (caps?.torch) {
+        await track.applyConstraints({ advanced: [{ torch: true }] });
+      }
+    } catch {
+      // Silencioso: muchos dispositivos/navegadores no lo permiten
+    }
+
+    // Solo EAN (ISBN suele venir como EAN-13)
     const hints = new Map();
-    hints.set(DecodeHintType.POSSIBLE_FORMATS, [
-      BarcodeFormat.EAN_13,
-      BarcodeFormat.EAN_8
-    ]);
-codeReader = new BrowserEANReader(hints);
-let codeReader = null;
-let currentStream = null;
-let lastScanValue = null;
-let lastScanCount = 0;
-codeReader.decodeFromVideoDevice(null, video, (result) => {
-  if (!result) return;
+    hints.set(DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.EAN_13, BarcodeFormat.EAN_8]);
 
-  const code = (result.text || '').trim();
-  if (!code) return;
+    codeReader = new BrowserMultiFormatReader(hints);
+    codeReader.decodeFromVideoDevice(null, video, (result) => {
+      if (!result) return;
 
-  if (code === lastScanValue) {
-    lastScanCount++;
-  } else {
-    lastScanValue = code;
-    lastScanCount = 1;
-  }
+      const code = (result.text || '').trim();
+      if (!code) return;
 
-  // ✅ Acepta solo si se repite al menos 2 frames seguidos
-  if (lastScanCount >= 2) {
-    const isbnEl = document.getElementById('isbn');
-    if (isbnEl) isbnEl.value = code;
+      if (code === lastScanValue) lastScanCount++;
+      else {
+        lastScanValue = code;
+        lastScanCount = 1;
+      }
 
-    setUserStatusOk(`ISBN detectado: ${code}`);
-    detenerEscaneo();
-  }
-});
+      // Acepta solo si se repite en 2 frames seguidos
+      if (lastScanCount >= 2) {
+        const isbnEl = document.getElementById('isbn');
+        if (isbnEl) isbnEl.value = code;
+
+        setUserStatusOk(`ISBN detectado: ${code}`);
+        detenerEscaneo();
+      }
+    });
 
   } catch (error) {
     console.error(error);
@@ -1280,6 +1283,7 @@ codeReader.decodeFromVideoDevice(null, video, (result) => {
 
 function detenerEscaneo() {
   const scannerDiv = document.getElementById('scanner');
+
   lastScanValue = null;
   lastScanCount = 0;
 
@@ -1295,6 +1299,7 @@ function detenerEscaneo() {
 
   if (scannerDiv) scannerDiv.style.display = 'none';
 }
+
 
 // ---------- Eliminar ejemplar ----------
 async function eliminarEjemplar(ejemplarId) {
