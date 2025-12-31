@@ -1196,9 +1196,13 @@ async function marcarPrestamoDevueltoGlobal() {
 }
 
 // ---------- Escáner ----------
+const { BrowserEANReader, DecodeHintType, BarcodeFormat } = ZXing;
+
 async function iniciarEscaneo() {
   const scannerDiv = document.getElementById('scanner');
   const video = document.getElementById('video');
+  lastScanValue = null;
+  lastScanCount = 0;
 
   if (!scannerDiv || !video) {
     setUserStatusErr('No se encontró el componente de escaneo.');
@@ -1209,25 +1213,64 @@ async function iniciarEscaneo() {
   scannerDiv.style.display = 'block';
 
   try {
-    const constraints = { video: { facingMode: 'environment' } };
+    const constraints = {
+      video: {
+        facingMode: { ideal: 'environment' },
+        focusMode: 'continuous',
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    };    
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
     currentStream = stream;
+    // ✅ Intentar activar linterna (torch) si el dispositivo lo soporta
+try {
+  const track = stream.getVideoTracks?.()[0];
+  const caps = track?.getCapabilities?.();
+  if (caps?.torch) {
+    await track.applyConstraints({ advanced: [{ torch: true }] });
+  }
+} catch (e) {
+  // Silencioso: muchos dispositivos/navegadores no lo permiten
+}
 
     video.srcObject = stream;
     video.setAttribute('playsinline', true);
     await video.play();
 
-    const { BrowserMultiFormatReader } = ZXing;
-    codeReader = new BrowserMultiFormatReader();
+    const hints = new Map();
+    hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+      BarcodeFormat.EAN_13,
+      BarcodeFormat.EAN_8
+    ]);
+codeReader = new BrowserEANReader(hints);
+let codeReader = null;
+let currentStream = null;
+let lastScanValue = null;
+let lastScanCount = 0;
+codeReader.decodeFromVideoDevice(null, video, (result) => {
+  if (!result) return;
 
-    codeReader.decodeFromVideoDevice(null, video, (result) => {
-      if (result) {
-        const isbnEl = document.getElementById('isbn');
-        if (isbnEl) isbnEl.value = result.text;
-        setUserStatusOk(`ISBN detectado: ${result.text}`);
-        detenerEscaneo();
-      }
-    });
+  const code = (result.text || '').trim();
+  if (!code) return;
+
+  if (code === lastScanValue) {
+    lastScanCount++;
+  } else {
+    lastScanValue = code;
+    lastScanCount = 1;
+  }
+
+  // ✅ Acepta solo si se repite al menos 2 frames seguidos
+  if (lastScanCount >= 2) {
+    const isbnEl = document.getElementById('isbn');
+    if (isbnEl) isbnEl.value = code;
+
+    setUserStatusOk(`ISBN detectado: ${code}`);
+    detenerEscaneo();
+  }
+});
+
   } catch (error) {
     console.error(error);
     setUserStatusErr('No se pudo acceder a la cámara.');
@@ -1237,6 +1280,8 @@ async function iniciarEscaneo() {
 
 function detenerEscaneo() {
   const scannerDiv = document.getElementById('scanner');
+  lastScanValue = null;
+  lastScanCount = 0;
 
   if (codeReader) {
     try { codeReader.reset(); } catch {}

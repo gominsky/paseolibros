@@ -2032,3 +2032,10 @@ input::placeholder {
     border-radius: 20px !important;
   }
 }
+#video{
+  object-fit: cover;
+  transform: scale(1.4);
+}
+#scanner{
+  overflow: hidden;
+}
