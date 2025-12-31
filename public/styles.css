@@ -1942,3 +1942,18 @@ input::placeholder {
   padding: 9px 10px;
   border-radius: 12px;
 }
+
+
+/* =========================================================
+   FIX (móvil): quitar "marco" interno (table-wrapper) alrededor de las fichas
+   - En móvil usamos #ejemplares-list / #ejemplares-grid, así que el wrapper de tabla debe
+     quedar oculto para que no aparezca un contenedor negro con borde.
+   ========================================================= */
+@media (max-width: 820px){
+  .table-wrapper{
+    display: none !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+}
