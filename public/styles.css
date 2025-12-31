@@ -1168,7 +1168,7 @@ html, body{ overflow-x: hidden; }
 
 @media (max-width: 820px){
   /* En móvil: ocultamos la tabla y mostramos la lista */
-  .table-wrapper{ display:none !important; }
+  .column-right > .card:first-child .table-wrapper{ display:none !important; }
   .ejemplares-list{ display:grid; gap:12px; }
 
   .ej-card{
@@ -1992,4 +1992,8 @@ input::placeholder {
     background: transparent; /* hereda el fondo exterior */
   }
 
+}
+@media (max-width: 820px){
+  /* ✅ Asegurar que Lecturas/Préstamos se vean */
+  .grid-two .table-wrapper{ display:block !important; }
 }
