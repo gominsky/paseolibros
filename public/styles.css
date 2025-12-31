@@ -1975,3 +1975,10 @@ input::placeholder {
     border: none !important;
   }
 }
+/* Marco exterior rosa corporativo */
+.app{
+  border-radius: 22px; /* un pelín más redondo que las cards */
+  box-shadow:
+    0 0 0 6px var(--pink-2),          /* marco rosa */
+    0 18px 44px rgba(0,0,0,.35);      /* sombra exterior suave */
+}
