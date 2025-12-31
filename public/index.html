@@ -57,17 +57,7 @@
           Importar CSV
           <input type="file" id="input-importar-csv" accept=".csv" hidden />
         </label>
-         <div class="tools-sep" aria-hidden="true"></div>
-        <div class="tools-item tools-item-row" role="group" aria-label="Ordenar ejemplares">
-          <span class="tools-item-label">Orden</span>
-          <select id="sort-ejemplares" class="tools-select" aria-label="Ordenar ejemplares">
-            <option value="creado_en:desc">Recientes</option>
-            <option value="titulo:asc">Título (A–Z)</option>
-            <option value="titulo:desc">Título (Z–A)</option>
-            <option value="autores:asc">Autor (A–Z)</option>
-            <option value="autores:desc">Autor (Z–A)</option>
-          </select>
-        </div>
+
         <div class="tools-sep" aria-hidden="true"></div>
         <button id="btn-open-deseos" class="tools-item" type="button">Lista de deseos</button>
 
@@ -231,6 +221,16 @@
                 placeholder="Buscar por título, autor, ISBN, notas."
               />
             </div>
+            <div class="sort-mini" aria-label="Ordenar ejemplares">
+                            <select id="sort-ejemplares" class="sort-select" title="Ordenar" aria-label="Ordenar">
+                              <option value="creado_en:desc">Recientes</option>
+                              <option value="titulo:asc">Título (A–Z)</option>
+                              <option value="titulo:desc">Título (Z–A)</option>
+                              <option value="autores:asc">Autor (A–Z)</option>
+                              <option value="autores:desc">Autor (Z–A)</option>
+                            </select>
+                          </div>
+          </div>
           
           <!-- 👇 IMPORTANTE: el grid va fuera del header -->
           <div id="ejemplares-grid" class="ej-grid" style="display:none;"></div>

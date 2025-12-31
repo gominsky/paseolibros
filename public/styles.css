@@ -394,6 +394,10 @@ tr:hover td{background: rgba(255,255,255,.06)}
     grid-template-columns: 120px 1fr;
     gap:12px;
     padding:14px 14px 0;
+    .table-wrapper {
+    background: transparent !important;
+    border: none !important;
+  }
   }
   .modal-cover-img{width:120px; height:170px}
   .modal-cover-upload{width:120px}
@@ -1881,32 +1885,25 @@ select::placeholder,
 input::placeholder {
   color: rgba(255,255,255,.65);
 }
-
- .tools-item:hover{ background: rgba(232,170,196,18); border-color: rgba(232,170,196,45); }
- 
- .tools-item-file{ display: block; }
-
-/* Item con label + select (Orden) */
-.tools-item-row{
-  display: flex;
+/* Ordenación mini (móvil / discreta) */
+.sort-mini{
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
 }
-.tools-item-label{
-  font-weight: 600;
-  opacity: .9;
-}
-.tools-select{
-  height: 34px;
-  max-width: 165px;
+
+.sort-select{
+  height: 36px;
   padding: 0 10px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,18);
-  background: rgba(0,0,0,72);
+  border: 1px solid rgba(214,165,181,65);
+  background: rgba(0,0,0,78);
   color: #fff;
+  font-weight: 700;
+  font-size: .9rem;
+  max-width: 160px;
 }
-.tools-select option{
-  background: #000;
-  color: #fff;
+
+/* En desktop puedes dejarlo visible o hacerlo más sutil */
+@media (min-width: 821px){
+  .sort-select{ max-width: 190px; }
 }

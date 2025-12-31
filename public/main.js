@@ -1902,6 +1902,22 @@ document.addEventListener('DOMContentLoaded', () => {
       renderEjemplares();
     });
   }
+    // Ordenación compacta (móvil): título / autor / recientes
+    const sortSel = document.getElementById('sort-ejemplares');
+    if (sortSel) {
+      // valor inicial coherente con el estado actual
+      sortSel.value = `${sortEjemplares.key}:${sortEjemplares.dir}`;
+      sortSel.addEventListener('change', () => {
+        const [key, dir] = String(sortSel.value).split(':');
+        if (!key || !dir) return;
+        sortEjemplares.key = key;
+        sortEjemplares.dir = dir;
+        // actualiza iconos de cabecera (desktop) si existen
+        const table = document.getElementById('tabla-ejemplares');
+        if (table) actualizarIconosOrden(table);
+        renderEjemplares();
+      });
+    }
   // Clicks en tabla ejemplares (acciones vs abrir ficha)
   const tbodyEjemplares = document.querySelector('#tabla-ejemplares tbody');
   tbodyEjemplares?.addEventListener('click', (e) => {
@@ -2005,23 +2021,7 @@ document.addEventListener('click', cerrarTools);
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') cerrarTools();
 });
-// Ordenación de ejemplares desde Herramientas (móvil-friendly)
-const sortSel = document.getElementById('sort-ejemplares');
-if (sortSel) {
-  // inicializa a lo que esté activo
-  sortSel.value = `${sortEjemplares.key}:${sortEjemplares.dir}`;
-  sortSel.addEventListener('change', () => {
-    const [key, dir] = String(sortSel.value).split(':');
-    if (!key || !dir) return;
-    sortEjemplares.key = key;
-    sortEjemplares.dir = dir;
-    // si existe tabla, actualiza iconos de cabecera
-    const table = document.getElementById('tabla-ejemplares');
-    if (table) actualizarIconosOrden(table);
-    renderEjemplares();
-    cerrarTools(); // sensación de "acción hecha"
-  });
-}
+
   // Delegación: marcar devuelto desde tabla préstamos modal
 
   async function apiPost(path, body) {
