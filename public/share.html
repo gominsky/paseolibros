@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>PaseoLibros · Lista compartida</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Fuentes (igual que la app) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9.144,600;9.144,800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Pequeños ajustes para esta página */
+    .share-page .app-header{ grid-template-columns: 1fr auto 1fr; }
+    .share-page .header-left{ justify-self: start; }
+    .share-page .header-right{ justify-self: end; gap: 10px; }
+
+    .share-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      font-size: .9rem;
+      opacity: .95;
+    }
+
+    .share-content{
+      margin-top: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .share-card{
+      background: #000;
+      border: 1.5px solid rgba(232,170,196,.55);
+      border-radius: 18px;
+      box-shadow: 0 18px 55px rgba(0,0,0,.55);
+      overflow: hidden;
+    }
+    .share-card .card-header-inline{
+      padding: 14px 14px 10px;
+    }
+    .share-card .card-body{
+      padding: 0 14px 14px;
+    }
+
+    /* Reutilizamos estilos de deseos/ejemplares cuando nos convenga */
+    .share-list{
+      display:grid;
+      gap: 10px;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+    .share-item{
+      padding: 12px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      display:grid;
+      gap:6px;
+    }
+    .share-title{ font-weight: 800; }
+    .share-meta{ font-size: .9rem; opacity: .9; display:flex; gap:10px; flex-wrap: wrap; }
+
+    .share-grid{
+      display:grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+    .share-grid .ej-grid-item{ cursor: default; }
+
+    .muted{ opacity: .82; }
+
+    @media (max-width: 820px){
+      .share-page .app-header{
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "actions"
+          "title";
+      }
+      .share-page .header-right{ justify-self: end; }
+      .share-page .logo.header-center{ text-align:center; }
+      .share-grid{ grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+    }
+  </style>
+</head>
+<body class="share-page">
+  <div class="app">
+    <header class="app-header">
+      <div class="header-left">
+        <a href="./" class="share-chip" style="text-decoration:none; color:inherit;">
+          ← Volver
+        </a>
+      </div>
+
+      <div class="logo header-center">
+        <div class="logo-icon">
+          <span class="logo-mark">Pdl</span>
+        </div>
+        <div class="logo-text">
+          <h1>Lista compartida</h1>
+          <p id="share-subtitle">Solo lectura</p>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <button id="btn-copy-link" class="btn btn-secondary btn-sm" type="button">Copiar enlace</button>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <div class="share-content">
+        <div class="share-card">
+          <div class="card-header-inline">
+            <h2 id="share-title">Cargando…</h2>
+            <div class="card-header-actions">
+              <span class="share-chip" id="share-badge">👁 Solo lectura</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <p id="share-info" class="helper-text">Estamos cargando la lista…</p>
+
+            <!-- Deseos (lista) -->
+            <ul id="share-wishlist" class="share-list" style="display:none;"></ul>
+
+            <!-- Ejemplares (grid) -->
+            <div id="share-ejemplares" class="share-grid" style="display:none;"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script>
+(function(){
+  const qs = new URLSearchParams(location.search);
+  const token = qs.get('t') || '';
+
+  const elTitle = document.getElementById('share-title');
+  const elInfo = document.getElementById('share-info');
+  const elWishlist = document.getElementById('share-wishlist');
+  const elEj = document.getElementById('share-ejemplares');
+  const elSubtitle = document.getElementById('share-subtitle');
+
+  function esc(s){
+    return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  function urlPortadaAbsoluta(url){
+    if (!url) return '';
+    if (/^https?:\/\//i.test(url)) return url;
+    return url; // asumimos que el backend sirve rutas absolutas o relativas correctas
+  }
+
+  function renderDeseos(items){
+    elWishlist.innerHTML = '';
+    (items || []).forEach(d => {
+      const li = document.createElement('li');
+      li.className = 'share-item';
+      const titulo = d.titulo || d.nombre || 'Sin título';
+      const autores = d.autores || d.autor || '';
+      const tipo = d.tipo || '';
+      const ubic = d.ubicacion || '';
+
+      li.innerHTML = `
+        <div class="share-title">${esc(titulo)}</div>
+        <div class="share-meta">
+          ${autores ? `<span>✍️ ${esc(autores)}</span>` : ''}
+          ${tipo ? `<span>🏷️ ${esc(tipo)}</span>` : ''}
+          ${ubic ? `<span>📍 ${esc(ubic)}</span>` : ''}
+        </div>
+      `;
+      elWishlist.appendChild(li);
+    });
+
+    elWishlist.style.display = 'grid';
+    elEj.style.display = 'none';
+    elSubtitle.textContent = 'Lista de deseos · Solo lectura';
+  }
+
+  function renderEjemplares(items){
+    elEj.innerHTML = '';
+    (items || []).forEach(e => {
+      const wrap = document.createElement('div');
+      wrap.className = 'ej-grid-item';
+      const titulo = e.titulo || 'Sin título';
+      const autores = e.autores || '';
+      const estado = e.estado || '';
+      const ubic = e.ubicacion || '';
+      const portada = urlPortadaAbsoluta(e.portada_url || e.portada || e.url_portada || '');
+
+      wrap.innerHTML = `
+        ${portada ? `<img class="ej-grid-cover" src="${esc(portada)}" alt="Portada" loading="lazy" />`
+                  : `<div class="ej-grid-cover" aria-hidden="true"></div>`}
+        <div class="ej-grid-title">${esc(titulo)}</div>
+        <div class="ej-grid-meta">
+          ${autores ? `<span class="ej-grid-pill">${esc(autores)}</span>` : ''}
+          ${estado ? `<span class="ej-grid-pill">${esc(estado)}</span>` : ''}
+          ${ubic ? `<span class="ej-grid-pill">${esc(ubic)}</span>` : ''}
+        </div>
+      `;
+      elEj.appendChild(wrap);
+    });
+
+    elWishlist.style.display = 'none';
+    elEj.style.display = 'grid';
+    elSubtitle.textContent = 'Ejemplares · Solo lectura';
+  }
+
+  async function load(){
+    if (!token){
+      elTitle.textContent = 'Enlace incompleto';
+      elInfo.textContent = 'Falta el token en la URL. Ejemplo: share.html?t=TU_TOKEN';
+      return;
+    }
+
+    try{
+      const res = await fetch(`/api/share/${encodeURIComponent(token)}`, { method: 'GET' });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok){
+        elTitle.textContent = 'Enlace no válido';
+        elInfo.textContent = data.error || 'No se pudo cargar la lista compartida.';
+        return;
+      }
+
+      const tipo = data.tipo || data.type || '';
+      const owner = data.owner || data.propietario || data.usuario || null;
+      const ownerName = owner?.nombre_usuario || owner?.nombre || data.owner_name || '';
+
+      if (tipo === 'deseos' || tipo === 'wishlist'){
+        elTitle.textContent = ownerName ? `Deseos de ${ownerName}` : 'Lista de deseos';
+        elInfo.textContent = (data.items?.length ?? data.deseos?.length ?? 0) ? '' : 'No hay deseos en esta lista.';
+        renderDeseos(data.items || data.deseos || data.wishlist || []);
+      } else {
+        elTitle.textContent = ownerName ? `Ejemplares de ${ownerName}` : 'Ejemplares';
+        elInfo.textContent = (data.items?.length ?? data.ejemplares?.length ?? 0) ? '' : 'No hay ejemplares en esta lista.';
+        renderEjemplares(data.items || data.ejemplares || []);
+      }
+    }catch(e){
+      console.error(e);
+      elTitle.textContent = 'Error de red';
+      elInfo.textContent = 'No se pudo conectar con el servidor.';
+    }
+  }
+
+  document.getElementById('btn-copy-link')?.addEventListener('click', async () => {
+    const url = location.href;
+    try{
+      await navigator.clipboard.writeText(url);
+      const btn = document.getElementById('btn-copy-link');
+      const old = btn.textContent;
+      btn.textContent = 'Copiado ✅';
+      setTimeout(() => btn.textContent = old, 1200);
+    }catch{
+      prompt('Copia este enlace:', url);
+    }
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>

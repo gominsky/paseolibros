@@ -1522,6 +1522,105 @@ async function mostrarFicha(libroId, ejemplarId) {
 
   abrirModalFicha();
 }
+// compartir deseos
+async function compartirLista(tipo) {
+  if (!token || !usuarioActual?.id) {
+    alert('Debes iniciar sesión para compartir.');
+    return;
+  }
+
+  let res;
+  try {
+    res = await fetch(`${API_BASE}/api/share`, {
+      method: 'POST',
+      headers: getHeaders(true),
+      body: JSON.stringify({ tipo })
+    });
+  } catch (e) {
+    console.error(e);
+    alert('Error de red (no se pudo conectar con el servidor).');
+    return;
+  }
+
+  const contentType = res.headers.get('content-type') || '';
+  let payload = null;
+  let raw = '';
+
+  if (contentType.includes('application/json')) {
+    payload = await res.json().catch(() => null);
+  } else {
+    raw = await res.text().catch(() => '');
+  }
+
+  if (!res.ok) {
+    const msg = payload?.error || raw?.slice(0, 160) || `HTTP ${res.status}`;
+    alert(`No se pudo generar el enlace (${res.status}): ${msg}`);
+    return;
+  }
+
+  const shareToken = payload?.token || payload?.share_token || payload?.id;
+  if (!shareToken && !payload?.url) {
+    alert('El servidor respondió OK pero no devolvió token/url.');
+    return;
+  }
+
+  const url = payload.url || new URL(`share.html?t=${encodeURIComponent(shareToken)}`, window.location.href).toString();
+
+  try {
+    await navigator.clipboard.writeText(url);
+    alert('Enlace copiado ✅');
+  } catch {
+    prompt('Copia este enlace:', url);
+  }
+}
+
+
+function abrirShareOverlay() {
+  const el = document.getElementById('share-overlay');
+  if (!el) return;
+  el.style.display = 'flex';
+  document.documentElement.style.overflow = 'hidden';
+}
+
+function cerrarShareOverlay() {
+  const el = document.getElementById('share-overlay');
+  if (!el) return;
+  el.style.display = 'none';
+  document.documentElement.style.overflow = '';
+}
+
+async function crearEnlaceCompartir(tipo) {
+  if (!token || !usuarioActual?.id) {
+    alert('Debes iniciar sesión para compartir.');
+    return;
+  }
+
+  const title = document.getElementById('share-title');
+  const input = document.getElementById('share-url');
+  const status = document.getElementById('share-status');
+
+  if (title) title.textContent = (tipo === 'deseos') ? 'Compartir deseos' : 'Compartir ejemplares';
+  if (input) input.value = '';
+  if (status) status.textContent = 'Generando enlace…';
+
+  abrirShareOverlay();
+
+  const res = await fetch(`${API_BASE}/api/share`, {
+    method: 'POST',
+    headers: getHeaders(true),
+    body: JSON.stringify({ tipo })
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    if (status) status.textContent = data.error || 'Error creando enlace';
+    return;
+  }
+
+  if (input) input.value = data.url || '';
+  if (status) status.textContent = 'Enlace listo ✅';
+}
+
 // ===== Deseos (Wishlist) =====
 let deseosKeyHandler = null;
 
@@ -1858,6 +1957,32 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!file) return;
     await importarEjemplaresCSV(file);
     e.target.value = '';
+  });
+  document.getElementById('btn-share-deseos')?.addEventListener('click', () => crearEnlaceCompartir('deseos'));
+  document.getElementById('btn-share-ejemplares')?.addEventListener('click', () => crearEnlaceCompartir('ejemplares'));
+  document.getElementById('btn-share-ejemplares')?.addEventListener('click', () => compartirLista('ejemplares'));
+  document.getElementById('btn-share-deseos')?.addEventListener('click', () => compartirLista('deseos'));
+
+  document.getElementById('btn-cerrar-share')?.addEventListener('click', cerrarShareOverlay);
+  document.getElementById('share-overlay')?.addEventListener('click', (e) => {
+    if (e.target?.id === 'share-overlay') cerrarShareOverlay();
+  });
+
+  document.getElementById('btn-copy-share')?.addEventListener('click', async () => {
+    const input = document.getElementById('share-url');
+    const status = document.getElementById('share-status');
+    const url = input?.value || '';
+    if (!url) return;
+
+    try {
+      await navigator.clipboard.writeText(url);
+      if (status) status.textContent = 'Copiado ✅';
+    } catch {
+      // fallback
+      input?.select();
+      document.execCommand?.('copy');
+      if (status) status.textContent = 'Copiado (modo compatibilidad) ✅';
+    }
   });
 
   document.addEventListener('keydown', (ev) => {

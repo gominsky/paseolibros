@@ -60,6 +60,9 @@
 
         <div class="tools-sep" aria-hidden="true"></div>
         <button id="btn-open-deseos" class="tools-item" type="button">Lista de deseos</button>
+<div class="tools-sep" aria-hidden="true"></div>
+<button id="btn-share-ejemplares" class="tools-item" type="button">Compartir ejemplares</button>
+<button id="btn-share-deseos" class="tools-item" type="button">Compartir deseos</button>
 
 <div class="tools-sep" aria-hidden="true"></div>
         <!-- Logout aquí (mantenemos el ID para tu JS) -->
@@ -586,5 +589,28 @@
     </div>
   </div>
 </div>
+<div id="share-overlay" class="deseos-overlay" style="display:none;">
+  <div class="deseos-dialog" role="dialog" aria-modal="true" aria-label="Compartir">
+    <div class="deseos-header">
+      <h3 id="share-title">Compartir</h3>
+      <button id="btn-cerrar-share" class="icon-btn" type="button" aria-label="Cerrar">
+        <span class="icon-circle">✕</span>
+      </button>
+    </div>
+
+    <div style="padding: 0 14px 14px; display:grid; gap:10px;">
+      <p class="muted" style="margin:0;">Cualquiera con este enlace podrá ver la lista (solo lectura).</p>
+
+      <input id="share-url" type="text" readonly />
+
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button id="btn-copy-share" class="btn btn-secondary btn-sm" type="button">Copiar</button>
+      </div>
+
+      <p id="share-status" class="muted" style="margin:0;"></p>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
