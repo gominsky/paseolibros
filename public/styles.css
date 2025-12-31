@@ -1907,3 +1907,38 @@ input::placeholder {
 @media (min-width: 821px){
   .sort-select{ max-width: 190px; }
 }
+
+
+
+/* =========================
+   ORDENAR: en móvil se mueve a Herramientas
+   ========================= */
+@media (max-width: 820px){
+  /* El selector ya no va en el header de "Ejemplares" en móvil */
+  .sort-mini{ display: none !important; }
+}
+
+/* Contenedor de ordenación dentro del menú Herramientas */
+.tools-sort-wrap{
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+.tools-sort-label{
+  font-size: .86rem;
+  font-weight: 600;
+  opacity: .92;
+}
+
+.tools-sort-wrap select{
+  width: 100%;
+  background: rgba(0,0,0,.78);
+  border: 1px solid rgba(232,170,196,.45);
+  color: #fff;
+  padding: 9px 10px;
+  border-radius: 12px;
+}

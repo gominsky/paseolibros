@@ -2018,9 +2018,59 @@ btnTools?.addEventListener('click', (e) => {
 });
 
 document.addEventListener('click', cerrarTools);
+
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') cerrarTools();
 });
+
+  // Evita que un click dentro del dropdown lo cierre (necesario para el selector de ordenar)
+  toolsDropdown?.addEventListener('click', (ev) => ev.stopPropagation());
+
+  // --- Ordenar: en móvil vive dentro de Herramientas ---
+  const mqlMobile = window.matchMedia('(max-width: 820px)');
+  const sortSelect = document.getElementById('sort-ejemplares');
+  const sortMiniHost = document.querySelector('.sort-mini');
+  const originalParent = sortSelect?.parentElement || null;
+  const originalNextSibling = sortSelect?.nextSibling || null;
+  let toolsSortWrap = null;
+
+  function ensureToolsSortWrap() {
+    if (!toolsDropdown || !sortSelect) return null;
+    if (toolsSortWrap && toolsSortWrap.isConnected) return toolsSortWrap;
+
+    toolsSortWrap = document.createElement('div');
+    toolsSortWrap.id = 'tools-sort-wrap';
+    toolsSortWrap.className = 'tools-item tools-sort-wrap';
+    toolsSortWrap.innerHTML = `<div class="tools-sort-label">Ordenar ejemplares</div>`;
+
+    // lo ponemos arriba del todo, antes de Exportar/Importar
+    toolsDropdown.insertBefore(toolsSortWrap, toolsDropdown.firstChild);
+    toolsSortWrap.appendChild(sortSelect);
+
+    return toolsSortWrap;
+  }
+
+  function placeSortControl() {
+    if (!sortSelect) return;
+
+    if (mqlMobile.matches) {
+      ensureToolsSortWrap();
+    } else {
+      // vuelve a su sitio (header Ejemplares)
+      if (sortMiniHost && sortMiniHost.isConnected) {
+        sortMiniHost.appendChild(sortSelect);
+      } else if (originalParent) {
+        originalParent.insertBefore(sortSelect, originalNextSibling);
+      }
+      if (toolsSortWrap && toolsSortWrap.isConnected) toolsSortWrap.remove();
+      toolsSortWrap = null;
+    }
+  }
+
+  placeSortControl();
+  if (mqlMobile.addEventListener) mqlMobile.addEventListener('change', placeSortControl);
+  else mqlMobile.addListener(placeSortControl);
+
 
   // Delegación: marcar devuelto desde tabla préstamos modal
 
