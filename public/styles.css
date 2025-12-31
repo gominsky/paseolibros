@@ -1957,3 +1957,13 @@ input::placeholder {
     box-shadow: none !important;
   }
 }
+
+
+/* MÓVIL: quitar el fondo interno (scroll) de la card de Ejemplares */
+@media (max-width: 820px){
+  .card.card-ejemplares{
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+}

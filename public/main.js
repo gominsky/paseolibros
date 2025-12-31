@@ -1718,6 +1718,9 @@ function renderEjemplaresGrid(lista) {
   const tablaWrap = document.querySelector('#tabla-ejemplares')?.closest('.table-wrapper');
   const mobileList = document.getElementById('ejemplares-list'); // tu lista móvil (si existe)
 
+  // Marca la card contenedora para estilos específicos en móvil
+  grid.closest('.card')?.classList.add('card-ejemplares');
+
   if (!grid || !tablaWrap) return;
 
   const showGrid = vistaEjemplares === 'grid';
