@@ -1997,3 +1997,38 @@ input::placeholder {
   /* ✅ Asegurar que Lecturas/Préstamos se vean */
   .grid-two .table-wrapper{ display:block !important; }
 }
+@media (max-width: 820px){
+
+  /* Evitar que el rosa de la card “se cuele” en las filas */
+  #tabla-lecturas-abiertas,
+  #tabla-prestamos-activos{
+    background: rgba(0,0,0,0.78) !important;
+  }
+
+  #tabla-lecturas-abiertas tbody td,
+  #tabla-prestamos-activos tbody td{
+    background: rgba(0,0,0,0.0) !important; /* base transparente dentro de tabla negra */
+  }
+
+  /* Alternancia suave para legibilidad (opcional, pero queda pro) */
+  #tabla-lecturas-abiertas tbody tr:nth-child(even) td,
+  #tabla-prestamos-activos tbody tr:nth-child(even) td{
+    background: rgba(255,255,255,0.04) !important;
+  }
+}
+@media (max-width: 820px){
+  /* Marco exterior de Ejemplares similar a las fichas */
+  .column-right > .card:first-child{
+    border: 1.5px solid rgba(232,170,196,0.55) !important;
+    box-shadow: 0 18px 55px rgba(0,0,0,0.55) !important;
+    border-radius: 20px !important;
+  }
+}
+@media (max-width: 820px){
+  /* Marco exterior de Ejemplares similar a las fichas */
+  .column-right > .card:first-child{
+    border: 1.5px solid rgba(232,170,196,0.55) !important;
+    box-shadow: 0 18px 55px rgba(0,0,0,0.55) !important;
+    border-radius: 20px !important;
+  }
+}
