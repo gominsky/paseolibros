@@ -1967,3 +1967,26 @@ input::placeholder {
     box-shadow: none !important;
   }
 }
+@media (max-width: 820px){
+
+  /* La card que contiene el scroll de fichas */
+  .card-ejemplares{
+    background: inherit !important;           /* mismo color/gradiente que el exterior */
+    backdrop-filter: none !important;         /* elimina el “oscurecido” */
+    -webkit-backdrop-filter: none !important; /* iOS/Safari */
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* El propio contenedor scroll (por si tiene fondo propio) */
+  .card-ejemplares .card-body,
+  .card-ejemplares #ejemplares-grid{
+    background: inherit !important;
+  }
+
+  /* Si hubiera algún overlay con pseudo-elementos */
+  .card-ejemplares::before,
+  .card-ejemplares::after{
+    content: none !important;
+  }
+}
