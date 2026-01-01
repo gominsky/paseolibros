@@ -1402,9 +1402,6 @@ const portada =
       img.classList.add('is-placeholder');
     };
   }
-  
-
-
     document.getElementById('ficha-titulo').textContent = libro.titulo || 'Sin título';
     document.getElementById('ficha-autores').textContent = libro.autores || 'Autor desconocido';
     document.getElementById('ficha-isbn').textContent = libro.isbn || '—';
@@ -1910,10 +1907,12 @@ function renderEjemplaresGrid(lista) {
     return `
       <div class="ej-grid-item" data-libro-id="${e.libro_id}" data-ejemplar-id="${e.ejemplar_id}">
         ${portada
-          ? `<img class="ej-grid-cover" src="${portada}" alt="Portada">`
-          : `<div class="portada-placeholder-mini" aria-hidden="true">
-  <span class="ph-logo">Pdl</span>
-</div>`
+          ? `<img class="ej-grid-cover" src="${portada}" alt="Portada"
+               onerror="this.onerror=null;this.outerHTML='<div class=&quot;portada-placeholder-grid&quot; aria-hidden=&quot;true&quot;><span class=&quot;ph-logo&quot;>Pdl</span><span class=&quot;ph-sub&quot;>Sin portada</span></div>';">`
+          : `<div class="portada-placeholder-grid" aria-hidden="true">
+               <span class="ph-logo">Pdl</span>
+               <span class="ph-sub">Sin portada</span>
+             </div>`
         }
         <div class="ej-grid-title">${escapeHtml(e.titulo || '—')}</div>
         <div class="ej-grid-meta">
@@ -1924,6 +1923,7 @@ function renderEjemplaresGrid(lista) {
       </div>
     `;
   }).join('');
+  
 }
 
 // ---------- Init ----------
