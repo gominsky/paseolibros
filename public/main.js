@@ -1200,17 +1200,20 @@ async function marcarPrestamoDevueltoGlobal() {
     setUserStatusErr('Error de red al marcar préstamo como devuelto.');
   }
 }
-
 // ---------- Escáner ----------
 const { BrowserMultiFormatReader, DecodeHintType, BarcodeFormat } = ZXing;
 
-let scanLocked = false; // evita aceptar 50 veces el mismo ISBN
+let codeReader = null;
+let currentStream = null;
+
+let lastScanValue = null;
+let lastScanCount = 0;
+let scanLocked = false;
 
 async function iniciarEscaneo() {
   const scannerDiv = document.getElementById('scanner');
   const video = document.getElementById('video');
 
-  // Reset de estabilidad por sesión
   lastScanValue = null;
   lastScanCount = 0;
   scanLocked = false;
@@ -1221,69 +1224,67 @@ async function iniciarEscaneo() {
     return;
   }
 
-  // Si había una sesión anterior abierta, la cerramos primero (idempotente)
+  // Cierra sesión previa si existía
   detenerEscaneo({ keepButtonState: true });
 
   setUserStatus('');
   scannerDiv.style.display = 'block';
+  setScanButtonState(true);
+
+  // Hints (más tolerante en móvil)
+  const hints = new Map();
+  hints.set(DecodeHintType.TRY_HARDER, true);
+  hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+    BarcodeFormat.EAN_13,   // ISBN-13 habitual
+    BarcodeFormat.EAN_8,
+    BarcodeFormat.UPC_A,    // algunos códigos vienen como UPC
+    BarcodeFormat.CODE_128  // a veces pegatinas/etiquetas
+  ]);
+
+  codeReader = new BrowserMultiFormatReader(hints);
 
   try {
-    const constraints = {
-      video: {
-        facingMode: { ideal: 'environment' },
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
-      }
-    };
+    // Elegir la mejor cámara posible (trasera)
+    const devices = await codeReader.listVideoInputDevices();
+    const preferred =
+      devices.find(d => /back|rear|environment/i.test(d.label)) || devices[0];
+    const deviceId = preferred?.deviceId || null;
 
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-    currentStream = stream;
+    // IMPORTANTE: ZXing abre la cámara, no nosotros
+    await codeReader.decodeFromVideoDevice(deviceId, video, async (result, err) => {
+      // Guarda el stream real por si queremos torch/stop extra seguro
+      if (!currentStream && video.srcObject) currentStream = video.srcObject;
 
-    video.srcObject = stream;
-    video.setAttribute('playsinline', 'true');
-    await video.play();
+      if (scanLocked) return;
 
-    // Intentar torch si se puede (silencioso si no)
-    try {
-      const track = stream.getVideoTracks()[0];
-      const caps = track.getCapabilities?.();
-      if (caps?.torch) {
-        await track.applyConstraints({ advanced: [{ torch: true }] });
-      }
-    } catch {}
+      if (result?.text) {
+        const code = String(result.text).trim();
+        if (!code) return;
 
-    // Solo EAN (ISBN suele venir como EAN-13)
-    const hints = new Map();
-    hints.set(DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.EAN_13, BarcodeFormat.EAN_8]);
+        // En móvil, con 1 lectura suele bastar; si quieres 2, deja >=2
+        if (code === lastScanValue) lastScanCount++;
+        else {
+          lastScanValue = code;
+          lastScanCount = 1;
+        }
 
-    codeReader = new BrowserMultiFormatReader(hints);
+        if (lastScanCount >= 1) {
+          scanLocked = true;
 
-    codeReader.decodeFromVideoDevice(null, video, (result) => {
-      if (!result || scanLocked) return;
+          const isbnEl = document.getElementById('isbn');
+          if (isbnEl) isbnEl.value = code;
 
-      const code = (result.text || '').trim();
-      if (!code) return;
+          // feedback
+          if (navigator.vibrate) navigator.vibrate(80);
 
-      if (code === lastScanValue) lastScanCount++;
-      else {
-        lastScanValue = code;
-        lastScanCount = 1;
-      }
-
-      // Acepta solo si se repite en 2 frames seguidos
-      if (lastScanCount >= 2) {
-        scanLocked = true; // se queda “pillado” hasta que pares o reinicies
-        const isbnEl = document.getElementById('isbn');
-        if (isbnEl) isbnEl.value = code;
-
-        setUserStatusOk(`ISBN detectado: ${code} (pulsa Detener para cerrar)`);
-        // ✅ NO detener aquí; solo al pulsar "Detener"
+          setUserStatusOk(`ISBN detectado: ${code} (pulsa Detener para cerrar)`);
+          // NO cerramos automáticamente: lo cierras con el switch/botón
+        }
       }
     });
-
-  } catch (error) {
-    console.error(error);
-    setUserStatusErr('No se pudo acceder a la cámara.');
+  } catch (e) {
+    console.error(e);
+    setUserStatusErr('No se pudo acceder a la cámara (revisa permisos/HTTPS).');
     scannerDiv.style.display = 'none';
     setScanButtonState(false);
     detenerEscaneo({ keepButtonState: true });
@@ -1292,27 +1293,31 @@ async function iniciarEscaneo() {
 
 function detenerEscaneo(opts = {}) {
   const { keepButtonState = false } = opts;
-  const scannerDiv = document.getElementById('scanner');
 
   lastScanValue = null;
   lastScanCount = 0;
   scanLocked = false;
+
+  const scannerDiv = document.getElementById('scanner');
+  const video = document.getElementById('video');
 
   if (codeReader) {
     try { codeReader.reset(); } catch {}
     codeReader = null;
   }
 
-  if (currentStream) {
-    currentStream.getTracks().forEach((t) => t.stop());
-    currentStream = null;
+  // Extra-seguro: parar tracks si quedaron vivos
+  const stream = currentStream || video?.srcObject;
+  if (stream?.getTracks) {
+    stream.getTracks().forEach(t => t.stop());
   }
+  currentStream = null;
 
+  if (video) video.srcObject = null;
   if (scannerDiv) scannerDiv.style.display = 'none';
 
   if (!keepButtonState) setScanButtonState(false);
 }
-
 
 // ---------- Eliminar ejemplar ----------
 async function eliminarEjemplar(ejemplarId) {
