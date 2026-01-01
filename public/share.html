@@ -9,10 +9,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9.144,600;9.144,800&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body class="share-page">
   <div class="app">
     <header class="app-header">
@@ -30,29 +30,26 @@
         <a href="./" class="btn btn-ghost btn-sm" style="text-decoration:none;">Volver</a>
         <button id="btn-copy-link" class="btn btn-secondary btn-sm" type="button">Copiar enlace</button>
       </div>
-      
     </header>
 
     <main class="app-main">
-      <div class="share-content">
-        <div class="share-card">
+      <div class="column column-right">
+        <div class="card">
           <div class="card-header-inline">
             <h2 id="share-title">Cargando…</h2>
             <div class="card-header-actions">
               <span class="share-chip" id="share-badge">Solo lectura</span>
             </div>
           </div>
-          <div class="card-body">
-            <p id="share-info" class="helper-text">Estamos cargando la lista…</p>
 
-            <!-- Deseos (lista) -->
-            <div id="share-table-wrap" class="table-wrapper" style="display:none;">
-              <table id="share-table" class="table-small">
-                <thead id="share-thead"></thead>
-                <tbody id="share-tbody"></tbody>
-              </table>
-            </div>
-            
+          <p id="share-info" class="helper-text">Estamos cargando la lista…</p>
+
+          <div id="share-table-wrap" class="table-wrapper" style="display:none;">
+            <!-- MISMO ESTILO que tabla principal: class="table" -->
+            <table id="share-table" class="table">
+              <thead id="share-thead"></thead>
+              <tbody id="share-tbody"></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -66,82 +63,84 @@
 
   const elTitle = document.getElementById('share-title');
   const elInfo = document.getElementById('share-info');
-  const elWishlist = document.getElementById('share-wishlist');
-  const elEj = document.getElementById('share-ejemplares');
   const elSubtitle = document.getElementById('share-subtitle');
+
+  const elWrap = document.getElementById('share-table-wrap');
+  const elThead = document.getElementById('share-thead');
+  const elTbody = document.getElementById('share-tbody');
 
   function esc(s){
     return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   }
 
+  // Igual que el front: aceptamos absolutas y relativas
   function urlPortadaAbsoluta(url){
     if (!url) return '';
     if (/^https?:\/\//i.test(url)) return url;
-    return url; // asumimos que el backend sirve rutas absolutas o relativas correctas
+    return url;
   }
 
-  const elWrap = document.getElementById('share-table-wrap');
-const elThead = document.getElementById('share-thead');
-const elTbody = document.getElementById('share-tbody');
+  function renderTabla(headers, rowsHtml){
+    elThead.innerHTML = `<tr>${headers.map(h => `<th>${esc(h)}</th>`).join('')}</tr>`;
+    elTbody.innerHTML = rowsHtml.join('');
+    elWrap.style.display = 'block';
+  }
 
-function renderTabla(headers, rowsHtml){
-  elThead.innerHTML = `<tr>${headers.map(h => `<th>${esc(h)}</th>`).join('')}</tr>`;
-  elTbody.innerHTML = rowsHtml.join('');
-  elWrap.style.display = 'block';
-}
-function renderDeseos(items){
-  const rows = (items || []).map(d => {
-    const titulo = d.titulo || d.nombre || '—';
-    const autores = d.autores || d.autor || '';
-    const tipo = d.tipo || '';
-    const ubic = d.ubicacion || '';
-    const portada = urlPortadaAbsoluta(d.url_portada || d.portada_url || '');
+  function cellPortada(portadaUrl){
+    const portada = urlPortadaAbsoluta(portadaUrl);
+    if (portada){
+      return `<img class="portada-mini-img" src="${esc(portada)}" alt="Portada" loading="lazy">`;
+    }
+    return `<div class="portada-placeholder-mini" aria-hidden="true">📚</div>`;
+  }
 
-    return `
-      <tr>
-        <td>${portada
-          ? `<img class="share-cover" src="${esc(portada)}" alt="Portada" loading="lazy">`
-          : `<div class="share-cover-ph" aria-hidden="true">📚</div>`
-        }</td>
-        <td class="col-title"><strong>${esc(titulo)}</strong></td>
-        <td>${esc(autores)}</td>
-        <td>${esc(tipo)}</td>
-        <td>${esc(ubic)}</td>
-      </tr>
-    `;
-  });
+  function renderDeseos(items){
+    const rows = (items || []).map(d => {
+      const titulo = d.titulo || d.nombre || '—';
+      const autores = d.autores || d.autor || '';
+      const tipo = d.tipo || '';
+      const ubic = d.ubicacion || '';
+      const portada = d.url_portada || d.portada_url || '';
 
-  renderTabla(['', 'Título', 'Autor', 'Tipo', 'Ubicación'], rows);
-  elSubtitle.textContent = 'Lista de deseos · Solo lectura';
-}
+      return `
+        <tr>
+          <td>${cellPortada(portada)}</td>
+          <td><strong>${esc(titulo)}</strong></td>
+          <td>${esc(autores)}</td>
+          <td>${esc(tipo)}</td>
+          <td>${esc(ubic)}</td>
+        </tr>
+      `;
+    });
 
-function renderEjemplares(items){
-  const rows = (items || []).map(e => {
-    const titulo = e.titulo || '—';
-    const autores = e.autores || '';
-    const estado = e.estado || '';
-    const ubic = e.ubicacion || '';
-    const isbn = e.isbn || '';
-    const portada = urlPortadaAbsoluta(e.url_portada || e.portada_url || '');
+    renderTabla(['Portada', 'Título', 'Autor', 'Tipo', 'Ubicación'], rows);
+    elSubtitle.textContent = 'Lista de deseos · Solo lectura';
+  }
 
-    return `
-      <tr>
-        <td>${portada
-          ? `<img class="share-cover" src="${esc(portada)}" alt="Portada" loading="lazy">`
-          : `<div class="share-cover-ph" aria-hidden="true">📚</div>`
-        }</td>
-        <td class="col-title"><strong>${esc(titulo)}</strong></td>
-        <td>${esc(autores)}</td>
-        <td>${esc(isbn)}</td>
-        <td>${esc(estado)}</td>
-        <td>${esc(ubic)}</td>
-      </tr>
-    `;
-  });
+  function renderEjemplares(items){
+    const rows = (items || []).map(e => {
+      const titulo = e.titulo || '—';
+      const autores = e.autores || '';
+      const isbn = e.isbn || '';
+      const estado = e.estado || '';
+      const ubic = e.ubicacion || '';
+      const portada = e.url_portada || e.portada_url || '';
 
-  renderTabla(['', 'Título', 'Autor', 'ISBN', 'Estado', 'Ubicación'], rows);
-  elSubtitle.textContent = 'Ejemplares · Solo lectura';
-}
+      return `
+        <tr>
+          <td>${cellPortada(portada)}</td>
+          <td><strong>${esc(titulo)}</strong></td>
+          <td>${esc(autores)}</td>
+          <td>${esc(isbn)}</td>
+          <td>${esc(estado)}</td>
+          <td>${esc(ubic)}</td>
+        </tr>
+      `;
+    });
+
+    renderTabla(['Portada', 'Título', 'Autor/es', 'ISBN', 'Estado', 'Ubicación'], rows);
+    elSubtitle.textContent = 'Ejemplares · Solo lectura';
+  }
 
   async function load(){
     if (!token){

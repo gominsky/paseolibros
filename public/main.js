@@ -451,7 +451,9 @@ function renderEjemplares() {
         ${
           e.url_portada
             ? `<img src="${urlPortadaAbsoluta(e.url_portada)}?t=${Date.now()}" alt="Portada" class="portada-mini-img" />`
-            : `<div class="portada-placeholder-mini">📚</div>`
+            : `<div class="portada-placeholder-mini" aria-hidden="true">
+  <span class="ph-logo">Pdl</span>
+</div>`
         }
       </td>
       <td class="cell-title">
@@ -509,7 +511,9 @@ function renderEjemplaresMobileList(filtrados){
       <div class="ej-card" data-libro-id="${e.libro_id}" data-ejemplar-id="${e.ejemplar_id}">
         ${portada
           ? `<img class="ej-cover" src="${portada}" alt="Portada" />`
-          : `<div class="ej-cover" style="display:grid;place-items:center;color:#fff;background:#000;border-radius:12px;">📚</div>`
+          : `<div class="portada-placeholder-mini" aria-hidden="true">
+  <span class="ph-logo">Pdl</span>
+</div>`
         }
 
         <div class="ej-main">
@@ -1387,10 +1391,18 @@ const portada =
   || (ejemplaresCache || []).find(e => Number(e.libro_id) === Number(libroSeleccionadoId))?.url_portada
   || '';
 
-if (img) {
-  img.src = portada ? `${urlPortadaAbsoluta(portada)}?t=${Date.now()}` : '';
-  img.onerror = () => { img.src = ''; }; // evita icono de imagen rota
-}
+  if (img) {
+    const hasPortada = Boolean(portada);
+  
+    img.classList.toggle('is-placeholder', !hasPortada);
+    img.src = hasPortada ? `${urlPortadaAbsoluta(portada)}?t=${Date.now()}` : '';
+  
+    img.onerror = () => {
+      img.src = '';
+      img.classList.add('is-placeholder');
+    };
+  }
+  
 
 
     document.getElementById('ficha-titulo').textContent = libro.titulo || 'Sin título';
@@ -1899,7 +1911,9 @@ function renderEjemplaresGrid(lista) {
       <div class="ej-grid-item" data-libro-id="${e.libro_id}" data-ejemplar-id="${e.ejemplar_id}">
         ${portada
           ? `<img class="ej-grid-cover" src="${portada}" alt="Portada">`
-          : `<div class="ej-grid-cover" style="display:grid;place-items:center;">📚</div>`
+          : `<div class="portada-placeholder-mini" aria-hidden="true">
+  <span class="ph-logo">Pdl</span>
+</div>`
         }
         <div class="ej-grid-title">${escapeHtml(e.titulo || '—')}</div>
         <div class="ej-grid-meta">
