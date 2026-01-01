@@ -2044,25 +2044,49 @@ input::placeholder {
 #share-table th{ white-space: nowrap; }
 #share-table{ background: rgba(0,0,0,0.0); }
 /* =========================
-   FIX: botón "Detener escaneo" visible en DESKTOP
+   FIX definitivo: Botón "Detener escaneo" visible en DESKTOP
+   (sobrescribe los 2 bloques min-width 821/761)
    ========================= */
    @media (min-width: 821px){
-    /* cuando el scanner está abierto, que tenga layout en columna */
+    /* cuando el scanner esté visible */
     #scanner.scanner[style*="display:block"],
     #scanner.scanner[style*="display: block"]{
-      display: flex !important;
-      flex-direction: column !important;
+      display: grid !important;
+      grid-template-columns: 1fr auto;
+      grid-template-rows: auto 260px;
+      grid-template-areas:
+        "txt btn"
+        "vid vid";
       gap: 12px !important;
+      align-items: center;
     }
   
-    /* asegura que el botón se vea y quede accesible */
-    #scanner #btn-detener{
+    #scanner.scanner > .scanner-text{
+      grid-area: txt;
+      margin: 0 !important;
+    }
+  
+    #scanner.scanner > video#video{
+      grid-area: vid;
+      width: 100% !important;
+      height: 260px !important;
+      max-height: 260px !important;
+      border-radius: 14px !important;
+      object-fit: cover !important;
+    }
+  
+    #scanner.scanner > #btn-detener{
+      grid-area: btn;
       display: inline-flex !important;
       align-items: center;
       justify-content: center;
-      margin-top: 2px;
-      align-self: flex-end; /* a la derecha */
       width: auto !important;
+      margin: 0 !important;
+      justify-self: end;
+      z-index: 9999; /* por si algo lo tapa */
     }
+  
+    /* por si el pseudo-elemento del overlay llega a tapar algo */
+    #scanner::before{ display: none !important; content: none !important; }
   }
   
