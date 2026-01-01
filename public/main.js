@@ -1203,12 +1203,12 @@ async function marcarPrestamoDevueltoGlobal() {
 // ---------- Escáner ----------
 const { BrowserMultiFormatReader, DecodeHintType, BarcodeFormat } = ZXing;
 
-let codeReader = null;
-let currentStream = null;
+codeReader = null;
+currentStream = null;
 
-let lastScanValue = null;
-let lastScanCount = 0;
-let scanLocked = false;
+lastScanValue = null;
+lastScanCount = 0;
+scanLocked = false;
 
 async function iniciarEscaneo() {
   const scannerDiv = document.getElementById('scanner');
@@ -1318,6 +1318,7 @@ function detenerEscaneo(opts = {}) {
 
   if (!keepButtonState) setScanButtonState(false);
 }
+
 
 // ---------- Eliminar ejemplar ----------
 async function eliminarEjemplar(ejemplarId) {
