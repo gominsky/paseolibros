@@ -180,9 +180,6 @@
               height="200"
               class="scanner-video"
             ></video>
-            <button id="btn-detener" class="btn btn-ghost btn-full">
-              Detener escaneo
-            </button>
           </div>
 
           <div class="form-group">
@@ -401,11 +398,7 @@
             <div class="form-group">
               <label for="edit-libro-paginas">Nº páginas</label>
               <input id="edit-libro-paginas" type="number" min="1" />
-            </div>
-            <div class="form-group">
-              <label for="edit-libro-portada">URL portada</label>
-              <input id="edit-libro-portada" type="text" />
-            </div>
+            </div>            
           </div>
 
           <div class="form-group">
@@ -432,6 +425,17 @@
                 placeholder="propio, prestado, etc."
               />
             </div>
+            <div class="form-group">
+              <label for="edit-ejemplar-tipo">Tipo</label>
+              <select id="edit-ejemplar-tipo">
+                <option value="libro">Libro</option>
+                <option value="comic">Cómic</option>
+                <option value="manga">Manga</option>
+                <option value="revista">Revista</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+            
             <div class="form-group">
               <label for="edit-ejemplar-ubicacion">Ubicación</label>
               <input id="edit-ejemplar-ubicacion" type="text" />

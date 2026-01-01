@@ -346,6 +346,7 @@ router.get('/:id', async (req, res) => {
          e.estado,
          e.ubicacion,
          e.notas,
+         e.tipo,  
          e.activo,
          e.creado_en
        FROM ejemplares e
@@ -367,15 +368,12 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-
 // Actualizar un ejemplar (estado / ubicación / notas)
 router.put('/:id', async (req, res) => {
   const ejemplarId = Number(req.params.id);
-  if (!ejemplarId) {
-    return res.status(400).json({ error: 'ID de ejemplar no válido' });
-  }
+  if (!ejemplarId) return res.status(400).json({ error: 'ID de ejemplar no válido' });
 
-  const { estado, ubicacion, notas } = req.body;
+  const { estado, ubicacion, notas, tipo } = req.body;
 
   try {
     const resultado = await pool.query(
@@ -383,18 +381,17 @@ router.put('/:id', async (req, res) => {
        SET
          estado = COALESCE($1, estado),
          ubicacion = COALESCE(NULLIF($2, ''), ubicacion),
-         notas = COALESCE(NULLIF($3, ''), notas)
-       WHERE id = $4
-         AND usuario_id = $5
+         notas = COALESCE(NULLIF($3, ''), notas),
+         tipo = COALESCE(NULLIF($4, ''), tipo)
+       WHERE id = $5
+         AND usuario_id = $6
          AND activo = TRUE
        RETURNING *`,
-      [estado, ubicacion, notas, ejemplarId, req.usuario.id]
+      [estado, ubicacion, notas, tipo, ejemplarId, req.usuario.id]
     );
 
     if (resultado.rowCount === 0) {
-      return res
-        .status(404)
-        .json({ error: 'Ejemplar no encontrado o no editable' });
+      return res.status(404).json({ error: 'Ejemplar no encontrado o no editable' });
     }
 
     res.json(resultado.rows[0]);
@@ -403,5 +400,6 @@ router.put('/:id', async (req, res) => {
     res.status(500).json({ error: 'Error actualizando ejemplar' });
   }
 });
+
 
 export default router;

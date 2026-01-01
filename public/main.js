@@ -1199,6 +1199,9 @@ async function marcarPrestamoDevueltoGlobal() {
 
 // ---------- Escáner ----------
 const { BrowserMultiFormatReader, DecodeHintType, BarcodeFormat } = ZXing;
+
+let scanLocked = false; // evita aceptar 50 veces el mismo ISBN
+
 async function iniciarEscaneo() {
   const scannerDiv = document.getElementById('scanner');
   const video = document.getElementById('video');
@@ -1206,14 +1209,16 @@ async function iniciarEscaneo() {
   // Reset de estabilidad por sesión
   lastScanValue = null;
   lastScanCount = 0;
+  scanLocked = false;
 
   if (!scannerDiv || !video) {
     setUserStatusErr('No se encontró el componente de escaneo.');
+    setScanButtonState(false);
     return;
   }
 
-  // Si había una sesión anterior abierta, la cerramos primero
-  try { detenerEscaneo(); } catch {}
+  // Si había una sesión anterior abierta, la cerramos primero (idempotente)
+  detenerEscaneo({ keepButtonState: true });
 
   setUserStatus('');
   scannerDiv.style.display = 'block';
@@ -1222,8 +1227,6 @@ async function iniciarEscaneo() {
     const constraints = {
       video: {
         facingMode: { ideal: 'environment' },
-        // No está soportado en todos, pero no rompe
-        focusMode: 'continuous',
         width: { ideal: 1280 },
         height: { ideal: 720 }
       }
@@ -1236,24 +1239,23 @@ async function iniciarEscaneo() {
     video.setAttribute('playsinline', 'true');
     await video.play();
 
-    // Intentar activar linterna (torch) si el dispositivo lo soporta
+    // Intentar torch si se puede (silencioso si no)
     try {
       const track = stream.getVideoTracks()[0];
       const caps = track.getCapabilities?.();
       if (caps?.torch) {
         await track.applyConstraints({ advanced: [{ torch: true }] });
       }
-    } catch {
-      // Silencioso: muchos dispositivos/navegadores no lo permiten
-    }
+    } catch {}
 
     // Solo EAN (ISBN suele venir como EAN-13)
     const hints = new Map();
     hints.set(DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.EAN_13, BarcodeFormat.EAN_8]);
 
     codeReader = new BrowserMultiFormatReader(hints);
+
     codeReader.decodeFromVideoDevice(null, video, (result) => {
-      if (!result) return;
+      if (!result || scanLocked) return;
 
       const code = (result.text || '').trim();
       if (!code) return;
@@ -1266,11 +1268,12 @@ async function iniciarEscaneo() {
 
       // Acepta solo si se repite en 2 frames seguidos
       if (lastScanCount >= 2) {
+        scanLocked = true; // se queda “pillado” hasta que pares o reinicies
         const isbnEl = document.getElementById('isbn');
         if (isbnEl) isbnEl.value = code;
 
-        setUserStatusOk(`ISBN detectado: ${code}`);
-        detenerEscaneo();
+        setUserStatusOk(`ISBN detectado: ${code} (pulsa Detener para cerrar)`);
+        // ✅ NO detener aquí; solo al pulsar "Detener"
       }
     });
 
@@ -1278,14 +1281,18 @@ async function iniciarEscaneo() {
     console.error(error);
     setUserStatusErr('No se pudo acceder a la cámara.');
     scannerDiv.style.display = 'none';
+    setScanButtonState(false);
+    detenerEscaneo({ keepButtonState: true });
   }
 }
 
-function detenerEscaneo() {
+function detenerEscaneo(opts = {}) {
+  const { keepButtonState = false } = opts;
   const scannerDiv = document.getElementById('scanner');
 
   lastScanValue = null;
   lastScanCount = 0;
+  scanLocked = false;
 
   if (codeReader) {
     try { codeReader.reset(); } catch {}
@@ -1298,6 +1305,8 @@ function detenerEscaneo() {
   }
 
   if (scannerDiv) scannerDiv.style.display = 'none';
+
+  if (!keepButtonState) setScanButtonState(false);
 }
 
 
@@ -1360,13 +1369,13 @@ async function cargarFormEdicion() {
     document.getElementById('edit-libro-editorial').value = libro.editorial || '';
     document.getElementById('edit-libro-fecha').value = libro.fecha_publicacion || '';
     document.getElementById('edit-libro-paginas').value = libro.numero_paginas || '';
-    document.getElementById('edit-libro-portada').value = libro.url_portada || '';
     document.getElementById('edit-libro-descripcion').value = libro.descripcion || '';
 
     // inputs ejemplar
     document.getElementById('edit-ejemplar-estado').value = ejemplar.estado || '';
     document.getElementById('edit-ejemplar-ubicacion').value = ejemplar.ubicacion || '';
     document.getElementById('edit-ejemplar-notas').value = ejemplar.notas || '';
+    document.getElementById('edit-ejemplar-tipo').value = ejemplar.tipo || 'libro';
 
     // header modal
     const img = document.getElementById('ficha-portada-img');
@@ -1404,56 +1413,37 @@ async function guardarLibroEditado() {
   const msg = document.getElementById('edit-mensaje');
   if (msg) msg.textContent = '';
 
-  if (!token || !usuarioActual) {
-    if (msg) msg.textContent = 'Debes iniciar sesión para editar libros.';
-    return;
-  }
-  if (!libroSeleccionadoId) {
-    if (msg) msg.textContent = 'Selecciona un libro.';
-    return;
-  }
+  if (!token || !usuarioActual) { if (msg) msg.textContent = 'Debes iniciar sesión para editar libros.'; return; }
+  if (!libroSeleccionadoId) { if (msg) msg.textContent = 'Selecciona un libro.'; return; }
 
   const titulo = document.getElementById('edit-libro-titulo').value.trim();
   const autores = document.getElementById('edit-libro-autores').value.trim();
   const editorial = document.getElementById('edit-libro-editorial').value.trim();
   const fecha_publicacion = document.getElementById('edit-libro-fecha').value.trim();
   const paginasStr = document.getElementById('edit-libro-paginas').value.trim();
-  const url_portada = document.getElementById('edit-libro-portada').value.trim();
   const descripcion = document.getElementById('edit-libro-descripcion').value.trim();
 
   const numero_paginas = paginasStr ? Number(paginasStr) : null;
-  const dups = titulosDuplicadosEnCache(titulo, libroSeleccionadoId);
-if (dups.length > 0) {
-  const ok = confirm(`Ojo: ya existe ese título en tu biblioteca (${dups.length} coincidencia/s). ¿Quieres guardar igualmente?`);
-  if (!ok) return;
-}
-  try {
-    const res = await fetch(`${API_BASE}/api/libros/${libroSeleccionadoId}`, {
-      method: 'PUT',
-      headers: getHeaders(),
-      body: JSON.stringify({
-        titulo: titulo || null,
-        autores: autores || null,
-        editorial: editorial || null,
-        fecha_publicacion: fecha_publicacion || null,
-        numero_paginas: Number.isNaN(numero_paginas) ? null : numero_paginas,
-        descripcion: descripcion || null,
-        url_portada: url_portada || null,
-      }),
-    });
 
-    const data = await res.json();
-    if (!res.ok) {
-      if (msg) msg.textContent = data.error || 'Error guardando libro.';
-      return;
-    }
+  const res = await fetch(`${API_BASE}/api/libros/${libroSeleccionadoId}`, {
+    method: 'PUT',
+    headers: getHeaders(),
+    body: JSON.stringify({
+      titulo: titulo || null,
+      autores: autores || null,
+      editorial: editorial || null,
+      fecha_publicacion: fecha_publicacion || null,
+      numero_paginas: Number.isNaN(numero_paginas) ? null : numero_paginas,
+      descripcion: descripcion || null,
+    }),
+  });
 
-    if (msg) msg.textContent = 'Libro guardado ✅';
-    if (usuarioActual?.id) await cargarEjemplares(usuarioActual.id);
-  } catch (err) {
-    console.error(err);
-    if (msg) msg.textContent = 'Error de red al guardar libro.';
-  }
+  const data = await res.json();
+  if (!res.ok) { if (msg) msg.textContent = data.error || 'Error guardando libro.'; return; }
+
+  if (msg) msg.textContent = 'Libro guardado ✅';
+  if (usuarioActual?.id) await cargarEjemplares(usuarioActual.id);
+  await cargarFormEdicion();   // ✅ refresca inputs + header del modal
 }
 
 async function guardarEjemplarEditado() {
@@ -1472,6 +1462,7 @@ async function guardarEjemplarEditado() {
   const estado = document.getElementById('edit-ejemplar-estado').value.trim();
   const ubicacion = document.getElementById('edit-ejemplar-ubicacion').value.trim();
   const notas = document.getElementById('edit-ejemplar-notas').value.trim();
+  const tipo = document.getElementById('edit-ejemplar-tipo').value;
 
   try {
     const res = await fetch(`${API_BASE}/api/ejemplares/${ejemplarSeleccionadoId}`, {
@@ -1481,6 +1472,7 @@ async function guardarEjemplarEditado() {
         estado: estado || null,
         ubicacion: ubicacion || null,
         notas: notas || null,
+        tipo: tipo || 'libro',      
       }),
     });
 
@@ -1492,6 +1484,7 @@ async function guardarEjemplarEditado() {
 
     if (msg) msg.textContent = 'Ejemplar guardado ✅';
     if (usuarioActual?.id) await cargarEjemplares(usuarioActual.id);
+    await cargarFormEdicion();   // ✅ para que el tipo/estado/notas y header se actualicen
   } catch (err) {
     console.error(err);
     if (msg) msg.textContent = 'Error de red al guardar ejemplar.';
@@ -1736,6 +1729,15 @@ async function cargarDeseos() {
     </div>
   `).join('');
 }
+function setScanButtonState(isOn) {
+  const btn = document.getElementById('btn-escanear');
+  if (!btn) return;
+
+  btn.dataset.scanning = isOn ? '1' : '0';
+  btn.textContent = isOn ? 'Detener' : 'Escanear';
+  btn.classList.toggle('btn-danger', isOn);      // si tienes esta clase
+  btn.classList.toggle('btn-secondary', !isOn);  // o la que uses
+}
 
 async function crearDeseoDesdeForm() {
   const titulo = document.getElementById('deseo-titulo')?.value?.trim() || '';
@@ -1917,6 +1919,18 @@ document.addEventListener('DOMContentLoaded', () => {
     vistaEjemplares = 'lista';
     renderEjemplares();
   });
+  document.getElementById('btn-escanear')?.addEventListener('click', async () => {
+    const btn = document.getElementById('btn-escanear');
+    const isOn = btn?.dataset?.scanning === '1';
+  
+    if (isOn) {
+      detenerEscaneo();
+      setScanButtonState(false);
+    } else {
+      setScanButtonState(true);
+      await iniciarEscaneo();
+    }
+  });
   
   document.getElementById('ej-vista-grid')?.addEventListener('click', () => {
     vistaEjemplares = 'grid';
@@ -1949,8 +1963,7 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     crearEjemplar();
   });
-  document.getElementById('btn-escanear')?.addEventListener('click', iniciarEscaneo);
-  document.getElementById('btn-detener')?.addEventListener('click', detenerEscaneo);
+  
   document.getElementById('btn-login')?.addEventListener('click', hacerLogin);
   document.getElementById('btn-logout')?.addEventListener('click', hacerLogout);
   document.getElementById('ejemplares-list')?.addEventListener('click', (e) => {

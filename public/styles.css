@@ -2041,7 +2041,6 @@ input::placeholder {
 }
 #share-table-wrap{ margin-top: 10px; }
 #share-table{ width: 100%; }
-#share-table th{ white-space: nowrap; }
 #share-table{ background: rgba(0,0,0,0.0); }
 /* =========================
    FIX definitivo: Botón "Detener escaneo" visible en DESKTOP
@@ -2088,5 +2087,175 @@ input::placeholder {
   
     /* por si el pseudo-elemento del overlay llega a tapar algo */
     #scanner::before{ display: none !important; content: none !important; }
+  }
+  /* Pequeños ajustes para esta página */
+  .share-page .app-header{ grid-template-columns: 1fr auto 1fr; }
+  .share-page .header-left{ justify-self: start; }
+  .share-page .header-right{ justify-self: end; gap: 10px; }
+
+  .share-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    font-size: .9rem;
+    opacity: .95;
+  }
+
+  .share-content{
+    margin-top: 18px;
+    display: grid;
+    gap: 14px;
+  }
+
+  .share-card{
+    background: #000;
+    border: 1.5px solid rgba(232,170,196,.55);
+    border-radius: 18px;
+    box-shadow: 0 18px 55px rgba(0,0,0,.55);
+    overflow: hidden;
+  }
+  .share-card .card-header-inline{
+    padding: 14px 14px 10px;
+  }
+  .share-card .card-body{
+    padding: 0 14px 14px;
+  }
+
+  /* Reutilizamos estilos de deseos/ejemplares cuando nos convenga */
+  .share-list{
+    display:grid;
+    gap: 10px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+  .share-item{
+    padding: 12px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    display:grid;
+    gap:6px;
+  }
+  .share-title{ font-weight: 800; }
+  .share-meta{ font-size: .9rem; opacity: .9; display:flex; gap:10px; flex-wrap: wrap; }
+
+  .share-grid{
+    display:grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  .share-grid .ej-grid-item{ cursor: default; }
+
+  .muted{ opacity: .82; }
+
+  @media (max-width: 820px){
+    .share-page .app-header{
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "actions"
+        "title";
+    }
+    .share-page .header-right{ justify-self: end; }
+    .share-page .logo.header-center{ text-align:center; }
+    .share-grid{ grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+  }
+
+  /* ===== Share: tabla a ancho completo y sin “contenedor pequeño” ===== */
+.share-page .app{
+  max-width: 1600px !important;
+  width: calc(100vw - 24px) !important;
+  margin: 12px auto !important;
+}
+
+.share-page .app-main{
+  padding: 0 !important;
+}
+
+/* la card ocupa toda la fila */
+.share-page .share-card{
+  width: 100% !important;
+}
+
+/* el wrapper NO limita ancho; solo permite scroll si hace falta */
+#share-table-wrap{
+  width: 100% !important;
+  overflow-x: auto;
+}
+
+/* la tabla llena el contenedor */
+#share-table{
+  width: 100% !important;
+  min-width: 0 !important;     /* ✅ anula “table-small” */
+  table-layout: fixed;         /* ✅ reparte columnas y evita “micro contenedor” */
+}
+
+/* permite que texto largo se envuelva (en vez de forzar scroll infinito) */
+#share-table th,
+#share-table td{
+  white-space: normal !important;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* portada fija y pequeña (para que no rompa el layout) */
+#share-table td:first-child,
+#share-table th:first-child{
+  width: 54px;
+}
+
+.share-cover{
+  width: 40px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* la columna título se queda con más aire */
+#share-table td.col-title{
+  min-width: 320px;
+}
+/* =========================================================
+   SHARE (deseos + ejemplares compartidos): tabla a ancho completo
+   ========================================================= */
+   .share-page #share-table-wrap{
+    width: 100% !important;
+    overflow-x: auto;                 /* si no cabe, scroll */
+  }
+  
+  .share-page #share-table{
+    width: 100% !important;
+    min-width: 0 !important;          /* ✅ anula table/table-small */
+    table-layout: fixed;              /* ✅ evita “encogerse raro” */
+  }
+  
+  /* ✅ En share: permitir que el texto envuelva (no nowrap) */
+  .share-page #share-table th,
+  .share-page #share-table td{
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  
+  /* ✅ anula el min-width global SOLO en share */
+  .share-page table{
+    min-width: 0 !important;
+  }
+  
+  /* Portada controlada */
+  .share-page .share-cover{
+    width: 40px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+  
+  /* Deja aire a la columna título */
+  .share-page #share-table td.col-title{
+    min-width: 320px;
   }
   
