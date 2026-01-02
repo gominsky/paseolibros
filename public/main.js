@@ -1200,135 +1200,196 @@ async function marcarPrestamoDevueltoGlobal() {
     setUserStatusErr('Error de red al marcar préstamo como devuelto.');
   }
 }
-
-// ---------- Escáner ----------
+// ---------- Escáner (REHECHO desde cero) ----------
 const { BrowserMultiFormatReader, DecodeHintType, BarcodeFormat } = ZXing;
 
-let scanLocked = false; // evita aceptar 50 veces el mismo ISBN
-async function getBackCameraDeviceId() {
+let scanLocked = false;
+
+const STABLE_FRAMES = 2; // pide 2 lecturas iguales seguidas para aceptar
+
+function isLikelyISBN(code) {
+  const v = String(code || "").trim();
+  // EAN-13 numérico (muchos ISBN vienen como 978/979...)
+  return /^\d{13}$/.test(v);
+}
+
+async function pickBackCameraDeviceId() {
   if (!navigator.mediaDevices?.enumerateDevices) return null;
 
   const devices = await navigator.mediaDevices.enumerateDevices();
-  const cams = devices.filter(d => d.kind === 'videoinput');
-  if (cams.length === 0) return null;
+  const cams = devices.filter(d => d.kind === "videoinput");
+  if (!cams.length) return null;
 
-  // Si el navegador expone labels (normalmente tras aceptar permisos),
-  // intenta encontrar la trasera por label.
-  const byLabel = cams.find(d => /back|rear|environment/i.test(d.label));
+  // si hay labels (normalmente tras aceptar permisos), intenta detectar trasera
+  const byLabel = cams.find(d => /back|rear|environment|trasera/i.test(d.label || ""));
   if (byLabel) return byLabel.deviceId;
 
-  // Fallback típico: la última suele ser la trasera en muchos móviles
+  // fallback típico: última cámara suele ser trasera en muchos móviles
   return cams[cams.length - 1].deviceId;
 }
 
-async function iniciarEscaneo() {
-  const scannerDiv = document.getElementById('scanner');
-  const video = document.getElementById('video');
+async function aplicarMejorasDeCamara(stream) {
+  try {
+    const track = stream.getVideoTracks?.()[0];
+    if (!track) return;
 
-  // Reset de estabilidad por sesión
+    const caps = track.getCapabilities?.() || {};
+
+    // autofocus continuo si existe
+    const adv = [];
+    if (caps.focusMode?.includes?.("continuous")) adv.push({ focusMode: "continuous" });
+
+    // torch si existe (opcional; en algunos móviles ayuda MUCHO)
+    if (caps.torch) adv.push({ torch: true });
+
+    if (adv.length) {
+      await track.applyConstraints({ advanced: adv });
+    }
+  } catch {
+    // silencioso: no todos los navegadores soportan esto
+  }
+}
+function extraerISBN(texto) {
+  const digits = String(texto || "").replace(/\D/g, ""); // solo números
+  // Busca un EAN-13 típico de ISBN: empieza por 978 o 979
+  for (let i = 0; i <= digits.length - 13; i++) {
+    const cand = digits.slice(i, i + 13);
+    if (cand.startsWith("978") || cand.startsWith("979")) return cand;
+  }
+  // fallback: si solo hay 13 dígitos y no empieza 978/979, igual te sirve
+  if (digits.length === 13) return digits;
+  return null;
+}
+
+function resetStability() {
+  scanLocked = false;
   lastScanValue = null;
   lastScanCount = 0;
-  scanLocked = false;
+}
+let bd = null;
+let bdRunning = false;
 
-  if (!scannerDiv || !video) {
-    setUserStatusErr('No se encontró el componente de escaneo.');
-    setScanButtonState(false);
+async function iniciarEscaneo() {
+  const scannerDiv = document.getElementById("scanner");
+  const video = document.getElementById("video");
+  const textEl = document.querySelector("#scanner .scanner-text");
+
+  if (!scannerDiv || !video) return;
+
+  if (!window.isSecureContext) {
+    setUserStatusErr(`La cámara requiere HTTPS (o localhost). Estás en: ${window.location.origin}`);
     return;
   }
 
-  // Cierra sesión previa (idempotente)
-  detenerEscaneo({ keepButtonState: true });
+  if (scannerRunning) return;
+  scannerRunning = true;
 
-  setUserStatus('');
-  scannerDiv.style.display = 'block';
+  detenerEscaneo({ keepButtonState: true, keepScannerRunning: true });
+  scannerDiv.style.display = "block";
+  setScanButtonState(true);
+  if (textEl) textEl.textContent = "Apunta al código de barras…";
 
   try {
-    // 1) Pedir cámara (trasera ideal)
-    const constraints = {
+    // 1) Abre cámara con constraints “para cerca”
+    const stream = await navigator.mediaDevices.getUserMedia({
       video: {
-        facingMode: { ideal: 'environment' },
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
-      }
-    };
-
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-    currentStream = stream;
-
-    // 2) Conectar stream al video
-    video.srcObject = stream;
-    video.setAttribute('playsinline', 'true');
-    await video.play();
-
-    // 3) (Opcional) Torch: mejor dejarlo OFF por defecto (reflejos en libros)
-    // Si luego quieres botón linterna, lo hacemos toggle.
-    // try {
-    //   const track = stream.getVideoTracks()[0];
-    //   const caps = track.getCapabilities?.();
-    //   if (caps?.torch) await track.applyConstraints({ advanced: [{ torch: true }] });
-    // } catch {}
-
-    // 4) Hints: prioriza EAN-13 (ISBN)
-    const hints = new Map();
-    hints.set(DecodeHintType.TRY_HARDER, true);
-    hints.set(DecodeHintType.POSSIBLE_FORMATS, [
-      BarcodeFormat.EAN_13,
-      BarcodeFormat.EAN_8,
-      BarcodeFormat.UPC_A,
-      BarcodeFormat.CODE_128
-    ]);
-
-    codeReader = new BrowserMultiFormatReader(hints);
-
-    // 5) Decode desde el stream (sin “play video twice”)
-    codeReader.decodeFromStream(stream, video, (result, err) => {
-      if (!result || scanLocked) return;
-
-      const code = (result.text || '').trim();
-      if (!code) return;
-
-      // estabilidad simple (evita “saltos”)
-      if (code === lastScanValue) lastScanCount++;
-      else {
-        lastScanValue = code;
-        lastScanCount = 1;
-      }
-
-      // con 1-2 lecturas seguidas suele bastar (puedes subir a 2 si hay falsos)
-      if (lastScanCount >= 1) {
-        scanLocked = true;
-
-        const isbnEl = document.getElementById('isbn');
-        if (isbnEl) isbnEl.value = code;
-
-        setUserStatusOk(`ISBN detectado: ${code}`);
-
-        // IMPORTANTÍSIMO: parar al detectar para no saturar y evitar warnings
-        detenerEscaneo({ keepButtonState: true });
-        setScanButtonState(false);
-      }
+        facingMode: { ideal: "environment" },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
+      },
+      audio: false
     });
+    currentStream = stream;
+    video.srcObject = stream;
+    video.setAttribute("playsinline", "true");
+    await video.play().catch(()=>{});
 
-    setScanButtonState(true);
-  } catch (error) {
-    console.error(error);
-    setUserStatusErr('No se pudo acceder a la cámara.');
-    if (scannerDiv) scannerDiv.style.display = 'none';
-    setScanButtonState(false);
-    detenerEscaneo({ keepButtonState: true });
+    // 2) Intenta autofocus/torch si existe
+    await aplicarMejorasDeCamara(stream);
+
+    // 3) Motor nativo (Chrome): EAN-13
+    if ("BarcodeDetector" in window) {
+      const formats = await BarcodeDetector.getSupportedFormats();
+      const wanted = ["ean_13", "ean_8", "upc_a", "code_128"];
+      const use = wanted.filter(f => formats.includes(f));
+      bd = new BarcodeDetector({ formats: use.length ? use : formats });
+
+      bdRunning = true;
+      detectarConBarcodeDetector(video, textEl);
+      return;
+    }
+
+    // 4) Fallback: ZXing si no hay BarcodeDetector
+    iniciarZXingFallback(video, textEl);
+
+  } catch (e) {
+    console.error(e);
+    setUserStatusErr(`No se pudo iniciar la cámara: ${e?.name || "error"}`);
+    detenerEscaneo({ keepButtonState: false });
+    scannerRunning = false;
   }
 }
 
+async function detectarConBarcodeDetector(video, textEl) {
+  if (!bdRunning) return;
+
+  try {
+    const barcodes = await bd.detect(video);
+    if (barcodes && barcodes.length) {
+      const raw = barcodes[0].rawValue || "";
+      if (textEl) textEl.textContent = `Detectado: ${raw}`;
+
+      const isbn = extraerISBN(raw);
+      if (isbn) {
+        document.getElementById("isbn").value = isbn;
+        setUserStatusOk(`ISBN detectado: ${isbn}`);
+        bdRunning = false;
+        detenerEscaneo({ keepButtonState: false });
+        scannerRunning = false;
+        return;
+      }
+    }
+  } catch (e) {
+    // silencioso
+  }
+
+  requestAnimationFrame(() => detectarConBarcodeDetector(video, textEl));
+}
+
+function iniciarZXingFallback(video, textEl) {
+  const hints = new Map();
+  hints.set(DecodeHintType.TRY_HARDER, true);
+  hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+    BarcodeFormat.EAN_13,
+    BarcodeFormat.EAN_8,
+    BarcodeFormat.UPC_A,
+    BarcodeFormat.CODE_128
+  ]);
+
+  codeReader = new BrowserMultiFormatReader(hints);
+
+  codeReader.decodeFromVideoElement(video, (result, err) => {
+    if (!result?.text) return;
+    const raw = String(result.text);
+    if (textEl) textEl.textContent = `Detectado: ${raw}`;
+
+    const isbn = extraerISBN(raw);
+    if (!isbn) return;
+
+    document.getElementById("isbn").value = isbn;
+    setUserStatusOk(`ISBN detectado: ${isbn}`);
+    detenerEscaneo({ keepButtonState: false });
+    scannerRunning = false;
+  });
+}
+
 function detenerEscaneo(opts = {}) {
+  const { keepButtonState = false, keepScannerRunning = false } = opts;
 
-scannerRunning = false;
+  const scannerDiv = document.getElementById("scanner");
+  const video = document.getElementById("video");
 
-  const { keepButtonState = false } = opts;
-  const scannerDiv = document.getElementById('scanner');
-
-  lastScanValue = null;
-  lastScanCount = 0;
-  scanLocked = false;
+  resetStability();
 
   if (codeReader) {
     try { codeReader.reset(); } catch {}
@@ -1336,15 +1397,20 @@ scannerRunning = false;
   }
 
   if (currentStream) {
-    currentStream.getTracks().forEach((t) => t.stop());
+    try { currentStream.getTracks().forEach(t => t.stop()); } catch {}
     currentStream = null;
   }
 
-  if (scannerDiv) scannerDiv.style.display = 'none';
+  if (video) {
+    try { video.pause(); } catch {}
+    video.srcObject = null;
+  }
+
+  if (scannerDiv) scannerDiv.style.display = "none";
 
   if (!keepButtonState) setScanButtonState(false);
+  if (!keepScannerRunning) scannerRunning = false;
 }
-
 
 // ---------- Eliminar ejemplar ----------
 async function eliminarEjemplar(ejemplarId) {
@@ -2108,7 +2174,6 @@ document.addEventListener('DOMContentLoaded', () => {
     fab.textContent = abierto ? '−' : '+';
     if (abierto) {
       setTimeout(() => document.getElementById('isbn')?.focus(), 50);
-      setTimeout(() => { try { iniciarEscaneo(); } catch {} }, 150);
     } else {
       try { detenerEscaneo(); } catch {}
     }
