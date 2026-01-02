@@ -1261,11 +1261,12 @@ hints.set(DecodeHintType.POSSIBLE_FORMATS, [
   BarcodeFormat.UPC_A,
   BarcodeFormat.CODE_128
 ]);
-
-
     codeReader = new BrowserMultiFormatReader(hints);
 
     codeReader.decodeFromStream(stream, video, (result, err) => {
+      if (err && err.name !== 'NotFoundException') {
+        console.debug('ZXing err:', err);
+      }
       if (!result || scanLocked) return;
 
       const code = (result.text || '').trim();
