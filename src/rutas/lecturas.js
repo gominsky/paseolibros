@@ -130,6 +130,40 @@ router.get('/usuarios/:usuarioId/lecturas-abiertas', async (req, res) => {
     res.status(500).json({ error: 'Error obteniendo lecturas abiertas del usuario' });
   }
 });
+// Actualizar marca-páginas (pagina_actual):
+// PATCH /api/lecturas/:id/pagina
+router.patch('/lecturas/:id/pagina', async (req, res) => {
+  const { id } = req.params;
+  const { pagina_actual } = req.body;
+
+  // permite null para “vaciar”
+  const pagina = (pagina_actual === null || pagina_actual === undefined || pagina_actual === '')
+    ? null
+    : Number(pagina_actual);
+
+  if (pagina !== null && (!Number.isFinite(pagina) || pagina < 0)) {
+    return res.status(400).json({ error: 'pagina_actual debe ser un número >= 0 o null' });
+  }
+
+  try {
+    const resultado = await pool.query(
+      `UPDATE lecturas
+       SET pagina_actual = $1
+       WHERE id = $2
+       RETURNING *`,
+      [pagina, id]
+    );
+
+    if (resultado.rows.length === 0) {
+      return res.status(404).json({ error: 'Lectura no encontrada' });
+    }
+
+    res.json(resultado.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error actualizando página actual' });
+  }
+});
 
 
 export default router;

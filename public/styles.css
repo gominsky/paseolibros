@@ -2196,3 +2196,59 @@ input::placeholder {
   font-size: .9rem;
   color: rgba(107,94,82,.75);
 }
+/* ===== Marcapáginas (mini modal) ===== */
+.mp-overlay{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+.mp-backdrop{
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.65);
+  backdrop-filter: blur(2px);
+}
+.mp-dialog{
+  position: relative;
+  width: min(520px, calc(100vw - 32px));
+  background: #000;
+  color: #fff;
+  border-radius: 18px;
+  border: 1.5px solid rgba(232, 170, 196, .85);
+  box-shadow: 0 24px 70px rgba(0,0,0,.72), 0 0 0 3px rgba(232, 170, 196, .18);
+  padding: 16px;
+  z-index: 1;
+}
+.mp-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.mp-body label{ display:block; margin-bottom: 6px; opacity:.92; }
+.mp-row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+.mp-row input[type="number"]{
+  flex: 1;
+  min-width: 110px;
+  text-align: center;
+}
+.mp-range{
+  width: 100%;
+  margin-top: 10px;
+}
+.mp-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap: 10px;
+  margin-top: 12px;
+}
+.mp-help{ margin-top: 8px; font-size: .85rem; opacity: .85; }

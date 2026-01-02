@@ -718,6 +718,23 @@ async function cargarLecturas(libroId) {
     if (info) info.textContent = 'Error al cargar lecturas.';
   }
 }
+async function actualizarPaginaLectura(lecturaId, pagina_actual) {
+  if (!token) throw new Error('Sin sesión');
+
+  const res = await fetch(`${API_BASE}/api/lecturas/${lecturaId}/pagina`, {
+    method: 'PATCH',
+    headers: getHeaders(true),
+    body: JSON.stringify({ pagina_actual }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.error || `Error guardando página (HTTP ${res.status})`);
+  }
+
+  setUserStatusOk('Página guardada');
+  return data;
+}
 
 async function terminarLecturaActual() {
   if (!token || !usuarioActual) {
@@ -818,13 +835,14 @@ async function cargarLecturasAbiertas() {
       tr.classList.add('row-link');
       tr.dataset.libroId = l.libro_id;
       if (l.ejemplar_id) tr.dataset.ejemplarId = l.ejemplar_id;
-
+      tr.dataset.lecturaId = l.id;                      // 👈 ID de la lectura
+      tr.dataset.paginaActual = (l.pagina_actual ?? ''); // 👈 para prellenar modal
       const fecha = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : '—';
       tr.innerHTML = `
-        <td>${l.titulo || 'Sin título'}</td>
-        <td>${l.pagina_actual ?? '—'}</td>
-        <td>${fecha}</td>
-      `;
+  <td>${l.titulo || 'Sin título'}</td>
+  <td class="cell-pagina">${l.pagina_actual ?? '—'}</td>
+  <td>${fecha}</td>
+`;
       tbody.appendChild(tr);
     }
   } catch (err) {
@@ -885,6 +903,125 @@ async function cargarPrestamosActivos() {
     console.error(err);
     info.textContent = 'Error al cargar los préstamos activos.';
   }
+}
+function crearUIMarcapagina() {
+  if (document.getElementById('mp-overlay')) return;
+
+  const div = document.createElement('div');
+  div.id = 'mp-overlay';
+  div.className = 'mp-overlay';
+  div.style.display = 'none';
+
+  div.innerHTML = `
+    <div class="mp-backdrop" data-close="1"></div>
+    <div class="mp-dialog" role="dialog" aria-modal="true" aria-label="Marcapáginas">
+      <div class="mp-header">
+        <h3>Marcapáginas</h3>
+        <button class="icon-btn" type="button" id="mp-close" title="Cerrar" aria-label="Cerrar">
+          <span class="icon-circle">✕</span>
+        </button>
+      </div>
+
+      <div class="mp-body">
+        <label for="mp-num">Página actual</label>
+
+        <div class="mp-row">
+          <button class="btn btn-ghost mp-step" type="button" data-step="-5">-5</button>
+          <button class="btn btn-ghost mp-step" type="button" data-step="-1">-1</button>
+
+          <input id="mp-num" type="number" min="0" step="1" inputmode="numeric" />
+
+          <button class="btn btn-ghost mp-step" type="button" data-step="1">+1</button>
+          <button class="btn btn-ghost mp-step" type="button" data-step="5">+5</button>
+        </div>
+
+        <input id="mp-range" class="mp-range" type="range" min="0" max="2000" step="1" />
+
+        <p class="helper-text mp-help">Puedes escribir el número o ajustarlo con la rueda.</p>
+      </div>
+
+      <div class="mp-actions">
+        <button class="btn btn-ghost" type="button" id="mp-skip">Omitir</button>
+        <button class="btn btn-secondary" type="button" id="mp-save">Guardar</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(div);
+
+  // cerrar: X / backdrop / ESC
+  div.addEventListener('click', (e) => {
+    if (e.target?.dataset?.close === '1') cerrarUIMarcapagina('skip');
+  });
+  document.getElementById('mp-close')?.addEventListener('click', () => cerrarUIMarcapagina('skip'));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') cerrarUIMarcapagina('skip'); });
+
+  // pasos +/- y sincronía input <-> range
+  div.addEventListener('click', (e) => {
+    const btn = e.target.closest('.mp-step');
+    if (!btn) return;
+    const step = Number(btn.dataset.step || 0);
+
+    const num = document.getElementById('mp-num');
+    const range = document.getElementById('mp-range');
+    const v = Math.max(0, Number(num.value || 0) + step);
+    num.value = String(v);
+    range.value = String(v);
+  });
+
+  document.getElementById('mp-num')?.addEventListener('input', (e) => {
+    const range = document.getElementById('mp-range');
+    const v = Math.max(0, Number(e.target.value || 0));
+    range.value = String(v);
+  });
+
+  document.getElementById('mp-range')?.addEventListener('input', (e) => {
+    const num = document.getElementById('mp-num');
+    num.value = String(e.target.value || 0);
+  });
+}
+
+let mpCtx = null;
+
+function abrirUIMarcapagina(ctx) {
+  crearUIMarcapagina();
+  mpCtx = ctx;
+
+  const overlay = document.getElementById('mp-overlay');
+  const num = document.getElementById('mp-num');
+  const range = document.getElementById('mp-range');
+
+  const inicial = (ctx?.paginaInicial ?? 0);
+  num.value = String(inicial);
+  range.value = String(inicial);
+
+  // bind botones (cada apertura)
+  document.getElementById('mp-save').onclick = async () => {
+    const v = num.value === '' ? null : Math.max(0, Number(num.value));
+    cerrarUIMarcapagina('save', v);
+  };
+  document.getElementById('mp-skip').onclick = () => cerrarUIMarcapagina('skip');
+
+  overlay.style.display = 'flex';
+  document.documentElement.style.overflow = 'hidden';
+  num.focus();
+  num.select?.();
+}
+
+function cerrarUIMarcapagina(action, value) {
+  const overlay = document.getElementById('mp-overlay');
+  if (!overlay) return;
+
+  overlay.style.display = 'none';
+  document.documentElement.style.overflow = '';
+
+  const ctx = mpCtx;
+  mpCtx = null;
+
+  if (!ctx) return;
+
+  if (action === 'save' && typeof ctx.onSave === 'function') ctx.onSave(value);
+  if (action !== 'save' && typeof ctx.onSkip === 'function') ctx.onSkip();
 }
 
 // ---------- Préstamos UI ----------
@@ -2091,6 +2228,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   if (e.target.closest('.m-loan')) {
     crearUIPrestamo();
+    crearUIMarcapagina();
     prestamoContexto = { libroId, ejemplarId };
     abrirUIPrestamo();
     cargarUsuariosParaPrestamo();
@@ -2270,19 +2408,49 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Click en lecturas/préstamos home => abrir ficha (resuelve ejemplar si falta)
-  document.querySelector('#tabla-lecturas-abiertas tbody')?.addEventListener('click', (e) => {
-  const tr = e.target.closest('tr');
-  if (!tr) return;
-
-  const libroId = Number(tr.dataset.libroId);
-  const ejId = tr.dataset.ejemplarId ? Number(tr.dataset.ejemplarId) : resolverEjemplarIdDesdeCache(libroId);
-
-  if (!ejId) {
-    setUserStatusErr('No encuentro el ejemplar de ese libro en tu lista (¿tienes algún ejemplar cargado?).');
-    return;
-  }
-  mostrarFicha(libroId, ejId);
-});
+  document.querySelector('#tabla-lecturas-abiertas tbody')?.addEventListener('click', async (e) => {
+    const tr = e.target.closest('tr');
+    if (!tr) return;
+  
+    const lecturaId = tr.dataset.lecturaId ? Number(tr.dataset.lecturaId) : null;
+    const libroId = Number(tr.dataset.libroId);
+    const ejId = tr.dataset.ejemplarId ? Number(tr.dataset.ejemplarId) : resolverEjemplarIdDesdeCache(libroId);
+  
+    if (!lecturaId) {
+      setUserStatusErr('No encuentro el ID de la lectura (lecturaId).');
+      return;
+    }
+    if (!ejId) {
+      setUserStatusErr('No encuentro el ejemplar de ese libro en tu lista.');
+      return;
+    }
+  
+    const paginaInicial = tr.dataset.paginaActual ? Number(tr.dataset.paginaActual) : null;
+  
+    abrirUIMarcapagina({
+      lecturaId,
+      paginaInicial,
+      onSave: async (pagina) => {
+        await actualizarPaginaLectura(lecturaId, pagina);
+  
+        // ✅ actualizar UI al instante
+        tr.dataset.paginaActual = String(pagina ?? '');
+        const td = tr.querySelector('.cell-pagina');
+        if (td) td.textContent = (pagina ?? '—');
+  
+        // (opcional) refresca el resumen por si tu API devuelve algo distinto
+        // await cargarLecturasAbiertas();
+  
+        // ✅ después abre ficha
+        mostrarFicha(libroId, ejId);
+      },
+      onSkip: () => {
+        // si cierran sin guardar, abre ficha igual (opcional)
+        mostrarFicha(libroId, ejId);
+      }
+    });
+  });
+  
 
 document.querySelector('#tabla-prestamos-activos tbody')?.addEventListener('click', (e) => {
   const tr = e.target.closest('tr');
