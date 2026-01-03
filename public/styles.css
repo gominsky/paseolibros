@@ -2252,3 +2252,75 @@ input::placeholder {
   margin-top: 12px;
 }
 .mp-help{ margin-top: 8px; font-size: .85rem; opacity: .85; }
+/* Marcapáginas: input grande y legible */
+#mp-num{
+  font-size: 2.2rem;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.1;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.22);
+  background: rgba(255,255,255,.08);
+  color: #fff;                 /* alto contraste */
+  caret-color: #fff;           /* cursor visible */
+}
+
+/* Cuando está seleccionado / en foco, que NO “desaparezca” */
+#mp-num:focus{
+  outline: 3px solid rgba(232,170,196,.75);
+  outline-offset: 2px;
+  background: rgba(255,255,255,.12);
+  border-color: rgba(232,170,196,.8);
+}
+
+/* Color del texto seleccionado */
+#mp-num::selection{
+  background: rgba(232,170,196,.45);
+  color: #fff;
+}
+
+/* Slider más pequeño (menos “tocho”) */
+#mp-range{
+  height: 22px;
+  margin-top: 8px;
+}
+#mp-range::-webkit-slider-runnable-track{ height: 6px; border-radius: 99px; }
+#mp-range::-webkit-slider-thumb{
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid rgba(232,170,196,.9);
+}
+#mp-range::-moz-range-track{ height: 6px; border-radius: 99px; }
+#mp-range::-moz-range-thumb{
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; border: 2px solid rgba(232,170,196,.9);
+}
+/* Home: Lecturas/Préstamos con scroll vertical en vez de cortar filas */
+#tabla-lecturas-abiertas,
+#tabla-prestamos-activos{
+  min-width: 0; /* para que no fuerce ancho */
+}
+
+#tabla-lecturas-abiertas.closest,
+#tabla-prestamos-activos.closest{
+  min-width: 0;
+}
+
+/* Ojo: limitamos altura al wrapper que contiene esas tablas */
+#tabla-lecturas-abiertas,
+#tabla-prestamos-activos{
+  width: 100%;
+}
+
+
+/* ✅ Solución sencilla: el wrapper que envuelve cada tabla dentro de las cards */
+.grid-two > .card .table-wrapper{
+  max-height: 340px;
+  overflow-y: auto;
+  overflow-x: auto; /* mantiene scroll horizontal en móvil si hiciera falta */
+}

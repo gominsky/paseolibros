@@ -823,14 +823,8 @@ async function cargarLecturasAbiertas() {
       return;
     }
 
-    const maxFilas = 10;
-    const aMostrar = lecturas.slice(0, maxFilas);
-    info.textContent =
-      lecturas.length > maxFilas
-        ? `Lecturas en curso: ${lecturas.length} (mostrando ${maxFilas})`
-        : `Lecturas en curso: ${lecturas.length}`;
-
-    for (const l of aMostrar) {
+    info.textContent = `Lecturas en curso: ${lecturas.length}`;
+    for (const l of lecturas) {
       const tr = document.createElement('tr');
       tr.classList.add('row-link');
       tr.dataset.libroId = l.libro_id;
@@ -875,15 +869,8 @@ async function cargarPrestamosActivos() {
       info.textContent = 'No tienes préstamos activos.';
       return;
     }
-
-    const maxFilas = 10;
-    const aMostrar = prestamos.slice(0, maxFilas);
-    info.textContent =
-      prestamos.length > maxFilas
-        ? `Préstamos activos: ${prestamos.length} (mostrando ${maxFilas})`
-        : `Préstamos activos: ${prestamos.length}`;
-
-    for (const p of aMostrar) {
+    info.textContent = `Préstamos: ${prestamos.length}`;
+    for (const p of prestamos) {
       const tr = document.createElement('tr');
       tr.classList.add('row-link');
       tr.dataset.libroId = p.libro_id;
@@ -935,7 +922,7 @@ function crearUIMarcapagina() {
           <button class="btn btn-ghost mp-step" type="button" data-step="5">+5</button>
         </div>
 
-        <input id="mp-range" class="mp-range" type="range" min="0" max="2000" step="1" />
+        <input id="mp-range" class="mp-range" type="range" min="0" max="600" step="1" />
 
         <p class="helper-text mp-help">Puedes escribir el número o ajustarlo con la rueda.</p>
       </div>
@@ -972,8 +959,13 @@ function crearUIMarcapagina() {
   document.getElementById('mp-num')?.addEventListener('input', (e) => {
     const range = document.getElementById('mp-range');
     const v = Math.max(0, Number(e.target.value || 0));
+  
+    // ✅ si el usuario pone 1200, el slider se adapta
+    if (v > Number(range.max)) range.max = String(Math.ceil(v / 50) * 50);
+  
     range.value = String(v);
   });
+  
 
   document.getElementById('mp-range')?.addEventListener('input', (e) => {
     const num = document.getElementById('mp-num');
