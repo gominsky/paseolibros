@@ -14,6 +14,7 @@ import librosRutas from './rutas/libros.js';
 import lecturasRutas from './rutas/lecturas.js';
 import prestamosRutas from './rutas/prestamos.js';
 import deseosRouter from './rutas/deseos.js';
+import colaRouter from './rutas/cola.js'
 import shareRutas from './rutas/share.js';
 const app = express();
 
@@ -66,7 +67,7 @@ app.use('/api', lecturasRutas);   // /api/usuarios/:id/lecturas-abiertas, etc.
 app.use('/api', prestamosRutas);  // /api/usuarios/:id/prestamos-activos, etc.
 app.use('/api', deseosRouter);
 app.use('/api', shareRutas);
-
+app.use('/api', colaRouter);
 // Endpoint de salud
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, mensaje: 'PaseoLibros API viva 😄' });

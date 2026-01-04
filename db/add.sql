@@ -77,3 +77,20 @@ CREATE INDEX IF NOT EXISTS idx_deseos_usuario_tipo
 CREATE UNIQUE INDEX IF NOT EXISTS uq_deseos_usuario_isbn
   ON deseos (usuario_id, isbn)
   WHERE isbn IS NOT NULL AND length(trim(isbn)) > 0;
+
+CREATE TABLE cola_lecturas (
+  id SERIAL PRIMARY KEY,
+  usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  ejemplar_id INTEGER NOT NULL REFERENCES ejemplares(id) ON DELETE CASCADE,
+  posicion INTEGER NOT NULL DEFAULT 999999,
+  notas TEXT,
+  creado_en TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- Evita duplicados del mismo ejemplar en la cola de un usuario
+CREATE UNIQUE INDEX cola_lecturas_usuario_ejemplar_uq
+  ON cola_lecturas(usuario_id, ejemplar_id);
+
+-- Para ordenar rápido
+CREATE INDEX cola_lecturas_usuario_posicion_idx
+  ON cola_lecturas(usuario_id, posicion, creado_en DESC);

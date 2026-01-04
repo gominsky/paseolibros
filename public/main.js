@@ -1899,6 +1899,153 @@ async function crearEnlaceCompartir(tipo) {
   if (input) input.value = data.url || '';
   if (status) status.textContent = 'Enlace listo ✅';
 }
+// ===== Cola =====
+async function cargarCola() {
+  if (!usuarioActual?.id) return;
+
+  const info = document.getElementById('info-cola');
+  const lista = document.getElementById('cola-lista');
+  if (!info || !lista) return;
+
+  const q = document.getElementById('cola-q')?.value?.trim() || '';
+
+  info.textContent = 'Cargando...';
+  lista.innerHTML = '';
+
+  const params = new URLSearchParams();
+  if (q) params.set('q', q);
+
+  const res = await fetch(`${API_BASE}/api/usuarios/${usuarioActual.id}/cola?${params.toString()}`, {
+    headers: getHeaders(false),
+  });
+  const data = await res.json();
+
+  if (!res.ok) {
+    info.textContent = data.error || 'Error cargando cola';
+    return;
+  }
+
+  info.textContent = `En cola: ${data.length}`;
+  lista.innerHTML = data.map(item => `
+    <div class="deseo-item" data-id="${item.id}">
+      <div>
+        <div class="deseo-title">${escapeHtml(item.titulo || '—')}</div>
+        <div class="deseo-meta">
+          ${item.autores ? `<span>${escapeHtml(item.autores)}</span>` : ''}
+          ${item.isbn ? `<span class="deseo-pill">ISBN: ${escapeHtml(item.isbn)}</span>` : ''}
+          ${item.ubicacion ? `<span class="deseo-pill">${escapeHtml(item.ubicacion)}</span>` : ''}
+          <span class="deseo-pill">Pos: ${item.posicion ?? '—'}</span>
+        </div>
+        ${item.notas ? `<div style="margin-top:6px; opacity:.85;">${escapeHtml(item.notas)}</div>` : ''}
+      </div>
+      <div class="deseo-actions">
+        <button class="icon-btn cola-del" type="button" title="Quitar"><span class="icon-circle">✕</span></button>
+      </div>
+    </div>
+  `).join('');
+}
+async function addEjemplarToCola(ejemplarId) {
+  const res = await fetch(`${API_BASE}/api/cola`, {
+    method: 'POST',
+    headers: getHeaders(true),
+    body: JSON.stringify({ ejemplar_id: Number(ejemplarId) })
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    alert(data.error || 'Error añadiendo a cola');
+    return;
+  }
+  await cargarCola();
+}
+async function borrarDeCola(id) {
+  const res = await fetch(`${API_BASE}/api/cola/${id}`, {
+    method: 'DELETE',
+    headers: getHeaders(false),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    alert(data.error || 'Error quitando de cola');
+    return;
+  }
+  await cargarCola();
+}
+function renderColaPickList() {
+  const list = document.getElementById('cola-pick-lista');
+  if (!list) return;
+
+  const q = (document.getElementById('cola-pick-q')?.value || '').toLowerCase().trim();
+  const items = (ejemplaresCache || []).filter(e => {
+    const blob = [e.titulo, e.autores, e.isbn, e.ubicacion, e.notas].filter(Boolean).join(' ').toLowerCase();
+    return !q || blob.includes(q);
+  });
+
+  list.innerHTML = items.map(e => `
+    <div class="deseo-item" data-ejemplar-id="${e.ejemplar_id}">
+      <div>
+        <div class="deseo-title">${escapeHtml(e.titulo || '—')}</div>
+        <div class="deseo-meta">
+          ${e.autores ? `<span>${escapeHtml(e.autores)}</span>` : ''}
+          ${e.isbn ? `<span class="deseo-pill">ISBN: ${escapeHtml(e.isbn)}</span>` : ''}
+          ${e.ubicacion ? `<span class="deseo-pill">${escapeHtml(e.ubicacion)}</span>` : ''}
+        </div>
+      </div>
+      <div class="deseo-actions">
+        <button class="btn btn-secondary btn-sm cola-add" type="button">Añadir</button>
+      </div>
+    </div>
+  `).join('');
+}
+function wireColaUI() {
+  document.getElementById('btn-open-cola')?.addEventListener('click', () => {
+    abrirOverlay('cola-overlay');
+    cargarCola();
+  });
+
+  document.getElementById('btn-cerrar-cola')?.addEventListener('click', () => cerrarOverlay('cola-overlay'));
+  document.getElementById('cola-overlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'cola-overlay') cerrarOverlay('cola-overlay');
+  });
+
+  let t = null;
+  document.getElementById('cola-q')?.addEventListener('input', () => {
+    clearTimeout(t);
+    t = setTimeout(cargarCola, 200);
+  });
+
+  // abrir selector
+  document.getElementById('btn-add-cola')?.addEventListener('click', () => {
+    abrirOverlay('cola-pick-overlay');
+    renderColaPickList();
+  });
+
+  // cerrar selector
+  document.getElementById('btn-cerrar-cola-pick')?.addEventListener('click', () => cerrarOverlay('cola-pick-overlay'));
+  document.getElementById('cola-pick-overlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'cola-pick-overlay') cerrarOverlay('cola-pick-overlay');
+  });
+  document.getElementById('cola-pick-q')?.addEventListener('input', () => renderColaPickList());
+
+  // delegación: añadir
+  document.getElementById('cola-pick-lista')?.addEventListener('click', async (e) => {
+    const card = e.target.closest('.deseo-item');
+    if (!card) return;
+    if (!e.target.closest('.cola-add')) return;
+
+    const ejId = Number(card.dataset.ejemplarId);
+    await addEjemplarToCola(ejId);
+    cerrarOverlay('cola-pick-overlay');
+  });
+
+  // delegación: borrar en lista cola
+  document.getElementById('cola-lista')?.addEventListener('click', async (e) => {
+    const card = e.target.closest('.deseo-item');
+    if (!card) return;
+    if (!e.target.closest('.cola-del')) return;
+
+    const id = Number(card.dataset.id);
+    await borrarDeCola(id);
+  });
+}
 
 // ===== Deseos (Wishlist) =====
 let deseosKeyHandler = null;
@@ -2156,6 +2303,7 @@ function renderEjemplaresGrid(lista) {
 // ---------- Init ----------
 document.addEventListener('DOMContentLoaded', () => {
   wireDeseosUI();
+  wireColaUI();
   document.getElementById('ej-vista-lista')?.addEventListener('click', () => {
     vistaEjemplares = 'lista';
     renderEjemplares();

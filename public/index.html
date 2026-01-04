@@ -60,6 +60,7 @@
 
         <div class="tools-sep" aria-hidden="true"></div>
         <button id="btn-open-deseos" class="tools-item" type="button">Lista de deseos</button>
+        <button id="btn-open-cola" class="tools-item" type="button">Cola de lecturas</button>
 <div class="tools-sep" aria-hidden="true"></div>
 <button id="btn-share-ejemplares" class="tools-item" type="button">Compartir ejemplares</button>
 <button id="btn-share-deseos" class="tools-item" type="button">Compartir deseos</button>
@@ -277,6 +278,43 @@
               </table>
             </div>
           </div>
+          <!-- Modal Cola de lecturas -->
+<div id="cola-overlay" class="deseos-overlay" style="display:none;">
+  <div class="deseos-dialog" role="dialog" aria-modal="true" aria-label="Cola de lecturas">
+    <div class="deseos-header">
+      <h3>Cola de lecturas</h3>
+      <button id="btn-cerrar-cola" class="icon-btn" type="button" title="Cerrar" aria-label="Cerrar">
+        <span class="icon-circle">✕</span>
+      </button>
+    </div>
+
+    <div class="deseos-toolbar">
+      <input id="cola-q" type="text" placeholder="Buscar por título/autor/ISBN…" />
+      <button id="btn-add-cola" class="btn btn-secondary btn-sm" type="button">+ Añadir desde ejemplares</button>
+    </div>
+
+    <p id="info-cola" class="muted"></p>
+    <div id="cola-lista" class="deseos-lista"></div>
+  </div>
+</div>
+
+<!-- Mini modal selector ejemplar -->
+<div id="cola-pick-overlay" class="deseos-overlay" style="display:none;">
+  <div class="deseos-dialog" role="dialog" aria-modal="true" aria-label="Añadir a cola">
+    <div class="deseos-header">
+      <h3>Añadir a cola</h3>
+      <button id="btn-cerrar-cola-pick" class="icon-btn" type="button" title="Cerrar" aria-label="Cerrar">
+        <span class="icon-circle">✕</span>
+      </button>
+    </div>
+
+    <div class="deseos-toolbar">
+      <input id="cola-pick-q" type="text" placeholder="Filtrar tus ejemplares…" />
+    </div>
+
+    <div id="cola-pick-lista" class="deseos-lista"></div>
+  </div>
+</div>
 
           <!-- Préstamos activos -->
           <div class="card">
