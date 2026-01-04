@@ -2341,3 +2341,7 @@ input::placeholder {
   flex-wrap: nowrap;  /* evita que se vayan “abajo” y parezcan desaparecer */
 }
 #info-cola{ padding: 0 12px; }
+.icon-btn.is-active{
+  outline: 2px solid rgba(232,170,196,.9);
+  box-shadow: 0 0 0 3px rgba(232,170,196,.25);
+}

@@ -15,6 +15,53 @@ let vistaEjemplares = 'lista';
 
 const TOKEN_KEY = 'paseolibros_token';
 const USER_KEY = 'paseolibros_usuario';
+// Preferencias UI (persisten en el navegador)
+const VISTA_EJ_KEY = 'paseolibros_vista_ejemplares';   // 'lista' | 'grid'
+const SORT_EJ_KEY  = 'paseolibros_sort_ejemplares';    // { key, dir }
+
+const SORT_EJ_KEYS_VALIDAS = new Set([
+  'creado_en', 'titulo', 'autores', 'isbn', 'estado', 'ubicacion', 'notas'
+]);
+
+function guardarVistaEjemplares() {
+  try { localStorage.setItem(VISTA_EJ_KEY, vistaEjemplares); } catch {}
+}
+
+function guardarSortEjemplares() {
+  try { localStorage.setItem(SORT_EJ_KEY, JSON.stringify(sortEjemplares)); } catch {}
+}
+
+function restaurarPreferenciasUI() {
+  // Vista
+  try {
+    const v = localStorage.getItem(VISTA_EJ_KEY);
+    if (v === 'lista' || v === 'grid') vistaEjemplares = v;
+  } catch {}
+
+  // Ordenación
+  try {
+    const raw = localStorage.getItem(SORT_EJ_KEY);
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    const keyOk = s && typeof s.key === 'string' && SORT_EJ_KEYS_VALIDAS.has(s.key);
+    const dirOk = s && (s.dir === 'asc' || s.dir === 'desc');
+    if (keyOk && dirOk) sortEjemplares = { key: s.key, dir: s.dir };
+  } catch {}
+}
+
+function actualizarBotonesVistaEjemplares() {
+  const bLista = document.getElementById('ej-vista-lista');
+  const bGrid  = document.getElementById('ej-vista-grid');
+  if (!bLista || !bGrid) return;
+
+  const isGrid = vistaEjemplares === 'grid';
+  bLista.classList.toggle('is-active', !isGrid);
+  bGrid.classList.toggle('is-active', isGrid);
+
+  // opcional accesibilidad
+  bLista.setAttribute('aria-pressed', String(!isGrid));
+  bGrid.setAttribute('aria-pressed', String(isGrid));
+}
 
 // selección actual en la tabla
 let libroSeleccionadoId = null;
@@ -337,9 +384,12 @@ function initOrdenacionEjemplares() {
         sortEjemplares.key = key;
         sortEjemplares.dir = 'asc';
       }
+    
+      guardarSortEjemplares(); // ✅ NUEVO
+    
       actualizarIconosOrden(table);
       renderEjemplares();
-    });
+    });    
 
     th.appendChild(btn);
   });
@@ -2370,21 +2420,21 @@ function renderEjemplaresGrid(lista) {
 document.addEventListener('DOMContentLoaded', () => {
   wireDeseosUI();
   wireColaUI();
+  restaurarPreferenciasUI();
+  actualizarBotonesVistaEjemplares();
+
   document.getElementById('ej-vista-lista')?.addEventListener('click', () => {
     vistaEjemplares = 'lista';
+    guardarVistaEjemplares();          // ✅ NUEVO
+    actualizarBotonesVistaEjemplares(); // ✅ NUEVO
     renderEjemplares();
   });
-  document.getElementById('btn-escanear')?.addEventListener('click', async () => {
-    const btn = document.getElementById('btn-escanear');
-    const isOn = btn?.dataset?.scanning === '1';
   
-    if (isOn) {
-      detenerEscaneo();
-      setScanButtonState(false);
-    } else {
-      setScanButtonState(true);
-      await iniciarEscaneo();
-    }
+  document.getElementById('ej-vista-grid')?.addEventListener('click', () => {
+    vistaEjemplares = 'grid';
+    guardarVistaEjemplares();          // ✅ NUEVO
+    actualizarBotonesVistaEjemplares(); // ✅ NUEVO
+    renderEjemplares();  
   });
   
   document.getElementById('ej-vista-grid')?.addEventListener('click', () => {
