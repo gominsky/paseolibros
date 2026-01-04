@@ -385,12 +385,10 @@ function initOrdenacionEjemplares() {
         sortEjemplares.dir = 'asc';
       }
     
-      guardarSortEjemplares(); // ✅ NUEVO
-    
+      guardarSortEjemplares();           // 👈 AÑADE ESTA LÍNEA (en todas)
       actualizarIconosOrden(table);
       renderEjemplares();
-    });    
-
+    });   
     th.appendChild(btn);
   });
 
