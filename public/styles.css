@@ -2324,3 +2324,20 @@ input::placeholder {
   overflow-y: auto;
   overflow-x: auto; /* mantiene scroll horizontal en móvil si hiciera falta */
 }
+/* Flechas de reordenar: asegurar visibilidad en Android */
+.icon-btn{
+  color: #fff !important;         /* por si alguna variable pisa el color */
+}
+
+.icon-circle{
+  font-family: system-ui, "Segoe UI Symbol", "Apple Color Emoji", "Noto Color Emoji", sans-serif !important;
+  font-weight: 900;
+  font-size: 18px;                 /* un poco más grande */
+  line-height: 1;
+}
+.deseo-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap: nowrap;  /* evita que se vayan “abajo” y parezcan desaparecer */
+}
+#info-cola{ padding: 0 12px; }

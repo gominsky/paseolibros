@@ -1934,13 +1934,20 @@ async function cargarCola() {
           ${item.autores ? `<span>${escapeHtml(item.autores)}</span>` : ''}
           ${item.isbn ? `<span class="deseo-pill">ISBN: ${escapeHtml(item.isbn)}</span>` : ''}
           ${item.ubicacion ? `<span class="deseo-pill">${escapeHtml(item.ubicacion)}</span>` : ''}
-          <span class="deseo-pill">Pos: ${item.posicion ?? '—'}</span>
         </div>
         ${item.notas ? `<div style="margin-top:6px; opacity:.85;">${escapeHtml(item.notas)}</div>` : ''}
       </div>
       <div class="deseo-actions">
-        <button class="icon-btn cola-del" type="button" title="Quitar"><span class="icon-circle">✕</span></button>
-      </div>
+  <button class="icon-btn cola-up" type="button" title="Subir">
+    <span class="icon-circle">▲</span>
+  </button>
+  <button class="icon-btn cola-down" type="button" title="Bajar">
+    <span class="icon-circle">▼</span>
+  </button>
+  <button class="icon-btn cola-del" type="button" title="Quitar">
+    <span class="icon-circle">✕</span>
+  </button>
+</div>
     </div>
   `).join('');
 }
@@ -1957,6 +1964,65 @@ async function addEjemplarToCola(ejemplarId) {
   }
   await cargarCola();
 }
+async function actualizarCola(id, patch) {
+  const res = await fetch(`${API_BASE}/api/cola/${id}`, {
+    method: 'PATCH',
+    headers: getHeaders(true),
+    body: JSON.stringify(patch),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Error actualizando cola (HTTP ${res.status})`);
+  return data;
+}
+async function moverColaSwap(id, dir) {
+  // dir = -1 (subir), +1 (bajar)
+  const q = document.getElementById('cola-q')?.value?.trim() || '';
+  const params = new URLSearchParams();
+  if (q) params.set('q', q);
+
+  // Importante: para reordenar, mejor usar el orden “posicion asc”
+  const res = await fetch(`${API_BASE}/api/usuarios/${usuarioActual.id}/cola?${params.toString()}`, {
+    headers: getHeaders(false),
+  });
+  const items = await res.json();
+  if (!res.ok) throw new Error(items.error || 'No se pudo cargar la cola');
+
+  const idx = items.findIndex(x => Number(x.id) === Number(id));
+  if (idx === -1) return;
+
+  const j = idx + dir;
+  if (j < 0 || j >= items.length) return; // ya está arriba/abajo
+
+  const a = items[idx];
+  const b = items[j];
+
+  // swap posiciones
+  const posA = Number(a.posicion ?? 999999);
+  const posB = Number(b.posicion ?? 999999);
+
+  // Si por lo que sea vinieran iguales, primero normalizamos
+  if (posA === posB) {
+    await normalizarPosicionesCola(items);
+    return moverColaSwap(id, dir);
+  }
+
+  await Promise.all([
+    actualizarCola(a.id, { posicion: posB }),
+    actualizarCola(b.id, { posicion: posA }),
+  ]);
+
+  await cargarCola();
+}
+async function normalizarPosicionesCola(items) {
+  // deja posiciones 10,20,30… para evitar colisiones
+  const updates = items.map((it, k) => {
+    const nueva = (k + 1) * 10;
+    return actualizarCola(it.id, { posicion: nueva });
+  });
+  await Promise.all(updates);
+  await cargarCola();
+}
+
 async function borrarDeCola(id) {
   const res = await fetch(`${API_BASE}/api/cola/${id}`, {
     method: 'DELETE',
@@ -2734,6 +2800,30 @@ document.getElementById('link-forgot')?.addEventListener('click', (e) => {
 function getQueryParam(name) {
   return new URLSearchParams(window.location.search).get(name);
 }
+document.getElementById('cola-lista')?.addEventListener('click', async (e) => {
+  const card = e.target.closest('.deseo-item');
+  if (!card) return;
+
+  const id = Number(card.dataset.id);
+
+  try {
+    if (e.target.closest('.cola-up')) {
+      await moverColaSwap(id, -1);
+      return;
+    }
+    if (e.target.closest('.cola-down')) {
+      await moverColaSwap(id, +1);
+      return;
+    }
+    if (e.target.closest('.cola-del')) {
+      await borrarDeCola(id);
+      return;
+    }
+  } catch (err) {
+    console.error(err);
+    alert(err.message || 'Error reordenando');
+  }
+});
 
 // --- REGISTRO ---
 const btnRegister = document.getElementById('btn-register');
