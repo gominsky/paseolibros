@@ -2436,12 +2436,7 @@ document.addEventListener('DOMContentLoaded', () => {
     actualizarBotonesVistaEjemplares(); // ✅ NUEVO
     renderEjemplares();  
   });
-  
-  document.getElementById('ej-vista-grid')?.addEventListener('click', () => {
-    vistaEjemplares = 'grid';
-    renderEjemplares();
-  });
-  
+   
   document.getElementById('ejemplares-grid')?.addEventListener('click', (e) => {
     const item = e.target.closest('.ej-grid-item');
     if (!item) return;
