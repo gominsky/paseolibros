@@ -385,10 +385,12 @@ function initOrdenacionEjemplares() {
         sortEjemplares.dir = 'asc';
       }
     
-      guardarSortEjemplares();           // 👈 AÑADE ESTA LÍNEA (en todas)
+      guardarSortEjemplares(); // ✅ NUEVO
+    
       actualizarIconosOrden(table);
       renderEjemplares();
-    });   
+    });    
+
     th.appendChild(btn);
   });
 
@@ -2427,14 +2429,22 @@ document.addEventListener('DOMContentLoaded', () => {
     actualizarBotonesVistaEjemplares(); // ✅ NUEVO
     renderEjemplares();
   });
-  
-  document.getElementById('ej-vista-grid')?.addEventListener('click', () => {
-    vistaEjemplares = 'grid';
+
+  document.getElementById('btn-escanear')?.addEventListener('click', async () => {
+    const btn = document.getElementById('btn-escanear');
+    const isOn = btn?.dataset?.scanning === '1';
+    if (isOn) {
+      detenerEscaneo();
+      setScanButtonState(false);
+    } else {
+      setScanButtonState(true);
+      await iniciarEscaneo();
+    }
     guardarVistaEjemplares();          // ✅ NUEVO
     actualizarBotonesVistaEjemplares(); // ✅ NUEVO
-    renderEjemplares();  
+    renderEjemplares();
   });
-   
+  
   document.getElementById('ejemplares-grid')?.addEventListener('click', (e) => {
     const item = e.target.closest('.ej-grid-item');
     if (!item) return;
