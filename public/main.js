@@ -376,7 +376,6 @@ function initOrdenacionEjemplares() {
     btn.className = 'th-sort';
     btn.dataset.key = key;
     btn.innerHTML = `<span>${label}</span><span class="th-sort-icon"></span>`;
-
     btn.addEventListener('click', () => {
       if (sortEjemplares.key === key) {
         sortEjemplares.dir = sortEjemplares.dir === 'asc' ? 'desc' : 'asc';
@@ -384,16 +383,12 @@ function initOrdenacionEjemplares() {
         sortEjemplares.key = key;
         sortEjemplares.dir = 'asc';
       }
-    
-      guardarSortEjemplares(); // ✅ NUEVO
-    
+      guardarSortEjemplares();            // ✅ AÑADIR
       actualizarIconosOrden(table);
       renderEjemplares();
-    });    
-
+    });
     th.appendChild(btn);
   });
-
   actualizarIconosOrden(table);
 }
 
