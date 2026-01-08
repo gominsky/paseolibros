@@ -190,8 +190,9 @@ function getHeaders(json = true) {
 
 function toSortable(v) {
   if (v === null || v === undefined) return '';
-  return String(v).toLowerCase();
+  return normalizarTitulo(String(v));
 }
+
 
 function compare(a, b, key, dir) {
   const va = a?.[key];
@@ -675,8 +676,7 @@ async function crearEjemplar() {
 
     const data = await res.json();
     if (res.status === 401) {
-      hacerLogout();
-      setUserStatusErr('Tu sesión ha caducado. Inicia sesión de nuevo.');
+      setUserStatusErr('El servidor ha respondido 401 (no autorizado). Probablemente el token haya caducado; vuelve a iniciar sesión.');
       return;
     }
     if (!res.ok) {
@@ -2480,7 +2480,7 @@ document.addEventListener('DOMContentLoaded', () => {
       usuarioActual = JSON.parse(savedUser);
     }
   } catch {}
-
+  actualizarUIAutenticacion();
 
   // Botones básicos
   document.getElementById('btn-crear')?.addEventListener('click', (e) => {
