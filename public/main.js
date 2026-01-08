@@ -346,6 +346,26 @@ async function cerrarModalFicha() {
   modal.classList.remove('is-visible');
   await refrescarHome();
 }
+function wireSortEjemplaresSelect() {
+  const sel = document.getElementById('sort-ejemplares');
+  if (!sel) return;
+
+  // Refleja el estado actual en el select (por si vienes de localStorage)
+  const current = `${sortEjemplares.key}:${sortEjemplares.dir}`;
+  if (sel.value !== current) sel.value = current;
+
+  // Evita duplicar listeners si se llama dos veces
+  if (sel.dataset.wired === '1') return;
+  sel.dataset.wired = '1';
+
+  sel.addEventListener('change', () => {
+    const [key, dir] = (sel.value || 'creado_en:desc').split(':');
+    sortEjemplares = { key: key || 'creado_en', dir: dir === 'asc' ? 'asc' : 'desc' };
+
+    guardarSortEjemplares();      // ✅ CLAVE: persistir ordenación
+    renderEjemplares();           // vuelve a pintar tabla/lista
+  });
+}
 
 // ---------- Ordenación: cabeceras como botones ----------
 function initOrdenacionEjemplares() {
@@ -404,6 +424,7 @@ function actualizarIconosOrden(table) {
       icon.textContent = '';
     }
   });
+  guardarSortEjemplares();
 }
 async function importarEjemplaresCSV(file) {
   if (!token || !usuarioActual) {
@@ -2417,14 +2438,21 @@ document.addEventListener('DOMContentLoaded', () => {
   wireColaUI();
   restaurarPreferenciasUI();
   actualizarBotonesVistaEjemplares();
-
+  initOrdenacionEjemplares();
+  wireSortEjemplaresSelect();
   document.getElementById('ej-vista-lista')?.addEventListener('click', () => {
     vistaEjemplares = 'lista';
     guardarVistaEjemplares();          // ✅ NUEVO
     actualizarBotonesVistaEjemplares(); // ✅ NUEVO
     renderEjemplares();
   });
-
+  document.getElementById('ej-vista-grid')?.addEventListener('click', () => {
+    vistaEjemplares = 'grid';
+    guardarVistaEjemplares();
+    actualizarBotonesVistaEjemplares();
+    renderEjemplares();
+  });
+  
   document.getElementById('btn-escanear')?.addEventListener('click', async () => {
     const btn = document.getElementById('btn-escanear');
     const isOn = btn?.dataset?.scanning === '1';
@@ -2435,9 +2463,6 @@ document.addEventListener('DOMContentLoaded', () => {
       setScanButtonState(true);
       await iniciarEscaneo();
     }
-    guardarVistaEjemplares();          // ✅ NUEVO
-    actualizarBotonesVistaEjemplares(); // ✅ NUEVO
-    renderEjemplares();
   });
   
   document.getElementById('ejemplares-grid')?.addEventListener('click', (e) => {
@@ -2456,10 +2481,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   } catch {}
 
-  actualizarUIAutenticacion();
-
-  // Ordenación tabla
-  initOrdenacionEjemplares();
 
   // Botones básicos
   document.getElementById('btn-crear')?.addEventListener('click', (e) => {
@@ -2598,20 +2619,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
     // Ordenación compacta (móvil): título / autor / recientes
     const sortSel = document.getElementById('sort-ejemplares');
-    if (sortSel) {
-      // valor inicial coherente con el estado actual
-      sortSel.value = `${sortEjemplares.key}:${sortEjemplares.dir}`;
-      sortSel.addEventListener('change', () => {
-        const [key, dir] = String(sortSel.value).split(':');
-        if (!key || !dir) return;
-        sortEjemplares.key = key;
-        sortEjemplares.dir = dir;
-        // actualiza iconos de cabecera (desktop) si existen
-        const table = document.getElementById('tabla-ejemplares');
-        if (table) actualizarIconosOrden(table);
-        renderEjemplares();
-      });
-    }
   // Clicks en tabla ejemplares (acciones vs abrir ficha)
   const tbodyEjemplares = document.querySelector('#tabla-ejemplares tbody');
   tbodyEjemplares?.addEventListener('click', (e) => {
