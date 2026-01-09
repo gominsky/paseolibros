@@ -2548,8 +2548,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('btn-share-deseos')?.addEventListener('click', () => crearEnlaceCompartir('deseos'));
   document.getElementById('btn-share-ejemplares')?.addEventListener('click', () => crearEnlaceCompartir('ejemplares'));
-  document.getElementById('btn-share-ejemplares')?.addEventListener('click', () => compartirLista('ejemplares'));
-  document.getElementById('btn-share-deseos')?.addEventListener('click', () => compartirLista('deseos'));
+  //document.getElementById('btn-share-ejemplares')?.addEventListener('click', () => compartirLista('ejemplares'));
+  //document.getElementById('btn-share-deseos')?.addEventListener('click', () => compartirLista('deseos'));
 
   document.getElementById('btn-cerrar-share')?.addEventListener('click', cerrarShareOverlay);
   document.getElementById('share-overlay')?.addEventListener('click', (e) => {
@@ -2559,19 +2559,49 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-copy-share')?.addEventListener('click', async () => {
     const input = document.getElementById('share-url');
     const status = document.getElementById('share-status');
-    const url = input?.value || '';
+    const title = document.getElementById('share-title')?.textContent || 'Lista';
+    const url = input?.value?.trim();
+  
     if (!url) return;
-
-    try {
-      await navigator.clipboard.writeText(url);
-      if (status) status.textContent = 'Copiado ✅';
-    } catch {
-      // fallback
-      input?.select();
+  
+    // 1) Intentar compartir nativo (móvil)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title,
+          text: title,
+          url,
+        });
+        if (status) status.textContent = 'Compartido ✅';
+        return;
+      } catch (err) {
+        // Si el usuario cancela o falla, seguimos con copiar
+        if (status) status.textContent = 'Compartir cancelado, intentando copiar…';
+      }
+    }
+  
+    // 2) Intentar clipboard moderno
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(url);
+        if (status) status.textContent = 'Copiado al portapapeles ✅';
+        return;
+      } catch (e) {
+        // seguimos al fallback clásico
+      }
+    }
+  
+    // 3) Fallback clásico (para navegadores viejos)
+    if (input) {
+      input.select();
       document.execCommand?.('copy');
       if (status) status.textContent = 'Copiado (modo compatibilidad) ✅';
+    } else {
+      // Último recurso: un prompt
+      prompt('Copia este enlace:', url);
     }
   });
+  
 
   document.addEventListener('keydown', (ev) => {
     if (ev.key === 'Escape') {
