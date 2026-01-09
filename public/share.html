@@ -1,199 +1,267 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>PaseoLibros · Lista compartida</title>
+  <meta charset="utf-8" />
+  <title>PaseoLibros – Lista compartida</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- Fuentes (igual que la app) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-
-  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f6;
+      color: #222;
+    }
+    .page {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 1rem 1.25rem 2rem;
+    }
+    h1 {
+      margin: 0.5rem 0 0.25rem;
+      font-size: 1.5rem;
+    }
+    .owner {
+      margin: 0;
+      color: #555;
+      font-size: 0.95rem;
+    }
+    .status {
+      margin: 0.75rem 0 1rem;
+      color: #666;
+      font-size: 0.9rem;
+    }
+    .list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .item {
+      background: #fff;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      padding: 0.75rem 0.85rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+    .cover {
+      width: 48px;
+      height: 72px;
+      border-radius: 0.25rem;
+      object-fit: cover;
+      background: #ddd;
+      flex-shrink: 0;
+    }
+    .placeholder {
+      width: 48px;
+      height: 72px;
+      border-radius: 0.25rem;
+      background: #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      color: #555;
+      flex-shrink: 0;
+    }
+    .item-main {
+      flex: 1;
+      min-width: 0;
+    }
+    .item-title {
+      font-weight: 600;
+      margin: 0 0 0.25rem;
+      font-size: 0.98rem;
+    }
+    .item-meta {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #555;
+    }
+    .pill {
+      display: inline-block;
+      padding: 0.1rem 0.45rem;
+      border-radius: 999px;
+      background: #eef;
+      color: #334;
+      font-size: 0.75rem;
+      margin-right: 0.35rem;
+      margin-top: 0.15rem;
+    }
+    .pill-secondary {
+      background: #eee;
+      color: #444;
+    }
+    @media (max-width: 480px) {
+      .item {
+        padding: 0.7rem 0.75rem;
+      }
+      .item-title {
+        font-size: 0.94rem;
+      }
+    }
+  </style>
 </head>
-
-<body class="share-page">
-  <div class="app">
-    <header class="app-header">
-      <div class="logo header-center">
-        <div class="logo-icon">
-          <span class="logo-mark">Pdl</span>
-        </div>
-        <div class="logo-text">
-          <h1>Lista compartida</h1>
-          <p id="share-subtitle">Solo lectura</p>
-        </div>
-      </div>
-
-      <div class="header-right">
-        <a href="./" class="btn btn-ghost btn-sm" style="text-decoration:none;">Volver</a>
-        <button id="btn-copy-link" class="btn btn-secondary btn-sm" type="button">Copiar enlace</button>
-      </div>
-    </header>
-
-    <main class="app-main">
-      <div class="column column-right">
-        <div class="card">
-          <div class="card-header-inline">
-            <h2 id="share-title">Cargando…</h2>
-            <div class="card-header-actions">
-              <span class="share-chip" id="share-badge">Solo lectura</span>
-            </div>
-          </div>
-
-          <p id="share-info" class="helper-text">Estamos cargando la lista…</p>
-
-          <div id="share-table-wrap" class="table-wrapper" style="display:none;">
-            <!-- MISMO ESTILO que tabla principal: class="table" -->
-            <table id="share-table" class="table">
-              <thead id="share-thead"></thead>
-              <tbody id="share-tbody"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </main>
+<body>
+  <div class="page">
+    <h1 id="share-title">Lista compartida</h1>
+    <p id="share-owner" class="owner"></p>
+    <p id="share-status" class="status">Cargando lista…</p>
+    <ul id="share-list" class="list"></ul>
   </div>
 
-<script>
-(function(){
-  const qs = new URLSearchParams(location.search);
-  const token = qs.get('t') || '';
+  <script>
+    (function () {
+      // === Config API: mismo backend en PC y móvil ===
+      var isLocalhost = (location.hostname === 'localhost' || location.hostname === '127.0.0.1');
+      // En desarrollo, backend local; en producción (Render), mismo host
+      var API_BASE = isLocalhost ? 'http://localhost:3011' : '';
 
-  const elTitle = document.getElementById('share-title');
-  const elInfo = document.getElementById('share-info');
-  const elSubtitle = document.getElementById('share-subtitle');
+      function getTokenFromUrl() {
+        try {
+          var url = new URL(window.location.href);
 
-  const elWrap = document.getElementById('share-table-wrap');
-  const elThead = document.getElementById('share-thead');
-  const elTbody = document.getElementById('share-tbody');
+          // 1) ?t=xxxxx (share.html?t=TOKEN)
+          var t = url.searchParams.get('t');
+          if (t) return t;
 
-  function esc(s){
-    return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  }
+          // 2) /share/TOKEN (por si usas ruta "bonita")
+          var parts = url.pathname.split('/').filter(Boolean);
+          var last = parts[parts.length - 1] || '';
+          // Evita confundir "share" o "share.html" con token
+          if (last && last !== 'share' && last !== 'share.html') {
+            return last;
+          }
+        } catch (e) {
+          console.error('Error analizando URL', e);
+        }
+        return null;
+      }
 
-  // Igual que el front: aceptamos absolutas y relativas
-  function urlPortadaAbsoluta(url){
-    if (!url) return '';
-    if (/^https?:\/\//i.test(url)) return url;
-    return url;
-  }
+      function escapeHtml(str) {
+        if (str == null) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
 
-  function renderTabla(headers, rowsHtml){
-    elThead.innerHTML = `<tr>${headers.map(h => `<th>${esc(h)}</th>`).join('')}</tr>`;
-    elTbody.innerHTML = rowsHtml.join('');
-    elWrap.style.display = 'block';
-  }
+      var token = getTokenFromUrl();
+      var titleEl = document.getElementById('share-title');
+      var ownerEl = document.getElementById('share-owner');
+      var statusEl = document.getElementById('share-status');
+      var listEl = document.getElementById('share-list');
 
-  function cellPortada(portadaUrl){
-    const portada = urlPortadaAbsoluta(portadaUrl);
-    if (portada){
-      return `<img class="portada-mini-img" src="${esc(portada)}" alt="Portada" loading="lazy">`;
-    }
-    return `<div class="portada-placeholder-mini" aria-hidden="true">📚</div>`;
-  }
-
-  function renderDeseos(items){
-    const rows = (items || []).map(d => {
-      const titulo = d.titulo || d.nombre || '—';
-      const autores = d.autores || d.autor || '';
-      const tipo = d.tipo || '';
-      const ubic = d.ubicacion || '';
-      const portada = d.url_portada || d.portada_url || '';
-
-      return `
-        <tr>
-          <td>${cellPortada(portada)}</td>
-          <td><strong>${esc(titulo)}</strong></td>
-          <td>${esc(autores)}</td>
-          <td>${esc(tipo)}</td>
-          <td>${esc(ubic)}</td>
-        </tr>
-      `;
-    });
-
-    renderTabla(['Portada', 'Título', 'Autor', 'Tipo', 'Ubicación'], rows);
-    elSubtitle.textContent = 'Lista de deseos · Solo lectura';
-  }
-
-  function renderEjemplares(items){
-    const rows = (items || []).map(e => {
-      const titulo = e.titulo || '—';
-      const autores = e.autores || '';
-      const isbn = e.isbn || '';
-      const estado = e.estado || '';
-      const ubic = e.ubicacion || '';
-      const portada = e.url_portada || e.portada_url || '';
-
-      return `
-        <tr>
-          <td>${cellPortada(portada)}</td>
-          <td><strong>${esc(titulo)}</strong></td>
-          <td>${esc(autores)}</td>
-          <td>${esc(isbn)}</td>
-          <td>${esc(estado)}</td>
-          <td>${esc(ubic)}</td>
-        </tr>
-      `;
-    });
-
-    renderTabla(['Portada', 'Título', 'Autor/es', 'ISBN', 'Estado', 'Ubicación'], rows);
-    elSubtitle.textContent = 'Ejemplares · Solo lectura';
-  }
-
-  async function load(){
-    if (!token){
-      elTitle.textContent = 'Enlace incompleto';
-      elInfo.textContent = 'Falta el token en la URL. Ejemplo: share.html?t=TU_TOKEN';
-      return;
-    }
-
-    try{
-      const res = await fetch(`/api/share/${encodeURIComponent(token)}`, { method: 'GET' });
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok){
-        elTitle.textContent = 'Enlace no válido';
-        elInfo.textContent = data.error || 'No se pudo cargar la lista compartida.';
+      if (!token) {
+        if (statusEl) statusEl.textContent = 'Enlace no válido (falta token).';
         return;
       }
 
-      const tipo = data.tipo || data.type || '';
-      const owner = data.owner || data.propietario || data.usuario || null;
-      const ownerName = owner?.nombre_usuario || owner?.nombre || data.owner_name || '';
+      // Petición al backend: /api/share/:token
+      fetch(API_BASE + '/api/share/' + encodeURIComponent(token))
+        .then(function (res) {
+          return res.json().then(function (data) {
+            return { ok: res.ok, data: data };
+          });
+        })
+        .then(function (result) {
+          var ok = result.ok;
+          var data = result.data || {};
 
-      if (tipo === 'deseos' || tipo === 'wishlist'){
-        elTitle.textContent = ownerName ? `Deseos de ${ownerName}` : 'Lista de deseos';
-        elInfo.textContent = (data.items?.length ?? data.deseos?.length ?? 0) ? '' : 'No hay deseos en esta lista.';
-        renderDeseos(data.items || data.deseos || data.wishlist || []);
-      } else {
-        elTitle.textContent = ownerName ? `Ejemplares de ${ownerName}` : 'Ejemplares';
-        elInfo.textContent = (data.items?.length ?? data.ejemplares?.length ?? 0) ? '' : 'No hay ejemplares en esta lista.';
-        renderEjemplares(data.items || data.ejemplares || []);
-      }
-    }catch(e){
-      console.error(e);
-      elTitle.textContent = 'Error de red';
-      elInfo.textContent = 'No se pudo conectar con el servidor.';
-    }
-  }
+          if (!ok) {
+            if (statusEl) statusEl.textContent = data.error || 'Error al cargar la lista compartida.';
+            return;
+          }
 
-  document.getElementById('btn-copy-link')?.addEventListener('click', async () => {
-    const url = location.href;
-    try{
-      await navigator.clipboard.writeText(url);
-      const btn = document.getElementById('btn-copy-link');
-      const old = btn.textContent;
-      btn.textContent = 'Copiado ✅';
-      setTimeout(() => btn.textContent = old, 1200);
-    }catch{
-      prompt('Copia este enlace:', url);
-    }
-  });
+          var tipo = data.tipo || '';
+          var owner = data.owner_name || '';
+          var items = Array.isArray(data.items) ? data.items : [];
 
-  load();
-})();
-</script>
+          if (titleEl) {
+            titleEl.textContent = tipo === 'deseos'
+              ? 'Lista de deseos compartida'
+              : 'Ejemplares compartidos';
+          }
+
+          if (ownerEl) {
+            ownerEl.textContent = owner
+              ? 'De ' + owner
+              : '';
+          }
+
+          if (!items.length) {
+            if (statusEl) statusEl.textContent = 'La lista está vacía.';
+            return;
+          }
+
+          if (statusEl) statusEl.textContent = 'Total: ' + items.length;
+
+          listEl.innerHTML = items.map(function (item) {
+            var titulo = escapeHtml(item.titulo || '—');
+            var autores = escapeHtml(item.autores || '');
+            var isbn = escapeHtml(item.isbn || '');
+            var estado = escapeHtml(item.estado || '');
+            var ubicacion = escapeHtml(item.ubicacion || '');
+            var urlPortada = item.url_portada || '';
+            var tipoTexto = escapeHtml(item.tipo || '');
+
+            var coverHtml;
+            if (urlPortada) {
+              var src = urlPortada;
+              // Si tu backend guarda rutas relativas tipo "/uploads/xyz.jpg"
+              if (urlPortada.charAt(0) === '/') {
+                src = API_BASE + urlPortada;
+              }
+              coverHtml = '<img class="cover" src="' + src + '" alt="Portada" />';
+            } else {
+              coverHtml = '<div class="placeholder">Sin<br>portada</div>';
+            }
+
+            var metaLine = '';
+
+            if (autores) metaLine += autores;
+            if (isbn) {
+              if (metaLine) metaLine += ' · ';
+              metaLine += 'ISBN: ' + isbn;
+            }
+            if (estado) {
+              if (metaLine) metaLine += ' · ';
+              metaLine += estado;
+            }
+            if (ubicacion) {
+              if (metaLine) metaLine += ' · ';
+              metaLine += ubicacion;
+            }
+
+            // Para deseos, mostramos tipo/ubicación como "pills"
+            var pills = '';
+            if (tipo === 'deseos') {
+              if (tipoTexto) pills += '<span class="pill">' + tipoTexto + '</span>';
+              if (ubicacion) pills += '<span class="pill pill-secondary">' + ubicacion + '</span>';
+            }
+
+            return (
+              '<li class="item">' +
+                coverHtml +
+                '<div class="item-main">' +
+                  '<p class="item-title">' + titulo + '</p>' +
+                  (pills ? ('<p class="item-meta">' + pills + '</p>') : '') +
+                  (metaLine ? ('<p class="item-meta">' + metaLine + '</p>') : '') +
+                '</div>' +
+              '</li>'
+            );
+          }).join('');
+        })
+        .catch(function (err) {
+          console.error(err);
+          if (statusEl) statusEl.textContent = 'Error de red al cargar la lista compartida.';
+        });
+    })();
+  </script>
 </body>
 </html>
+
