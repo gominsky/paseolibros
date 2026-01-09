@@ -1,5 +1,11 @@
-const isDev = ['localhost', '127.0.0.1'].includes(window.location.hostname) || window.location.protocol === 'file:';
-const API_BASE = isDev ? 'http://localhost:3011' : '';
+const PROD_API = 'https://paseolibros.onrender.com'; // <- pon aquí tu URL real
+const isDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+// Si estoy en localhost (PC desarrollando) → uso backend local
+// En cualquier otro sitio (incluido file:// en móvil) → uso backend de Render
+const API_BASE = isDev ? 'http://localhost:3011' : PROD_API;
+
+//const isDev = ['localhost', '127.0.0.1'].includes(window.location.hostname) || window.location.protocol === 'file:';
+//const API_BASE = isDev ? 'http://localhost:3011' : '';
 
 let codeReader = null;
 let currentStream = null;
