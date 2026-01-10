@@ -1888,6 +1888,48 @@ async function mostrarFicha(libroId, ejemplarId) {
 
   abrirModalFicha();
 }
+function moverFicha(offset) {
+  const tbody = document.querySelector('#tabla-ejemplares tbody');
+  if (!tbody) return;
+
+  const filas = Array.from(tbody.querySelectorAll('tr'));
+  if (!filas.length || ejemplarSeleccionadoId == null) return;
+
+  // Buscar índice de la fila actual según el ejemplar seleccionado
+  const idxActual = filas.findIndex(
+    (tr) => Number(tr.dataset.ejemplarId) === Number(ejemplarSeleccionadoId)
+  );
+  if (idxActual === -1) return;
+
+  let nuevoIdx = idxActual + offset;
+
+  // Sin "wrap": si te sales del rango, no hace nada
+  if (nuevoIdx < 0 || nuevoIdx >= filas.length) {
+    return;
+  }
+
+  const filaNueva = filas[nuevoIdx];
+  const nuevoLibroId = filaNueva.dataset.libroId
+    ? Number(filaNueva.dataset.libroId)
+    : null;
+  const nuevoEjemplarId = filaNueva.dataset.ejemplarId
+    ? Number(filaNueva.dataset.ejemplarId)
+    : null;
+
+  if (!nuevoLibroId || !nuevoEjemplarId) return;
+
+  // Actualizamos selección global
+  libroSeleccionadoId = nuevoLibroId;
+  ejemplarSeleccionadoId = nuevoEjemplarId;
+
+  // Marcamos visualmente la fila seleccionada en la tabla
+  filas.forEach((tr) => tr.classList.remove('fila-seleccionada'));
+  filaNueva.classList.add('fila-seleccionada');
+
+  // Cargamos de nuevo la ficha
+  mostrarFicha(nuevoLibroId, nuevoEjemplarId);
+}
+
 // compartir deseos
 async function compartirLista(tipo) {
   if (!token || !usuarioActual?.id) {
@@ -2474,6 +2516,15 @@ document.addEventListener('DOMContentLoaded', () => {
   actualizarBotonesVistaEjemplares();
   initOrdenacionEjemplares();
   wireSortEjemplaresSelect();
+  const prevBtn = document.getElementById('ficha-prev');
+  const nextBtn = document.getElementById('ficha-next');
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => moverFicha(-1));
+  }
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => moverFicha(1));
+  }
   document.getElementById('ej-vista-lista')?.addEventListener('click', () => {
     vistaEjemplares = 'lista';
     guardarVistaEjemplares();          // ✅ NUEVO

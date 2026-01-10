@@ -369,9 +369,27 @@
   <!-- Modal ficha libro/ejemplar -->
   <div id="modal-ficha" class="modal">
     <div id="modal-ficha-backdrop" class="modal-backdrop"></div>
-
+  
     <div class="modal-dialog">
       <button id="modal-ficha-cerrar" class="modal-close">&times;</button>
+  
+      <!-- FLECHAS DE NAVEGACIÓN -->
+      <button
+        id="ficha-prev"
+        class="modal-nav-arrow modal-nav-arrow--prev"
+        type="button"
+        aria-label="Libro anterior"
+      >
+        ‹
+      </button>
+      <button
+        id="ficha-next"
+        class="modal-nav-arrow modal-nav-arrow--next"
+        type="button"
+        aria-label="Libro siguiente"
+      >
+        ›
+      </button>
 
       <!-- Cabecera de la ficha -->
       <div class="modal-header">
