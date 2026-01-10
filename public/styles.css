@@ -1,7 +1,7 @@
 :root{
   /* Base */
-  --bg: #faeef3;            /* rosa muy claro (fondo general) */
-  --ink: #ffffff;           /* texto blanco */
+  --bg: #faeef3;
+  --ink: #ffffff;
 
   /* Rosa palo (cards + botones) */
   --pink: #d6a5b5;
@@ -19,7 +19,97 @@
   --radius: 16px;
   --radius-sm: 12px;
   --gap: 18px;
+
+  /* 👇 nuevas variables para poder tematizar más cosas */
+  --card-bg: rgba(214,165,181,.92);
+  --card-border: rgba(0,0,0,.25);
+
+  --btn-bg: rgba(214,165,181,0.98);
+  --btn-border: rgba(0,0,0,.28);
+  --btn-color: #ffffff;
+
+  --modal-bg: rgba(0,0,0,.94);
+  --modal-border: rgba(214,165,181,.60);
+
+  --table-bg: rgba(0,0,0,.78);
+  --table-border: rgba(214,165,181,.55);
+
+  --scanner-bg: rgba(0,0,0,.65);
+
+  --pill-bg: rgba(0,0,0,.75);
+
+  --card-bg: rgba(214,165,181,.92);
+  --card-border: rgba(0,0,0,.25);
+
+  /* 👇 nuevas para las cards grandes de ejemplares (vista grid) */
+  --ej-card-bg: rgba(232,170,196,.92);
+  --ej-card-border: rgba(0,0,0,.12);
+
+  --btn-bg: rgba(214,165,181,0.98);
+  --btn-border: rgba(0,0,0,.28);
+  --btn-color: #ffffff;
 }
+body.theme-rose{
+  /* mismos valores que :root: mantiene el aspecto actual */
+  --bg: #faeef3;
+  --ink: #ffffff;
+  --pink: #d6a5b5;
+  --pink-2: #c78ea1;
+  --panel: #000000;
+  --panel-2: rgba(0,0,0,.72);
+  --muted: rgba(255,255,255,.78);
+  --border: rgba(255,255,255,.16);
+  --border-pink: rgba(214,165,181,.55);
+  --shadow: 0 14px 34px rgba(0,0,0,.55);
+  --radius: 16px;
+  --radius-sm: 12px;
+  --gap: 18px;
+  --card-bg: rgba(214,165,181,.92);
+  --card-border: rgba(0,0,0,.25);
+  --btn-bg: rgba(214,165,181,0.98);
+  --btn-border: rgba(0,0,0,.28);
+  --btn-color: #ffffff;
+  --modal-bg: rgba(0,0,0,.94);
+  --modal-border: rgba(214,165,181,.60);
+  --table-bg: rgba(0,0,0,.78);
+  --table-border: rgba(214,165,181,.55);
+  --scanner-bg: rgba(0,0,0,.65);
+  --pill-bg: rgba(0,0,0,.75);
+  --input-border: rgba(214,165,181,.55);
+  --ej-card-bg: rgba(232,170,196,.92);
+  --ej-card-border: rgba(0,0,0,.12);
+}
+
+body.theme-dark{
+  --bg: #050508;
+  --ink: #f5f5ff;
+  --pink: #7f5af0;
+  --pink-2: #5a32c3;
+  --panel: #050509;
+  --panel-2: rgba(0,0,0,.9);
+  --muted: rgba(200,200,255,.82);
+  --border: rgba(255,255,255,.25);
+  --border-pink: rgba(127,90,240,.7);
+  --shadow: 0 18px 40px rgba(0,0,0,.85);
+  --radius: 16px;
+  --radius-sm: 12px;
+  --gap: 18px;
+  --card-bg: rgba(18,18,30,.96);
+  --card-border: rgba(255,255,255,.16);
+  --btn-bg: #7f5af0;
+  --btn-border: rgba(0,0,0,.6);
+  --btn-color: #ffffff;
+  --modal-bg: rgba(6,6,14,.98);
+  --modal-border: rgba(127,90,240,.7);
+  --table-bg: rgba(10,10,18,.92);
+  --table-border: rgba(127,90,240,.6);
+  --scanner-bg: rgba(12,12,20,.9);
+  --pill-bg: rgba(0,0,0,.7);
+  --input-border: rgba(127,90,240,.7);
+  --ej-card-bg: rgba(18,18,30,.96);
+  --ej-card-border: rgba(255,255,255,.16);
+}
+
 
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -28,9 +118,9 @@ body{
   margin:0;
   font-family:"Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   background:
-    radial-gradient(1200px 700px at 15% 0%, rgba(214,165,181,.22), transparent 55%),
-    radial-gradient(1000px 700px at 85% 20%, rgba(214,165,181,.12), transparent 55%),
-    var(--bg);
+  radial-gradient(1200px 700px at 15% 0%, rgba(214,165,181,.22), transparent 55%),
+  radial-gradient(1000px 700px at 85% 20%, rgba(214,165,181,.12), transparent 55%),
+  var(--bg);
   color:var(--ink);
 }
 
@@ -41,8 +131,8 @@ a:hover{color:var(--pink); text-decoration:underline}
 img{max-width:100%; height:auto; display:block}
 
 /* =========================
-   CONTENEDOR + MÁRGENES LATERALES
-   ========================= */
+CONTENEDOR + MÁRGENES LATERALES
+========================= */
 .app{
   max-width: 1400px;
   margin: 0 auto;
@@ -51,8 +141,8 @@ img{max-width:100%; height:auto; display:block}
 }
 
 /* =========================
-   HEADER
-   ========================= */
+HEADER
+========================= */
 .app-header{
   display:flex;
   align-items:center;
@@ -100,8 +190,8 @@ img{max-width:100%; height:auto; display:block}
 .user-name{font-weight:800}
 
 /* =========================
-   LAYOUT (izq: alta | dcha: tabla + resumen)
-   ========================= */
+LAYOUT (izq: alta | dcha: tabla + resumen)
+========================= */
 .app-main{
   margin-top:var(--gap);
   display:grid;
@@ -118,15 +208,16 @@ img{max-width:100%; height:auto; display:block}
 }
 
 /* =========================
-   CARDS (rosa)
-   ========================= */
+CARDS (rosa)
+========================= */
 .card{
-  background: rgba(214,165,181,.92);
-  border: 1px solid rgba(0,0,0,.25);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding:16px;
 }
+
 .card + .card{margin-top:var(--gap)}
 
 .card-header-inline{
@@ -151,8 +242,8 @@ h2{margin:0 0 10px; font-size:1.08rem}
 @media (max-width: 980px){ .grid-two{grid-template-columns:1fr} }
 
 /* =========================
-   FORMULARIOS (inputs negros dentro de card rosa)
-   ========================= */
+FORMULARIOS (inputs negros dentro de card rosa)
+========================= */
 .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px}
 @media (max-width: 520px){ .form-grid{grid-template-columns:1fr} }
 
@@ -161,7 +252,7 @@ label{color: rgba(255,255,255,.88); font-size:.9rem}
 
 input, select, textarea{
   background: rgba(0,0,0,.84);
-  border: 1px solid rgba(214,165,181,.55);
+  border: 1px solid var(--input-border);
   color: var(--ink);
   padding:10px 12px;
   border-radius: var(--radius-sm);
@@ -177,31 +268,44 @@ input:focus, select:focus, textarea:focus{
 .input-with-button input{flex:1}
 
 /* =========================
-   BOTONES (rosa)
+   BOTONES (theme-aware)
    ========================= */
-.btn{
-  border: 1px solid rgba(0,0,0,.28);
-  background: rgba(214,165,181,.98);
-  color: #ffffff;
-  padding:10px 12px;
-  border-radius:999px;
-  cursor:pointer;
-  font-weight:800;
-}
-.btn:hover{filter:brightness(1.05)}
-.btn:active{transform: translateY(1px)}
-.btn-primary{background: rgba(214,165,181,1)}
-.btn-secondary{background: rgba(199,142,161,1)}
-.btn-ghost{
-  background: rgba(0,0,0,.78);
-  border:1px solid rgba(214,165,181,.65);
-}
-.btn-full{width:100%}
-.btn-sm{padding:8px 10px; font-size:.9rem}
+   .btn{
+    border: 1px solid var(--btn-border);
+    background: var(--btn-bg);
+    color: var(--btn-color);
+    padding:10px 12px;
+    border-radius:999px;
+    cursor:pointer;
+    font-weight:800;
+  }
+  .btn:hover{ filter:brightness(1.05); }
+  .btn:active{ transform: translateY(1px); }
+  
+  /* primario = color de botón del tema */
+  .btn-primary{
+    background: var(--btn-bg);
+  }
+  
+  /* secundario = mismo tono pero usando el rosa 2 del tema */
+  .btn-secondary{
+    background: var(--pink-2);
+    border-color: var(--btn-border);
+  }
+  
+  /* ghost = fondo oscuro del tema + borde rosa del tema */
+  .btn-ghost{
+    background: var(--panel-2);
+    border:1px solid var(--border-pink);
+  }
+  
+  .btn-full{width:100%}
+  .btn-sm{padding:8px 10px; font-size:.9rem}
+  
 
 /* =========================
-   ICON BUTTONS (solo círculo, SIN “cuadrado dentro”)
-   ========================= */
+ICON BUTTONS (solo círculo, SIN “cuadrado dentro”)
+========================= */
 .icon-btn{
   width: 34px;
   height: 34px;
@@ -211,11 +315,14 @@ input:focus, select:focus, textarea:focus{
   place-items:center;
   cursor:pointer;
 
-  background: rgba(0,0,0,.78);
-  border:1px solid rgba(214,165,181,.65);
+  background: var(--panel-2);     /* antes rgba(0,0,0,.78) */
+  border:1px solid var(--border-pink);  /* antes rgba(214,165,181,.65) */
   color: var(--ink);
 }
-.icon-btn:hover{filter:brightness(1.08)}
+.icon-btn:hover{
+  filter:brightness(1.08);
+}
+
 
 /* El span interior NO debe dibujar otra caja */
 .icon-circle{
@@ -235,32 +342,43 @@ input:focus, select:focus, textarea:focus{
 .celda-acciones{white-space:nowrap}
 
 /* =========================
-   TABLAS (negras, texto blanco)
+   TABLAS (theme-aware)
    ========================= */
-.table-wrapper{
-  overflow:auto;
-  border-radius:14px;
-  border:1px solid rgba(214,165,181,.55);
-  background: rgba(0,0,0,.78);
-}
-table{width:100%; border-collapse:collapse; min-width:760px}
-.table-small{min-width:520px}
-
-th,td{
-  padding:10px 12px;
-  border-bottom:1px solid rgba(255,255,255,.12);
-  vertical-align:top;
-}
-th{
-  position:sticky;
-  top:0;
-  background: rgba(0,0,0,.94);
-  text-align:left;
-  font-size:.9rem;
-  color: rgba(255,255,255,.84);
-}
-tr:hover td{background: rgba(255,255,255,.06)}
-
+   .table-wrapper{
+    overflow:auto;
+    border-radius:14px;
+    border:1px solid var(--table-border);
+    background: var(--table-bg);
+  }
+  
+  table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:760px;
+  }
+  .table-small{min-width:520px;}
+  
+  th,td{
+    padding:10px 12px;
+    border-bottom:1px solid rgba(255,255,255,.12);
+    vertical-align:top;
+  }
+  
+  /* cabecera se apoya en el "panel" del tema */
+  th{
+    position:sticky;
+    top:0;
+    background: var(--panel-2);
+    text-align:left;
+    font-size:.9rem;
+    color: rgba(255,255,255,.84);
+  }
+  
+  /* el hover lo mantenemos igual (queda bien en ambos temas) */
+  tr:hover td{
+    background: rgba(255,255,255,.06);
+  }
+  
 /* Ordenación: que NO parezca botón, pero sea clicable */
 .th-sort{
   background: transparent;
@@ -306,8 +424,8 @@ tr:hover td{background: rgba(255,255,255,.06)}
 }
 
 /* =========================
-   LOGIN MODAL
-   ========================= */
+LOGIN MODAL
+========================= */
 .auth-overlay{
   position:fixed;
   inset:0;
@@ -333,8 +451,8 @@ tr:hover td{background: rgba(255,255,255,.06)}
 .auth-body{padding:16px}
 
 /* =========================
-   MODAL FICHA
-   ========================= */
+MODAL FICHA
+========================= */
 .modal{position:fixed; inset:0; display:none; z-index:5000}
 .modal.is-visible{display:block}
 
@@ -343,14 +461,15 @@ tr:hover td{background: rgba(255,255,255,.06)}
   position:relative;
   margin: 4vh auto;
   width: min(980px, calc(100% - 24px));
-  background: rgba(0,0,0,.94);
-  border:1px solid rgba(214,165,181,.60);
+  background: var(--modal-bg);
+  border:1px solid var(--modal-border);
   border-radius:var(--radius);
   box-shadow: var(--shadow);
   overflow:hidden;
   display:flex;
   flex-direction:column;
 }
+
 .modal-close{
   position:absolute;
   top:10px;
@@ -395,9 +514,9 @@ tr:hover td{background: rgba(255,255,255,.06)}
     gap:12px;
     padding:14px 14px 0;
     .table-wrapper {
-    background: transparent !important;
-    border: none !important;
-  }
+      background: transparent !important;
+      border: none !important;
+    }
   }
   .modal-cover-img{width:120px; height:170px}
   .modal-cover-upload{width:120px}
@@ -428,7 +547,7 @@ tr:hover td{background: rgba(255,255,255,.06)}
   height: 1em;
   font-size: 16px;     /* ajusta si quieres */
   line-height: 1;
-  
+
 }
 /* ✅ Modal préstamos: overlay pantalla completa SIEMPRE */
 #prestamo-overlay{
@@ -460,11 +579,10 @@ body, html{
 }
 /* Modal préstamo: caja negra */
 .prestamo-dialog{
-  background: #000 !important;
-  border: 1px solid rgba(255,255,255,.18) !important;
-  box-shadow: 0 18px 45px rgba(0,0,0,.75) !important;
-  color: #fff;
+  background: var(--panel) !important;
+  border: 1px solid var(--border) !important;
 }
+
 /* Modal préstamo: más pro (compacto + menos recto) */
 .prestamo-dialog{
   width: min(440px, calc(100vw - 32px)) !important;
@@ -520,8 +638,8 @@ body, html{
 .prestamo-dialog{
   border: 1.5px solid rgba(232, 170, 196, .85) !important; /* rosa palo */
   box-shadow:
-    0 24px 70px rgba(0,0,0,.72),
-    0 0 0 3px rgba(232, 170, 196, .18) !important;         /* halo rosa */
+  0 24px 70px rgba(0,0,0,.72),
+  0 0 0 3px rgba(232, 170, 196, .18) !important;         /* halo rosa */
 }
 /* FAB (+) solo visible en móvil */
 #btn-toggle-alta{
@@ -542,8 +660,8 @@ body, html{
   align-self: start;
 }
 /* =========================
-   FIX: margen lateral real (desktop/tablet)
-   ========================= */
+FIX: margen lateral real (desktop/tablet)
+========================= */
 .app{
   max-width: 1400px !important;
   margin-left: auto !important;
@@ -553,9 +671,9 @@ body, html{
 }
 
 /* =========================
-   FIX: tarjetas de Lecturas/Préstamos alineadas arriba
-   (anula el .card + .card dentro del grid)
-   ========================= */
+FIX: tarjetas de Lecturas/Préstamos alineadas arriba
+(anula el .card + .card dentro del grid)
+========================= */
 .grid-two{
   align-items: start;
 }
@@ -736,8 +854,8 @@ body{
   white-space: pre-wrap;
 }
 /* =========================
-   MÓVIL
-   ========================= */
+MÓVIL
+========================= */
 @media (max-width: 820px){
 
   /* Header más compacto */
@@ -826,9 +944,9 @@ body{
   #btn-toggle-alta{ display:grid !important; }
 }
 /* =========================
-   MODO PRO MÓVIL: Portada + Título + Autor + Acciones
-   (mantiene ordenación en Título/Autor)
-   ========================= */
+MODO PRO MÓVIL: Portada + Título + Autor + Acciones
+(mantiene ordenación en Título/Autor)
+========================= */
 @media (max-width: 820px){
 
   /* La tabla ya no necesita ser tan ancha */
@@ -889,8 +1007,8 @@ body{
   #tabla-ejemplares .th-sort:active{ transform: none; }
 }
 /* =========================
-   MODO PRO MÓVIL: tabla en 2 líneas por fila (muestra todo)
-   ========================= */
+MODO PRO MÓVIL: tabla en 2 líneas por fila (muestra todo)
+========================= */
 @media (max-width: 820px){
 
   /* Ocultamos columnas extra porque ya van en la línea meta (más limpio) */
@@ -930,8 +1048,8 @@ body{
   .meta-dot{ margin: 0 6px; opacity: .65; }
 }
 /* =========================
-   Modal ficha full-screen en móvil
-   ========================= */
+Modal ficha full-screen en móvil
+========================= */
 @media (max-width: 820px){
   #modal-ficha .modal-dialog{
     width: 100vw !important;
@@ -955,8 +1073,8 @@ body{
   }
 }
 /* =========================
-   Escáner PRO: overlay negro + cámara grande + guías
-   ========================= */
+Escáner PRO: overlay negro + cámara grande + guías
+========================= */
 #scanner.scanner{
   position: fixed;
   inset: 0;
@@ -1012,7 +1130,7 @@ body{
 }
 
 /* (Nota) ::before/::after no se aplican a <video> en algunos navegadores.
-   Por eso añadimos un fallback abajo usando el contenedor #scanner */
+Por eso añadimos un fallback abajo usando el contenedor #scanner */
 #scanner::before{
   content:"";
   position:absolute;
@@ -1031,8 +1149,8 @@ body{
   }
 }
 /* =========================
-   Header full-bleed (fondo a 100vw, contenido respeta gutter)
-   ========================= */
+Header full-bleed (fondo a 100vw, contenido respeta gutter)
+========================= */
 .app-header{
   position: relative;
 }
@@ -1048,8 +1166,8 @@ body{
   z-index: -1;
 }
 /* =========================================================
-   PRO MAX MÓVIL: layout a ancho completo + cards uniformes
-   ========================================================= */
+PRO MAX MÓVIL: layout a ancho completo + cards uniformes
+========================================================= */
 @media (max-width: 820px){
 
   /* Más “pantalla completa”: menos gutter lateral en móvil */
@@ -1065,10 +1183,6 @@ body{
   .card{
     width: 100% !important;
     max-width: none !important;
-  }
-
-  /* Que todas las cards respiren igual */
-  .card{
     border-radius: 18px;
   }
 
@@ -1101,8 +1215,8 @@ body{
 }
 
 /* =========================================================
-   FAB (+) PRO: tamaño, color, sombra, safe-area, animación
-   ========================================================= */
+FAB (+) PRO: tamaño, color, sombra, safe-area, animación
+========================================================= */
 @media (max-width: 820px){
   #btn-toggle-alta.fab-plus{
     width: 58px !important;
@@ -1121,8 +1235,8 @@ body{
     border: 1px solid rgba(0,0,0,.22) !important;
 
     box-shadow:
-      0 16px 40px rgba(0,0,0,.55),
-      0 0 0 4px rgba(232,170,196,.18) !important;
+    0 16px 40px rgba(0,0,0,.55),
+    0 0 0 4px rgba(232,170,196,.18) !important;
 
     font-size: 30px !important;
     font-weight: 700 !important;
@@ -1143,26 +1257,26 @@ body{
     color: #fff !important;
     border-color: rgba(232,170,196,.6) !important;
     box-shadow:
-      0 16px 40px rgba(0,0,0,.55),
-      0 0 0 4px rgba(232,170,196,.24) !important;
+    0 16px 40px rgba(0,0,0,.55),
+    0 0 0 4px rgba(232,170,196,.24) !important;
   }
 }
 
 /* =========================================================
-   PRO MAX: que el panel de alta (sheet) se vea premium
-   ========================================================= */
+PRO MAX: que el panel de alta (sheet) se vea premium
+========================================================= */
 @media (max-width: 820px){
   body.alta-visible .column-left .card{
     border-radius: 20px !important;
     border: 1.5px solid rgba(232,170,196,.85) !important;
     box-shadow:
-      0 24px 70px rgba(0,0,0,.72),
-      0 0 0 3px rgba(232,170,196,.18) !important;
+    0 24px 70px rgba(0,0,0,.72),
+    0 0 0 3px rgba(232,170,196,.18) !important;
   }
 }
 /* =========================
-   PRO MAX móvil: lista de cards + evitar desbordes
-   ========================= */
+PRO MAX móvil: lista de cards + evitar desbordes
+========================= */
 *{ box-sizing: border-box; }
 html, body{ overflow-x: hidden; }
 
@@ -1246,9 +1360,9 @@ html, body{ overflow-x: hidden; }
   .card, .column, .app-main{ min-width: 0; }
 }
 /* =========================================================
-   OVERRIDE FINAL MÓVIL (PRO MAX) – pegar al final del CSS
-   Objetivo: móvil = lista cards / desktop = tabla
-   ========================================================= */
+OVERRIDE FINAL MÓVIL (PRO MAX) – pegar al final del CSS
+Objetivo: móvil = lista cards / desktop = tabla
+========================================================= */
 *{ box-sizing: border-box; }
 html, body{ max-width: 100%; overflow-x: hidden; }
 
@@ -1575,13 +1689,12 @@ html, body{ max-width: 100%; overflow-x: hidden; }
   white-space: nowrap;
 }
 
-
 /* =========================================================
-   FIX: Vista Ejemplares (Lista vs Portadas) sin duplicados
-   - En móvil, había reglas que forzaban #ejemplares-list visible
-     aunque estuvieras en portadas.
-   - Usamos la clase body.vista-ej-grid que pone main.js.
-   ========================================================= */
+FIX: Vista Ejemplares (Lista vs Portadas) sin duplicados
+- En móvil, había reglas que forzaban #ejemplares-list visible
+aunque estuvieras en portadas.
+- Usamos la clase body.vista-ej-grid que pone main.js.
+========================================================= */
 @media (max-width: 820px){
   body:not(.vista-ej-grid) #ejemplares-list{ display: grid !important; }
   body.vista-ej-grid #ejemplares-list{ display: none !important; }
@@ -1591,8 +1704,8 @@ html, body{ max-width: 100%; overflow-x: hidden; }
 }
 
 /* =========================================================
-   Header: botones de vista junto a Herramientas
-   ========================================================= */
+Header: botones de vista junto a Herramientas
+========================================================= */
 .header-view-toggle{
   display: inline-flex;
   align-items: center;
@@ -1603,10 +1716,9 @@ html, body{ max-width: 100%; overflow-x: hidden; }
   height: 38px;
 }
 
-
 /* =========================================================
-   Ajustes solicitados (móvil + modal + ejemplares)
-   ========================================================= */
+Ajustes solicitados (móvil + modal + ejemplares)
+========================================================= */
 
 /* 1) Título con fuente elegante */
 .logo-text h1{
@@ -1621,8 +1733,8 @@ html, body{ max-width: 100%; overflow-x: hidden; }
     display:grid;
     grid-template-columns: 1fr;
     grid-template-areas:
-      "actions"
-      "title";
+    "actions"
+    "title";
     gap:10px;
     padding: 12px 12px !important;
   }
@@ -1634,9 +1746,10 @@ html, body{ max-width: 100%; overflow-x: hidden; }
 }
 
 /* 3) Card de Ejemplares (home): menos oscura (sombra más suave) */
+/* 3) Card de Ejemplares (home): menos oscura (sombra más suave) */
 .column-right > .card:first-child{
   box-shadow: 0 10px 22px rgba(0,0,0,.26) !important;
-  background: rgba(214,165,181,.86) !important;
+  background: var(--card-bg) !important;
 }
 
 /* 4) Modal: botón "Añadir" centrado de verdad */
@@ -1693,8 +1806,8 @@ html, body{ max-width: 100%; overflow-x: hidden; }
 }
 
 /* =========================
-   Desktop (web): escáner integrado en la columna (no overlay)
-   ========================= */
+Desktop (web): escáner integrado en la columna (no overlay)
+========================= */
 @media (min-width: 821px){
   #scanner.scanner{
     position: static !important;
@@ -1733,48 +1846,48 @@ html, body{ max-width: 100%; overflow-x: hidden; }
   #scanner #btn-detener{ width: auto; }
 }
 /* =========================
-   SCANNER: en desktop dentro de la card (no overlay)
-   ========================= */
-   @media (min-width: 761px){
-    /* mata el overlay fijo */
-    #scanner.scanner{
-      position: static !important;
-      inset: auto !important;
-      background: transparent !important;
-      padding: 0 !important;
-      z-index: auto !important;
-      border-radius: 0 !important;
-    }
-  
-    /* cuando JS pone display:block → no lo conviertas en grid overlay */
-    #scanner.scanner[style*="display:block"],
-    #scanner.scanner[style*="display: block"]{
-      display: block !important;
-      grid-template-rows: none !important;
-      gap: 0 !important;
-    }
-  
-    /* vídeo ajustado al ancho de la sección */
-    #scanner .scanner-video,
-    #scanner video#video{
-      width: 100% !important;
-      height: 240px !important;   /* ajusta si lo quieres más bajo/alto */
-      border-radius: 14px !important;
-      object-fit: cover !important;
-    }
-  
-    /* desactiva “guías” de overlay */
-    #scanner::before,
-    #scanner .scanner-video::before,
-    #scanner .scanner-video::after,
-    #scanner video#video::before,
-    #scanner video#video::after{
-      content: none !important;
-    }
+SCANNER: en desktop dentro de la card (no overlay)
+========================= */
+@media (min-width: 761px){
+  /* mata el overlay fijo */
+  #scanner.scanner{
+    position: static !important;
+    inset: auto !important;
+    background: transparent !important;
+    padding: 0 !important;
+    z-index: auto !important;
+    border-radius: 0 !important;
   }
+
+  /* cuando JS pone display:block → no lo conviertas en grid overlay */
+  #scanner.scanner[style*="display:block"],
+  #scanner.scanner[style*="display: block"]{
+    display: block !important;
+    grid-template-rows: none !important;
+    gap: 0 !important;
+  }
+
+  /* vídeo ajustado al ancho de la sección */
+  #scanner .scanner-video,
+  #scanner video#video{
+    width: 100% !important;
+    height: 240px !important;   /* ajusta si lo quieres más bajo/alto */
+    border-radius: 14px !important;
+    object-fit: cover !important;
+  }
+
+  /* desactiva “guías” de overlay */
+  #scanner::before,
+  #scanner .scanner-video::before,
+  #scanner .scanner-video::after,
+  #scanner video#video::before,
+  #scanner video#video::after{
+    content: none !important;
+  }
+}
 /* =========================
-   EJEMPLARES (PORTADAS): scroll interno del bloque
-   ========================= */
+EJEMPLARES (PORTADAS): scroll interno del bloque
+========================= */
 
 /* el contenedor del grid debe poder scrollear */
 #ejemplares-grid{
@@ -1793,41 +1906,41 @@ html, body{ max-width: 100%; overflow-x: hidden; }
   -webkit-overflow-scrolling: touch;
 }
 /* =========================
-   HEADER MÓVIL: una sola línea, botones alineados
-   ========================= */
-   @media (max-width: 820px){
-    .app-header{
-      display: flex !important;
-      align-items: center !important;
-      justify-content: space-between !important;
-      gap: 10px !important;
-      padding: 10px 12px !important;
-    }
-  
-    .header-center{
-      flex: 1 1 auto !important;
-      min-width: 0 !important;
-    }
-  
-    /* título compacto sin romper línea */
-    .logo-text h1{
-      font-size: 1.02rem !important;
-      white-space: nowrap !important;
-      overflow: hidden !important;
-      text-overflow: ellipsis !important;
-    }
-  
-    .header-right{
-      flex: 0 0 auto !important;
-      display: inline-flex !important;
-      align-items: center !important;
-      gap: 8px !important;
-      flex-wrap: nowrap !important;
-    }
+HEADER MÓVIL: una sola línea, botones alineados
+========================= */
+@media (max-width: 820px){
+  .app-header{
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    padding: 10px 12px !important;
   }
-  /* =========================
-   HEADER DESKTOP: todo en una línea (no wrap)
-   ========================= */
+
+  .header-center{
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  /* título compacto sin romper línea */
+  .logo-text h1{
+    font-size: 1.02rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .header-right{
+    flex: 0 0 auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+  }
+}
+/* =========================
+HEADER DESKTOP: todo en una línea (no wrap)
+========================= */
 @media (min-width: 821px){
   .app-header{
     display: flex !important;
@@ -1908,11 +2021,9 @@ input::placeholder {
   .sort-select{ max-width: 190px; }
 }
 
-
-
 /* =========================
-   ORDENAR: en móvil se mueve a Herramientas
-   ========================= */
+ORDENAR: en móvil se mueve a Herramientas
+========================= */
 @media (max-width: 820px){
   /* El selector ya no va en el header de "Ejemplares" en móvil */
   .sort-mini{ display: none !important; }
@@ -1943,12 +2054,11 @@ input::placeholder {
   border-radius: 12px;
 }
 
-
 /* =========================================================
-   FIX (móvil): quitar "marco" interno (table-wrapper) alrededor de las fichas
-   - En móvil usamos #ejemplares-list / #ejemplares-grid, así que el wrapper de tabla debe
-     quedar oculto para que no aparezca un contenedor negro con borde.
-   ========================================================= */
+FIX (móvil): quitar "marco" interno (table-wrapper) alrededor de las fichas
+- En móvil usamos #ejemplares-list / #ejemplares-grid, así que el wrapper de tabla debe
+quedar oculto para que no aparezca un contenedor negro con borde.
+========================================================= */
 @media (max-width: 820px){
   .table-wrapper{
     display: none !important;
@@ -1957,7 +2067,6 @@ input::placeholder {
     box-shadow: none !important;
   }
 }
-
 
 /* MÓVIL: quitar el fondo interno (scroll) de la card de Ejemplares */
 @media (max-width: 820px){
@@ -1979,8 +2088,8 @@ input::placeholder {
 .app{
   border-radius: 22px; /* un pelín más redondo que las cards */
   box-shadow:
-    0 0 0 6px var(--pink-2),          /* marco rosa */
-    0 18px 44px rgba(0,0,0,.35);      /* sombra exterior suave */
+  0 0 0 6px var(--pink-2),          /* marco rosa */
+  0 18px 44px rgba(0,0,0,.35);      /* sombra exterior suave */
 }
 @media (max-width: 820px){
 
@@ -2043,128 +2152,128 @@ input::placeholder {
 #share-table th{ white-space: nowrap; }
 #share-table{ background: rgba(0,0,0,0.0); }
 /* =========================
-   FIX definitivo: Botón "Detener escaneo" visible en DESKTOP
-   (sobrescribe los 2 bloques min-width 821/761)
-   ========================= */
-   @media (min-width: 821px){
-    /* cuando el scanner esté visible */
-    #scanner.scanner[style*="display:block"],
-    #scanner.scanner[style*="display: block"]{
-      display: grid !important;
-      grid-template-columns: 1fr auto;
-      grid-template-rows: auto 260px;
-      grid-template-areas:
-        "txt btn"
-        "vid vid";
-      gap: 12px !important;
-      align-items: center;
-    }
-  
-    #scanner.scanner > .scanner-text{
-      grid-area: txt;
-      margin: 0 !important;
-    }
-  
-    #scanner.scanner > video#video{
-      grid-area: vid;
-      width: 100% !important;
-      height: 260px !important;
-      max-height: 260px !important;
-      border-radius: 14px !important;
-      object-fit: cover !important;
-    }
-  
-    #scanner.scanner > #btn-detener{
-      grid-area: btn;
-      display: inline-flex !important;
-      align-items: center;
-      justify-content: center;
-      width: auto !important;
-      margin: 0 !important;
-      justify-self: end;
-      z-index: 9999; /* por si algo lo tapa */
-    }
-  
-    /* por si el pseudo-elemento del overlay llega a tapar algo */
-    #scanner::before{ display: none !important; content: none !important; }
+FIX definitivo: Botón "Detener escaneo" visible en DESKTOP
+(sobrescribe los 2 bloques min-width 821/761)
+========================= */
+@media (min-width: 821px){
+  /* cuando el scanner esté visible */
+  #scanner.scanner[style*="display:block"],
+  #scanner.scanner[style*="display: block"]{
+    display: grid !important;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto 260px;
+    grid-template-areas:
+    "txt btn"
+    "vid vid";
+    gap: 12px !important;
+    align-items: center;
   }
-#btn-detener{ display:none !important; }  
+
+  #scanner.scanner > .scanner-text{
+    grid-area: txt;
+    margin: 0 !important;
+  }
+
+  #scanner.scanner > video#video{
+    grid-area: vid;
+    width: 100% !important;
+    height: 260px !important;
+    max-height: 260px !important;
+    border-radius: 14px !important;
+    object-fit: cover !important;
+  }
+
+  #scanner.scanner > #btn-detener{
+    grid-area: btn;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: auto !important;
+    margin: 0 !important;
+    justify-self: end;
+    z-index: 9999; /* por si algo lo tapa */
+  }
+
+  /* por si el pseudo-elemento del overlay llega a tapar algo */
+  #scanner::before{ display: none !important; content: none !important; }
+}
+#btn-detener{ display:none !important; }
 .share-page .app-main{
   grid-template-columns: 1fr !important;
 }
 /* =========================================================
-   Portada placeholder (sin imagen) – PaseoLibros
-   ========================================================= */
+Portada placeholder (sin imagen) – PaseoLibros
+========================================================= */
 
-   .portada-placeholder-mini{
-    width: 40px;
-    height: 56px;
-    border-radius: 8px;
-  
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  
-    background:
-      linear-gradient(135deg, #f4efe9 0%, #e6ded4 100%);
-    border: 1px solid rgba(0,0,0,.06);
-  
-    color: #6b5e52;
-    font-family: "Fraunces", serif;
-    font-weight: 700;
-    font-size: 0.7rem;
-    letter-spacing: .04em;
-  
-    box-shadow:
-      inset 0 0 0 1px rgba(255,255,255,.4),
-      0 1px 2px rgba(0,0,0,.08);
-  }
-  
-  /* letra/logo dentro */
-  .portada-placeholder-mini .ph-logo{
-    line-height: 1;
-  }
-  
-  /* mismo tamaño que las portadas reales */
-  .portada-mini-img{
-    width: 40px;
-    height: 56px;
-    object-fit: cover;
-    border-radius: 8px;
-  }
+.portada-placeholder-mini{
+  width: 40px;
+  height: 56px;
+  border-radius: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+  linear-gradient(135deg, #f4efe9 0%, #e6ded4 100%);
+  border: 1px solid rgba(0,0,0,.06);
+
+  color: #6b5e52;
+  font-family: "Fraunces", serif;
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: .04em;
+
+  box-shadow:
+  inset 0 0 0 1px rgba(255,255,255,.4),
+  0 1px 2px rgba(0,0,0,.08);
+}
+
+/* letra/logo dentro */
+.portada-placeholder-mini .ph-logo{
+  line-height: 1;
+}
+
+/* mismo tamaño que las portadas reales */
+.portada-mini-img{
+  width: 40px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 8px;
+}
 /* =========================================================
-   Placeholder portada grande (modal)
-   ========================================================= */
+Placeholder portada grande (modal)
+========================================================= */
 
-   .modal-cover-img.is-placeholder{
-    /* Mantiene el tamaño, pero en vez de “imagen rota”, pinta una portada bonita */
-    background:
-      linear-gradient(135deg, #f4efe9 0%, #e6ded4 100%);
-    border: 1px solid rgba(0,0,0,.10);
-  }
-  
-  /* “Logo” centrado encima cuando no hay imagen */
-  .modal-cover-img.is-placeholder{
-    position: relative;
-  }
-  
-  .modal-cover-img.is-placeholder::after{
-    content: "Pdl";
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-  
-    color: #6b5e52;
-    font-family: "Fraunces", serif;
-    font-weight: 800;
-    font-size: 1.4rem;
-    letter-spacing: .05em;
-  
-    /* un poco de relieve suave */
-    text-shadow: 0 1px 0 rgba(255,255,255,.55);
-  }
-  /* Placeholder grande para la vista grid (fichas) */
+.modal-cover-img.is-placeholder{
+  /* Mantiene el tamaño, pero en vez de “imagen rota”, pinta una portada bonita */
+  background:
+  linear-gradient(135deg, #f4efe9 0%, #e6ded4 100%);
+  border: 1px solid rgba(0,0,0,.10);
+}
+
+/* “Logo” centrado encima cuando no hay imagen */
+.modal-cover-img.is-placeholder{
+  position: relative;
+}
+
+.modal-cover-img.is-placeholder::after{
+  content: "Pdl";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+
+  color: #6b5e52;
+  font-family: "Fraunces", serif;
+  font-weight: 800;
+  font-size: 1.4rem;
+  letter-spacing: .05em;
+
+  /* un poco de relieve suave */
+  text-shadow: 0 1px 0 rgba(255,255,255,.55);
+}
+/* Placeholder grande para la vista grid (fichas) */
 .portada-placeholder-grid{
   width: 100%;
   aspect-ratio: 2 / 3;
@@ -2178,8 +2287,8 @@ input::placeholder {
   border: 1px solid rgba(0,0,0,.10);
 
   box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.55),
-    0 10px 24px rgba(0,0,0,.25);
+  inset 0 0 0 1px rgba(255,255,255,.55),
+  0 10px 24px rgba(0,0,0,.25);
 }
 
 .portada-placeholder-grid .ph-logo{
@@ -2316,7 +2425,6 @@ input::placeholder {
 #tabla-prestamos-activos{
   width: 100%;
 }
-
 
 /* ✅ Solución sencilla: el wrapper que envuelve cada tabla dentro de las cards */
 .grid-two > .card .table-wrapper{

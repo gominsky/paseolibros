@@ -206,19 +206,21 @@
             var isbn = escapeHtml(item.isbn || '');
             var estado = escapeHtml(item.estado || '');
             var ubicacion = escapeHtml(item.ubicacion || '');
-            var urlPortada = item.url_portada || '';
             var tipoTexto = escapeHtml(item.tipo || '');
+            var urlPortada = item.url_portada || '';
+            var coverHtml = '';
 
-            var coverHtml;
-            if (urlPortada) {
-              var src = urlPortada;
-              // Si tu backend guarda rutas relativas tipo "/uploads/xyz.jpg"
-              if (urlPortada.charAt(0) === '/') {
-                src = API_BASE + urlPortada;
+            // Para ejemplares sí mostramos portada / placeholder
+            if (tipo !== 'deseos') {
+              if (urlPortada) {
+                var src = urlPortada;
+                if (urlPortada.charAt(0) === '/') {
+                  src = API_BASE + urlPortada;
+                }
+                coverHtml = '<img class="cover" src="' + src + '" alt="Portada" />';
+              } else {
+                coverHtml = '<div class="placeholder">Sin<br>portada</div>';
               }
-              coverHtml = '<img class="cover" src="' + src + '" alt="Portada" />';
-            } else {
-              coverHtml = '<div class="placeholder">Sin<br>portada</div>';
             }
 
             var metaLine = '';

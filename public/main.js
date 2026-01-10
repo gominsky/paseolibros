@@ -80,6 +80,21 @@ let prestamoContexto = null;
 let ejemplaresCache = [];
 let ejemplaresQuery = '';
 let sortEjemplares = { key: 'creado_en', dir: 'desc' }; // por defecto: más nuevos primero
+// ---------- Themes ----------
+const THEMES = ['rose', 'dark'];
+
+function aplicarTema(nombre) {
+  const body = document.body;
+  // Limpia todas las clases de theme
+  THEMES.forEach((t) => body.classList.remove(`theme-${t}`));
+
+  // 'rose' lo aplicamos también por clase para que sea simétrico
+  const theme = nombre && THEMES.includes(nombre) ? nombre : 'rose';
+  body.classList.add(`theme-${theme}`);
+  try {
+    localStorage.setItem('paseolibros_theme', theme);
+  } catch {}
+}
 
 // ---------- Helpers ----------
 function setUserStatus(msg) {
@@ -2440,6 +2455,19 @@ function renderEjemplaresGrid(lista) {
 
 // ---------- Init ----------
 document.addEventListener('DOMContentLoaded', () => {
+    // 1) Aplicar tema guardado
+    const savedTheme = localStorage.getItem('paseolibros_theme') || 'rose';
+    aplicarTema(savedTheme);
+  
+    // 2) Botón toggle de tema
+    const themeBtn = document.getElementById('btn-toggle-theme');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', () => {
+        const current = localStorage.getItem('paseolibros_theme') || 'rose';
+        const next = current === 'rose' ? 'dark' : 'rose';
+        aplicarTema(next);
+      });
+    }
   wireDeseosUI();
   wireColaUI();
   restaurarPreferenciasUI();
@@ -2642,6 +2670,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-guardar-libro')?.addEventListener('click', guardarLibroEditado);
   document.getElementById('btn-guardar-ejemplar')?.addEventListener('click', guardarEjemplarEditado);
 
+  
   // UI préstamo overlay
   crearUIPrestamo();
 
