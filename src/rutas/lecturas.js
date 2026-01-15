@@ -1,8 +1,52 @@
-// src/rutas/lecturas.js
 import { Router } from 'express';
 import pool from '../bd.js';
 
 const router = Router();
+
+router.get('/usuarios/:id/lecturas/estadisticas', async (req, res) => {
+  try {
+    const usuarioId = Number(req.params.id);
+
+    const sql = `
+      SELECT
+        anio,
+        SUM(empezadas)  AS empezadas,
+        SUM(terminadas) AS terminadas
+      FROM (
+        -- Lecturas empezadas por año
+        SELECT
+          EXTRACT(YEAR FROM inicio)::int AS anio,
+          COUNT(*) AS empezadas,
+          0       AS terminadas
+        FROM lecturas
+        WHERE usuario_id = $1
+          AND inicio IS NOT NULL
+        GROUP BY anio
+
+        UNION ALL
+
+        -- Lecturas terminadas por año
+        SELECT
+          EXTRACT(YEAR FROM fin)::int AS anio,
+          0       AS empezadas,
+          COUNT(*) AS terminadas
+        FROM lecturas
+        WHERE usuario_id = $1
+          AND fin IS NOT NULL
+        GROUP BY anio
+      ) t
+      GROUP BY anio
+      ORDER BY anio;
+    `;
+
+    const { rows } = await pool.query(sql, [usuarioId]);
+    res.json(rows);
+  } catch (err) {
+    console.error('Error al obtener estadísticas de lecturas:', err);
+    res.status(500).json({ error: 'Error al obtener estadísticas de lecturas.' });
+  }
+});
+
 
 // Histórico de lecturas de un libro:
 // GET /api/libros/:libroId/lecturas

@@ -153,6 +153,28 @@ function escapeHtml(s){
 
 function setUserStatusOk(msg) { setUserStatus(msg ? `✅ ${msg}` : ''); }
 function setUserStatusErr(msg) { setUserStatus(msg ? `❌ ${msg}` : ''); }
+function handleUnauthorized() {
+  // Mensaje general
+  setUserStatusErr('La sesión ha caducado, vuelve a iniciar sesión.');
+
+  // Limpiamos token y usuario
+  token = null;
+  usuarioActual = null;
+  try {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+  } catch {}
+
+  // Limpiar estadísticas de lectura también
+  const infoStats = document.getElementById('stats-lecturas-info');
+  const tbodyStats = document.getElementById('tabla-stats-lecturas');
+  if (infoStats) infoStats.textContent = 'Inicia sesión para ver tus estadísticas.';
+  if (tbodyStats) tbodyStats.innerHTML = '';
+
+  // Esto ya hace que se muestre el modal de login y se oculte la barra de usuario
+  actualizarUIAutenticacion();
+}
+
 function normalizarTitulo(t) {
   return (t || '')
     .toLowerCase()
@@ -181,7 +203,7 @@ function setModalMsg(msg) {
 async function refrescarHome() {
   if (!token || !usuarioActual?.id) return;
   try {
-    await Promise.all([cargarLecturasAbiertas(), cargarPrestamosActivos()]);
+    await Promise.all([cargarLecturasAbiertas(), cargarPrestamosActivos(), cargarEstadisticasLecturas()]);
   } catch (e) {
     console.warn('No se pudo refrescar la home', e);
   }
@@ -270,12 +292,14 @@ if (!sessionStorage.getItem('portadas_refrescadas')) {
   if (info) info.textContent = loggedIn ? 'Tus ejemplares:' : 'Inicia sesión para ver tu biblioteca.';
 
   if (loggedIn) {
-    if (usuarioActual.id) cargarEjemplares(usuarioActual.id);
+    if (usuarioActual.id) {
+      cargarEjemplares(usuarioActual.id);
+      cargarEstadisticasLecturas();  // 👈 aquí
+    }
     cargarLecturasAbiertas();
     cargarPrestamosActivos();
     return;
   }
-
   // Limpieza UI cuando no hay sesión
   const tbodyEj = document.querySelector('#tabla-ejemplares tbody');
   if (tbodyEj) tbodyEj.innerHTML = '';
@@ -642,6 +666,12 @@ async function cargarEjemplares(usuarioId) {
     const res = await fetch(`${API_BASE}/api/usuarios/${usuarioId}/ejemplares`, {
       headers: getHeaders(false),
     });
+    
+    if (res.status === 401) {
+      handleUnauthorized();
+      return;
+    }
+          
     const ejemplares = await res.json();
 
     if (!Array.isArray(ejemplares) || ejemplares.length === 0) {
@@ -881,6 +911,61 @@ async function terminarLecturaActual() {
   } catch (err) {
     console.error(err);
     setUserStatusErr('Error de red al terminar la lectura.');
+  }
+}
+async function cargarEstadisticasLecturas() {
+  const info = document.getElementById('stats-lecturas-info');
+  const tbody = document.getElementById('tabla-stats-lecturas');
+  if (!info || !tbody) return;
+
+  if (!usuarioActual || !usuarioActual.id || !token) {
+    info.textContent = 'Inicia sesión para ver tus estadísticas.';
+    tbody.innerHTML = '';
+    return;
+  }
+
+  info.textContent = 'Cargando estadísticas...';
+  tbody.innerHTML = '';
+
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/usuarios/${usuarioActual.id}/lecturas/estadisticas`,
+      { headers: getHeaders(false) }
+    );
+    
+    if (res.status === 401) {
+      handleUnauthorized();
+      return;
+    }
+    
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || 'Error al obtener estadísticas.');
+    }    
+
+    const stats = await res.json(); // [{ anio, empezadas, terminadas }, ...]
+
+    if (!Array.isArray(stats) || stats.length === 0) {
+      info.textContent = 'Sin datos de lectura todavía.';
+      tbody.innerHTML = '';
+      return;
+    }
+
+    info.textContent = `Histórico de lecturas (${stats.length} año${stats.length !== 1 ? 's' : ''})`;
+
+    for (const row of stats) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${row.anio}</td>
+        <td>${row.empezadas ?? 0}</td>
+        <td>${row.terminadas ?? 0}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+  } catch (err) {
+    console.error(err);
+    info.textContent = 'Error al cargar estadísticas.';
+    tbody.innerHTML = '';
   }
 }
 

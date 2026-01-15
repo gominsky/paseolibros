@@ -78,6 +78,7 @@ body.theme-rose{
   --input-border: rgba(214,165,181,.55);
   --ej-card-bg: rgba(232,170,196,.92);
   --ej-card-border: rgba(0,0,0,.12);
+  --table-row-border: rgba(255,255,255,.12);
 }
 
 body.theme-dark{
@@ -108,7 +109,8 @@ body.theme-dark{
   --input-border: rgba(127,90,240,.7);
   --ej-card-bg: rgba(18,18,30,.96);
   --ej-card-border: rgba(255,255,255,.16);
-}
+  --table-row-border: rgba(255,255,255,.06);  /* la mitad de intensidad */
+  }
 
 
 *{box-sizing:border-box}
@@ -360,9 +362,10 @@ ICON BUTTONS (solo círculo, SIN “cuadrado dentro”)
   
   th,td{
     padding:10px 12px;
-    border-bottom:1px solid rgba(255,255,255,.12);
+    border-bottom:1px solid var(--table-row-border);
     vertical-align:top;
   }
+  
   
   /* cabecera se apoya en el "panel" del tema */
   th{
@@ -2493,4 +2496,47 @@ Placeholder portada grande (modal)
     height:40px;
     font-size:1.6rem;
   }
+}
+#modal-ficha .modal-dialog{
+  overflow: visible;
+}
+
+#modal-ficha .modal-nav-arrow--prev{
+  left: -80px;   /* más afuera */
+}
+
+#modal-ficha .modal-nav-arrow--next{
+  right: -80px;  /* más afuera */
+}
+
+/* En móvil no exagerar tanto */
+@media (max-width: 640px){
+  #modal-ficha .modal-nav-arrow--prev{
+    left: -32px;
+  }
+  #modal-ficha .modal-nav-arrow--next{
+    right: -32px;
+  }
+}
+#card-stats-lecturas .table-wrapper{
+  overflow-x:auto;
+}
+
+#card-stats-lecturas table{
+  min-width:0;
+  width:100%;
+  table-layout:fixed;
+}
+
+#card-stats-lecturas th,
+#card-stats-lecturas td{
+  white-space:nowrap;
+}
+#card-stats-lecturas th,
+#card-stats-lecturas td{
+  white-space:normal;
+}
+/* Más espacio encima de la tarjeta de estadísticas */
+#card-stats-lecturas{
+  margin-top: calc(var(--gap) * 2); /* normalmente 32px */
 }
