@@ -3,6 +3,7 @@ import pool from '../bd.js';
 
 const router = Router();
 
+// 🔢 estadísticas
 router.get('/usuarios/:id/lecturas/estadisticas', async (req, res) => {
   try {
     const usuarioId = Number(req.params.id);
@@ -13,7 +14,6 @@ router.get('/usuarios/:id/lecturas/estadisticas', async (req, res) => {
         SUM(empezadas)  AS empezadas,
         SUM(terminadas) AS terminadas
       FROM (
-        -- Lecturas empezadas por año
         SELECT
           EXTRACT(YEAR FROM inicio)::int AS anio,
           COUNT(*) AS empezadas,
@@ -25,7 +25,6 @@ router.get('/usuarios/:id/lecturas/estadisticas', async (req, res) => {
 
         UNION ALL
 
-        -- Lecturas terminadas por año
         SELECT
           EXTRACT(YEAR FROM fin)::int AS anio,
           0       AS empezadas,
@@ -44,6 +43,69 @@ router.get('/usuarios/:id/lecturas/estadisticas', async (req, res) => {
   } catch (err) {
     console.error('Error al obtener estadísticas de lecturas:', err);
     res.status(500).json({ error: 'Error al obtener estadísticas de lecturas.' });
+  }
+});
+// 🔍 Detalle de lecturas por año (para el botón +)
+// GET /api/usuarios/:id/lecturas/estadisticas/:anio
+router.get('/usuarios/:id/lecturas/estadisticas/:anio', async (req, res) => {
+  try {
+    const usuarioId = Number(req.params.id);
+    const anio = Number(req.params.anio);
+
+    if (!Number.isFinite(usuarioId) || !Number.isFinite(anio)) {
+      return res.status(400).json({ error: 'Parámetros inválidos.' });
+    }
+
+    const sql = `
+      SELECT
+        le.id,
+        le.libro_id,
+        le.ejemplar_id,
+        l.titulo,
+        l.autores,
+        le.inicio,
+        le.fin,
+        (le.inicio IS NOT NULL AND EXTRACT(YEAR FROM le.inicio)::int = $2) AS empezada_en_anio,
+        (le.fin    IS NOT NULL AND EXTRACT(YEAR FROM le.fin)::int    = $2) AS terminada_en_anio
+      FROM lecturas le
+      JOIN libros l ON l.id = le.libro_id
+      WHERE le.usuario_id = $1
+        AND (
+          (le.inicio IS NOT NULL AND EXTRACT(YEAR FROM le.inicio)::int = $2)
+          OR
+          (le.fin    IS NOT NULL AND EXTRACT(YEAR FROM le.fin)::int    = $2)
+        )
+      ORDER BY COALESCE(le.fin, le.inicio) DESC, l.titulo;
+    `;
+
+    const { rows } = await pool.query(sql, [usuarioId, anio]);
+
+    const empezadas = rows
+      .filter(r => r.empezada_en_anio)
+      .map(r => ({
+        id: r.id,
+        libro_id: r.libro_id,
+        ejemplar_id: r.ejemplar_id,
+        titulo: r.titulo,
+        autores: r.autores,
+        inicio: r.inicio,
+      }));
+
+    const terminadas = rows
+      .filter(r => r.terminada_en_anio)
+      .map(r => ({
+        id: r.id,
+        libro_id: r.libro_id,
+        ejemplar_id: r.ejemplar_id,
+        titulo: r.titulo,
+        autores: r.autores,
+        fin: r.fin,
+      }));
+
+    res.json({ anio, empezadas, terminadas });
+  } catch (err) {
+    console.error('Error al obtener detalle de estadísticas de lecturas:', err);
+    res.status(500).json({ error: 'Error al obtener detalle de estadísticas de lecturas.' });
   }
 });
 

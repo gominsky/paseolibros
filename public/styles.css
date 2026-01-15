@@ -2540,3 +2540,93 @@ Placeholder portada grande (modal)
 #card-stats-lecturas{
   margin-top: calc(var(--gap) * 2); /* normalmente 32px */
 }
+/* Pills para las estadísticas de lectura */
+#card-stats-lecturas .stats-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:2px 8px;
+  border-radius:999px;
+  font-size:0.8rem;
+  font-weight:600;
+  background: var(--pill-bg);
+  min-width: 2.5em;
+}
+
+/* Empezadas (rosa del tema) */
+#card-stats-lecturas .stats-pill--start{
+  border:1px solid var(--border-pink);
+}
+
+/* Terminadas (un verde suave para diferenciar) */
+#card-stats-lecturas .stats-pill--end{
+  border:1px solid rgba(120, 200, 140, 0.85);
+}
+
+/* Centrar números en esas columnas */
+#card-stats-lecturas td:nth-child(2),
+#card-stats-lecturas td:nth-child(3){
+  text-align:center;
+}
+/* --- Estadísticas de lectura con detalle --- */
+#card-stats-lecturas .stats-year-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#card-stats-lecturas .stats-toggle {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1px solid var(--border-pink);
+  background: var(--panel-2);
+  color: #fff;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+#card-stats-lecturas .stats-toggle:hover {
+  filter: brightness(1.1);
+}
+
+#card-stats-lecturas .stats-detail-row td {
+  background: var(--panel-1);
+  border-top: none;
+}
+
+#card-stats-lecturas .stats-detail-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+#card-stats-lecturas .stats-detail-col {
+  min-width: 180px;
+}
+
+#card-stats-lecturas .stats-list {
+  list-style: disc;
+  padding-left: 18px;
+  margin: 4px 0 0;
+}
+
+#card-stats-lecturas .stats-list li {
+  font-size: 0.9rem;
+}
+
+#card-stats-lecturas .stats-list li .muted {
+  opacity: 0.7;
+  font-size: 0.8em;
+}
+
+/* ya tenías esto, lo mantengo para separar la tarjeta del bloque superior */
+#card-stats-lecturas {
+  margin-top: calc(var(--gap) * 2);
+}
