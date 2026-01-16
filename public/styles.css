@@ -2018,6 +2018,12 @@ input::placeholder {
   font-size: .9rem;
   max-width: 160px;
 }
+/* Override para el desplegable de ordenación (sin borde rosa) */
+.sort-select{
+  border: 1px solid var(--border) !important;
+  background: var(--panel-2);
+  color: #fff;
+}
 
 /* En desktop puedes dejarlo visible o hacerlo más sutil */
 @media (min-width: 821px){
@@ -2629,4 +2635,138 @@ Placeholder portada grande (modal)
 /* ya tenías esto, lo mantengo para separar la tarjeta del bloque superior */
 #card-stats-lecturas {
   margin-top: calc(var(--gap) * 2);
+}
+body.theme-dark .ej-grid-item{
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+}
+
+/* Solo los botones de selección de vista */
+.header-view-toggle .icon-btn{
+  border: 1px solid var(--border);
+}
+
+.header-view-toggle .icon-btn.is-active{
+  outline: 2px solid var(--border);
+  box-shadow: 0 0 0 3px rgba(0,0,0,.5);
+}
+body.theme-dark .ej-grid-item{
+  background: var(--ej-card-bg);
+  border: 1px solid var(--ej-card-border);
+}
+/* Overrides para quitar el marco rosa en vista de fichas */
+.ej-grid-item{
+  border: 1px solid var(--border) !important;
+}
+/* Móvil: asegurar que la tarjeta de estadísticas es visible y ocupa el ancho */
+@media (max-width: 820px){
+  #card-stats-lecturas{
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  #card-stats-lecturas .table-wrapper{
+    display: block !important;
+    overflow-x: auto;
+  }
+
+  #card-stats-lecturas table{
+    min-width: 0 !important;
+    width: 100% !important;
+    table-layout: fixed;
+  }
+}
+/* Móvil + tema dark: cards de ejemplares sin rosa */
+@media (max-width: 820px){
+  body.theme-dark .ej-card{
+    background: var(--ej-card-bg) !important;
+    border: 1px solid var(--ej-card-border) !important;
+    color: var(--ink) !important;
+    box-shadow: 0 16px 40px rgba(0,0,0,.55);
+  }
+
+  body.theme-dark .ej-pill{
+    background: var(--pill-bg) !important;
+    border-color: rgba(255,255,255,.16) !important;
+    color: var(--ink) !important;
+  }
+
+  body.theme-dark .ej-cover{
+    border-color: rgba(255,255,255,.16) !important;
+    background: #000;
+  }
+
+  /* El “sheet” del alta sin borde rosa en dark */
+  body.theme-dark.alta-visible .column-left .card{
+    border: 1px solid var(--card-border) !important;
+    box-shadow: 0 24px 70px rgba(0,0,0,.72) !important;
+  }
+}
+/* Móvil + tema dark: iconos (vista lista/portadas, tools, tema...) más neutros */
+@media (max-width: 820px){
+  body.theme-dark .icon-btn{
+    border: 1px solid var(--border) !important;
+    background: var(--panel-2);
+    color: var(--ink);
+  }
+
+  body.theme-dark .icon-btn.is-active{
+    outline: 2px solid var(--pink); /* lila del tema */
+    box-shadow: 0 0 0 3px rgba(127,90,240,.30);
+  }
+}
+/* Móvil + tema dark: FAB (+) con el color del tema dark, no rosa */
+@media (max-width: 820px){
+  body.theme-dark #btn-toggle-alta.fab-plus{
+    background: var(--btn-bg) !important;   /* morado del tema */
+    color: #fff !important;
+    border: 1px solid rgba(0,0,0,.6) !important;
+    box-shadow:
+      0 16px 40px rgba(0,0,0,.55),
+      0 0 0 4px rgba(127,90,240,.25) !important;
+  }
+
+  body.theme-dark.alta-visible #btn-toggle-alta.fab-plus{
+    background: #000 !important;
+    color: #fff !important;
+    border-color: var(--pink) !important;
+    box-shadow:
+      0 16px 40px rgba(0,0,0,.55),
+      0 0 0 4px rgba(127,90,240,.40) !important;
+  }
+}
+/* Móvil: título más pequeño y con ellipsis para que no choque con los iconos */
+@media (max-width: 820px){
+  .logo .logo-text h1{
+    font-size: 0.95rem !important;
+    line-height: 1.15;
+    max-width: 70vw;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+/* Móvil: que se vean bien las flechas del modal */
+@media (max-width: 640px){
+  /* Dejar que algo pueda sobresalir un poco */
+  #modal-ficha .modal-dialog{
+    overflow: visible;
+  }
+
+  /* Tamaño algo más pequeño en móvil */
+  #modal-ficha .modal-nav-arrow{
+    width: 36px;
+    height: 36px;
+    font-size: 1.4rem;
+  }
+
+  /* Recolocarlas para que no queden fuera de la pantalla */
+  #modal-ficha .modal-nav-arrow--prev{
+    left: 6px;          /* si las tenías en negativo, esto las trae de vuelta */
+  }
+
+  #modal-ficha .modal-nav-arrow--next{
+    right: 6px;
+  }
 }
