@@ -2770,22 +2770,34 @@ body.theme-dark .ej-grid-item{
     right: 6px;
   }
 }
-/* MÓVIL: la ficha de estadísticas SIEMPRE visible y con scroll propio */
+/* MÓVIL: que la ficha de estadísticas no se salga y se adapte al ancho */
 @media (max-width: 820px){
-  /* Anular los "display:none" globales solo para esta card */
-  #card-stats-lecturas .table-wrapper{
-    display: block !important;
+
+  /* La tarjeta ocupa todo el ancho disponible y no recorta nada raro */
+  #card-stats-lecturas{
+    display: block;
+    width: 100%;
     max-width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    background: transparent;
-    border: none;
-    box-shadow: none;
   }
 
-  #card-stats-lecturas table{
-    min-width: 480px;   /* o 720px si prefieres más ancho */
+  /* El contenedor de la tabla no limita el ancho y deja respirar el contenido */
+  #card-stats-lecturas .table-wrapper{
     width: 100%;
+    max-width: 100%;
+    overflow-x: visible;          /* ya no necesitamos scroll horizontal */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* La tabla ya no fuerza esos 720px de ancho en móvil */
+  #card-stats-lecturas table{
+    min-width: 0 !important;      /* machaca el table{min-width:720px} */
+    width: 100% !important;
     table-layout: auto;
+  }
+
+  /* Permitimos que los textos se partan en varias líneas */
+  #card-stats-lecturas th,
+  #card-stats-lecturas td{
+    white-space: normal !important;
   }
 }
