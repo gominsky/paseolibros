@@ -2770,47 +2770,41 @@ body.theme-dark .ej-grid-item{
     right: 6px;
   }
 }
-/* Estadísticas de lectura: tabla más compacta (desktop) */
-#card-stats-lecturas .table-wrapper{
-  overflow-x:auto;
-}
-
-#card-stats-lecturas table{
-  min-width:0;
-  width:100%;
-  table-layout:fixed;
-}
-
-#card-stats-lecturas th,
-#card-stats-lecturas td{
-  white-space:nowrap;
-}
-
-/* MÓVIL: que la ficha de estadísticas no se salga y se adapte al ancho */
+/* MÓVIL: que la ficha de estadísticas NO se salga y se vea todo */
 @media (max-width: 820px){
 
+  /* La tarjeta ocupa todo el ancho disponible */
   #card-stats-lecturas{
-    display:block;
-    width:100%;
-    max-width:100%;
+    display: block;
+    width: 100%;
+    max-width: 100%;
   }
 
+  /* El wrapper no recorta y deja que la tabla use el ancho del card */
   #card-stats-lecturas .table-wrapper{
-    width:100%;
-    max-width:100%;
-    overflow-x:visible;               /* que no haya scroll lateral raro */
+    width: 100%;
+    max-width: 100%;
+    overflow-x: visible !important;   /* nada de scroll lateral raro */
+    border-radius: 0;                 /* opcional: plano en móvil */
   }
 
+  /* Aquí está el truco gordo: anula el min-width global y el layout fijo */
   #card-stats-lecturas table{
-    min-width:0 !important;           /* machaca el table{min-width:780px} */
-    width:100% !important;
-    table-layout:auto !important;
+    min-width: 0 !important;          /* machaca el table{min-width:720px} */
+    width: 100% !important;
+    table-layout: auto !important;    /* deja que el navegador reparta */
   }
 
+  /* Y deja que los textos se partan en varias líneas */
   #card-stats-lecturas th,
   #card-stats-lecturas td{
-    white-space:normal !important;    /* permite varias líneas */
-    overflow-wrap:anywhere;
-    word-break:break-word;
+    white-space: normal !important;   /* adiós nowrap */
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* Un pelín más pequeñas las cabeceras para que entren mejor */
+  #card-stats-lecturas th{
+    font-size: .85rem;
   }
 }
