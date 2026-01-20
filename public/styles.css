@@ -2770,3 +2770,22 @@ body.theme-dark .ej-grid-item{
     right: 6px;
   }
 }
+/* MÓVIL: la ficha de estadísticas SIEMPRE visible y con scroll propio */
+@media (max-width: 820px){
+  /* Anular los "display:none" globales solo para esta card */
+  #card-stats-lecturas .table-wrapper{
+    display: block !important;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+
+  #card-stats-lecturas table{
+    min-width: 480px;   /* o 720px si prefieres más ancho */
+    width: 100%;
+    table-layout: auto;
+  }
+}
