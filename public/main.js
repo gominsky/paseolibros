@@ -916,7 +916,10 @@ async function terminarLecturaActual() {
 async function cargarEstadisticasLecturas() {
   const info = document.getElementById('stats-lecturas-info');
   const tbody = document.getElementById('tabla-stats-lecturas');
+  const mobileList = document.getElementById('stats-lecturas-mobile');
   if (!info || !tbody) return;
+if (mobileList) mobileList.innerHTML = '';
+
 
   if (!usuarioActual || !usuarioActual.id || !token) {
     info.textContent = 'Inicia sesión para ver tus estadísticas.';
@@ -955,51 +958,36 @@ async function cargarEstadisticasLecturas() {
     tbody.innerHTML = '';
 
     for (const row of stats) {
-      // Fila principal
-      const tr = document.createElement('tr');
-      tr.classList.add('stats-row');
-      tr.dataset.anio = row.anio;
+  const anio = row.anio;
+  const empezadas = Number(row.empezadas ?? 0);
+  const terminadas = Number(row.terminadas ?? 0);
 
-      tr.innerHTML = `
-        <td class="stats-year-cell">
-          <button
-            type="button"
-            class="stats-toggle"
-            data-anio="${row.anio}"
-            aria-label="Ver detalle de ${row.anio}"
-            aria-expanded="false"
-          >
-            +
-          </button>
-          <span class="stats-year">${row.anio}</span>
-        </td>
-        <td>${row.empezadas ?? 0}</td>
-        <td>${row.terminadas ?? 0}</td>
-      `;
+  // Vista web: tabla
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td>${anio}</td>
+    <td>${empezadas}</td>
+    <td>${terminadas}</td>
+  `;
+  tbody.appendChild(tr);
 
-      // Fila de detalle (oculta)
-      const detailTr = document.createElement('tr');
-      detailTr.classList.add('stats-detail-row');
-      detailTr.dataset.anio = row.anio;
-      detailTr.style.display = 'none';
-      detailTr.innerHTML = `
-        <td colspan="3">
-          <div class="stats-detail-content">
-            <div class="stats-detail-col">
-              <strong>Empezados</strong>
-              <ul class="stats-list stats-list-empezadas"></ul>
-            </div>
-            <div class="stats-detail-col">
-              <strong>Terminados</strong>
-              <ul class="stats-list stats-list-terminadas"></ul>
-            </div>
-          </div>
-        </td>
-      `;
+  // Vista móvil: lista
+  if (mobileList) {
+    const item = document.createElement('div');
+    item.className = 'stats-mobile-item';
+    item.innerHTML = `
+      <div class="stats-mobile-item-header">
+        <span class="stats-mobile-year">${anio}</span>
+      </div>
+      <div class="stats-mobile-counts">
+        <span>Emp: ${empezadas}</span>
+        <span>Fin: ${terminadas}</span>
+      </div>
+    `;
+    mobileList.appendChild(item);
+  }
+}
 
-      tbody.appendChild(tr);
-      tbody.appendChild(detailTr);
-    }
   } catch (err) {
     console.error(err);
     info.textContent = 'Error al cargar estadísticas.';

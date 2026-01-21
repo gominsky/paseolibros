@@ -4,6 +4,7 @@ import pool from '../bd.js';
 const router = Router();
 
 // 🔢 estadísticas
+// 🔢 estadisticas
 router.get('/usuarios/:id/lecturas/estadisticas', async (req, res) => {
   try {
     const usuarioId = Number(req.params.id);
@@ -14,10 +15,11 @@ router.get('/usuarios/:id/lecturas/estadisticas', async (req, res) => {
         SUM(empezadas)  AS empezadas,
         SUM(terminadas) AS terminadas
       FROM (
+        -- lecturas empezadas por año
         SELECT
           EXTRACT(YEAR FROM inicio)::int AS anio,
           COUNT(*) AS empezadas,
-          0       AS terminadas
+          0        AS terminadas
         FROM lecturas
         WHERE usuario_id = $1
           AND inicio IS NOT NULL
@@ -25,9 +27,10 @@ router.get('/usuarios/:id/lecturas/estadisticas', async (req, res) => {
 
         UNION ALL
 
+        -- lecturas terminadas por año
         SELECT
           EXTRACT(YEAR FROM fin)::int AS anio,
-          0       AS empezadas,
+          0        AS empezadas,
           COUNT(*) AS terminadas
         FROM lecturas
         WHERE usuario_id = $1
@@ -35,7 +38,7 @@ router.get('/usuarios/:id/lecturas/estadisticas', async (req, res) => {
         GROUP BY anio
       ) t
       GROUP BY anio
-      ORDER BY anio;
+      ORDER BY anio DESC;
     `;
 
     const { rows } = await pool.query(sql, [usuarioId]);
@@ -45,8 +48,7 @@ router.get('/usuarios/:id/lecturas/estadisticas', async (req, res) => {
     res.status(500).json({ error: 'Error al obtener estadísticas de lecturas.' });
   }
 });
-// 🔍 Detalle de lecturas por año (para el botón +)
-// GET /api/usuarios/:id/lecturas/estadisticas/:anio
+
 router.get('/usuarios/:id/lecturas/estadisticas/:anio', async (req, res) => {
   try {
     const usuarioId = Number(req.params.id);
