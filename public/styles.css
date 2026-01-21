@@ -2866,10 +2866,13 @@ body.theme-dark .ej-grid-item{
     font-size:0.85rem;
   }
 }
-.ej-card{
-  border: 1.5px solid rgba(232,170,196,.55);
-}
-.ej-grid-item{
-  border: 1.5px solid rgba(232,170,196,.55);
+/* Borde de fichas usando los colores del tema */
+.ej-card,
+.ej-grid-item {
+  border: 1px solid var(--ej-card-border);
 }
 
+/* Vista fichas: mismo borde que el resto de la UI */
+.ej-grid-item {
+  border: 1px solid var(--border) !important;
+}
