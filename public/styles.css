@@ -2866,4 +2866,10 @@ body.theme-dark .ej-grid-item{
     font-size:0.85rem;
   }
 }
+.ej-card{
+  border: 1.5px solid rgba(232,170,196,.55);
+}
+.ej-grid-item{
+  border: 1.5px solid rgba(232,170,196,.55);
+}
 

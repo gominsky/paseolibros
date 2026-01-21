@@ -918,17 +918,19 @@ async function cargarEstadisticasLecturas() {
   const tbody = document.getElementById('tabla-stats-lecturas');
   const mobileList = document.getElementById('stats-lecturas-mobile');
   if (!info || !tbody) return;
-if (mobileList) mobileList.innerHTML = '';
 
+  if (mobileList) mobileList.innerHTML = '';
 
   if (!usuarioActual || !usuarioActual.id || !token) {
     info.textContent = 'Inicia sesión para ver tus estadísticas.';
     tbody.innerHTML = '';
+    if (mobileList) mobileList.innerHTML = '';
     return;
   }
 
   info.textContent = 'Cargando estadísticas...';
   tbody.innerHTML = '';
+  if (mobileList) mobileList.innerHTML = '';
 
   try {
     const res = await fetch(
@@ -951,6 +953,7 @@ if (mobileList) mobileList.innerHTML = '';
     if (!Array.isArray(stats) || stats.length === 0) {
       info.textContent = 'Sin datos de lectura todavía.';
       tbody.innerHTML = '';
+      if (mobileList) mobileList.innerHTML = '';
       return;
     }
 
@@ -958,42 +961,78 @@ if (mobileList) mobileList.innerHTML = '';
     tbody.innerHTML = '';
 
     for (const row of stats) {
-  const anio = row.anio;
-  const empezadas = Number(row.empezadas ?? 0);
-  const terminadas = Number(row.terminadas ?? 0);
+      const anio = row.anio;
+      const empezadas = Number(row.empezadas ?? 0);
+      const terminadas = Number(row.terminadas ?? 0);
 
-  // Vista web: tabla
-  const tr = document.createElement('tr');
-  tr.innerHTML = `
-    <td>${anio}</td>
-    <td>${empezadas}</td>
-    <td>${terminadas}</td>
-  `;
-  tbody.appendChild(tr);
+      // === VISTA WEB: TABLA CON BOTÓN + ===
+      const tr = document.createElement('tr');
+      tr.classList.add('stats-row');
+      tr.dataset.anio = anio;
 
-  // Vista móvil: lista
-  if (mobileList) {
-    const item = document.createElement('div');
-    item.className = 'stats-mobile-item';
-    item.innerHTML = `
-      <div class="stats-mobile-item-header">
-        <span class="stats-mobile-year">${anio}</span>
-      </div>
-      <div class="stats-mobile-counts">
-        <span>Emp: ${empezadas}</span>
-        <span>Fin: ${terminadas}</span>
-      </div>
-    `;
-    mobileList.appendChild(item);
-  }
-}
+      tr.innerHTML = `
+        <td class="stats-year-cell">
+          <button
+            type="button"
+            class="stats-toggle"
+            data-anio="${anio}"
+            aria-label="Ver detalle de ${anio}"
+            aria-expanded="false"
+          >
+            +
+          </button>
+          <span class="stats-year">${anio}</span>
+        </td>
+        <td>${empezadas}</td>
+        <td>${terminadas}</td>
+      `;
 
+      const detailTr = document.createElement('tr');
+      detailTr.classList.add('stats-detail-row');
+      detailTr.dataset.anio = anio;
+      detailTr.style.display = 'none';
+      detailTr.innerHTML = `
+        <td colspan="3">
+          <div class="stats-detail-content">
+            <div class="stats-detail-col">
+              <strong>Empezados</strong>
+              <ul class="stats-list stats-list-empezadas"></ul>
+            </div>
+            <div class="stats-detail-col">
+              <strong>Terminados</strong>
+              <ul class="stats-list stats-list-terminadas"></ul>
+            </div>
+          </div>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+      tbody.appendChild(detailTr);
+
+      // === VISTA MÓVIL: LISTA SIMPLE POR AÑO ===
+      if (mobileList) {
+        const item = document.createElement('div');
+        item.className = 'stats-mobile-item';
+        item.innerHTML = `
+          <div class="stats-mobile-item-header">
+            <span class="stats-mobile-year">${anio}</span>
+          </div>
+          <div class="stats-mobile-counts">
+            <span>Emp: ${empezadas}</span>
+            <span>Fin: ${terminadas}</span>
+          </div>
+        `;
+        mobileList.appendChild(item);
+      }
+    }
   } catch (err) {
     console.error(err);
     info.textContent = 'Error al cargar estadísticas.';
     tbody.innerHTML = '';
+    if (mobileList) mobileList.innerHTML = '';
   }
 }
+
 async function manejarClickStatsToggle(e) {
   const btn = e.target.closest('.stats-toggle');
   if (!btn) return;
@@ -1010,14 +1049,13 @@ async function manejarClickStatsToggle(e) {
   const estaAbierto = detailRow.style.display !== 'none';
 
   if (estaAbierto) {
-    // Ocultar
     detailRow.style.display = 'none';
     btn.textContent = '+';
     btn.setAttribute('aria-expanded', 'false');
     return;
   }
 
-  // Si aún no hemos cargado los datos, pedimos al servidor
+  // Cargar detalle solo la primera vez
   if (!detailRow.dataset.loaded) {
     const ulEmpezadas = detailRow.querySelector('.stats-list-empezadas');
     const ulTerminadas = detailRow.querySelector('.stats-list-terminadas');
@@ -1036,8 +1074,11 @@ async function manejarClickStatsToggle(e) {
         return;
       }
 
-      const data = await res.json();
+      if (!res.ok) {
+        throw new Error('Error al cargar detalle de estadísticas.');
+      }
 
+      const data = await res.json();
       const { empezadas = [], terminadas = [] } = data || {};
 
       if (ulEmpezadas) {
@@ -1067,14 +1108,11 @@ async function manejarClickStatsToggle(e) {
       detailRow.dataset.loaded = '1';
     } catch (err) {
       console.error(err);
-      const ulEmpezadas = detailRow.querySelector('.stats-list-empezadas');
-      const ulTerminadas = detailRow.querySelector('.stats-list-terminadas');
       if (ulEmpezadas) ulEmpezadas.innerHTML = '<li class="muted">Error al cargar.</li>';
       if (ulTerminadas) ulTerminadas.innerHTML = '';
     }
   }
 
-  // Mostrar
   detailRow.style.display = '';
   btn.textContent = '−';
   btn.setAttribute('aria-expanded', 'true');
