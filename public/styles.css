@@ -2915,3 +2915,42 @@ body.theme-dark .app-footer{
     min-width: 100%;
   }
 }
+/* MÓVIL: abreviar cabeceras de estadísticas para que quepan las 3 columnas */
+@media (max-width: 820px){
+  /* Ocultamos el texto largo de las columnas 2 y 3 */
+  #card-stats-lecturas thead th:nth-child(2),
+  #card-stats-lecturas thead th:nth-child(3){
+    font-size: 0;              /* oculta "Empezadas" / "Terminadas" */
+    white-space: nowrap;
+  }
+
+  /* Cabecera abreviada: Emp. */
+  #card-stats-lecturas thead th:nth-child(2)::after{
+    content: "Emp.";
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  /* Cabecera abreviada: Fin. (Terminadas) */
+  #card-stats-lecturas thead th:nth-child(3)::after{
+    content: "Fin.";
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+}
+/* MÓVIL: detalle de estadísticas apilado y con texto más compacto */
+@media (max-width: 820px){
+  #card-stats-lecturas .stats-detail-content{
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  #card-stats-lecturas .stats-detail-col{
+    min-width: 100%;
+  }
+
+  #card-stats-lecturas .stats-list li{
+    font-size: 0.8rem;
+    line-height: 1.2;
+  }
+}
