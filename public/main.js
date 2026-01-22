@@ -916,32 +916,22 @@ async function terminarLecturaActual() {
 async function cargarEstadisticasLecturas() {
   const info = document.getElementById('stats-lecturas-info');
   const tbody = document.getElementById('tabla-stats-lecturas');
-  const mobileList = document.getElementById('stats-lecturas-mobile');
   if (!info || !tbody) return;
-
-  if (mobileList) mobileList.innerHTML = '';
 
   if (!usuarioActual || !usuarioActual.id || !token) {
     info.textContent = 'Inicia sesión para ver tus estadísticas.';
     tbody.innerHTML = '';
-    if (mobileList) mobileList.innerHTML = '';
     return;
   }
 
   info.textContent = 'Cargando estadísticas...';
   tbody.innerHTML = '';
-  if (mobileList) mobileList.innerHTML = '';
 
   try {
     const res = await fetch(
       `${API_BASE}/api/usuarios/${usuarioActual.id}/lecturas/estadisticas`,
       { headers: getHeaders(false) }
     );
-
-    if (res.status === 401) {
-      handleUnauthorized();
-      return;
-    }
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
@@ -953,7 +943,6 @@ async function cargarEstadisticasLecturas() {
     if (!Array.isArray(stats) || stats.length === 0) {
       info.textContent = 'Sin datos de lectura todavía.';
       tbody.innerHTML = '';
-      if (mobileList) mobileList.innerHTML = '';
       return;
     }
 
@@ -965,7 +954,7 @@ async function cargarEstadisticasLecturas() {
       const empezadas = Number(row.empezadas ?? 0);
       const terminadas = Number(row.terminadas ?? 0);
 
-      // === VISTA WEB: TABLA CON BOTÓN + ===
+      // Fila principal con botón +
       const tr = document.createElement('tr');
       tr.classList.add('stats-row');
       tr.dataset.anio = anio;
@@ -987,6 +976,7 @@ async function cargarEstadisticasLecturas() {
         <td>${terminadas}</td>
       `;
 
+      // Fila de detalle (oculta al inicio)
       const detailTr = document.createElement('tr');
       detailTr.classList.add('stats-detail-row');
       detailTr.dataset.anio = anio;
@@ -1008,28 +998,11 @@ async function cargarEstadisticasLecturas() {
 
       tbody.appendChild(tr);
       tbody.appendChild(detailTr);
-
-      // === VISTA MÓVIL: LISTA SIMPLE POR AÑO ===
-      if (mobileList) {
-        const item = document.createElement('div');
-        item.className = 'stats-mobile-item';
-        item.innerHTML = `
-          <div class="stats-mobile-item-header">
-            <span class="stats-mobile-year">${anio}</span>
-          </div>
-          <div class="stats-mobile-counts">
-            <span>Emp: ${empezadas}</span>
-            <span>Fin: ${terminadas}</span>
-          </div>
-        `;
-        mobileList.appendChild(item);
-      }
     }
   } catch (err) {
     console.error(err);
     info.textContent = 'Error al cargar estadísticas.';
     tbody.innerHTML = '';
-    if (mobileList) mobileList.innerHTML = '';
   }
 }
 
@@ -1055,67 +1028,62 @@ async function manejarClickStatsToggle(e) {
     return;
   }
 
-  // Cargar detalle solo la primera vez
-  if (!detailRow.dataset.loaded) {
-    const ulEmpezadas = detailRow.querySelector('.stats-list-empezadas');
-    const ulTerminadas = detailRow.querySelector('.stats-list-terminadas');
-
-    if (ulEmpezadas) ulEmpezadas.innerHTML = '<li class="muted">Cargando…</li>';
-    if (ulTerminadas) ulTerminadas.innerHTML = '';
-
-    try {
-      const res = await fetch(
-        `${API_BASE}/api/usuarios/${usuarioActual.id}/lecturas/estadisticas/${anio}`,
-        { headers: getHeaders(false) }
-      );
-
-      if (res.status === 401) {
-        handleUnauthorized();
-        return;
-      }
-
-      if (!res.ok) {
-        throw new Error('Error al cargar detalle de estadísticas.');
-      }
-
-      const data = await res.json();
-      const { empezadas = [], terminadas = [] } = data || {};
-
-      if (ulEmpezadas) {
-        if (!empezadas.length) {
-          ulEmpezadas.innerHTML = '<li class="muted">Sin lecturas empezadas este año.</li>';
-        } else {
-          ulEmpezadas.innerHTML = empezadas.map(l => {
-            const fecha = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : '—';
-            const autor = l.autores ? ` · ${escapeHtml(l.autores)}` : '';
-            return `<li>${escapeHtml(l.titulo || 'Sin título')}${autor} <span class="muted">(${fecha})</span></li>`;
-          }).join('');
-        }
-      }
-
-      if (ulTerminadas) {
-        if (!terminadas.length) {
-          ulTerminadas.innerHTML = '<li class="muted">Sin lecturas terminadas este año.</li>';
-        } else {
-          ulTerminadas.innerHTML = terminadas.map(l => {
-            const fecha = l.fin ? new Date(l.fin).toLocaleDateString('es-ES') : '—';
-            const autor = l.autores ? ` · ${escapeHtml(l.autores)}` : '';
-            return `<li>${escapeHtml(l.titulo || 'Sin título')}${autor} <span class="muted">(${fecha})</span></li>`;
-          }).join('');
-        }
-      }
-
-      detailRow.dataset.loaded = '1';
-    } catch (err) {
-      console.error(err);
-      if (ulEmpezadas) ulEmpezadas.innerHTML = '<li class="muted">Error al cargar.</li>';
-      if (ulTerminadas) ulTerminadas.innerHTML = '';
-    }
-  }
-
+  // Primero despliego, luego relleno si hace falta
   detailRow.style.display = '';
   btn.textContent = '−';
   btn.setAttribute('aria-expanded', 'true');
+
+  if (detailRow.dataset.loaded) return;
+
+  const ulEmpezadas = detailRow.querySelector('.stats-list-empezadas');
+  const ulTerminadas = detailRow.querySelector('.stats-list-terminadas');
+
+  if (ulEmpezadas) ulEmpezadas.innerHTML = '<li class="muted">Cargando…</li>';
+  if (ulTerminadas) ulTerminadas.innerHTML = '';
+
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/usuarios/${usuarioActual.id}/lecturas/estadisticas/${anio}`,
+      { headers: getHeaders(false) }
+    );
+
+    if (!res.ok) {
+      throw new Error('Error al obtener detalle.');
+    }
+
+    const data = await res.json();
+    const { empezadas = [], terminadas = [] } = data || {};
+
+    if (ulEmpezadas) {
+      if (!empezadas.length) {
+        ulEmpezadas.innerHTML = '<li class="muted">Sin lecturas empezadas este año.</li>';
+      } else {
+        ulEmpezadas.innerHTML = empezadas.map(l => {
+          const fecha = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : '—';
+          const autor = l.autores ? ` · ${escapeHtml(l.autores)}` : '';
+          return `<li>${escapeHtml(l.titulo || 'Sin título')}${autor} <span class="muted">(${fecha})</span></li>`;
+        }).join('');
+      }
+    }
+
+    if (ulTerminadas) {
+      if (!terminadas.length) {
+        ulTerminadas.innerHTML = '<li class="muted">Sin lecturas terminadas este año.</li>';
+      } else {
+        ulTerminadas.innerHTML = terminadas.map(l => {
+          const fecha = l.fin ? new Date(l.fin).toLocaleDateString('es-ES') : '—';
+          const autor = l.autores ? ` · ${escapeHtml(l.autores)}` : '';
+          return `<li>${escapeHtml(l.titulo || 'Sin título')}${autor} <span class="muted">(${fecha})</span></li>`;
+        }).join('');
+      }
+    }
+
+    detailRow.dataset.loaded = '1';
+  } catch (err) {
+    console.error(err);
+    if (ulEmpezadas) ulEmpezadas.innerHTML = '<li class="muted">Error al cargar.</li>';
+    if (ulTerminadas) ulTerminadas.innerHTML = '';
+  }
 }
 
 // ---------- Resumen global lecturas / préstamos ----------
@@ -2821,6 +2789,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const libroId = Number(card.dataset.libroId);
   const ejemplarId = Number(card.dataset.ejemplarId);
+      // Click en el botón + de estadísticas
+  const tablaStats = document.getElementById('tabla-stats-lecturas');
+  if (tablaStats) {
+    tablaStats.addEventListener('click', manejarClickStatsToggle);
+  }
 
   if (e.target.closest('.m-read')) {
     empezarLectura(libroId, ejemplarId);

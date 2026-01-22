@@ -2876,3 +2876,29 @@ body.theme-dark .ej-grid-item{
 .ej-grid-item {
   border: 1px solid var(--border) !important;
 }
+/* Tema dark + móvil: el card principal de Ejemplares sin marco rosa */
+@media (max-width: 820px){
+  body.theme-dark .column-left .card{
+    border-radius: 20px !important;
+    border: 1.5px solid var(--card-border) !important;
+    box-shadow:
+      0 24px 70px rgba(0,0,0,.72),
+      0 0 0 3px rgba(127,90,240,.22) !important;
+  }
+
+  /* Y las cards individuales de ejemplares sin fondo rosa */
+  body.theme-dark .ej-card{
+    background: var(--card-bg) !important;
+    border: 1px solid var(--card-border) !important;
+    color: var(--ink) !important;
+  }
+}
+.app-footer{
+  margin-top:var(--gap);
+  text-align:center;
+  color:rgba(0,0,0,.55);  /* 👈 siempre negro semi */
+}
+/* Tema dark: footer legible */
+body.theme-dark .app-footer{
+  color: var(--muted);
+}
