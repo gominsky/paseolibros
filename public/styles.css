@@ -2068,8 +2068,9 @@ FIX (móvil): quitar "marco" interno (table-wrapper) alrededor de las fichas
 - En móvil usamos #ejemplares-list / #ejemplares-grid, así que el wrapper de tabla debe
 quedar oculto para que no aparezca un contenedor negro con borde.
 ========================================================= */
+/* FIX (móvil): quitar el "marco" interno SOLO en la card de Ejemplares */
 @media (max-width: 820px){
-  .table-wrapper{
+  .card-ejemplares .table-wrapper{
     display: none !important;
     background: transparent !important;
     border: none !important;
@@ -2102,14 +2103,13 @@ quedar oculto para que no aparezca un contenedor negro con borde.
 }
 @media (max-width: 820px){
 
-  /* Contenedor de las fichas (área scroll) */
+  /* Contenedor de las fichas (sin marco rosa en móvil) */
   #ejemplares-grid{
-    border: 3px solid var(--pink-2);
+    border: 0;
     border-radius: 16px;
-    padding: 12px;
-    background: transparent; /* hereda el fondo exterior */
+    padding: 0;
+    background: transparent;
   }
-
 }
 @media (max-width: 820px){
   /* ✅ Asegurar que Lecturas/Préstamos se vean */
@@ -2823,49 +2823,17 @@ body.theme-dark .ej-grid-item{
     font-size: .9rem !important;
   }
 }
-/* Escritorio: lista móvil oculta */
-#stats-lecturas-mobile{
-  display:none;
-}
-
-/* MÓVIL: ocultar la tabla de estadísticas y mostrar lista */
+/* MÓVIL: usamos la misma tabla de estadísticas que en escritorio */
 @media (max-width: 820px){
   #card-stats-lecturas .table-wrapper{
-    display:none !important;
+    display:block !important;
   }
 
   #stats-lecturas-mobile{
-    display:block !important;
-    margin-top:8px;
-  }
-
-  .stats-mobile-item{
-    padding:8px 10px;
-    border-radius:12px;
-    background: var(--card-bg);
-    border:1px solid var(--card-border);
-    margin-bottom:6px;
-    font-size:0.9rem;
-  }
-
-  .stats-mobile-item-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:4px;
-    font-weight:600;
-  }
-
-  .stats-mobile-year{
-    font-size:0.95rem;
-  }
-
-  .stats-mobile-counts{
-    display:flex;
-    gap:10px;
-    font-size:0.85rem;
+    display:none !important;
   }
 }
+
 /* Borde de fichas usando los colores del tema */
 .ej-card,
 .ej-grid-item {
@@ -2901,4 +2869,26 @@ body.theme-dark .ej-grid-item{
 /* Tema dark: footer legible */
 body.theme-dark .app-footer{
   color: var(--muted);
+}
+/* === FIX vista móvil tema dark === */
+@media (max-width: 820px) {
+  body.theme-dark .card,
+  body.theme-dark .card-header,
+  body.theme-dark .ejemplares-list,
+  body.theme-dark .table-wrapper,
+  body.theme-dark input,
+  body.theme-dark select {
+    border-color: var(--card-border) !important;
+  }
+
+  body.theme-dark .sort-select {
+    border-color: var(--input-border) !important;
+    background: var(--panel-2) !important;
+    color: var(--ink) !important;
+  }
+
+  body.theme-dark .muted {
+    color: var(--ink) !important;
+    opacity: .7 !important;
+  }
 }
