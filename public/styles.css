@@ -2618,6 +2618,17 @@ Placeholder portada grande (modal)
 #card-stats-lecturas .stats-detail-col {
   min-width: 180px;
 }
+/* Móvil: que el detalle de estadísticas se apile y no se salga */
+@media (max-width: 820px){
+  #card-stats-lecturas .stats-detail-content{
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  #card-stats-lecturas .stats-detail-col{
+    min-width: 100%;
+  }
+}
 
 #card-stats-lecturas .stats-list {
   list-style: disc;
