@@ -2954,3 +2954,43 @@ body.theme-dark .app-footer{
     line-height: 1.2;
   }
 }
+/* ⛑️ Ficha "Estadísticas de lectura" – fix solo para móvil */
+@media (max-width: 820px){
+  /* La card no puede ser más ancha que la pantalla */
+  #card-stats-lecturas{
+    display: block;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* El wrapper manda: recorta y mete scroll si hace falta */
+  #card-stats-lecturas .table-wrapper{
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;           /* si la tabla se pasa, scroll horizontal */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Aquí anulamos el min-width global de las tablas solo en esta ficha */
+  #card-stats-lecturas table{
+    min-width: 0;               /* clave: deja que se adapte al ancho */
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  /* Opcional: texto de celdas compactado para que quepa mejor */
+  #card-stats-lecturas th,
+  #card-stats-lecturas td{
+    white-space: nowrap;
+  }
+
+  /* Y el detalle de cada año apilado, para que no se desborde */
+  #card-stats-lecturas .stats-detail-content{
+    flex-direction: column;
+  }
+
+  #card-stats-lecturas .stats-detail-col{
+    min-width: 100%;
+  }
+}
