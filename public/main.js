@@ -170,6 +170,8 @@ function handleUnauthorized() {
   const tbodyStats = document.getElementById('tabla-stats-lecturas');
   if (infoStats) infoStats.textContent = 'Inicia sesión para ver tus estadísticas.';
   if (tbodyStats) tbodyStats.innerHTML = '';
+  const mobileStats = document.getElementById('stats-lecturas-mobile');
+  if (mobileStats) mobileStats.innerHTML = '';
 
   // Esto ya hace que se muestre el modal de login y se oculte la barra de usuario
   actualizarUIAutenticacion();
@@ -916,16 +918,19 @@ async function terminarLecturaActual() {
 async function cargarEstadisticasLecturas() {
   const info = document.getElementById('stats-lecturas-info');
   const tbody = document.getElementById('tabla-stats-lecturas');
+  const mobileList = document.getElementById('stats-lecturas-mobile');
   if (!info || !tbody) return;
 
   if (!usuarioActual || !usuarioActual.id || !token) {
     info.textContent = 'Inicia sesión para ver tus estadísticas.';
     tbody.innerHTML = '';
+    if (mobileList) mobileList.innerHTML = '';
     return;
   }
 
   info.textContent = 'Cargando estadísticas...';
   tbody.innerHTML = '';
+  if (mobileList) mobileList.innerHTML = '';
 
   try {
     const res = await fetch(
@@ -938,23 +943,26 @@ async function cargarEstadisticasLecturas() {
       throw new Error(data.error || 'Error al obtener estadísticas.');
     }
 
-    const stats = await res.json(); // [{ anio, empezadas, terminadas }, ...]
+    // [{ anio, empezadas, terminadas }, ...]
+    const stats = await res.json();
 
     if (!Array.isArray(stats) || stats.length === 0) {
       info.textContent = 'Sin datos de lectura todavía.';
       tbody.innerHTML = '';
+      if (mobileList) mobileList.innerHTML = '';
       return;
     }
 
     info.textContent = `Histórico de lecturas (${stats.length} año${stats.length !== 1 ? 's' : ''})`;
     tbody.innerHTML = '';
+    if (mobileList) mobileList.innerHTML = '';
 
     for (const row of stats) {
       const anio = row.anio;
       const empezadas = Number(row.empezadas ?? 0);
       const terminadas = Number(row.terminadas ?? 0);
 
-      // Fila principal con botón +
+      // ===== VISTA ESCRITORIO (tabla) =====
       const tr = document.createElement('tr');
       tr.classList.add('stats-row');
       tr.dataset.anio = anio;
@@ -966,17 +974,14 @@ async function cargarEstadisticasLecturas() {
             class="stats-toggle"
             data-anio="${anio}"
             aria-label="Ver detalle de ${anio}"
-            aria-expanded="false"
           >
-            +
+            ${anio}
           </button>
-          <span class="stats-year">${anio}</span>
         </td>
         <td>${empezadas}</td>
         <td>${terminadas}</td>
       `;
 
-      // Fila de detalle (oculta al inicio)
       const detailTr = document.createElement('tr');
       detailTr.classList.add('stats-detail-row');
       detailTr.dataset.anio = anio;
@@ -998,11 +1003,28 @@ async function cargarEstadisticasLecturas() {
 
       tbody.appendChild(tr);
       tbody.appendChild(detailTr);
+
+      // ===== VISTA MÓVIL (lista) =====
+      if (mobileList) {
+        const item = document.createElement('article');
+        item.className = 'stats-mobile-item';
+        item.innerHTML = `
+          <header class="stats-mobile-header">
+            <span class="stats-mobile-year">${anio}</span>
+            <div class="stats-mobile-counters">
+              <span class="stats-pill">Emp: ${empezadas}</span>
+              <span class="stats-pill">Fin: ${terminadas}</span>
+            </div>
+          </header>
+        `;
+        mobileList.appendChild(item);
+      }
     }
   } catch (err) {
     console.error(err);
     info.textContent = 'Error al cargar estadísticas.';
     tbody.innerHTML = '';
+    if (mobileList) mobileList.innerHTML = '';
   }
 }
 
