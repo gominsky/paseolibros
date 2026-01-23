@@ -3014,3 +3014,16 @@ body.theme-dark .app-footer{
     white-space: nowrap;
   }
 }
+.stats-mobile-toggle{
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 2px 8px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.stats-mobile-detail{
+  margin-top: 6px;
+}

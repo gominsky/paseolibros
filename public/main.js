@@ -943,8 +943,7 @@ async function cargarEstadisticasLecturas() {
       throw new Error(data.error || 'Error al obtener estadísticas.');
     }
 
-    // [{ anio, empezadas, terminadas }, ...]
-    const stats = await res.json();
+    const stats = await res.json(); // [{ anio, empezadas, terminadas }, ...]
 
     if (!Array.isArray(stats) || stats.length === 0) {
       info.textContent = 'Sin datos de lectura todavía.';
@@ -962,7 +961,7 @@ async function cargarEstadisticasLecturas() {
       const empezadas = Number(row.empezadas ?? 0);
       const terminadas = Number(row.terminadas ?? 0);
 
-      // ===== VISTA ESCRITORIO (tabla) =====
+      // ====== ESCRITORIO (tabla con botón +) ======
       const tr = document.createElement('tr');
       tr.classList.add('stats-row');
       tr.dataset.anio = anio;
@@ -973,10 +972,11 @@ async function cargarEstadisticasLecturas() {
             type="button"
             class="stats-toggle"
             data-anio="${anio}"
-            aria-label="Ver detalle de ${anio}"
+            aria-expanded="false"
           >
-            ${anio}
+            +
           </button>
+          <span class="stats-year-label">${anio}</span>
         </td>
         <td>${empezadas}</td>
         <td>${terminadas}</td>
@@ -1004,19 +1004,42 @@ async function cargarEstadisticasLecturas() {
       tbody.appendChild(tr);
       tbody.appendChild(detailTr);
 
-      // ===== VISTA MÓVIL (lista) =====
+      // ====== MÓVIL (tarjetita con botón + y detalle) ======
       if (mobileList) {
         const item = document.createElement('article');
         item.className = 'stats-mobile-item';
+        item.dataset.anio = anio;
+
         item.innerHTML = `
           <header class="stats-mobile-header">
             <span class="stats-mobile-year">${anio}</span>
             <div class="stats-mobile-counters">
               <span class="stats-pill">Emp: ${empezadas}</span>
               <span class="stats-pill">Fin: ${terminadas}</span>
+              <button
+                type="button"
+                class="stats-mobile-toggle"
+                data-anio="${anio}"
+                aria-expanded="false"
+              >
+                +
+              </button>
             </div>
           </header>
+          <div class="stats-mobile-detail" data-anio="${anio}" hidden>
+            <div class="stats-detail-content">
+              <div class="stats-detail-col">
+                <strong>Empezados</strong>
+                <ul class="stats-list stats-mobile-list-empezadas"></ul>
+              </div>
+              <div class="stats-detail-col">
+                <strong>Terminados</strong>
+                <ul class="stats-list stats-mobile-list-terminadas"></ul>
+              </div>
+            </div>
+          </div>
         `;
+
         mobileList.appendChild(item);
       }
     }
@@ -1027,6 +1050,84 @@ async function cargarEstadisticasLecturas() {
     if (mobileList) mobileList.innerHTML = '';
   }
 }
+async function manejarClickStatsMobileToggle(e) {
+  const btn = e.target.closest('.stats-mobile-toggle');
+  if (!btn) return;
+
+  const anio = btn.dataset.anio;
+  if (!anio || !usuarioActual || !usuarioActual.id) return;
+
+  const detail = document.querySelector(`.stats-mobile-detail[data-anio="${anio}"]`);
+  if (!detail) return;
+
+  const estaAbierto = !detail.hasAttribute('hidden');
+
+  if (estaAbierto) {
+    detail.setAttribute('hidden', '');
+    btn.textContent = '+';
+    btn.setAttribute('aria-expanded', 'false');
+    return;
+  }
+
+  // Abro
+  detail.removeAttribute('hidden');
+  btn.textContent = '−';
+  btn.setAttribute('aria-expanded', 'true');
+
+  // ¿Ya estaba cargado?
+  if (detail.dataset.loaded) return;
+
+  const ulEmpezadas = detail.querySelector('.stats-mobile-list-empezadas');
+  const ulTerminadas = detail.querySelector('.stats-mobile-list-terminadas');
+
+  if (ulEmpezadas) ulEmpezadas.innerHTML = '<li class="muted">Cargando…</li>';
+  if (ulTerminadas) ulTerminadas.innerHTML = '';
+
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/usuarios/${usuarioActual.id}/lecturas/estadisticas/${anio}`,
+      { headers: getHeaders(false) }
+    );
+
+    if (!res.ok) {
+      throw new Error('Error al obtener detalle.');
+    }
+
+    const data = await res.json();
+    const { empezadas = [], terminadas = [] } = data || {};
+
+    if (ulEmpezadas) {
+      if (!empezadas.length) {
+        ulEmpezadas.innerHTML = '<li class="muted">Sin lecturas empezadas este año.</li>';
+      } else {
+        ulEmpezadas.innerHTML = empezadas.map(l => {
+          const fecha = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : '—';
+          const autor = l.autores ? ` · ${escapeHtml(l.autores)}` : '';
+          return `<li>${escapeHtml(l.titulo || 'Sin título')}${autor} <span class="muted">(${fecha})</span></li>`;
+        }).join('');
+      }
+    }
+
+    if (ulTerminadas) {
+      if (!terminadas.length) {
+        ulTerminadas.innerHTML = '<li class="muted">Sin lecturas terminadas este año.</li>';
+      } else {
+        ulTerminadas.innerHTML = terminadas.map(l => {
+          const fecha = l.fin ? new Date(l.fin).toLocaleDateString('es-ES') : '—';
+          const autor = l.autores ? ` · ${escapeHtml(l.autores)}` : '';
+          return `<li>${escapeHtml(l.titulo || 'Sin título')}${autor} <span class="muted">(${fecha})</span></li>`;
+        }).join('');
+      }
+    }
+
+    detail.dataset.loaded = '1';
+  } catch (err) {
+    console.error(err);
+    if (ulEmpezadas) ulEmpezadas.innerHTML = '<li class="muted">Error al cargar.</li>';
+    if (ulTerminadas) ulTerminadas.innerHTML = '';
+  }
+}
+
 
 async function manejarClickStatsToggle(e) {
   const btn = e.target.closest('.stats-toggle');
@@ -2816,6 +2917,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (tablaStats) {
     tablaStats.addEventListener('click', manejarClickStatsToggle);
   }
+  const mobileStats = document.getElementById('stats-lecturas-mobile');
+if (mobileStats) {
+  mobileStats.addEventListener('click', manejarClickStatsMobileToggle);
+}
 
   if (e.target.closest('.m-read')) {
     empezarLectura(libroId, ejemplarId);
