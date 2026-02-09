@@ -21,19 +21,12 @@
 <body>
   <div class="app">
       <header class="app-header">
-  <div class="header-left"></div>
-
-  <div class="logo header-center">
-    <div class="logo-icon">
-      <span class="logo-mark">Pdl</span>
-    </div>
-    <div class="logo-text">
-      <h1>Paseo de los libros</h1>
-      <p>Biblioteca, lecturas, préstamos...</p>
-    </div>
+  <div class="logo header-center" aria-label="Paseo de los libros">
+    <img class="logo-img" src="logo.png" alt="Paseo de los libros" />
   </div>
 
-    <div class="view-toggle header-view-toggle" role="group" aria-label="Vista ejemplares">
+  <div class="header-right">
+<div class="view-toggle header-view-toggle" role="group" aria-label="Vista ejemplares">
       <button id="ej-vista-lista" type="button" class="icon-btn" aria-label="Vista lista" title="Vista lista">
         <span class="icon-circle">≣</span>
       </button>
@@ -41,8 +34,7 @@
         <span class="icon-circle">▦</span>
       </button>
     </div>
-    <!-- Dentro de .header-right o similar -->
-    <button
+<button
     id="btn-toggle-theme"
     class="icon-btn"
     type="button"
@@ -51,9 +43,7 @@
     >
     <span class="icon-circle">🌗</span>
     </button>
-
-    <!-- Herramientas (dropdown) -->
-    <div class="tools-menu">
+<div class="tools-menu">
       <button id="btn-tools" class="icon-btn" type="button" aria-label="Herramientas" title="Herramientas">
         <span class="icon-circle">⚙</span>
       </button>
