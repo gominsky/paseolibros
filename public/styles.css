@@ -3084,3 +3084,74 @@ body.theme-dark .app-footer{
 #reader-fav[aria-pressed="true"]{
   border:1px solid rgba(0,0,0,.25);
 }
+.badges{
+  display:inline-flex;
+  gap:8px;
+  margin-left:10px;
+  vertical-align:middle;
+}
+
+.badge{
+  font-size: 0.95em;
+  opacity: .85;
+  user-select:none;
+}
+
+.badge-fav{
+  font-weight: 800;
+  letter-spacing: .02em;
+}
+
+.badge-fav.is-on{
+  opacity: 1;
+}
+
+.title-main{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.title-text{
+  flex:1;
+  min-width:0;
+}
+/* Badges dentro del título: en línea y alineados */
+.title-main[data-badge-libro],
+.ej-title[data-badge-libro]{
+  display: inline-flex;
+  align-items: baseline;
+  gap: .45rem;
+}
+
+/* Los badges no deben “empujar” a otra línea */
+.badge{
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+.cell-title{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+.title-icons{
+  display:flex;
+  gap:8px;
+  font-size:0.95em;
+  opacity:.85;
+}
+
+.title-text{
+  font-weight:600;
+  line-height:1.2;
+}
+
+.title-meta{
+  font-size:.85em;
+  opacity:.7;
+}

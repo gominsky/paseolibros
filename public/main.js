@@ -1,11 +1,9 @@
-const PROD_API = 'https://paseolibros.onrender.com'; // <- pon aquí tu URL real
-const isDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-// Si estoy en localhost (PC desarrollando) → uso backend local
-// En cualquier otro sitio (incluido file:// en móvil) → uso backend de Render
-const API_BASE = isDev ? 'http://localhost:3011' : PROD_API;
-
-//const isDev = ['localhost', '127.0.0.1'].includes(window.location.hostname) || window.location.protocol === 'file:';
-//const API_BASE = isDev ? 'http://localhost:3011' : '';
+const API_BASE = window.API_BASE;
+// sesión (alias a global)
+function syncSession() {
+  window.token = window.token || null;
+  window.usuarioActual = window.usuarioActual || null;
+}
 
 let codeReader = null;
 let currentStream = null;
@@ -14,13 +12,8 @@ let currentStream = null;
 let lastScanValue = null;
 let lastScanCount = 0;
 let scannerRunning = false;
-let token = null;
-let usuarioActual = null; // { id, nombre_usuario, ... }
-// Vista ejemplares: 'lista' | 'grid'
 let vistaEjemplares = 'lista';
 
-const TOKEN_KEY = 'paseolibros_token';
-const USER_KEY = 'paseolibros_usuario';
 // Preferencias UI (persisten en el navegador)
 const VISTA_EJ_KEY = 'paseolibros_vista_ejemplares';   // 'lista' | 'grid'
 const SORT_EJ_KEY  = 'paseolibros_sort_ejemplares';    // { key, dir }
@@ -153,30 +146,6 @@ function escapeHtml(s){
 
 function setUserStatusOk(msg) { setUserStatus(msg ? `✅ ${msg}` : ''); }
 function setUserStatusErr(msg) { setUserStatus(msg ? `❌ ${msg}` : ''); }
-function handleUnauthorized() {
-  // Mensaje general
-  setUserStatusErr('La sesión ha caducado, vuelve a iniciar sesión.');
-
-  // Limpiamos token y usuario
-  token = null;
-  usuarioActual = null;
-  try {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-  } catch {}
-
-  // Limpiar estadísticas de lectura también
-  const infoStats = document.getElementById('stats-lecturas-info');
-  const tbodyStats = document.getElementById('tabla-stats-lecturas');
-  if (infoStats) infoStats.textContent = 'Inicia sesión para ver tus estadísticas.';
-  if (tbodyStats) tbodyStats.innerHTML = '';
-  const mobileStats = document.getElementById('stats-lecturas-mobile');
-  if (mobileStats) mobileStats.innerHTML = '';
-
-  // Esto ya hace que se muestre el modal de login y se oculte la barra de usuario
-  actualizarUIAutenticacion();
-}
-
 function normalizarTitulo(t) {
   return (t || '')
     .toLowerCase()
@@ -217,22 +186,6 @@ function urlPortadaAbsoluta(url) {
   return `${API_BASE}${url}`; // /uploads/xxx.jpg
 }
 
-function getHeaders(json = true) {
-  const headers = {};
-  if (json) headers['Content-Type'] = 'application/json';
-
-  if (token) {
-    // Variante 1 (Bearer)
-    headers['Authorization'] = `Bearer ${token}`;
-
-    // Variante 2 (sin Bearer) + header alternativo común
-    headers['X-Access-Token'] = token;
-    headers['Authorization-Token'] = token; // opcional defensivo
-  }
-
-  return headers;
-}
-
 function toSortable(v) {
   if (v === null || v === undefined) return '';
   return normalizarTitulo(String(v));
@@ -264,123 +217,6 @@ function compare(a, b, key, dir) {
   if (sa > sb) return dir === 'asc' ? 1 : -1;
   return 0;
 }
-
-// ---------- UI auth ----------
-function actualizarUIAutenticacion() {
-  const loginModal = document.getElementById('login-modal');
-  const userBar = document.getElementById('user-bar');
-  const nombreSpan = document.getElementById('nombre-usuario-actual');
-
-  const loggedIn = Boolean(token && usuarioActual);
-  // Refresco suave de portadas (1 vez por sesión)
-if (!sessionStorage.getItem('portadas_refrescadas')) {
-  sessionStorage.setItem('portadas_refrescadas', '1');
-
-  fetch(`${API_BASE}/api/ejemplares/refrescar-portadas?limite=10`, {
-    method: 'POST',
-    headers: getHeaders(false),
-  })
-    .then(() => cargarEjemplares(usuarioActual.id))
-    .catch(() => {});
-}
-
-  // Modal de login + barra superior
-  if (loginModal) loginModal.style.display = loggedIn ? 'none' : 'flex';
-  if (userBar) userBar.style.display = loggedIn ? 'flex' : 'none';
-  if (nombreSpan) nombreSpan.textContent = loggedIn ? (usuarioActual.nombre_usuario || '') : '';
-
-  // Mensajes + datos
-  const info = document.getElementById('info-ejemplares');
-  if (info) info.textContent = loggedIn ? 'Tus ejemplares:' : 'Inicia sesión para ver tu biblioteca.';
-
-  if (loggedIn) {
-    if (usuarioActual.id) {
-      cargarEjemplares(usuarioActual.id);
-      cargarEstadisticasLecturas();  // 👈 aquí
-    }
-    cargarLecturasAbiertas();
-    cargarPrestamosActivos();
-    return;
-  }
-  // Limpieza UI cuando no hay sesión
-  const tbodyEj = document.querySelector('#tabla-ejemplares tbody');
-  if (tbodyEj) tbodyEj.innerHTML = '';
-
-  const tbodyL = document.querySelector('#tabla-lecturas-abiertas tbody');
-  const tbodyP = document.querySelector('#tabla-prestamos-activos tbody');
-  if (tbodyL) tbodyL.innerHTML = '';
-  if (tbodyP) tbodyP.innerHTML = '';
-
-  const infoL = document.getElementById('info-lecturas-abiertas');
-  const infoP = document.getElementById('info-prestamos-activos');
-  if (infoL) infoL.textContent = 'Inicia sesión para ver tus lecturas en curso.';
-  if (infoP) infoP.textContent = 'Inicia sesión para ver tus préstamos activos.';
-}
-
-// ---------- Login / Logout ----------
-async function hacerLogin() {
-  const usuarioInput = document.getElementById('login-usuario');
-  const passInput = document.getElementById('login-contrasena');
-  const mensaje = document.getElementById('login-mensaje');
-
-  const nombre_usuario = usuarioInput.value.trim();
-  const contrasena = passInput.value.trim();
-
-  if (!nombre_usuario || !contrasena) {
-    if (mensaje) mensaje.textContent = 'Introduce usuario y contraseña';
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API_BASE}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nombre_usuario, contrasena })
-    });
-
-    const data = await res.json();
-    if (!res.ok) {
-      if (mensaje) mensaje.textContent = data.error || 'Error en el login';
-      return;
-    }
-
-    token = data.token || data.access_token || data.jwt || null;
-    usuarioActual = data.usuario || data.user || null;
-
-    try {
-      // Guarda el token REAL (puede venir como token/access_token/jwt)
-      localStorage.setItem(TOKEN_KEY, token || '');
-      // Guarda el usuario REAL (puede venir como usuario/user)
-      localStorage.setItem(USER_KEY, JSON.stringify(usuarioActual || {}));
-    } catch {}
-
-    if (mensaje) mensaje.textContent = 'Login correcto ✅';
-    usuarioInput.value = '';
-    passInput.value = '';
-
-    actualizarUIAutenticacion();
-    setUserStatusOk('Sesión iniciada');
-  } catch (err) {
-    console.error(err);
-    if (mensaje) mensaje.textContent = 'Error de red en el login';
-  }
-}
-
-function hacerLogout() {
-  token = null;
-  usuarioActual = null;
-
-  try {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-  } catch {}
-
-  actualizarUIAutenticacion();
-  setUserStatus('Sesión cerrada');
-  const mensaje = document.getElementById('login-mensaje');
-  if (mensaje) mensaje.textContent = 'Sesión cerrada';
-}
-
 // ---------- Modal ----------
 function abrirModalFicha() {
   const modal = document.getElementById('modal-ficha');
@@ -412,6 +248,115 @@ function wireSortEjemplaresSelect() {
 
     guardarSortEjemplares();      // ✅ CLAVE: persistir ordenación
     renderEjemplares();           // vuelve a pintar tabla/lista
+  });
+}
+// =========================
+// Reader meta cache (favorito + nº notas)
+// =========================
+const readerMetaCache = new Map();        // libroId -> { favorite, notesCount, tagsCount? }
+const readerMetaInflight = new Map();     // libroId -> Promise
+
+function getReaderMetaCached(libroId) {
+  return readerMetaCache.get(Number(libroId)) || null;
+}
+
+async function fetchReaderMeta(libroId) {
+  libroId = Number(libroId);
+  if (!libroId) return null;
+
+  if (readerMetaCache.has(libroId)) return readerMetaCache.get(libroId);
+  if (readerMetaInflight.has(libroId)) return readerMetaInflight.get(libroId);
+
+  const p = (async () => {
+    try {
+      // OJO: aquí usamos tu API_BASE y getHeaders(false)
+      const res = await fetch(`${API_BASE}/api/libros/${libroId}/reader-meta`, {
+        headers: getHeaders(false),
+      });
+      if (!res.ok) throw new Error(`reader-meta ${res.status}`);
+
+      const meta = await res.json();
+      
+      console.log('reader-meta', libroId, JSON.stringify(meta, null, 2));
+
+// soporta: notes[], notesCount, notas[], notas_count, etc.
+const notesArr =
+  (Array.isArray(meta?.notes) && meta.notes) ||
+  (Array.isArray(meta?.notas) && meta.notas) ||
+  [];
+
+const notesCount =
+  (Array.isArray(notesArr) ? notesArr.length : 0) ||
+  Number(meta?.notesCount ?? meta?.notes_count ?? meta?.notasCount ?? meta?.notas_count ?? 0);
+
+const audiosArr =
+  (Array.isArray(meta?.audios) && meta.audios) ||
+  (Array.isArray(meta?.audio) && meta.audio) ||
+  [];
+
+const audiosCount =
+  (Array.isArray(audiosArr) ? audiosArr.length : 0) ||
+  Number(meta?.audiosCount ?? meta?.audios_count ?? 0);
+
+const normalized = {
+  favorite: Boolean(meta?.favorite ?? meta?.favorito ?? false),
+  notesCount,
+  audiosCount, // ✅ NUEVO
+  tagsCount: Array.isArray(meta?.tags) ? meta.tags.length : Number(meta?.tagsCount || meta?.tags_count || 0),
+};
+      readerMetaCache.set(libroId, normalized);
+      return normalized;
+    } catch (e) {
+      // Si falla, cachea “vacío” para no reintentar en bucle.
+      const fallback = { favorite: false, notesCount: 0, tagsCount: 0 };
+      readerMetaCache.set(libroId, fallback);
+      return fallback;
+    } finally {
+      readerMetaInflight.delete(libroId);
+    }
+  })();
+
+  readerMetaInflight.set(libroId, p);
+  return p;
+}
+
+// Concurrencia limitada
+async function ensureReaderMetaFor(libroIds, concurrency = 6) {
+  const ids = Array.from(new Set((libroIds || []).map(Number))).filter(Boolean);
+  const pending = ids.filter(id => !readerMetaCache.has(id));
+
+  let i = 0;
+  const workers = Array.from({ length: Math.min(concurrency, pending.length) }, async () => {
+    while (i < pending.length) {
+      const id = pending[i++];
+      await fetchReaderMeta(id);
+      applyBadgesForLibro(id); // pinta lo que haya en DOM
+    }
+  });
+  await Promise.all(workers);
+}
+
+// Aplica badges a TODOS los nodos que correspondan a un libroId
+function applyBadgesForLibro(libroId) {
+  const meta = getReaderMetaCached(libroId);
+  if (!meta) return;
+
+  document.querySelectorAll(`[data-badge-libro="${libroId}"]`).forEach((el) => {
+    const fav = el.querySelector('.badge-fav');
+    const notes = el.querySelector('.badge-notes');
+
+    if (fav) {
+      fav.textContent = meta.favorite ? '★' : '';
+      fav.title = meta.favorite ? 'Favorito' : 'No favorito';
+      fav.classList.toggle('is-on', meta.favorite);
+    }
+   if (notes) {
+  const parts = [];
+  if (meta.notesCount) parts.push(`📝 ${meta.notesCount}`);
+  if (meta.audiosCount) parts.push(`🎙️ ${meta.audiosCount}`);
+  notes.textContent = parts.join(' ');
+  notes.title = parts.length ? `Notas: ${meta.notesCount || 0} · Audios: ${meta.audiosCount || 0}` : '';
+}
   });
 }
 
@@ -560,34 +505,32 @@ function renderEjemplares() {
     tr.dataset.ejemplarId = e.ejemplar_id;
     tr.dataset.creadoEn = e.creado_en || '';
 
-    tr.innerHTML = `
-      <td>
-        ${
-          e.url_portada
-            ? `<img src="${urlPortadaAbsoluta(e.url_portada)}?t=${Date.now()}" alt="Portada" class="portada-mini-img" />`
-            : `<div class="portada-placeholder-mini" aria-hidden="true">
-  <span class="ph-logo">Pdl</span>
-</div>`
-        }
-      </td>
-      <td class="cell-title">
-  <div class="title-main">${e.titulo || ''}</div>
-  <div class="title-meta">
-    <span class="meta-item">ISBN: ${e.isbn || '—'}</span>
-    <span class="meta-dot">·</span>
-    <span class="meta-item">${e.estado || '—'}</span>
-    <span class="meta-dot">·</span>
-    <span class="meta-item">${e.ubicacion || '—'}</span>
-    ${e.notas ? `<span class="meta-dot">·</span><span class="meta-item">${e.notas}</span>` : ''}
+   tr.innerHTML = `
+  <td>
+    ${
+      e.url_portada
+        ? `<img src="${urlPortadaAbsoluta(e.url_portada)}?t=${Date.now()}" alt="Portada" class="portada-mini-img" />`
+        : `<div class="portada-placeholder-mini" aria-hidden="true"><span class="ph-logo">Pdl</span></div>`
+    }
+  </td>
+  <td class="cell-title">
+     <!-- título -->
+  <div class="title-text">
+    ${escapeHtml(e.titulo || 'Libro desconocido')}
+  </div>
+  <!-- fila de iconos -->
+  <div class="title-icons" data-badge-libro="${e.libro_id}">
+    <span class="badge badge-fav"></span>
+    <span class="badge badge-notes"></span>
   </div>
 </td>
 
-<td class="cell-author">${e.autores || ''}</td>
 
-      <td>${e.isbn || ''}</td>
-      <td>${e.estado || ''}</td>
-      <td>${e.ubicacion || ''}</td>
-      <td>${e.notas || ''}</td>
+    <td class="cell-author">${e.autores || ''}</td>
+  <td>${e.isbn || ''}</td>
+  <td>${e.estado || ''}</td>
+  <td>${e.ubicacion || ''}</td>
+  <td>${e.notas || ''}</td>
       <td class="celda-acciones">
         <button class="icon-btn btn-leer" title="Empezar / ver lectura"
           data-libro-id="${e.libro_id}" data-ejemplar-id="${e.ejemplar_id}" type="button">
@@ -608,8 +551,13 @@ function renderEjemplares() {
     // ✅ PRO MAX: también pinta la lista móvil (con los mismos filtrados/orden)
   renderEjemplaresMobileList(filtrados);
   renderEjemplaresGrid(filtrados);
+if (token && usuarioActual?.id) {
+  const ids = filtrados.map(e => e.libro_id);
+  requestAnimationFrame(() => ensureReaderMetaFor(ids));
+}
 
 }
+
 function renderEjemplaresMobileList(filtrados){
   const list = document.getElementById('ejemplares-list');
   if (!list) return;
@@ -631,7 +579,12 @@ function renderEjemplaresMobileList(filtrados){
         }
 
         <div class="ej-main">
-          <div class="ej-title">${escapeHtml(e.titulo || '—')}</div>
+          <div class="ej-title" data-badge-libro="${e.libro_id}">
+  <span class="badge badge-fav" aria-hidden="true"></span>
+  <span class="badge badge-notes" aria-hidden="true"></span>
+  ${escapeHtml(e.titulo || '—')}
+</div>
+
           <div class="ej-author">${escapeHtml(e.autores || '—')}</div>
 
           <div class="ej-meta">
@@ -650,6 +603,8 @@ function renderEjemplaresMobileList(filtrados){
       </div>
     `;
   }).join('');
+  ensureReaderMetaFor((filtrados || []).map(x => x.libro_id));
+
 }
 
 // ---------- Cargar ejemplares (rellena caché y renderiza) ----------

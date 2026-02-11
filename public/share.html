@@ -112,13 +112,16 @@
     <ul id="share-list" class="list"></ul>
   </div>
 
+<script>
+  // "" = mismo dominio (recomendado si share.html lo sirves desde tu backend)
+  // Si lo sirves desde otro hosting, aquí pones "https://tu-api.com"
+  window.__API_BASE__ = "";
+</script>
+
   <script>
     (function () {
-      // === Config API: mismo backend en PC y móvil ===
       var isLocalhost = (location.hostname === 'localhost' || location.hostname === '127.0.0.1');
-      // En desarrollo, backend local; en producción (Render), mismo host
-      var API_BASE = isLocalhost ? 'http://localhost:3011' : '';
-
+      var API_BASE = isLocalhost ? 'http://localhost:3011' : (window.__API_BASE__ || '');
       function getTokenFromUrl() {
         try {
           var url = new URL(window.location.href);

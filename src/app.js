@@ -25,11 +25,27 @@ fs.mkdirSync(uploadsDir, { recursive: true });
 app.use('/uploads', express.static(uploadsDir));
 
 dotenv.config();
+if (!process.env.JWT_SECRETO) {
+  throw new Error('Falta JWT_SECRETO en variables de entorno');
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 // Middlewares básicos
-app.use(cors());
+const allowedOrigins = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin: function(origin, cb) {
+    // Permite requests sin origin (curl, server-to-server)
+    if (!origin) return cb(null, true);
+    if (allowedOrigins.length === 0) return cb(null, true); // si aún no lo configuras
+    return cb(null, allowedOrigins.includes(origin));
+  },
+  credentials: false,
+}));
 app.use(morgan('dev'));
 app.use(express.json());
 

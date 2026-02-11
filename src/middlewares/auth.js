@@ -19,10 +19,7 @@ export function verificarToken(req, res, next) {
   }
 
   try {
-    const payload = jwt.verify(
-      token,
-      process.env.JWT_SECRETO || 'cambia_esto_en_.env'
-    );
+    const payload = jwt.verify(token, process.env.JWT_SECRETO);
 
     req.usuario = {
       id: payload.id,

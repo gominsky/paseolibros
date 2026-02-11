@@ -372,22 +372,20 @@
         <div id="stats-lecturas-mobile" class="stats-mobile-list">
           <!-- Relleno desde JS -->
         </div>
-
-      </section>
-
-      
+      </section>     
     </main>
-
-
     <footer class="app-footer">
       <p>¡Ubícate!</p>
     </footer>
   </div>
-
   <!-- Librería ZXing y JS de la app -->
   <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
+  <script>
+  window.__API_BASE__ = ""; // "" = mismo dominio (recomendado si sirves frontend desde el backend)
+  </script>
+  <script src="api.js"></script>
+  <script src="auth-ui.js"></script>
   <script src="main.js"></script>
-
   <!-- Modal ficha libro/ejemplar -->
   <div id="modal-ficha" class="modal">
     <div id="modal-ficha-backdrop" class="modal-backdrop"></div>
