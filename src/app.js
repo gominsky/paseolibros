@@ -16,6 +16,8 @@ import prestamosRutas from './rutas/prestamos.js';
 import deseosRouter from './rutas/deseos.js';
 import colaRouter from './rutas/cola.js'
 import shareRutas from './rutas/share.js';
+import readerRoutes from "./rutas/reader.js";
+
 const app = express();
 
 const uploadsDir = path.join(process.cwd(), 'uploads');
@@ -68,6 +70,7 @@ app.use('/api', prestamosRutas);  // /api/usuarios/:id/prestamos-activos, etc.
 app.use('/api', deseosRouter);
 app.use('/api', shareRutas);
 app.use('/api', colaRouter);
+app.use("/api", readerRoutes);
 // Endpoint de salud
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, mensaje: 'PaseoLibros API viva 😄' });

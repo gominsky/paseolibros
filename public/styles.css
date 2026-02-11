@@ -3042,3 +3042,45 @@ body.theme-dark .app-footer{
   width: auto;
   object-fit: contain;
 }
+/* ===== Panel Del lector ===== */
+.reader-panel { margin-top: 6px; }
+.reader-panel-head{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.reader-block{ margin-top: 12px; display:grid; gap:8px; }
+.reader-label{ font-weight:600; }
+
+.reader-tags-row{
+  display:flex; gap:8px; align-items:center;
+}
+.reader-tags-row input{ flex:1; }
+
+.reader-chips{ display:flex; flex-wrap:wrap; gap:8px; }
+.reader-chip{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 10px;
+  border-radius:999px;
+  background: rgba(0,0,0,.06);
+}
+.reader-chip button{
+  border:none; background:transparent; cursor:pointer; font-size:14px; line-height:1;
+}
+
+.reader-actions{ display:flex; gap:10px; justify-content:flex-end; }
+.reader-list{ display:grid; gap:10px; margin-top: 6px; }
+.reader-item{
+  padding:10px;
+  border-radius:12px;
+  background: rgba(0,0,0,.04);
+}
+.reader-item-head{
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+}
+.reader-item small{ opacity:.7; }
+.reader-item p{ margin:8px 0 0; white-space:pre-wrap; }
+
+.reader-audio-row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+#reader-fav[aria-pressed="true"]{
+  border:1px solid rgba(0,0,0,.25);
+}

@@ -487,6 +487,55 @@
             Guardar datos del libro
           </button>
         </div>
+        <!-- Panel Del lector (favorito / tags / notas / audio) -->
+<div class="form-subsection reader-panel" id="reader-panel" data-libro-id="">
+  <div class="reader-panel-head">
+    <h3>Datos del lector</h3>
+
+    <button id="reader-fav" class="btn btn-ghost btn-sm" type="button" aria-pressed="false">
+      ☆ Favorito
+    </button>
+  </div>
+
+  <!-- Tags -->
+  <div class="reader-block">
+    <label class="reader-label">Etiquetas</label>
+    <div class="reader-tags-row">
+      <input id="reader-tag-input" type="text" placeholder="Añade una etiqueta y pulsa Enter…" />
+      <button id="reader-tag-add" class="btn btn-secondary btn-sm" type="button">Añadir</button>
+    </div>
+    <div id="reader-tags" class="reader-chips" aria-live="polite"></div>
+  </div>
+
+  <!-- Notas -->
+  <div class="reader-block">
+    <label class="reader-label">Notas</label>
+    <textarea id="reader-note-text" rows="3" placeholder="Escribe una nota sobre este libro…"></textarea>
+    <div class="reader-actions">
+      <button id="reader-note-save" class="btn btn-primary btn-sm" type="button">Guardar nota</button>
+    </div>
+    <div id="reader-notes" class="reader-list" aria-live="polite"></div>
+  </div>
+
+  <!-- Audio -->
+  <div class="reader-block">
+    <label class="reader-label">Notas de audio</label>
+    <div class="reader-audio-row">
+      <button id="reader-rec" class="btn btn-secondary btn-sm" type="button">🎙️ Grabar</button>
+      <button id="reader-stop" class="btn btn-ghost btn-sm" type="button" disabled>⏹️ Parar</button>
+      <span id="reader-audio-status" class="muted"></span>
+    </div>
+
+    <audio id="reader-audio-preview" controls style="display:none; width:100%; margin-top:8px;"></audio>
+
+    <div class="reader-actions" style="margin-top:8px;">
+      <button id="reader-audio-upload" class="btn btn-primary btn-sm" type="button" disabled>Guardar audio</button>
+      <button id="reader-audio-discard" class="btn btn-ghost btn-sm" type="button" disabled>Descartar</button>
+    </div>
+
+    <div id="reader-audios" class="reader-list" aria-live="polite"></div>
+  </div>
+</div>
 
         <hr class="divider" />
 
