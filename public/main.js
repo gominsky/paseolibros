@@ -1,10 +1,4 @@
 const API_BASE = window.API_BASE;
-// sesión (alias a global)
-function syncSession() {
-  window.token = window.token || null;
-  window.usuarioActual = window.usuarioActual || null;
-}
-
 let codeReader = null;
 let currentStream = null;
 
@@ -308,7 +302,7 @@ const normalized = {
       return normalized;
     } catch (e) {
       // Si falla, cachea “vacío” para no reintentar en bucle.
-      const fallback = { favorite: false, notesCount: 0, tagsCount: 0 };
+      const fallback = { favorite: false, notesCount: 0, audiosCount: 0, tagsCount: 0 };
       readerMetaCache.set(libroId, fallback);
       return fallback;
     } finally {
@@ -1887,6 +1881,8 @@ function detenerEscaneo(opts = {}) {
 
   resetStability();
 
+  bdRunning = false;
+
   if (codeReader) {
     try { codeReader.reset(); } catch {}
     codeReader = null;
@@ -2513,16 +2509,6 @@ function wireColaUI() {
     await addEjemplarToCola(ejId);
     cerrarOverlay('cola-pick-overlay');
   });
-
-  // delegación: borrar en lista cola
-  document.getElementById('cola-lista')?.addEventListener('click', async (e) => {
-    const card = e.target.closest('.deseo-item');
-    if (!card) return;
-    if (!e.target.closest('.cola-del')) return;
-
-    const id = Number(card.dataset.id);
-    await borrarDeCola(id);
-  });
 }
 
 // ===== Deseos (Wishlist) =====
@@ -2858,28 +2844,16 @@ document.addEventListener('DOMContentLoaded', () => {
   
   document.getElementById('btn-login')?.addEventListener('click', hacerLogin);
   document.getElementById('btn-logout')?.addEventListener('click', hacerLogout);
-    // Click en el botón + de estadísticas
-    const tablaStats = document.getElementById('tabla-stats-lecturas');
-    if (tablaStats) {
-      tablaStats.addEventListener('click', manejarClickStatsToggle);
-    }
-  
+  // Stats lecturas: desplegar años (desktop + móvil)
+  document.getElementById('tabla-stats-lecturas')?.addEventListener('click', manejarClickStatsToggle);
+  document.getElementById('stats-lecturas-mobile')?.addEventListener('click', manejarClickStatsMobileToggle);
+  // Lista móvil: acciones y abrir ficha
   document.getElementById('ejemplares-list')?.addEventListener('click', (e) => {
-  const card = e.target.closest('.ej-card');
-  if (!card) return;
+    const card = e.target.closest('.ej-card');
+    if (!card) return;
 
-  const libroId = Number(card.dataset.libroId);
-  const ejemplarId = Number(card.dataset.ejemplarId);
-      // Click en el botón + de estadísticas
-  const tablaStats = document.getElementById('tabla-stats-lecturas');
-  if (tablaStats) {
-    tablaStats.addEventListener('click', manejarClickStatsToggle);
-  }
-  const mobileStats = document.getElementById('stats-lecturas-mobile');
-if (mobileStats) {
-  mobileStats.addEventListener('click', manejarClickStatsMobileToggle);
-}
-
+    const libroId = Number(card.dataset.libroId);
+    const ejemplarId = Number(card.dataset.ejemplarId);
   if (e.target.closest('.m-read')) {
     empezarLectura(libroId, ejemplarId);
     return;
@@ -3226,7 +3200,7 @@ document.addEventListener('keydown', (e) => {
     body: JSON.stringify(body),
   });
   const data = await res.json().catch(() => ({}));
-  return { ok: res.ok, data };
+  return { ok: res.ok, status: res.status, data };
 }
 function mostrarRegistro() {
   const loginBox = document.getElementById('login-box');
