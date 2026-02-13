@@ -3421,11 +3421,34 @@ btnRegister?.addEventListener('click', async (e) => {
       const delBtn  = item.querySelectorAll("button")[1];
       const audioEl = item.querySelector("audio");
 
-      playBtn.onclick = () => {
-        audioEl.style.display = "block";
-        audioEl.src = `${API_BASE}/api/libros/${currentLibroId}/audios/${a.id}`;
-        audioEl.play().catch(()=>{});
-      };
+      playBtn.onclick = async () => {
+  try {
+    audioEl.style.display = "block";
+
+    const url = `${API_BASE}/api/libros/${currentLibroId}/audios/${a.id}`;
+
+    // 1) Descarga con headers (token)
+    const res = await fetch(url, { headers: getHeaders(false) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    // 2) Convierte a blob y reproduce
+    const blob = await res.blob();
+    if (!blob || blob.size === 0) throw new Error("Audio vacío (0 bytes)");
+
+    const objectUrl = URL.createObjectURL(blob);
+
+    // Limpia url previa
+    if (audioEl.dataset.objectUrl) URL.revokeObjectURL(audioEl.dataset.objectUrl);
+    audioEl.dataset.objectUrl = objectUrl;
+
+    audioEl.src = objectUrl;
+    await audioEl.play();
+  } catch (e) {
+    console.error(e);
+    alert("No se pudo reproducir el audio (revisar token / ruta / bytes).");
+  }
+};
+
 
       delBtn.onclick = async () => {
         await api(`/api/libros/${currentLibroId}/audios/${a.id}`, { method: "DELETE" });
