@@ -3155,3 +3155,39 @@ body.theme-dark .app-footer{
   font-size:.85em;
   opacity:.7;
 }
+/* =========================
+FIX: títulos en lista móvil (wrap + no romper cards)
+========================= */
+@media (max-width: 820px){
+  /* Asegura que la card no “desborde” visualmente */
+  #ejemplares-list .ej-card{
+    overflow: hidden;
+  }
+
+  /* Clave en layouts flex: permite que el texto se encoja y envuelva */
+  #ejemplares-list .ej-main{
+    min-width: 0;
+  }
+
+  /* Permite salto de línea en el título (y evita que se salga) */
+  #ejemplares-list .ej-title{
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+
+    /* Por si había ellipsis/nowrap previos */
+    text-overflow: initial !important;
+    overflow: visible;
+
+    line-height: 1.15;
+  }
+}
+@media (max-width: 820px){
+  #ejemplares-list .ej-title{
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;   /* máximo 2 líneas */
+    line-clamp: 2;
+    overflow: hidden;        /* necesario para el clamp */
+  }
+}
