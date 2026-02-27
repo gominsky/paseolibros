@@ -1310,7 +1310,15 @@ function crearUIMarcapagina() {
   });
   document.getElementById('mp-close')?.addEventListener('click', () => cerrarUIMarcapagina('skip'));
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') cerrarUIMarcapagina('skip'); });
+  document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState !== 'visible') return;
+  if (!token || !usuarioActual?.id) return;
 
+  // Re-pedir lista (si el backend ahora trae url_portada, aparecerán)
+  try {
+    await cargarEjemplares(usuarioActual.id);
+  } catch {}
+});
   // pasos +/- y sincronía input <-> range
   div.addEventListener('click', (e) => {
     const btn = e.target.closest('.mp-step');
