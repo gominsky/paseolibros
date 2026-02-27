@@ -727,11 +727,18 @@ async function empezarLectura(libroId, ejemplarId) {
     });
 
     const data = await res.json();
+
     if (!res.ok) {
       setUserStatusErr(data.error || 'Error al empezar la lectura.');
       return;
     }
+    // Buscar título desde cache
+const libro = (ejemplaresCache || [])
+  .find(e => Number(e.libro_id) === Number(libroId));
 
+flashOk(
+  `Lectura iniciada 📖${libro?.titulo ? ': ' + libro.titulo : ''}`
+);
     setUserStatusOk('Lectura iniciada.');
     await cargarLecturas(libroId);
     await refrescarHome();
@@ -3315,6 +3322,36 @@ btnRegister?.addEventListener('click', async (e) => {
 });
 
 });
+// =========================
+// Mensajes temporales (auto-hide)
+// =========================
+window.flashOk = function flashOk(msg, ms = 2500) {
+  if (typeof setUserStatusOk === 'function') {
+    setUserStatusOk(msg);
+  }
+
+  clearTimeout(window.__statusTimer);
+
+  window.__statusTimer = setTimeout(() => {
+    if (typeof setUserStatus === 'function') {
+      setUserStatus('');
+    }
+  }, ms);
+};
+
+window.flashErr = function flashErr(msg, ms = 3500) {
+  if (typeof setUserStatusErr === 'function') {
+    setUserStatusErr(msg);
+  }
+
+  clearTimeout(window.__statusTimer);
+
+  window.__statusTimer = setTimeout(() => {
+    if (typeof setUserStatus === 'function') {
+      setUserStatus('');
+    }
+  }, ms);
+};
 // =========================
 // Panel "Del lector" (favorito/tags/notas/audio)
 // Usa API_BASE + getHeaders + token actual
