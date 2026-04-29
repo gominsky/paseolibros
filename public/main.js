@@ -4115,10 +4115,20 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 // ══════════════════════════════════════════════════════════
 (function () {
 
+  // Usa el apiFetch global de api.js que gestiona el token correctamente
   function apiFetch(path, opts = {}) {
+    const isJson = opts.body !== undefined;
     return fetch(`${window.API_BASE}${path}`, {
       ...opts,
-      headers: { ...window.getHeaders(opts.body !== undefined), ...(opts.headers || {}) }
+      headers: {
+        ...(isJson ? { 'Content-Type': 'application/json' } : {}),
+        ...(window.token ? {
+          'Authorization':       `Bearer ${window.token}`,
+          'X-Access-Token':      window.token,
+          'Authorization-Token': window.token,
+        } : {}),
+        ...(opts.headers || {})
+      }
     });
   }
 
