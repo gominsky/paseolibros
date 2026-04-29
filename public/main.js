@@ -270,8 +270,6 @@ async function fetchReaderMeta(libroId) {
       if (!res.ok) throw new Error(`reader-meta ${res.status}`);
 
       const meta = await res.json();
-      
-      console.log('reader-meta', libroId, JSON.stringify(meta, null, 2));
 
 // soporta: notes[], notesCount, notas[], notas_count, etc.
 const notesArr =
@@ -662,8 +660,6 @@ async function crearEjemplar() {
     setUserStatusErr('Introduce un ISBN (o escanéalo).');
     return;
   }
-  console.log('TOKEN?', token);
-  console.log('HEADERS', getHeaders());
   try {
     const res = await fetch(`${API_BASE}/api/ejemplares`, {
       method: 'POST',

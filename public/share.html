@@ -167,8 +167,15 @@
       // Petición al backend: /api/share/:token
       fetch(API_BASE + '/api/share/' + encodeURIComponent(token))
         .then(function (res) {
-          return res.json().then(function (data) {
-            return { ok: res.ok, data: data };
+          var status = res.status;
+          var contentType = res.headers.get('content-type') || '';
+          if (contentType.indexOf('application/json') !== -1) {
+            return res.json().then(function (data) {
+              return { ok: res.ok, data: data, status: status };
+            });
+          }
+          return res.text().then(function (text) {
+            return { ok: res.ok, data: { error: text || ('Error del servidor (HTTP ' + status + ')') }, status: status };
           });
         })
         .then(function (result) {

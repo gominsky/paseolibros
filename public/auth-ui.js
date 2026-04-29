@@ -67,8 +67,13 @@ window.hacerLogin = async function hacerLogin() {
       return;
     }
 
-    window.token = data.token || data.access_token || data.jwt || null;
-    window.usuarioActual = data.usuario || data.user || null;
+    window.token = data.token ?? null;
+    window.usuarioActual = data.usuario ?? null;
+
+    if (!window.token || !window.usuarioActual) {
+      if (mensaje) mensaje.textContent = 'Respuesta inesperada del servidor. Inténtalo de nuevo.';
+      return;
+    }
 
     window.saveSession();
 

@@ -224,8 +224,9 @@
     } catch (e) {
       console.error(e);
       setUserStatusErr(`No se pudo iniciar la cámara: ${e?.name || "error"}`);
+      // Aseguramos limpieza completa aunque haya fallado a mitad
       scannerRunning = false;
-      stop({ keepButtonState: false });
+      stop({ keepButtonState: false, keepScannerRunning: true });
     }
   }
 

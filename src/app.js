@@ -7,6 +7,42 @@ import jwt from 'jsonwebtoken';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+
+// Rate limiter simple en memoria para /api/auth/login
+const loginAttempts = new Map();
+function loginRateLimiter(req, res, next) {
+  const ip = req.ip || req.headers['x-forwarded-for'] || 'unknown';
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000; // 15 minutos
+  const maxAttempts = 15;
+
+  const entry = loginAttempts.get(ip) || { count: 0, resetAt: now + windowMs };
+
+  if (now > entry.resetAt) {
+    entry.count = 0;
+    entry.resetAt = now + windowMs;
+  }
+
+  entry.count++;
+  loginAttempts.set(ip, entry);
+
+  if (entry.count > maxAttempts) {
+    const retryAfter = Math.ceil((entry.resetAt - now) / 1000);
+    res.setHeader('Retry-After', retryAfter);
+    return res.status(429).json({
+      error: `Demasiados intentos de login. Espera ${Math.ceil(retryAfter / 60)} minutos.`
+    });
+  }
+  next();
+}
+
+// Limpieza periódica para evitar memory leaks
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, entry] of loginAttempts.entries()) {
+    if (now > entry.resetAt) loginAttempts.delete(ip);
+  }
+}, 10 * 60 * 1000);
 import authRutas from './rutas/auth.js';
 import usuariosRutas from './rutas/usuarios.js';
 import ejemplaresRutas from './rutas/ejemplares.js';
@@ -18,16 +54,16 @@ import colaRouter from './rutas/cola.js'
 import shareRutas from './rutas/share.js';
 import readerRoutes from "./rutas/reader.js";
 
+dotenv.config();
+if (!process.env.JWT_SECRETO) {
+  throw new Error('Falta JWT_SECRETO en variables de entorno');
+}
+
 const app = express();
 
 const uploadsDir = path.join(process.cwd(), 'uploads');
 fs.mkdirSync(uploadsDir, { recursive: true });
 app.use('/uploads', express.static(uploadsDir));
-
-dotenv.config();
-if (!process.env.JWT_SECRETO) {
-  throw new Error('Falta JWT_SECRETO en variables de entorno');
-}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -65,7 +101,7 @@ app.use((req, res, next) => {
     try {
       const payload = jwt.verify(
         token,
-        process.env.JWT_SECRETO || 'paseolibros_JWT_$9fK2!xQmA7zR'
+        process.env.JWT_SECRETO
       );
       req.usuario = { id: payload.id, nombre_usuario: payload.nombre_usuario };
     } catch (e) {
@@ -77,6 +113,7 @@ app.use((req, res, next) => {
 });
 
 // Rutas API
+app.use('/api/auth/login', loginRateLimiter);
 app.use('/api/auth', authRutas);
 app.use('/api/usuarios', usuariosRutas);
 app.use('/api/ejemplares', ejemplaresRutas);
