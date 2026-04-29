@@ -1692,22 +1692,7 @@ tr:hover .portada-mini-img {
   color: var(--ink-3);
 }
 
-/* Botón cambiar portada: aparece al hacer hover sobre la portada */
-.modal-cover-upload-btn {
-  position: absolute;
-  inset: 0;
-  border-radius: var(--r-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(26,20,16,.55);
-  color: #fff;
-  font-size: 1.4rem;
-  opacity: 0;
-  cursor: pointer;
-  transition: opacity .2s;
-}
-.modal-cover:hover .modal-cover-upload-btn { opacity: 1; }
+/* overlay de portada eliminado — ahora usa .modal-cover-actions */
 
 /* Info cabecera */
 .modal-header-info { min-width: 0; padding-top: 2px; }
@@ -2401,4 +2386,30 @@ input, select, textarea { padding: 7px 10px; font-size: .9rem; }
 @media (max-width: 820px) {
   .modal-cover-img-wrap { width: 80px; }
   .modal-cover-actions  { width: 80px; }
+}
+
+/* ── Portada: imagen sin hover propio (los botones están debajo) ─ */
+.modal-cover-img {
+  display: block;
+  width: 90px;
+  height: 132px;
+  object-fit: cover;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border-2);
+  background: var(--surface-2);
+  box-shadow: 4px 4px 16px rgba(26,20,16,.18);
+  pointer-events: none; /* la imagen no captura eventos, el wrapper sí */
+}
+.modal-cover-img-wrap {
+  position: relative;
+  width: 90px;
+  flex-shrink: 0;
+}
+/* El botón eliminar solo aparece al hover del wrapper */
+.modal-cover-img-wrap:hover .modal-cover-delete-btn { opacity: 1; }
+
+@media (max-width: 820px) {
+  .modal-cover-img        { width: 80px; height: 118px; }
+  .modal-cover-img-wrap   { width: 80px; }
+  .modal-cover-actions    { width: 80px; }
 }
