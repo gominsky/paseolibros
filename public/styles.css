@@ -2325,3 +2325,80 @@ input, select, textarea { padding: 7px 10px; font-size: .9rem; }
 @media (max-width: 820px) {
   .portada-url-dialog { width: 100vw; border-radius: 0; }
 }
+
+/* ══════════════════════════════════════════════════════════
+   ZONA DE PORTADA — rediseño con botones en fila
+   ══════════════════════════════════════════════════════════ */
+
+/* Wrapper de la imagen: contiene la img + botón eliminar */
+.modal-cover-img-wrap {
+  position: relative;
+  display: inline-block;
+  width: 90px;
+}
+
+/* Botón eliminar: esquina superior derecha, solo visible en hover */
+.modal-cover-delete-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid var(--border-2);
+  background: var(--surface);
+  color: #b85555;
+  font-size: .7rem;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transition: opacity .15s, background .15s;
+  z-index: 2;
+}
+.modal-cover-img-wrap:hover .modal-cover-delete-btn { opacity: 1; }
+.modal-cover-delete-btn:hover { background: rgba(184,85,85,.12); }
+
+/* Fila de tres botones debajo de la portada */
+.modal-cover-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 7px;
+  width: 90px;
+}
+
+.modal-cover-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 5px 6px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border-2);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-family: var(--font-body);
+  font-size: .72rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  transition: background .15s, border-color .15s, color .15s;
+  white-space: nowrap;
+}
+.modal-cover-action-btn:hover {
+  background: var(--accent-soft);
+  border-color: var(--border-acc);
+  color: var(--accent);
+}
+
+/* Quitar estilos viejos que ya no aplican */
+.modal-cover-upload-btn,
+.modal-cover-search-btn,
+.modal-cover-search-btn--alt { display: none !important; }
+
+@media (max-width: 820px) {
+  .modal-cover-img-wrap { width: 80px; }
+  .modal-cover-actions  { width: 80px; }
+}

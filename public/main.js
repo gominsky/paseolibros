@@ -4237,6 +4237,29 @@ window.flashErr = function flashErr(msg, ms = 3500) {
         cerrarPortadaUrl();
       }
     });
+
+    // Eliminar portada
+    document.getElementById('btn-eliminar-portada')?.addEventListener('click', async () => {
+      if (!window.libroSeleccionadoId) return;
+      if (!confirm('¿Eliminar la portada de este libro?')) return;
+
+      try {
+        const res = await apiFetch(`/api/libros/${window.libroSeleccionadoId}/portada`, { method: 'DELETE' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        // Limpiar imagen en el modal
+        const img = document.getElementById('ficha-portada-img');
+        if (img) { img.src = ''; img.classList.add('is-placeholder'); }
+
+        // Refrescar lista
+        if (window.usuarioActual?.id && window.cargarEjemplares) {
+          window.cargarEjemplares(window.usuarioActual.id);
+        }
+      } catch (e) {
+        alert('Error eliminando portada: ' + e.message);
+      }
+    });
   });
 
 })();

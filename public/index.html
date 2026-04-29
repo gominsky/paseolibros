@@ -405,17 +405,22 @@
       <div class="modal-header">
         <!-- Portada -->
         <div class="modal-cover">
-          <img id="ficha-portada-img" src="" alt="Portada del libro" class="modal-cover-img" />
-          <label class="modal-cover-upload-btn" title="Añadir imagen">
-            <span class="modal-cover-upload-text">Añadir imagen</span>
-            <input type="file" id="ficha-portada-file" accept="image/*" hidden />
-          </label>
-          <button id="btn-buscar-portada" class="modal-cover-search-btn" type="button" title="Buscar portada automáticamente">
-            Buscar portada
-          </button>
-          <button id="btn-portada-manual" class="modal-cover-search-btn modal-cover-search-btn--alt" type="button" title="Pegar URL de imagen">
-            Pegar URL
-          </button>
+          <div class="modal-cover-img-wrap">
+            <img id="ficha-portada-img" src="" alt="Portada del libro" class="modal-cover-img" />
+            <button id="btn-eliminar-portada" class="modal-cover-delete-btn" type="button" title="Eliminar portada" aria-label="Eliminar portada">✕</button>
+          </div>
+          <div class="modal-cover-actions">
+            <label class="modal-cover-action-btn" title="Subir imagen desde tu dispositivo">
+              <span>↑ Subir</span>
+              <input type="file" id="ficha-portada-file" accept="image/*" hidden />
+            </label>
+            <button id="btn-buscar-portada" class="modal-cover-action-btn" type="button" title="Buscar portada automáticamente">
+              ⚲ Buscar
+            </button>
+            <button id="btn-portada-manual" class="modal-cover-action-btn" type="button" title="Pegar URL de imagen">
+              ⊕ URL
+            </button>
+          </div>
         </div>
 
         <!-- Metadatos principales -->

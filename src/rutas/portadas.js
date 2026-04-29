@@ -408,4 +408,39 @@ router.post('/libros/:id/portada-url', requireAuth, async (req, res) => {
 });
 
 
+// ── DELETE /api/libros/:id/portada ───────────────────────
+// Elimina la portada de un libro (borra el archivo local y limpia la BD)
+router.delete('/libros/:id/portada', requireAuth, async (req, res) => {
+  const libroId = Number(req.params.id);
+
+  try {
+    // Verificar acceso
+    const { rows } = await pool.query(
+      `SELECT l.id, l.url_portada FROM libros l
+       JOIN ejemplares ej ON ej.libro_id = l.id
+       WHERE l.id = $1 AND ej.usuario_id = $2
+       LIMIT 1`,
+      [libroId, req.usuario.id]
+    );
+    if (!rows.length) return res.status(403).json({ error: 'Sin acceso a este libro' });
+
+    const urlPortada = rows[0].url_portada;
+
+    // Borrar archivo local si es un upload propio (no una URL externa)
+    if (urlPortada && urlPortada.startsWith('/uploads/')) {
+      const filePath = path.join(process.cwd(), urlPortada);
+      fs.unlink(filePath, () => {}); // silencioso si no existe
+    }
+
+    // Limpiar en BD
+    await pool.query('UPDATE libros SET url_portada = NULL WHERE id = $1', [libroId]);
+
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('[portadas] Error eliminando portada:', e);
+    res.status(500).json({ error: e.message || 'Error eliminando portada' });
+  }
+});
+
+
 export default router;
