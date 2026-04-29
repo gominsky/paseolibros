@@ -413,6 +413,9 @@
           <button id="btn-buscar-portada" class="modal-cover-search-btn" type="button" title="Buscar portada automáticamente">
             Buscar portada
           </button>
+          <button id="btn-portada-manual" class="modal-cover-search-btn modal-cover-search-btn--alt" type="button" title="Pegar URL de imagen">
+            Pegar URL
+          </button>
         </div>
 
         <!-- Metadatos principales -->
@@ -865,6 +868,41 @@
         <button id="btn-lanzar-busqueda" class="btn btn-primary" type="button">
           Buscar todas las portadas
         </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: pegar URL de portada manualmente ───────── -->
+<div id="portada-url-overlay" class="deseos-overlay" style="display:none;">
+  <div class="deseos-dialog portada-url-dialog" role="dialog" aria-modal="true" aria-label="Añadir portada por URL">
+    <div class="deseos-header">
+      <h3>Añadir portada por URL</h3>
+      <button id="portada-url-cerrar" class="icon-btn" type="button" aria-label="Cerrar">
+        <span class="icon-circle">✕</span>
+      </button>
+    </div>
+    <div class="portada-url-body">
+      <p class="portada-url-desc">
+        Busca la portada en Google Images y pega aquí la URL directa de la imagen.
+      </p>
+      <a id="portada-url-google-link" href="#" target="_blank" rel="noopener" class="btn btn-ghost btn-sm portada-url-google">
+        Buscar en Google Images ↗
+      </a>
+      <a id="portada-url-bing-link" href="#" target="_blank" rel="noopener" class="btn btn-ghost btn-sm portada-url-google">
+        Buscar en Bing Images ↗
+      </a>
+      <div class="form-group" style="margin-top:14px;">
+        <label for="portada-url-input">URL de la imagen</label>
+        <input id="portada-url-input" type="url" placeholder="https://ejemplo.com/portada.jpg" />
+      </div>
+      <div id="portada-url-preview-wrap" style="display:none; margin-top:10px;">
+        <img id="portada-url-preview" src="" alt="Vista previa" style="max-height:160px; border-radius:8px; border:1px solid var(--border-2);" />
+      </div>
+      <p id="portada-url-msg" class="muted" style="min-height:1.4em; margin-top:8px; font-size:.85rem;"></p>
+      <div class="portada-url-footer">
+        <button id="portada-url-cancelar" class="btn btn-ghost btn-sm" type="button">Cancelar</button>
+        <button id="portada-url-guardar" class="btn btn-primary btn-sm" type="button">Guardar portada</button>
       </div>
     </div>
   </div>

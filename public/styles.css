@@ -2280,3 +2280,48 @@ input, select, textarea { padding: 7px 10px; font-size: .9rem; }
 @media (max-width: 820px) {
   .portadas-dialog { width: 100vw; max-height: 100vh; border-radius: 0; }
 }
+
+/* ── Botón "Pegar URL" (variante del botón de portada) ───── */
+.modal-cover-search-btn--alt {
+  background: transparent;
+  color: var(--ink-3);
+  border-color: var(--border);
+}
+.modal-cover-search-btn--alt:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+  border-color: var(--border-2);
+  box-shadow: none;
+}
+
+/* ── Modal URL manual ─────────────────────────────────────── */
+.portada-url-dialog {
+  width: min(480px, calc(100vw - 32px));
+}
+.portada-url-body {
+  padding: 14px 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.portada-url-desc {
+  color: var(--ink-2);
+  font-size: .88rem;
+  line-height: 1.5;
+  margin: 0;
+}
+.portada-url-google {
+  align-self: flex-start;
+  font-size: .82rem;
+}
+.portada-url-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 820px) {
+  .portada-url-dialog { width: 100vw; border-radius: 0; }
+}

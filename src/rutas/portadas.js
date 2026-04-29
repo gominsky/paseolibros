@@ -102,6 +102,115 @@ async function buscarPortadaUrl(isbn) {
   return null;
 }
 
+
+// ── Scraping de imágenes: Google Images → Bing fallback ──
+// Busca por título+autor en lugar de ISBN (más resultados para libros sin datos en APIs)
+async function buscarPortadaWebScraping(titulo, autores, isbn) {
+  const query = encodeURIComponent(
+    [titulo, autores, 'portada libro']
+      .filter(Boolean).join(' ')
+      .slice(0, 120)
+  );
+
+  // 1) Intentar Bing Images (más permisivo con bots que Google)
+  try {
+    const bingUrl = `https://www.bing.com/images/search?q=${query}&qft=+filterui:photo-photo&form=IRFLTR`;
+    const res = await fetch(bingUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+        'Referer': 'https://www.bing.com/',
+      },
+      signal: AbortSignal.timeout(10000)
+    });
+
+    const html = await res.text();
+
+    // Bing guarda las URLs en atributos "murl" dentro del JSON de cada resultado
+    const murlMatches = [...html.matchAll(/"murl":"([^"]+)"/g)];
+    const imageUrls = murlMatches
+      .map(m => m[1])
+      .filter(u => /\.(jpg|jpeg|png|webp)/i.test(u))
+      .slice(0, 8); // probar las primeras 8
+
+    for (const url of imageUrls) {
+      try {
+        const headRes = await fetch(url, {
+          method: 'HEAD',
+          signal: AbortSignal.timeout(5000),
+          headers: { 'User-Agent': 'Mozilla/5.0' }
+        });
+        const ct = headRes.headers.get('content-type') || '';
+        const cl = Number(headRes.headers.get('content-length') || 0);
+        if (headRes.ok && ct.startsWith('image/') && (cl === 0 || cl > 2000)) {
+          return { fuente: 'bing-scraping', url };
+        }
+      } catch { continue; }
+    }
+  } catch (e) {
+    console.warn('[portadas] Bing scraping falló:', e.message);
+  }
+
+  // 2) Fallback: Google Images (más agresivo con bloqueos, pero vale la pena intentar)
+  try {
+    const googleUrl = `https://www.google.com/search?q=${query}&tbm=isch&hl=es`;
+    const res = await fetch(googleUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html',
+        'Accept-Language': 'es-ES,es;q=0.9',
+      },
+      signal: AbortSignal.timeout(10000)
+    });
+
+    const html = await res.text();
+
+    // Google incrusta thumbnails en base64 y URLs originales en JSON embebido
+    // Buscamos el patrón de URLs de imagen directas
+    const urlMatches = [...html.matchAll(/"(https?:\/\/[^"]*\.(?:jpg|jpeg|png|webp)[^"]*)"/g)];
+    const imageUrls = urlMatches
+      .map(m => m[1])
+      .filter(u => !u.includes('google.com') && !u.includes('gstatic.com'))
+      .slice(0, 8);
+
+    for (const url of imageUrls) {
+      try {
+        const headRes = await fetch(url, {
+          method: 'HEAD',
+          signal: AbortSignal.timeout(5000),
+          headers: { 'User-Agent': 'Mozilla/5.0' }
+        });
+        const ct = headRes.headers.get('content-type') || '';
+        const cl = Number(headRes.headers.get('content-length') || 0);
+        if (headRes.ok && ct.startsWith('image/') && (cl === 0 || cl > 2000)) {
+          return { fuente: 'google-scraping', url };
+        }
+      } catch { continue; }
+    }
+  } catch (e) {
+    console.warn('[portadas] Google scraping falló:', e.message);
+  }
+
+  return null;
+}
+
+// ── buscarPortadaCompleta: API + scraping ─────────────────
+// Orquesta las tres fuentes en orden: Google Books → Open Library → scraping web
+async function buscarPortadaCompleta(isbn, titulo, autores) {
+  // 1+2) APIs estructuradas (más fiables, sin riesgo legal)
+  const desdeApi = await buscarPortadaUrl(isbn);
+  if (desdeApi) return desdeApi;
+
+  // 3) Scraping web como último recurso
+  if (titulo) {
+    const desdeScraping = await buscarPortadaWebScraping(titulo, autores, isbn);
+    if (desdeScraping) return desdeScraping;
+  }
+
+  return null;
+}
+
 // ── POST /api/libros/:id/buscar-portada ───────────────────
 // Busca y asigna portada para un libro concreto
 router.post('/libros/:id/buscar-portada', requireAuth, async (req, res) => {
@@ -125,7 +234,7 @@ router.post('/libros/:id/buscar-portada', requireAuth, async (req, res) => {
     if (!libro.isbn) return res.status(400).json({ error: 'El libro no tiene ISBN' });
 
     // Buscar URL
-    const resultado = await buscarPortadaUrl(libro.isbn);
+    const resultado = await buscarPortadaCompleta(libro.isbn, libro.titulo, libro.autores);
     if (!resultado) {
       return res.status(404).json({ error: 'No se encontró portada en ninguna fuente' });
     }
@@ -215,7 +324,7 @@ router.post('/portadas/rellenar-todas', requireAuth, async (req, res) => {
       while (i < libros.length) {
         const libro = libros[i++];
         try {
-          const resultado = await buscarPortadaUrl(libro.isbn);
+          const resultado = await buscarPortadaCompleta(libro.isbn, libro.titulo, libro.autores);
           if (!resultado) { resultados.error++; continue; }
 
           const filename = `portada_${libro.id}_${Date.now()}.jpg`;
@@ -250,5 +359,53 @@ router.post('/portadas/rellenar-todas', requireAuth, async (req, res) => {
     console.error('[portadas] Error en lote:', e);
   }
 });
+
+// ── POST /api/libros/:id/portada-url ──────────────────────
+// El usuario pega una URL encontrada manualmente; el servidor la descarga y guarda
+router.post('/libros/:id/portada-url', requireAuth, async (req, res) => {
+  const libroId = Number(req.params.id);
+  const { url } = req.body;
+
+  if (!url?.trim()) return res.status(400).json({ error: 'Falta la URL de la imagen' });
+
+  // Validar que sea una URL de imagen razonable
+  const urlLimpia = url.trim();
+  if (!/^https?:\/\//.test(urlLimpia)) {
+    return res.status(400).json({ error: 'La URL debe empezar por http:// o https://' });
+  }
+
+  try {
+    // Verificar que el libro existe y pertenece a un ejemplar del usuario
+    const { rows } = await pool.query(
+      `SELECT l.id FROM libros l
+       JOIN ejemplares ej ON ej.libro_id = l.id
+       WHERE l.id = $1 AND ej.usuario_id = $2
+       LIMIT 1`,
+      [libroId, req.usuario.id]
+    );
+    if (!rows.length) return res.status(403).json({ error: 'Sin acceso a este libro' });
+
+    const ext      = /\.png$/i.test(urlLimpia) ? 'png' : 'jpg';
+    const filename = `portada_${libroId}_${Date.now()}.${ext}`;
+    const destPath = path.join(UPLOADS_DIR, filename);
+
+    await descargarImagen(urlLimpia, destPath);
+
+    const stats = fs.statSync(destPath);
+    if (stats.size < 1024) {
+      fs.unlink(destPath, () => {});
+      return res.status(400).json({ error: 'La imagen descargada es demasiado pequeña' });
+    }
+
+    const urlPortada = `/uploads/${filename}`;
+    await pool.query('UPDATE libros SET url_portada = $1 WHERE id = $2', [urlPortada, libroId]);
+
+    res.json({ ok: true, url_portada: urlPortada });
+  } catch (e) {
+    console.error('[portadas] Error URL manual:', e);
+    res.status(500).json({ error: e.message || 'Error descargando la imagen' });
+  }
+});
+
 
 export default router;
