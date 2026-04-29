@@ -3903,3 +3903,200 @@ window.flashErr = function flashErr(msg, ms = 3500) {
   });
 
 })();
+
+
+// ══════════════════════════════════════════════════════════
+// BÚSQUEDA AUTOMÁTICA DE PORTADAS
+// ══════════════════════════════════════════════════════════
+(function () {
+
+  // ── Helpers ──────────────────────────────────────────
+  function apiFetch(path, opts = {}) {
+    return fetch(`${window.API_BASE}${path}`, {
+      ...opts,
+      headers: { ...window.getHeaders(opts.body !== undefined), ...(opts.headers || {}) }
+    });
+  }
+
+  function abrirPortadas()  {
+    document.getElementById('portadas-overlay').style.display = 'flex';
+    document.documentElement.style.overflow = 'hidden';
+    cargarSinPortada();
+  }
+  function cerrarPortadas() {
+    document.getElementById('portadas-overlay').style.display = 'none';
+    document.documentElement.style.overflow = '';
+  }
+
+  // ── Cargar lista de libros sin portada ────────────────
+  async function cargarSinPortada() {
+    const infoEl = document.getElementById('portadas-sin-portada-info');
+    const listaEl = document.getElementById('portadas-lista-sin');
+    if (!infoEl || !listaEl) return;
+
+    infoEl.textContent = 'Cargando…';
+    listaEl.innerHTML  = '';
+
+    try {
+      const res  = await apiFetch('/api/portadas/sin-portada');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      if (!data.length) {
+        infoEl.innerHTML = '<span class="portadas-ok">✅ Todos tus libros tienen portada</span>';
+        document.getElementById('btn-lanzar-busqueda').disabled = true;
+        return;
+      }
+
+      infoEl.textContent = `${data.length} libro${data.length > 1 ? 's' : ''} sin portada`;
+      document.getElementById('btn-lanzar-busqueda').disabled = false;
+
+      listaEl.innerHTML = data.map(l => `
+        <div class="portadas-item" id="portada-item-${l.id}">
+          <div class="portadas-item-info">
+            <span class="portadas-item-titulo">${escapeHtmlLocal(l.titulo || '—')}</span>
+            <span class="portadas-item-autor">${escapeHtmlLocal(l.autores || '')}</span>
+            <span class="portadas-item-isbn">ISBN: ${escapeHtmlLocal(l.isbn || '—')}</span>
+          </div>
+          <button class="btn btn-secondary btn-sm portadas-btn-uno" data-libro-id="${l.id}" type="button">
+            Buscar
+          </button>
+        </div>
+      `).join('');
+    } catch (e) {
+      infoEl.textContent = 'Error: ' + e.message;
+    }
+  }
+
+  // ── Buscar portada de un libro concreto ───────────────
+  async function buscarPortadaUno(libroId, btnEl) {
+    if (btnEl) { btnEl.disabled = true; btnEl.textContent = '…'; }
+    const item = document.getElementById(`portada-item-${libroId}`);
+
+    try {
+      const res  = await apiFetch(`/api/libros/${libroId}/buscar-portada`, { method: 'POST', body: '{}' });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error);
+
+      if (item) {
+        item.classList.add('portadas-item--ok');
+        item.querySelector('.portadas-btn-uno').textContent = '✅';
+      }
+
+      // Refrescar cache de ejemplares para que aparezca la portada en la lista
+      if (window.usuarioActual?.id && window.cargarEjemplares) {
+        window.cargarEjemplares(window.usuarioActual.id);
+      }
+    } catch (e) {
+      if (btnEl) { btnEl.disabled = false; btnEl.textContent = 'Buscar'; }
+      if (item) {
+        const err = document.createElement('span');
+        err.className = 'portadas-item-err';
+        err.textContent = '❌ ' + e.message;
+        item.appendChild(err);
+      }
+    }
+  }
+
+  // ── Desde la ficha del libro: botón "Buscar portada" ──
+  async function buscarPortadaDesdeModal() {
+    const btn = document.getElementById('btn-buscar-portada');
+    if (!btn || !window.libroSeleccionadoId) return;
+
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Buscando…';
+
+    try {
+      const res  = await apiFetch(`/api/libros/${window.libroSeleccionadoId}/buscar-portada`, {
+        method: 'POST', body: '{}'
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error);
+
+      if (data.ya_tenia) {
+        btn.textContent = 'Ya tiene portada';
+      } else {
+        btn.textContent = '✅ Portada encontrada';
+        // Actualizar la imagen en el modal
+        const img = document.getElementById('ficha-portada-img');
+        if (img && data.url_portada) {
+          img.src = `${window.API_BASE}${data.url_portada}?t=${Date.now()}`;
+          img.classList.remove('is-placeholder');
+        }
+        // Refrescar lista
+        if (window.usuarioActual?.id && window.cargarEjemplares) {
+          window.cargarEjemplares(window.usuarioActual.id);
+        }
+      }
+    } catch (e) {
+      btn.textContent = '❌ ' + e.message;
+    } finally {
+      setTimeout(() => { btn.disabled = false; btn.textContent = original; }, 3000);
+    }
+  }
+
+  // ── Lanzar búsqueda masiva ────────────────────────────
+  async function lanzarBusquedaMasiva() {
+    const btnLanzar = document.getElementById('btn-lanzar-busqueda');
+    const progresoEl = document.getElementById('portadas-progreso');
+    const msgEl      = document.getElementById('portadas-progreso-msg');
+    const fillEl     = document.getElementById('portadas-progreso-fill');
+
+    if (btnLanzar) btnLanzar.disabled = true;
+    if (progresoEl) progresoEl.style.display = 'block';
+    if (msgEl) msgEl.textContent = 'Lanzando búsqueda en segundo plano…';
+    if (fillEl) fillEl.style.width = '10%';
+
+    try {
+      const res  = await apiFetch('/api/portadas/rellenar-todas', { method: 'POST', body: '{}' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      if (msgEl) msgEl.textContent = data.mensaje;
+      if (fillEl) fillEl.style.width = '100%';
+
+      // Recargar la lista tras 4 segundos para mostrar avances
+      setTimeout(async () => {
+        await cargarSinPortada();
+        if (window.usuarioActual?.id && window.cargarEjemplares) {
+          window.cargarEjemplares(window.usuarioActual.id);
+        }
+        if (progresoEl) progresoEl.style.display = 'none';
+        if (btnLanzar)  btnLanzar.disabled = false;
+      }, 4000);
+    } catch (e) {
+      if (msgEl) msgEl.textContent = '❌ ' + e.message;
+      if (btnLanzar) btnLanzar.disabled = false;
+    }
+  }
+
+  function escapeHtmlLocal(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Wiring ────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('btn-rellenar-portadas')?.addEventListener('click', abrirPortadas);
+    document.getElementById('portadas-cerrar')?.addEventListener('click', cerrarPortadas);
+    document.getElementById('portadas-overlay')?.addEventListener('click', e => {
+      if (e.target.id === 'portadas-overlay') cerrarPortadas();
+    });
+    document.getElementById('btn-lanzar-busqueda')?.addEventListener('click', lanzarBusquedaMasiva);
+    document.getElementById('btn-buscar-portada')?.addEventListener('click', buscarPortadaDesdeModal);
+
+    // Delegación: buscar portada de uno en la lista
+    document.getElementById('portadas-lista-sin')?.addEventListener('click', e => {
+      const btn = e.target.closest('.portadas-btn-uno');
+      if (!btn) return;
+      buscarPortadaUno(Number(btn.dataset.libroId), btn);
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') cerrarPortadas();
+    });
+  });
+
+})();

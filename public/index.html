@@ -65,6 +65,7 @@
 
 <div class="tools-sep" aria-hidden="true"></div>
 <button id="btn-open-biblioteca-compartida" class="tools-item" type="button">Bibliotecas compartidas</button>
+<button id="btn-rellenar-portadas" class="tools-item" type="button">Buscar portadas faltantes</button>
 
 <div class="tools-sep" aria-hidden="true"></div>
         <!-- Logout aquí (mantenemos el ID para tu JS) -->
@@ -409,6 +410,9 @@
             <span class="modal-cover-upload-text">Añadir imagen</span>
             <input type="file" id="ficha-portada-file" accept="image/*" hidden />
           </label>
+          <button id="btn-buscar-portada" class="modal-cover-search-btn" type="button" title="Buscar portada automáticamente">
+            Buscar portada
+          </button>
         </div>
 
         <!-- Metadatos principales -->
@@ -833,6 +837,36 @@
     <!-- Lista de ejemplares -->
     <div id="bc-ver-lista" class="bc-ver-lista"></div>
 
+  </div>
+</div>
+
+<!-- ── Modal: progreso búsqueda de portadas ──────────── -->
+<div id="portadas-overlay" class="deseos-overlay" style="display:none;">
+  <div class="deseos-dialog portadas-dialog" role="dialog" aria-modal="true" aria-label="Buscando portadas">
+    <div class="deseos-header">
+      <h3>Buscar portadas faltantes</h3>
+      <button id="portadas-cerrar" class="icon-btn" type="button" aria-label="Cerrar">
+        <span class="icon-circle">✕</span>
+      </button>
+    </div>
+    <div class="portadas-body">
+      <p class="portadas-desc">
+        Busca automáticamente en Google Books y Open Library las portadas de todos tus libros que no tienen imagen.
+      </p>
+      <div id="portadas-sin-portada-info" class="portadas-stat"></div>
+      <div id="portadas-progreso" class="portadas-progreso" style="display:none;">
+        <div class="portadas-progreso-bar">
+          <div id="portadas-progreso-fill" class="portadas-progreso-fill"></div>
+        </div>
+        <p id="portadas-progreso-msg" class="muted" style="font-size:.85rem; margin-top:6px;"></p>
+      </div>
+      <div id="portadas-lista-sin" class="portadas-lista"></div>
+      <div class="portadas-footer">
+        <button id="btn-lanzar-busqueda" class="btn btn-primary" type="button">
+          Buscar todas las portadas
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 </body>
