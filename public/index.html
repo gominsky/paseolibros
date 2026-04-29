@@ -64,6 +64,9 @@
 <button id="btn-share-deseos" class="tools-item" type="button">Compartir deseos</button>
 
 <div class="tools-sep" aria-hidden="true"></div>
+<button id="btn-open-biblioteca-compartida" class="tools-item" type="button">Bibliotecas compartidas</button>
+
+<div class="tools-sep" aria-hidden="true"></div>
         <!-- Logout aquí (mantenemos el ID para tu JS) -->
         <button id="btn-logout" class="tools-item tools-danger" type="button">Cerrar sesión</button>
       </div>
@@ -769,5 +772,68 @@
     });
   })();
   </script>
+
+<!-- ── Modal: Bibliotecas compartidas ─────────────────── -->
+<div id="bc-overlay" class="deseos-overlay" style="display:none;">
+  <div class="deseos-dialog bc-dialog" role="dialog" aria-modal="true" aria-label="Bibliotecas compartidas">
+
+    <div class="deseos-header">
+      <h3>Bibliotecas compartidas</h3>
+      <button id="bc-cerrar" class="icon-btn" type="button" aria-label="Cerrar">
+        <span class="icon-circle">✕</span>
+      </button>
+    </div>
+
+    <!-- Pestañas -->
+    <nav class="bc-tabs">
+      <button class="bc-tab is-active" data-bc-tab="conmigo">Compartidas conmigo</button>
+      <button class="bc-tab" data-bc-tab="miscompartidas">Las que yo comparto</button>
+    </nav>
+
+    <!-- Panel: bibliotecas que otros comparten conmigo -->
+    <div class="bc-panel is-active" id="bc-panel-conmigo">
+      <p id="bc-info-conmigo" class="muted bc-info">Cargando…</p>
+      <div id="bc-lista-conmigo" class="bc-lista"></div>
+    </div>
+
+    <!-- Panel: a quién he compartido yo mi biblioteca -->
+    <div class="bc-panel" id="bc-panel-miscompartidas">
+      <!-- Formulario para compartir -->
+      <div class="bc-share-form">
+        <input id="bc-input-usuario" type="text" placeholder="Nombre de usuario…" />
+        <button id="bc-btn-compartir" class="btn btn-primary btn-sm" type="button">Compartir</button>
+      </div>
+      <p id="bc-msg-compartir" class="muted bc-msg"></p>
+      <p id="bc-info-miscompartidas" class="muted bc-info">Cargando…</p>
+      <div id="bc-lista-miscompartidas" class="bc-lista"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Modal: Ver biblioteca ajena ────────────────────── -->
+<div id="bc-ver-overlay" class="deseos-overlay" style="display:none;">
+  <div class="deseos-dialog bc-ver-dialog" role="dialog" aria-modal="true" aria-label="Biblioteca compartida">
+
+    <div class="deseos-header">
+      <h3 id="bc-ver-titulo">Biblioteca de …</h3>
+      <button id="bc-ver-cerrar" class="icon-btn" type="button" aria-label="Cerrar">
+        <span class="icon-circle">✕</span>
+      </button>
+    </div>
+
+    <!-- Buscador -->
+    <div class="bc-ver-toolbar">
+      <div class="table-search" style="flex:1;">
+        <input id="bc-ver-q" type="text" placeholder="Buscar por título, autor, ISBN…" />
+      </div>
+      <span id="bc-ver-info" class="muted" style="font-size:.85rem; white-space:nowrap;"></span>
+    </div>
+
+    <!-- Lista de ejemplares -->
+    <div id="bc-ver-lista" class="bc-ver-lista"></div>
+
+  </div>
+</div>
 </body>
 </html>
