@@ -53,6 +53,7 @@ import deseosRouter from './rutas/deseos.js';
 import colaRouter from './rutas/cola.js'
 import shareRutas from './rutas/share.js';
 import readerRoutes from "./rutas/reader.js";
+import bcRutas from './rutas/biblioteca_compartida.js';
 
 dotenv.config();
 if (!process.env.JWT_SECRETO) {
@@ -124,6 +125,7 @@ app.use('/api', deseosRouter);
 app.use('/api', shareRutas);
 app.use('/api', colaRouter);
 app.use("/api", readerRoutes);
+app.use('/api', bcRutas);
 // Endpoint de salud
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, mensaje: 'PaseoLibros API viva 😄' });
