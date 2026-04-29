@@ -390,66 +390,64 @@
   <!-- Modal ficha libro/ejemplar -->
   <div id="modal-ficha" class="modal">
     <div id="modal-ficha-backdrop" class="modal-backdrop"></div>
-  
-    <div class="modal-dialog">
-      <button id="modal-ficha-cerrar" class="modal-close">&times;</button>
-  
-      <!-- FLECHAS DE NAVEGACIÓN -->
-      <button
-        id="ficha-prev"
-        class="modal-nav-arrow modal-nav-arrow--prev"
-        type="button"
-        aria-label="Libro anterior"
-      >
-        ‹
-      </button>
-      <button
-        id="ficha-next"
-        class="modal-nav-arrow modal-nav-arrow--next"
-        type="button"
-        aria-label="Libro siguiente"
-      >
-        ›
-      </button>
 
-      <!-- Cabecera de la ficha -->
+    <div class="modal-dialog">
+
+      <!-- Flechas navegación entre libros -->
+      <button id="ficha-prev" class="modal-nav-arrow modal-nav-arrow--prev" type="button" aria-label="Libro anterior">‹</button>
+      <button id="ficha-next" class="modal-nav-arrow modal-nav-arrow--next" type="button" aria-label="Libro siguiente">›</button>
+
+      <!-- ── CABECERA ─────────────────────────────────── -->
       <div class="modal-header">
+        <!-- Portada -->
         <div class="modal-cover">
-          <img
-            id="ficha-portada-img"
-            src=""
-            alt="Portada del libro"
-            class="modal-cover-img"
-          />
-          <label class="btn btn-secondary btn-sm modal-cover-upload">
-            Añadir
-            <input
-              type="file"
-              id="ficha-portada-file"
-              accept="image/*"
-              hidden
-            />
+          <img id="ficha-portada-img" src="" alt="Portada del libro" class="modal-cover-img" />
+          <label class="modal-cover-upload-btn" title="Añadir imagen">
+            <span class="modal-cover-upload-text">Añadir imagen</span>
+            <input type="file" id="ficha-portada-file" accept="image/*" hidden />
           </label>
         </div>
 
+        <!-- Metadatos principales -->
         <div class="modal-header-info">
-          <h2 id="ficha-titulo">Título del libro</h2>
-          <p id="ficha-autores" class="helper-text">Autor/es</p>
-          <p class="helper-text">
-            ISBN: <span id="ficha-isbn">—</span>
-          </p>
-          <p class="helper-text">
-            Incorporado a tu biblioteca:
-            <span id="ficha-creado-en">—</span>
-          </p>
+          <h2 id="ficha-titulo" class="modal-title">Título del libro</h2>
+          <p id="ficha-autores" class="modal-authors">Autor/es</p>
+
+          <div class="modal-meta-pills">
+            <span class="modal-meta-pill">
+              <span class="modal-meta-label">ISBN</span>
+              <span id="ficha-isbn">—</span>
+            </span>
+            <span class="modal-meta-pill">
+              <span class="modal-meta-label">Añadido</span>
+              <span id="ficha-creado-en">—</span>
+            </span>
+          </div>
+
+          <!-- Botón favorito destacado en la cabecera -->
+          <button id="reader-fav" class="modal-fav-btn" type="button" aria-pressed="false">
+            <span class="modal-fav-star">☆</span>
+            <span class="modal-fav-label">Favorito</span>
+          </button>
         </div>
+
+        <!-- Botón cerrar -->
+        <button id="modal-ficha-cerrar" class="modal-close" aria-label="Cerrar">&times;</button>
       </div>
 
-      <!-- Cuerpo de la ficha -->
+      <!-- ── PESTAÑAS ─────────────────────────────────── -->
+      <nav class="modal-tabs" role="tablist">
+        <button class="modal-tab is-active" data-tab="libro" role="tab" aria-selected="true">Libro</button>
+        <button class="modal-tab" data-tab="lector" role="tab" aria-selected="false">Mi lectura</button>
+        <button class="modal-tab" data-tab="ejemplar" role="tab" aria-selected="false">Ejemplar</button>
+        <button class="modal-tab" data-tab="historial" role="tab" aria-selected="false">Historial</button>
+      </nav>
+
+      <!-- ── CUERPO (paneles de pestañas) ──────────────── -->
       <div class="modal-body">
-        <!-- Datos del libro (reutilizamos los mismos IDs que antes) -->
-        <div class="form-subsection">
-          <h3>Datos del libro</h3>
+
+        <!-- PESTAÑA: Libro -->
+        <div class="modal-panel is-active" id="tab-panel-libro" role="tabpanel">
           <div class="form-grid">
             <div class="form-group">
               <label for="edit-libro-titulo">Título</label>
@@ -464,91 +462,86 @@
               <input id="edit-libro-editorial" type="text" />
             </div>
             <div class="form-group">
-              <label for="edit-libro-fecha">Fecha publicación</label>
-              <input
-                id="edit-libro-fecha"
-                type="text"
-                placeholder="Ej: 1960"
-              />
+              <label for="edit-libro-fecha">Año publicación</label>
+              <input id="edit-libro-fecha" type="text" placeholder="Ej: 1960" />
             </div>
             <div class="form-group">
-              <label for="edit-libro-paginas">Nº páginas</label>
+              <label for="edit-libro-paginas">Páginas</label>
               <input id="edit-libro-paginas" type="number" min="1" />
-            </div>            
+            </div>
           </div>
-
           <div class="form-group">
             <label for="edit-libro-descripcion">Descripción</label>
-            <textarea id="edit-libro-descripcion" rows="3"></textarea>
+            <textarea id="edit-libro-descripcion" rows="4"></textarea>
+          </div>
+          <p id="edit-mensaje" class="helper-text" style="min-height:1.4em;"></p>
+          <div class="modal-panel-footer">
+            <button id="btn-guardar-libro" class="btn btn-primary">Guardar libro</button>
+          </div>
+        </div>
+
+        <!-- PESTAÑA: Mi lectura (reader panel) -->
+        <div class="modal-panel" id="tab-panel-lector" role="tabpanel">
+          <div class="reader-panel" id="reader-panel" data-libro-id="">
+
+            <!-- Etiquetas -->
+            <div class="reader-block">
+              <label class="reader-label">Etiquetas</label>
+              <div class="reader-tags-row">
+                <input id="reader-tag-input" type="text" placeholder="Nueva etiqueta… (Enter para añadir)" />
+                <button id="reader-tag-add" class="btn btn-secondary btn-sm" type="button">Añadir</button>
+              </div>
+              <div id="reader-tags" class="reader-chips" aria-live="polite"></div>
+            </div>
+
+            <!-- Notas escritas -->
+            <div class="reader-block">
+              <label class="reader-label">Notas</label>
+              <textarea id="reader-note-text" rows="3" placeholder="Escribe una nota sobre este libro…"></textarea>
+              <div class="reader-actions">
+                <button id="reader-note-save" class="btn btn-primary btn-sm" type="button">Guardar nota</button>
+              </div>
+              <div id="reader-notes" class="reader-list" aria-live="polite"></div>
+            </div>
+
+            <!-- Notas de audio -->
+            <div class="reader-block">
+              <label class="reader-label">Notas de audio</label>
+              <div class="reader-audio-row">
+                <button id="reader-rec" class="btn btn-secondary btn-sm" type="button">🎙 Grabar</button>
+                <button id="reader-stop" class="btn btn-ghost btn-sm" type="button" disabled>⏹ Parar</button>
+                <span id="reader-audio-status" class="muted"></span>
+              </div>
+              <audio id="reader-audio-preview" controls style="display:none; width:100%; margin-top:8px;"></audio>
+              <div class="reader-actions" style="margin-top:8px;">
+                <button id="reader-audio-upload" class="btn btn-primary btn-sm" type="button" disabled>Guardar audio</button>
+                <button id="reader-audio-discard" class="btn btn-ghost btn-sm" type="button" disabled>Descartar</button>
+              </div>
+              <div id="reader-audios" class="reader-list" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PESTAÑA: Ejemplar -->
+        <div class="modal-panel" id="tab-panel-ejemplar" role="tabpanel">
+
+          <!-- Acciones rápidas -->
+          <div class="modal-acciones">
+            <button id="btn-leer-modal" class="modal-accion" type="button">
+              <span class="modal-accion-icon">▶</span>
+              <span class="modal-accion-label">Iniciar lectura</span>
+            </button>
+            <button id="btn-prestar-modal" class="modal-accion" type="button">
+              <span class="modal-accion-icon">⇄</span>
+              <span class="modal-accion-label">Registrar préstamo</span>
+            </button>
           </div>
 
-          <button id="btn-guardar-libro" class="btn btn-primary btn-full">
-            Guardar datos del libro
-          </button>
-        </div>
-        <!-- Panel Del lector (favorito / tags / notas / audio) -->
-<div class="form-subsection reader-panel" id="reader-panel" data-libro-id="">
-  <div class="reader-panel-head">
-    <h3>Datos del lector</h3>
-
-    <button id="reader-fav" class="btn btn-ghost btn-sm" type="button" aria-pressed="false">
-      ☆ Favorito
-    </button>
-  </div>
-
-  <!-- Tags -->
-  <div class="reader-block">
-    <label class="reader-label">Etiquetas</label>
-    <div class="reader-tags-row">
-      <input id="reader-tag-input" type="text" placeholder="Añade una etiqueta y pulsa Enter…" />
-      <button id="reader-tag-add" class="btn btn-secondary btn-sm" type="button">Añadir</button>
-    </div>
-    <div id="reader-tags" class="reader-chips" aria-live="polite"></div>
-  </div>
-
-  <!-- Notas -->
-  <div class="reader-block">
-    <label class="reader-label">Notas</label>
-    <textarea id="reader-note-text" rows="3" placeholder="Escribe una nota sobre este libro…"></textarea>
-    <div class="reader-actions">
-      <button id="reader-note-save" class="btn btn-primary btn-sm" type="button">Guardar nota</button>
-    </div>
-    <div id="reader-notes" class="reader-list" aria-live="polite"></div>
-  </div>
-
-  <!-- Audio -->
-  <div class="reader-block">
-    <label class="reader-label">Notas de audio</label>
-    <div class="reader-audio-row">
-      <button id="reader-rec" class="btn btn-secondary btn-sm" type="button">🎙️ Grabar</button>
-      <button id="reader-stop" class="btn btn-ghost btn-sm" type="button" disabled>⏹️ Parar</button>
-      <span id="reader-audio-status" class="muted"></span>
-    </div>
-
-    <audio id="reader-audio-preview" controls style="display:none; width:100%; margin-top:8px;"></audio>
-
-    <div class="reader-actions" style="margin-top:8px;">
-      <button id="reader-audio-upload" class="btn btn-primary btn-sm" type="button" disabled>Guardar audio</button>
-      <button id="reader-audio-discard" class="btn btn-ghost btn-sm" type="button" disabled>Descartar</button>
-    </div>
-
-    <div id="reader-audios" class="reader-list" aria-live="polite"></div>
-  </div>
-</div>
-
-        <hr class="divider" />
-
-        <!-- Datos del ejemplar -->
-        <div class="form-subsection">
-          <h3>Datos del ejemplar</h3>
-          <div class="form-grid">
+          <!-- Datos del ejemplar -->
+          <div class="form-grid" style="margin-top:16px;">
             <div class="form-group">
               <label for="edit-ejemplar-estado">Estado</label>
-              <input
-                id="edit-ejemplar-estado"
-                type="text"
-                placeholder="propio, prestado, etc."
-              />
+              <input id="edit-ejemplar-estado" type="text" placeholder="propio, prestado…" />
             </div>
             <div class="form-group">
               <label for="edit-ejemplar-tipo">Tipo</label>
@@ -560,64 +553,56 @@
                 <option value="otro">Otro</option>
               </select>
             </div>
-            
             <div class="form-group">
               <label for="edit-ejemplar-ubicacion">Ubicación</label>
               <input id="edit-ejemplar-ubicacion" type="text" />
             </div>
           </div>
           <div class="form-group">
-            <label for="edit-ejemplar-notas">Notas</label>
+            <label for="edit-ejemplar-notas">Notas del ejemplar</label>
             <input id="edit-ejemplar-notas" type="text" />
           </div>
 
-          <button id="btn-guardar-ejemplar" class="btn btn-secondary btn-full">
-            Guardar datos del ejemplar
-          </button>
-        </div>
-
-        <p id="edit-mensaje" class="helper-text"></p>
-
-        <hr class="divider" />
-
-        <!-- Lecturas y préstamos dentro del modal -->
-        <div class="grid-two">
-          <!-- Lecturas -->
-          <div class="card card-inside-modal card-summary">
-            <div class="card-header-inline">
-              <h3>Lecturas del libro</h3>
-              <div class="card-header-actions">
-  <button id="btn-terminar-lectura" class="icon-btn" type="button" title="Terminar lectura" aria-label="Terminar lectura">
-    <span class="icon-circle">✓</span>
-  </button>
-</div>
-            </div>
-            <p id="info-lecturas" class="helper-text">
-              Selecciona un ejemplar en la tabla para ver o terminar tu lectura.
-            </p>
-            <pre id="lecturas-detalle" class="result-block small"></pre>
-          </div>
-
-          <!-- Préstamos -->
-          <div class="card card-inside-modal card-summary">
-            <div class="card-header-inline">
-              <h3>Préstamos del libro</h3>
-             <div class="card-header-actions">
-  <button id="btn-marcar-devuelto-global" class="icon-btn" type="button" title="Marcar devuelto" aria-label="Marcar devuelto">
-    <span class="icon-circle">✓</span>
-  </button>
-</div>
-
-            </div>
-            <p id="info-prestamos" class="helper-text">
-              Selecciona un ejemplar en la tabla para ver o cerrar préstamos.
-            </p>
-           <pre id="prestamos-detalle" class="result-block small"></pre>
+          <div class="modal-panel-footer">
+            <button id="btn-eliminar-modal" class="btn btn-danger" type="button">Eliminar ejemplar</button>
+            <button id="btn-guardar-ejemplar" class="btn btn-primary">Guardar ejemplar</button>
           </div>
         </div>
-      </div> <!-- /modal-body -->
-    </div> <!-- /modal-dialog -->
-  </div> <!-- /modal-ficha -->
+
+        <!-- PESTAÑA: Historial (lecturas + préstamos) -->
+        <div class="modal-panel" id="tab-panel-historial" role="tabpanel">
+          <div class="historial-grid">
+
+            <!-- Lecturas -->
+            <div class="historial-card">
+              <div class="historial-card-header">
+                <h3>Lecturas</h3>
+                <button id="btn-terminar-lectura" class="btn btn-sm btn-secondary" type="button" title="Terminar lectura activa">
+                  ✓ Terminar
+                </button>
+              </div>
+              <p id="info-lecturas" class="helper-text"></p>
+              <pre id="lecturas-detalle" class="result-block"></pre>
+            </div>
+
+            <!-- Préstamos -->
+            <div class="historial-card">
+              <div class="historial-card-header">
+                <h3>Préstamos</h3>
+                <button id="btn-marcar-devuelto-global" class="btn btn-sm btn-secondary" type="button" title="Marcar devuelto">
+                  ✓ Devuelto
+                </button>
+              </div>
+              <p id="info-prestamos" class="helper-text"></p>
+              <pre id="prestamos-detalle" class="result-block"></pre>
+            </div>
+
+          </div>
+        </div>
+
+      </div><!-- /modal-body -->
+    </div><!-- /modal-dialog -->
+  </div><!-- /modal-ficha -->
   <button id="btn-toggle-alta" class="fab-plus" type="button" aria-label="Añadir ejemplar">+</button>
   <!-- Modal Deseos -->
 <div id="deseos-overlay" class="deseos-overlay" style="display:none;">
@@ -740,5 +725,49 @@
   </div>
 </div>
 
+
+  <script>
+  // ── Lógica de pestañas del modal de ficha ───────────────
+  (function () {
+    function initModalTabs() {
+      const tabs    = document.querySelectorAll('.modal-tab');
+      const panels  = document.querySelectorAll('.modal-panel');
+
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const target = tab.dataset.tab;
+
+          tabs.forEach(t => {
+            t.classList.toggle('is-active', t === tab);
+            t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+          });
+
+          panels.forEach(p => {
+            const active = p.id === 'tab-panel-' + target;
+            p.classList.toggle('is-active', active);
+          });
+        });
+      });
+    }
+
+    // Cuando se abre el modal, resetear a la primera pestaña
+    const observer = new MutationObserver(() => {
+      const modal = document.getElementById('modal-ficha');
+      if (!modal) return;
+      if (modal.classList.contains('is-visible')) {
+        const firstTab = document.querySelector('.modal-tab');
+        if (firstTab && !document.querySelector('.modal-tab.is-active')) {
+          firstTab.click();
+        }
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initModalTabs();
+      const modal = document.getElementById('modal-ficha');
+      if (modal) observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
+    });
+  })();
+  </script>
 </body>
 </html>

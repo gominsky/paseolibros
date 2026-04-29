@@ -270,6 +270,8 @@ async function fetchReaderMeta(libroId) {
       if (!res.ok) throw new Error(`reader-meta ${res.status}`);
 
       const meta = await res.json();
+      
+      console.log('reader-meta', libroId, JSON.stringify(meta, null, 2));
 
 // soporta: notes[], notesCount, notas[], notas_count, etc.
 const notesArr =
@@ -524,17 +526,9 @@ function renderEjemplares() {
   <td>${e.ubicacion || ''}</td>
   <td>${e.notas || ''}</td>
       <td class="celda-acciones">
-        <button class="icon-btn btn-leer" title="Empezar / ver lectura"
+        <button class="icon-btn btn-abrir-ficha" title="Ver ficha"
           data-libro-id="${e.libro_id}" data-ejemplar-id="${e.ejemplar_id}" type="button">
-          <span class="icon-circle icon-read">▶</span>
-        </button>
-        <button class="icon-btn btn-prestar" title="Registrar préstamo"
-          data-libro-id="${e.libro_id}" data-ejemplar-id="${e.ejemplar_id}" type="button">
-          <span class="icon-circle icon-loan">⇄</span>
-        </button>
-        <button class="icon-btn btn-eliminar" title="Eliminar ejemplar"
-          data-ejemplar-id="${e.ejemplar_id}" type="button">
-          <span class="icon-circle icon-delete">✕</span>
+          <span class="icon-circle">›</span>
         </button>
       </td>
     `;
@@ -588,9 +582,7 @@ function renderEjemplaresMobileList(filtrados){
         </div>
 
         <div class="ej-actions">
-          <button class="icon-btn m-read" type="button" title="Lectura"><span class="icon-circle">▶</span></button>
-          <button class="icon-btn m-loan" type="button" title="Préstamo"><span class="icon-circle">⇄</span></button>
-          <button class="icon-btn m-del" type="button" title="Borrar"><span class="icon-circle">✕</span></button>
+          <button class="icon-btn m-open" type="button" title="Ver ficha"><span class="icon-circle">›</span></button>
         </div>
       </div>
     `;
@@ -660,6 +652,8 @@ async function crearEjemplar() {
     setUserStatusErr('Introduce un ISBN (o escanéalo).');
     return;
   }
+  console.log('TOKEN?', token);
+  console.log('HEADERS', getHeaders());
   try {
     const res = await fetch(`${API_BASE}/api/ejemplares`, {
       method: 'POST',
@@ -2865,24 +2859,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const libroId = Number(card.dataset.libroId);
     const ejemplarId = Number(card.dataset.ejemplarId);
-  if (e.target.closest('.m-read')) {
-    empezarLectura(libroId, ejemplarId);
-    return;
-  }
-  if (e.target.closest('.m-loan')) {
-    crearUIPrestamo();
-    crearUIMarcapagina();
-    prestamoContexto = { libroId, ejemplarId };
-    abrirUIPrestamo();
-    cargarUsuariosParaPrestamo();
-    return;
-  }
-  if (e.target.closest('.m-del')) {
-    e.stopPropagation();
-    eliminarEjemplar(ejemplarId);
-    return;
-  }
-  // click general o botón “open”
+  // Cualquier click en la card abre la ficha
   mostrarFicha(libroId, ejemplarId);
 });
 
@@ -3004,6 +2981,31 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-guardar-libro')?.addEventListener('click', guardarLibroEditado);
   document.getElementById('btn-guardar-ejemplar')?.addEventListener('click', guardarEjemplarEditado);
 
+  // Acciones del modal: leer, prestar, eliminar
+  document.getElementById('btn-leer-modal')?.addEventListener('click', () => {
+    if (!libroSeleccionadoId || !ejemplarSeleccionadoId) {
+      setUserStatusErr('Selecciona un ejemplar primero.');
+      return;
+    }
+    empezarLectura(libroSeleccionadoId, ejemplarSeleccionadoId);
+  });
+
+  document.getElementById('btn-prestar-modal')?.addEventListener('click', () => {
+    if (!libroSeleccionadoId || !ejemplarSeleccionadoId) {
+      setUserStatusErr('Selecciona un ejemplar primero.');
+      return;
+    }
+    crearPrestamo(libroSeleccionadoId, ejemplarSeleccionadoId);
+  });
+
+  document.getElementById('btn-eliminar-modal')?.addEventListener('click', async () => {
+    if (!ejemplarSeleccionadoId) return;
+    const confirmar = confirm('¿Eliminar este ejemplar? Esta acción no se puede deshacer.');
+    if (!confirmar) return;
+    await cerrarModalFicha();
+    await eliminarEjemplar(ejemplarSeleccionadoId);
+  });
+
   
   // UI préstamo overlay
   crearUIPrestamo();
@@ -3030,27 +3032,7 @@ document.addEventListener('DOMContentLoaded', () => {
     tbodyEjemplares.querySelectorAll('tr').forEach((tr) => tr.classList.remove('fila-seleccionada'));
     fila.classList.add('fila-seleccionada');
 
-    const btnLeer = e.target.closest('.btn-leer');
-    const btnPrestar = e.target.closest('.btn-prestar');
-    const btnEliminar = e.target.closest('.btn-eliminar');
-
-    if (btnLeer) {
-      e.stopPropagation();
-      empezarLectura(btnLeer.dataset.libroId, btnLeer.dataset.ejemplarId);
-      return;
-    }
-    if (btnPrestar) {
-      e.stopPropagation();
-      crearPrestamo(btnPrestar.dataset.libroId, btnPrestar.dataset.ejemplarId);
-      return;
-    }
-    if (btnEliminar) {
-      e.stopPropagation();
-      eliminarEjemplar(btnEliminar.dataset.ejemplarId);
-      return;
-    }
-
-    // abrir ficha
+    // Cualquier click en la fila abre la ficha
     mostrarFicha(fila.dataset.libroId, fila.dataset.ejemplarId);
   });
   // Cerrar “alta” al tocar fuera (solo móvil)

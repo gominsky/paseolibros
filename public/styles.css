@@ -1655,3 +1655,356 @@ tr:hover .portada-mini-img {
     transition-duration: .01ms !important;
   }
 }
+
+/* ══════════════════════════════════════════════════════════
+   MODAL REDISEÑADO — cabecera + pestañas
+   ══════════════════════════════════════════════════════════ */
+
+/* Cabecera: portada + info + cerrar en una línea */
+.modal-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 20px;
+  padding: 20px 20px 0;
+  align-items: start;
+  background: var(--surface);
+}
+
+/* Portada */
+.modal-cover { position: relative; display: inline-block; }
+.modal-cover-img {
+  width: 110px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border-2);
+  background: var(--surface-2);
+  display: block;
+  box-shadow: 4px 4px 16px rgba(26,20,16,.18);
+}
+.modal-cover-img.is-placeholder {
+  background: var(--surface-2);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--ink-3);
+}
+
+/* Botón cambiar portada: aparece al hacer hover sobre la portada */
+.modal-cover-upload-btn {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(26,20,16,.55);
+  color: #fff;
+  font-size: 1.4rem;
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity .2s;
+}
+.modal-cover:hover .modal-cover-upload-btn { opacity: 1; }
+
+/* Info cabecera */
+.modal-header-info { min-width: 0; padding-top: 2px; }
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0 0 4px;
+  letter-spacing: -.02em;
+}
+.modal-authors {
+  color: var(--ink-2);
+  font-size: .95rem;
+  margin: 0 0 12px;
+  font-style: italic;
+}
+
+/* Pills de metadatos (ISBN, fecha) */
+.modal-meta-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.modal-meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: .8rem;
+  color: var(--ink-2);
+}
+.modal-meta-label {
+  font-weight: 600;
+  color: var(--ink-3);
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+/* Botón favorito en cabecera */
+.modal-fav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-2);
+  background: transparent;
+  color: var(--ink-2);
+  font-size: .88rem;
+  cursor: pointer;
+  transition: background .18s, border-color .18s, color .18s, box-shadow .18s;
+}
+.modal-fav-btn:hover {
+  background: var(--accent-soft);
+  border-color: var(--border-acc);
+  color: var(--accent);
+}
+.modal-fav-btn[aria-pressed="true"] {
+  background: var(--accent-soft);
+  border-color: var(--border-acc);
+  color: var(--accent);
+}
+.modal-fav-star { font-size: 1rem; }
+
+/* Botón cerrar en esquina */
+.modal-close {
+  position: static;     /* ya no absolute, está en el grid */
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--border-2);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  transition: background .15s, color .15s;
+  align-self: start;
+}
+.modal-close:hover { background: var(--accent-soft); color: var(--accent); border-color: var(--border-acc); }
+
+/* ── PESTAÑAS ─────────────────────────────────────────── */
+.modal-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 12px 20px 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+.modal-tab {
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  color: var(--ink-3);
+  font-family: var(--font-body);
+  font-size: .88rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: var(--r-sm) var(--r-sm) 0 0;
+  border-bottom: 2px solid transparent;
+  transition: color .15s, border-color .15s, background .15s;
+  white-space: nowrap;
+}
+.modal-tab:hover { color: var(--ink); background: var(--surface-2); }
+.modal-tab.is-active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── PANELES ──────────────────────────────────────────── */
+.modal-panel {
+  display: none;
+  animation: fadeIn .18s ease both;
+}
+.modal-panel.is-active { display: block; }
+
+/* Footer de panel con botón de guardar */
+.modal-panel-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16px;
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── HISTORIAL ────────────────────────────────────────── */
+.historial-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
+}
+@media (max-width: 640px) {
+  .historial-grid { grid-template-columns: 1fr; }
+}
+.historial-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px;
+}
+.historial-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.historial-card-header h3 { margin: 0; font-size: .95rem; }
+
+/* ── MÓVIL: modal full screen, pestañas en scroll ─────── */
+@media (max-width: 820px) {
+  .modal-header {
+    grid-template-columns: auto 1fr auto;
+    gap: 14px;
+    padding: 14px 14px 0;
+  }
+  .modal-cover-img { width: 80px; height: 118px; }
+  .modal-title { font-size: 1.1rem; }
+  .modal-tabs { overflow-x: auto; padding: 10px 14px 0; gap: 0; }
+  .modal-tab { padding: 7px 12px; font-size: .82rem; }
+  .modal-body { padding: 14px; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   MODAL — compactación + acciones en ejemplar
+   ══════════════════════════════════════════════════════════ */
+
+/* Cabecera más compacta */
+.modal-header { padding: 16px 16px 0; gap: 14px; }
+.modal-cover-img { width: 90px; height: 132px; }
+.modal-title { font-size: 1.2rem; }
+.modal-authors { font-size: .9rem; margin-bottom: 8px; }
+.modal-meta-pills { gap: 5px; margin-bottom: 10px; }
+.modal-meta-pill { padding: 3px 9px; font-size: .76rem; }
+
+/* Pestañas más compactas */
+.modal-tabs { padding: 10px 16px 0; }
+.modal-tab { padding: 6px 13px; font-size: .85rem; }
+
+/* Cuerpo con menos aire */
+.modal-body { padding: 14px 16px; }
+.form-group { margin-bottom: 9px; }
+.form-group label { font-size: .82rem; }
+input, select, textarea { padding: 7px 10px; font-size: .9rem; }
+.form-grid { gap: 10px; }
+
+/* Footer de panel */
+.modal-panel-footer {
+  padding-top: 12px;
+  margin-top: 2px;
+  gap: 8px;
+}
+
+/* ── Acciones rápidas (Leer / Prestar) ───────────────── */
+.modal-acciones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.modal-accion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border-2);
+  background: var(--surface-2);
+  color: var(--ink);
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: background .18s, border-color .18s, box-shadow .18s, transform .12s;
+  text-align: left;
+}
+.modal-accion:hover {
+  background: var(--accent-soft);
+  border-color: var(--border-acc);
+  box-shadow: 0 2px 10px var(--accent-glow);
+  transform: translateY(-1px);
+}
+.modal-accion:active { transform: translateY(0); }
+.modal-accion-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+  flex-shrink: 0;
+  opacity: .75;
+}
+.modal-accion-label {
+  font-size: .88rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+/* ── Botón eliminar ──────────────────────────────────── */
+.btn-danger {
+  background: transparent;
+  color: #b85555;
+  border: 1px solid rgba(184, 85, 85, .30);
+}
+.btn-danger:hover {
+  background: rgba(184, 85, 85, .10);
+  border-color: rgba(184, 85, 85, .55);
+  box-shadow: none;
+}
+
+/* ── Botón "abrir ficha" en tabla (flecha) ───────────── */
+.btn-abrir-ficha .icon-circle {
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--ink-3);
+}
+.btn-abrir-ficha:hover .icon-circle { color: var(--accent); }
+
+/* ── Card de lista móvil: sin columna de acciones ───────*/
+@media (max-width: 820px) {
+  .ej-card { grid-template-columns: 48px minmax(0, 1fr) auto; }
+  .ej-actions .icon-btn { opacity: .55; }
+  .ej-actions .icon-btn:hover { opacity: 1; }
+}
+
+/* ── Historial más compacto ──────────────────────────── */
+.historial-grid { gap: 12px; }
+.historial-card { padding: 12px; }
+.historial-card-header { margin-bottom: 8px; }
+.historial-card-header h3 { font-size: .9rem; }
+.result-block { font-size: .78rem; line-height: 1.5; color: var(--ink-2); }
+
+/* ── Reader panel más compacto ───────────────────────── */
+.reader-block { margin-top: 10px; gap: 6px; }
+.reader-label { font-size: .82rem; }
+.reader-list { gap: 7px; }
+.reader-item { padding: 8px 10px; }
+
+@media (max-width: 820px) {
+  .modal-acciones { grid-template-columns: 1fr 1fr; }
+  .modal-accion { padding: 10px 12px; }
+  .modal-accion-label { font-size: .82rem; }
+}
+
+/* Botón "Añadir imagen" sobre la portada */
+.modal-cover-upload-text {
+  font-size: .75rem;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.3;
+  padding: 0 6px;
+  text-shadow: 0 1px 3px rgba(0,0,0,.4);
+}
