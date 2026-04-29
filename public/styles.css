@@ -1,3193 +1,1277 @@
-:root{
-  /* Base */
-  --bg: #faeef3;
-  --ink: #ffffff;
+/* ============================================================
+   PaseoLibros — styles.css
+   Dirección estética: editorial íntima. Papel de libro, tinta,
+   manchas de té. Tipografía serif + sans. Cálido y denso pero
+   nunca recargado.
+   ============================================================ */
 
-  /* Rosa palo (cards + botones) */
-  --pink: #d6a5b5;
-  --pink-2: #c78ea1;
+/* ── Google Fonts (Fraunces display + DM Sans texto) ─────── */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap');
 
-  /* Negro (resto) */
-  --panel: #000000;
-  --panel-2: rgba(0,0,0,.72);
+/* ══════════════════════════════════════════════════════════
+   TOKENS
+   ══════════════════════════════════════════════════════════ */
+:root {
+  /* Paleta base — tema rosa / papel */
+  --bg:          #f7f0eb;
+  --surface:     #fffdf9;
+  --surface-2:   #f2e8df;
+  --ink:         #1a1410;
+  --ink-2:       #4a3f36;
+  --ink-3:       #8a7a70;
 
-  --muted: rgba(255,255,255,.78);
-  --border: rgba(255,255,255,.16);
-  --border-pink: rgba(214,165,181,.55);
+  /* Acento */
+  --accent:      #b85c6e;
+  --accent-soft: rgba(184, 92, 110, .12);
+  --accent-glow: rgba(184, 92, 110, .28);
 
-  --shadow: 0 14px 34px rgba(0,0,0,.55);
-  --radius: 16px;
-  --radius-sm: 12px;
-  --gap: 18px;
+  /* Borders */
+  --border:      rgba(26, 20, 16, .10);
+  --border-2:    rgba(26, 20, 16, .18);
+  --border-acc:  rgba(184, 92, 110, .40);
 
-  /* 👇 nuevas variables para poder tematizar más cosas */
-  --card-bg: rgba(214,165,181,.92);
-  --card-border: rgba(0,0,0,.25);
+  /* Sombras */
+  --shadow-sm:   0 2px 6px rgba(26, 20, 16, .07);
+  --shadow-md:   0 8px 24px rgba(26, 20, 16, .10);
+  --shadow-lg:   0 20px 50px rgba(26, 20, 16, .14);
 
-  --btn-bg: rgba(214,165,181,0.98);
-  --btn-border: rgba(0,0,0,.28);
-  --btn-color: #ffffff;
+  /* Radios */
+  --r-sm:  10px;
+  --r-md:  16px;
+  --r-lg:  22px;
+  --r-xl:  30px;
 
-  --modal-bg: rgba(0,0,0,.94);
-  --modal-border: rgba(214,165,181,.60);
+  /* Espacios */
+  --gap:   20px;
+  --gap-s: 12px;
 
-  --table-bg: rgba(0,0,0,.78);
-  --table-border: rgba(214,165,181,.55);
-
-  --scanner-bg: rgba(0,0,0,.65);
-
-  --pill-bg: rgba(0,0,0,.75);
-
-  --card-bg: rgba(214,165,181,.92);
-  --card-border: rgba(0,0,0,.25);
-
-  /* 👇 nuevas para las cards grandes de ejemplares (vista grid) */
-  --ej-card-bg: rgba(232,170,196,.92);
-  --ej-card-border: rgba(0,0,0,.12);
-
-  --btn-bg: rgba(214,165,181,0.98);
-  --btn-border: rgba(0,0,0,.28);
-  --btn-color: #ffffff;
-}
-body.theme-rose{
-  /* mismos valores que :root: mantiene el aspecto actual */
-  --bg: #faeef3;
-  --ink: #ffffff;
-  --pink: #d6a5b5;
-  --pink-2: #c78ea1;
-  --panel: #000000;
-  --panel-2: rgba(0,0,0,.72);
-  --muted: rgba(255,255,255,.78);
-  --border: rgba(255,255,255,.16);
-  --border-pink: rgba(214,165,181,.55);
-  --shadow: 0 14px 34px rgba(0,0,0,.55);
-  --radius: 16px;
-  --radius-sm: 12px;
-  --gap: 18px;
-  --card-bg: rgba(214,165,181,.92);
-  --card-border: rgba(0,0,0,.25);
-  --btn-bg: rgba(214,165,181,0.98);
-  --btn-border: rgba(0,0,0,.28);
-  --btn-color: #ffffff;
-  --modal-bg: rgba(0,0,0,.94);
-  --modal-border: rgba(214,165,181,.60);
-  --table-bg: rgba(0,0,0,.78);
-  --table-border: rgba(214,165,181,.55);
-  --scanner-bg: rgba(0,0,0,.65);
-  --pill-bg: rgba(0,0,0,.75);
-  --input-border: rgba(214,165,181,.55);
-  --ej-card-bg: rgba(232,170,196,.92);
-  --ej-card-border: rgba(0,0,0,.12);
-  --table-row-border: rgba(255,255,255,.12);
+  /* Tipografía */
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body:    'DM Sans', system-ui, -apple-system, sans-serif;
 }
 
-body.theme-dark{
-  --bg: #050508;
-  --ink: #f5f5ff;
-  --pink: #7f5af0;
-  --pink-2: #5a32c3;
-  --panel: #050509;
-  --panel-2: rgba(0,0,0,.9);
-  --muted: rgba(200,200,255,.82);
-  --border: rgba(255,255,255,.25);
-  --border-pink: rgba(127,90,240,.7);
-  --shadow: 0 18px 40px rgba(0,0,0,.85);
-  --radius: 16px;
-  --radius-sm: 12px;
-  --gap: 18px;
-  --card-bg: rgba(18,18,30,.96);
-  --card-border: rgba(255,255,255,.16);
-  --btn-bg: #7f5af0;
-  --btn-border: rgba(0,0,0,.6);
-  --btn-color: #ffffff;
-  --modal-bg: rgba(6,6,14,.98);
-  --modal-border: rgba(127,90,240,.7);
-  --table-bg: rgba(10,10,18,.92);
-  --table-border: rgba(127,90,240,.6);
-  --scanner-bg: rgba(12,12,20,.9);
-  --pill-bg: rgba(0,0,0,.7);
-  --input-border: rgba(127,90,240,.7);
-  --ej-card-bg: rgba(18,18,30,.96);
-  --ej-card-border: rgba(255,255,255,.16);
-  --table-row-border: rgba(255,255,255,.06);  /* la mitad de intensidad */
-  }
+/* Tema oscuro */
+body.theme-dark {
+  --bg:          #0e0b09;
+  --surface:     #1a1410;
+  --surface-2:   #251e18;
+  --ink:         #f0e8e0;
+  --ink-2:       #c8b8ac;
+  --ink-3:       #7a6a60;
 
+  --accent:      #e07a8a;
+  --accent-soft: rgba(224, 122, 138, .12);
+  --accent-glow: rgba(224, 122, 138, .25);
 
-*{box-sizing:border-box}
-html,body{height:100%}
+  --border:      rgba(240, 232, 224, .08);
+  --border-2:    rgba(240, 232, 224, .14);
+  --border-acc:  rgba(224, 122, 138, .35);
 
-body{
-  margin:0;
-  font-family:"Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  background:
-  radial-gradient(1200px 700px at 15% 0%, rgba(214,165,181,.22), transparent 55%),
-  radial-gradient(1000px 700px at 85% 20%, rgba(214,165,181,.12), transparent 55%),
-  var(--bg);
-  color:var(--ink);
+  --shadow-sm:   0 2px 8px rgba(0, 0, 0, .30);
+  --shadow-md:   0 8px 28px rgba(0, 0, 0, .40);
+  --shadow-lg:   0 22px 56px rgba(0, 0, 0, .55);
 }
 
-a{color:var(--ink); text-decoration:none}
-a:hover{color:var(--pink); text-decoration:underline}
+/* ══════════════════════════════════════════════════════════
+   RESET & BASE
+   ══════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; max-width: 100%; overflow-x: hidden; }
 
-/* Evita imágenes gigantes */
-img{max-width:100%; height:auto; display:block}
-
-/* =========================
-CONTENEDOR + MÁRGENES LATERALES
-========================= */
-.app{
-  max-width: 1400px;
-  margin: 0 auto;
-  padding-inline: clamp(14px, 3vw, 40px);   /* 👈 aire izq/dcha */
-  padding-block: 22px 34px;                /* arriba/abajo */
-}
-
-/* =========================
-HEADER
-========================= */
-.app-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:var(--gap);
-  padding:16px 16px;
-  background: rgba(0,0,0,.86);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(10px);
-}
-
-.logo{display:flex; align-items:center; gap:14px}
-.logo-icon{
-  width:48px; height:48px;
-  display:grid; place-items:center;
-  border-radius:14px;
-  background: rgba(214,165,181,.18);
-  border:1px solid rgba(214,165,181,.45);
-}
-.logo-mark{font-weight:800}
-.logo-text h1{margin:0; font-size:1.25rem}
-.logo-text p{margin:.15rem 0 0; color:var(--muted); font-size:.92rem}
-
-/* Barra usuario (solo nombre + logout) */
-.user-bar{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:10px 12px;
-  border-radius:999px;
-  background: rgba(0,0,0,.60);
-  border:1px solid rgba(214,165,181,.45);
-}
-.user-bar-left{display:flex; align-items:center; gap:10px}
-.user-avatar{
-  width:30px; height:30px;
-  display:grid; place-items:center;
-  border-radius:999px;
-  background: rgba(214,165,181,.75);
-  border:1px solid rgba(214,165,181,.95);
-  font-size:1.05rem;
-}
-.user-name{font-weight:800}
-
-/* =========================
-LAYOUT (izq: alta | dcha: tabla + resumen)
-========================= */
-.app-main{
-  margin-top:var(--gap);
-  display:grid;
-  grid-template-columns: 360px 1fr;
-  gap:var(--gap);
-  align-items:start;
-}
-.column{min-width:0}
-.column-left{position:sticky; top:18px; align-self:start}
-
-@media (max-width: 980px){
-  .app-main{grid-template-columns:1fr}
-  .column-left{position:static}
-}
-
-/* =========================
-CARDS (rosa)
-========================= */
-.card{
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding:16px;
-}
-
-.card + .card{margin-top:var(--gap)}
-
-.card-header-inline{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  margin-bottom:10px;
-}
-.card-header-actions{display:flex; gap:10px; align-items:center}
-
-h2{margin:0 0 10px; font-size:1.08rem}
-.helper-text{margin:10px 0 0; color: rgba(255,255,255,.90); font-size:.92rem}
-
-/* grid de lecturas + préstamos debajo de ejemplares */
-.grid-two{
-  margin-top:var(--gap);
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:var(--gap);
-}
-@media (max-width: 980px){ .grid-two{grid-template-columns:1fr} }
-
-/* =========================
-FORMULARIOS (inputs negros dentro de card rosa)
-========================= */
-.form-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px}
-@media (max-width: 520px){ .form-grid{grid-template-columns:1fr} }
-
-.form-group{display:flex; flex-direction:column; gap:6px; margin-bottom:12px}
-label{color: rgba(255,255,255,.88); font-size:.9rem}
-
-input, select, textarea{
-  background: rgba(0,0,0,.84);
-  border: 1px solid var(--input-border);
+body {
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  background: var(--bg);
   color: var(--ink);
-  padding:10px 12px;
-  border-radius: var(--radius-sm);
-  outline:none;
-}
-input::placeholder, textarea::placeholder{color: rgba(255,255,255,.62)}
-input:focus, select:focus, textarea:focus{
-  border-color: rgba(214,165,181,.95);
-  box-shadow: 0 0 0 3px rgba(214,165,181,.18);
+  -webkit-font-smoothing: antialiased;
+  transition: background .3s, color .3s;
 }
 
-.input-with-button{display:flex; gap:10px}
-.input-with-button input{flex:1}
-
-/* =========================
-   BOTONES (theme-aware)
-   ========================= */
-   .btn{
-    border: 1px solid var(--btn-border);
-    background: var(--btn-bg);
-    color: var(--btn-color);
-    padding:10px 12px;
-    border-radius:999px;
-    cursor:pointer;
-    font-weight:800;
-  }
-  .btn:hover{ filter:brightness(1.05); }
-  .btn:active{ transform: translateY(1px); }
-  
-  /* primario = color de botón del tema */
-  .btn-primary{
-    background: var(--btn-bg);
-  }
-  
-  /* secundario = mismo tono pero usando el rosa 2 del tema */
-  .btn-secondary{
-    background: var(--pink-2);
-    border-color: var(--btn-border);
-  }
-  
-  /* ghost = fondo oscuro del tema + borde rosa del tema */
-  .btn-ghost{
-    background: var(--panel-2);
-    border:1px solid var(--border-pink);
-  }
-  
-  .btn-full{width:100%}
-  .btn-sm{padding:8px 10px; font-size:.9rem}
-  
-
-/* =========================
-ICON BUTTONS (solo círculo, SIN “cuadrado dentro”)
-========================= */
-.icon-btn{
-  width: 34px;
-  height: 34px;
-  padding: 0;
-  border-radius: 999px;
-  display:inline-grid;
-  place-items:center;
-  cursor:pointer;
-
-  background: var(--panel-2);     /* antes rgba(0,0,0,.78) */
-  border:1px solid var(--border-pink);  /* antes rgba(214,165,181,.65) */
-  color: var(--ink);
-}
-.icon-btn:hover{
-  filter:brightness(1.08);
+/* Textura de papel sutil en el fondo */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(ellipse 80vw 50vh at 10% 0%, rgba(184,92,110,.06), transparent),
+    radial-gradient(ellipse 60vw 40vh at 90% 80%, rgba(184,92,110,.04), transparent);
+  pointer-events: none;
+  z-index: 0;
 }
 
+img { max-width: 100%; height: auto; display: block; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
 
-/* El span interior NO debe dibujar otra caja */
-.icon-circle{
-  display:inline;
-  width:auto !important;
-  height:auto !important;
-  padding:0 !important;
-  border:0 !important;
-  background: transparent !important;
-  border-radius: 0 !important;
-  box-shadow:none !important;
-  font-size: 16px;
-  line-height: 1;
-}
-
-/* Celda de acciones: sin saltos */
-.celda-acciones{white-space:nowrap}
-
-/* =========================
-   TABLAS (theme-aware)
-   ========================= */
-   .table-wrapper{
-    overflow:auto;
-    border-radius:14px;
-    border:1px solid var(--table-border);
-    background: var(--table-bg);
-    width: 100%;
-    max-width: 100%;
-}
-
-  
-  table{
-    width:100%;
-    border-collapse:collapse;
-    min-width:760px;
-  }
-  .table-small{min-width:520px;}
-  
-  th,td{
-    padding:10px 12px;
-    border-bottom:1px solid var(--table-row-border);
-    vertical-align:top;
-  }
-  
-  
-  /* cabecera se apoya en el "panel" del tema */
-  th{
-    position:sticky;
-    top:0;
-    background: var(--panel-2);
-    text-align:left;
-    font-size:.9rem;
-    color: rgba(255,255,255,.84);
-  }
-  
-  /* el hover lo mantenemos igual (queda bien en ambos temas) */
-  tr:hover td{
-    background: rgba(255,255,255,.06);
-  }
-  
-/* Ordenación: que NO parezca botón, pero sea clicable */
-.th-sort{
-  background: transparent;
-  border: 0;
-  padding: 0;
-  margin: 0;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  width:100%;
-  text-align:left;
-}
-.th-sort:hover span:first-child{ text-decoration: underline; text-decoration-thickness: 2px; }
-.th-sort-icon{ font-size:.8rem; opacity:.9; }
-.th-sort:focus-visible{
-  outline:2px solid rgba(214,165,181,.80);
-  outline-offset:2px;
-  border-radius:10px;
-}
-
-/* Mini portada en tabla */
-.portada-mini-img{
-  width: 34px;
-  height: 48px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid rgba(214,165,181,.55);
-  background: rgba(0,0,0,.65);
-}
-.portada-placeholder-mini{
-  width: 34px;
-  height: 48px;
-  border-radius: 8px;
-  display:grid;
-  place-items:center;
-  background: rgba(0,0,0,.65);
-  border: 1px solid rgba(214,165,181,.55);
-  font-size: .9rem;
-}
-
-/* =========================
-LOGIN MODAL
-========================= */
-.auth-overlay{
-  position:fixed;
-  inset:0;
-  display:none; /* JS lo pone a flex */
-  align-items:center;
-  justify-content:center;
-  padding:18px;
-  background: rgba(0,0,0,.78);
-  backdrop-filter: blur(8px);
-  z-index: 9999;
-}
-.auth-dialog{
-  width:min(520px, 100%);
-  background: rgba(0,0,0,.94);
-  border:1px solid rgba(214,165,181,.60);
-  border-radius:var(--radius);
-  box-shadow: var(--shadow);
-  overflow:hidden;
-}
-.auth-header{padding:16px 16px 0}
-.auth-header h2{margin:0}
-.auth-header .helper-text{margin:6px 0 0}
-.auth-body{padding:16px}
-
-/* =========================
-MODAL FICHA
-========================= */
-.modal{position:fixed; inset:0; display:none; z-index:5000}
-.modal.is-visible{display:block}
-
-.modal-backdrop{position:absolute; inset:0; background: rgba(0,0,0,.78); backdrop-filter: blur(6px)}
-.modal-dialog{
-  position:relative;
-  margin: 4vh auto;
-  width: min(980px, calc(100% - 24px));
-  background: var(--modal-bg);
-  border:1px solid var(--modal-border);
-  border-radius:var(--radius);
-  box-shadow: var(--shadow);
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
-}
-
-.modal-close{
-  position:absolute;
-  top:10px;
-  right:12px;
-  border:none;
-  background: transparent;
-  color: var(--ink);
-  font-size: 1.4rem;
-  cursor:pointer;
-}
-
-.modal-header{
-  display:flex;
-  gap:16px;
-  padding:16px 16px 0;
-  align-items:flex-start;
-}
-.modal-cover{display:flex; flex-direction:column; gap:10px}
-.modal-cover-img{
-  width: 140px;
-  height: 200px;
-  object-fit: contain;
-  border-radius: 14px;
-  border: 1px solid rgba(214,165,181,.60);
-  background: rgba(0,0,0,.75);
-}
-.modal-cover-upload{width:140px; justify-content:center}
-.modal-header-info{min-width:0}
-
-.modal-body{
-  padding:16px;
-  overflow:auto;
-  min-height:0;
-}
-
-@media (max-width: 820px){
-  table{min-width:720px}
-  .modal-dialog{margin:0; width:100%; height:100vh; border-radius:0}
-  .modal-header{
-    display:grid;
-    grid-template-columns: 120px 1fr;
-    gap:12px;
-    padding:14px 14px 0;
-    .table-wrapper {
-      background: transparent !important;
-      border: none !important;
-    }
-  }
-  .modal-cover-img{width:120px; height:170px}
-  .modal-cover-upload{width:120px}
-}
-
-@media (max-width: 520px){
-  table{min-width:720px}
-  .portada-mini-img,.portada-placeholder-mini{width:28px; height:40px}
-}
-
-/* Footer */
-.app-footer{margin-top:var(--gap); text-align:center; color:rgba(0,0,0,.55)}
-/* ✅ Márgenes laterales reales (izq/dcha) también en pantallas MUY grandes */
-.app{
-  /* mantiene tu padding vertical actual */
-  padding-top: 1.5rem !important;
-  padding-bottom: 2rem !important;
-
-  /* esto es lo importante: gutter lateral adaptable */
-  padding-left: clamp(24px, 6vw, 140px) !important;
-  padding-right: clamp(24px, 6vw, 140px) !important;
-}
-/* Igualar tamaño visual de iconos texto (↑ ↓ etc.) */
-.icon-circle{
-  display: inline-grid;
-  place-items: center;
-  width: 1em;
-  height: 1em;
-  font-size: 16px;     /* ajusta si quieres */
-  line-height: 1;
-
-}
-/* ✅ Modal préstamos: overlay pantalla completa SIEMPRE */
-#prestamo-overlay{
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  inset: 0 !important;
-  z-index: 9999 !important;
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Se abre añadiendo clase */
-#prestamo-overlay.is-open{
-  display: flex !important;
-}
-
-/* Por si algún contenedor tiene transform y fastidia el fixed */
-body, html{
-  transform: none !important;
-}
-/* ✅ Backdrop del modal de préstamos */
-#prestamo-overlay{
-  background: rgba(0, 0, 0, 0.65) !important;
-  backdrop-filter: blur(2px);
-}
-/* Modal préstamo: caja negra */
-.prestamo-dialog{
-  background: var(--panel) !important;
-  border: 1px solid var(--border) !important;
-}
-
-/* Modal préstamo: más pro (compacto + menos recto) */
-.prestamo-dialog{
-  width: min(440px, calc(100vw - 32px)) !important;
-  padding: 18px 18px 14px !important;
-  border-radius: 18px !important;
-  border: 1px solid rgba(255,255,255,.16) !important;
-  box-shadow: 0 24px 70px rgba(0,0,0,.72) !important;
-}
-
-/* Título más compacto */
-.prestamo-dialog h3{
-  margin: 0 0 12px !important;
-  font-size: 1.05rem;
-}
-
-/* Menos aire entre campos */
-.prestamo-dialog .form-group{
-  margin-bottom: 10px !important;
-}
-
-.prestamo-dialog label{
-  margin-bottom: 6px !important;
-  font-size: .92rem;
-  opacity: .92;
-}
-
-.prestamo-dialog input,
-.prestamo-dialog select{
-  padding: 9px 10px !important;
-  border-radius: 12px !important;
-}
-
-/* Helper text más discreto */
-.prestamo-dialog .helper-text{
-  margin-top: 6px !important;
-  font-size: .82rem;
-  opacity: .8;
-}
-
-/* Botones alineados y compactos */
-.prestamo-dialog-buttons{
-  margin-top: 12px !important;
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
-.prestamo-dialog-buttons .btn{
-  padding: 8px 12px !important;
-  border-radius: 12px !important;
-}
-/* Modal préstamos: marquito rosa estilo ficha ejemplar */
-.prestamo-dialog{
-  border: 1.5px solid rgba(232, 170, 196, .85) !important; /* rosa palo */
-  box-shadow:
-  0 24px 70px rgba(0,0,0,.72),
-  0 0 0 3px rgba(232, 170, 196, .18) !important;         /* halo rosa */
-}
-/* FAB (+) solo visible en móvil */
-#btn-toggle-alta{
-  display: none !important; /* desktop y tablet */
-}
-
-@media (max-width: 820px){
-  #btn-toggle-alta{
-    display: grid !important; /* móvil */
-  }
-}
-/* Alinear por arriba las tarjetas de Lecturas y Préstamos */
-.grid-two{
-  align-items: start !important;
-}
-
-.grid-two > .card{
-  align-self: start;
-}
-/* =========================
-FIX: margen lateral real (desktop/tablet)
-========================= */
-.app{
-  max-width: 1400px !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  padding-left: clamp(16px, 3vw, 44px) !important;
-  padding-right: clamp(16px, 3vw, 44px) !important;
-}
-
-/* =========================
-FIX: tarjetas de Lecturas/Préstamos alineadas arriba
-(anula el .card + .card dentro del grid)
-========================= */
-.grid-two{
-  align-items: start;
-}
-
-.grid-two > .card{
-  align-self: start;
-}
-
-/* CLAVE: quitar el margin-top que rompe la alineación en grid */
-.grid-two > .card + .card{
-  margin-top: 0 !important;
-}
-/* ✅ Gutter lateral GLOBAL (se nota en main sí o sí) */
-body{
-  padding-left: clamp(16px, 3vw, 44px);
-  padding-right: clamp(16px, 3vw, 44px);
-}
-
-/* La app sigue centrada, pero SIN padding propio (para no pelear con reglas viejas) */
-.app{
-  max-width: 1400px;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 0 !important;
-}
-
-/* Header y main con separación vertical normal */
-.app-header{ margin-top: 18px; }
-.app-main{ margin-top: 18px; }
-/* ===== Herramientas (header dropdown) ===== */
-.tools-menu{
+/* ══════════════════════════════════════════════════════════
+   CONTENEDOR PRINCIPAL
+   ══════════════════════════════════════════════════════════ */
+.app {
   position: relative;
-  display: inline-flex;
+  z-index: 1;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: clamp(16px, 3vw, 40px) clamp(16px, 3vw, 44px);
+}
+
+/* ══════════════════════════════════════════════════════════
+   HEADER
+   ══════════════════════════════════════════════════════════ */
+.app-header {
+  display: flex;
   align-items: center;
-  margin-left: auto; /* empuja a la derecha si lo colocas tras el logo */
-}
-
-.tools-dropdown{
-  position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
-  min-width: 180px;
-  padding: 10px;
-  border-radius: 14px;
-  background: #000;
-  border: 1.5px solid rgba(232, 170, 196, .85);
-  box-shadow: 0 18px 45px rgba(0,0,0,.65);
-  display: none;
-  z-index: 10000;
-}
-
-.tools-dropdown.is-open{ display: grid; gap: 8px; }
-
-.tools-item{
-  width: 100%;
-  text-align: left;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12);
-  color: #fff;
-  cursor: pointer;
-}
-
-.tools-item:hover{ background: rgba(232,170,196,.18); border-color: rgba(232,170,196,.45); }
-
-.tools-item-file{ display: block; }
-/* Header centrado con controles a la derecha */
-.app-header{
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 14px;
-}
-
-.header-center{ justify-self: center; }
-.header-right{
-  justify-self: end;
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* user-bar ya no empuja con auto; se alinea antes de herramientas */
-.user-bar{ margin: 0 !important; }
-
-/* Separador dentro del dropdown */
-.tools-sep{
-  height: 1px;
-  background: rgba(255,255,255,.14);
-  margin: 4px 2px;
-}
-
-/* Botón peligro (logout) */
-.tools-danger{
-  border-color: rgba(255,255,255,.18);
-}
-.tools-danger:hover{
-  background: rgba(255, 80, 120, .18);
-  border-color: rgba(255, 80, 120, .35);
-}
-/* ✅ Que el header y el dropdown siempre queden por encima de la tabla */
-.app-header{
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
   position: relative;
   z-index: 5000;
-  overflow: visible;          /* evita que el menú se recorte */
+  overflow: visible;
 }
 
-.tools-menu{
+.logo.header-center {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.logo-img {
+  height: clamp(32px, 5vw, 64px);
+  width: auto;
+  object-fit: contain;
+}
+
+.header-right {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+/* ══════════════════════════════════════════════════════════
+   ICON BUTTONS
+   ══════════════════════════════════════════════════════════ */
+.icon-btn {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  color: var(--ink);
+  transition: background .18s, border-color .18s, transform .12s, box-shadow .18s;
+}
+.icon-btn:hover {
+  background: var(--accent-soft);
+  border-color: var(--border-acc);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.icon-btn:active { transform: scale(.95); }
+.icon-btn.is-active {
+  background: var(--accent-soft);
+  border-color: var(--border-acc);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.icon-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  line-height: 1;
+  width: auto;
+  height: auto;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Vista toggle */
+.header-view-toggle { display: inline-flex; align-items: center; gap: 6px; }
+
+/* ══════════════════════════════════════════════════════════
+   TOOLS DROPDOWN
+   ══════════════════════════════════════════════════════════ */
+.tools-menu {
   position: relative;
+  display: inline-flex;
+  align-items: center;
   z-index: 6000;
   overflow: visible;
 }
 
-.tools-dropdown{
-  z-index: 7000;              /* por encima de todo */
+.tools-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 190px;
+  padding: 8px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  box-shadow: var(--shadow-lg);
+  display: none;
+  z-index: 7000;
+  overflow: visible;
+}
+.tools-dropdown.is-open { display: grid; gap: 4px; }
+
+.tools-item {
+  width: 100%;
+  text-align: left;
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  background: transparent;
+  border: none;
+  color: var(--ink);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: .9rem;
+  transition: background .15s;
+}
+.tools-item:hover { background: var(--accent-soft); color: var(--accent); }
+.tools-item-file { display: block; cursor: pointer; }
+.tools-danger { color: #b85555; }
+.tools-danger:hover { background: rgba(184, 85, 85, .1); color: #b85555; }
+
+.tools-sep {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
 }
 
-/* Si algún contenedor recorta (muy común en table-wrapper) */
-.table-wrapper{
+/* Sort dentro de tools */
+.tools-sort-wrap {
+  display: grid;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.tools-sort-label { font-size: .82rem; font-weight: 500; color: var(--ink-3); }
+.tools-sort-wrap select {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  color: var(--ink);
+  padding: 7px 10px;
+  border-radius: var(--r-sm);
+  font-family: var(--font-body);
+}
+
+/* ══════════════════════════════════════════════════════════
+   LAYOUT PRINCIPAL
+   ══════════════════════════════════════════════════════════ */
+.app-main {
+  margin-top: var(--gap);
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: var(--gap);
+  align-items: start;
+}
+.column { min-width: 0; }
+.column-left { position: sticky; top: 18px; align-self: start; }
+
+@media (max-width: 980px) {
+  .app-main { grid-template-columns: 1fr; }
+  .column-left { position: static; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   CARDS
+   ══════════════════════════════════════════════════════════ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  padding: 18px;
+  transition: box-shadow .2s;
+}
+.card + .card { margin-top: var(--gap); }
+
+.card-header-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.card-header-actions { display: flex; gap: 8px; align-items: center; }
+
+/* ══════════════════════════════════════════════════════════
+   TIPOGRAFÍA
+   ══════════════════════════════════════════════════════════ */
+h2 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0 0 10px;
+  color: var(--ink);
+  letter-spacing: -.01em;
+}
+h3 {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 8px;
+  letter-spacing: -.01em;
+}
+.helper-text { margin: 8px 0 0; color: var(--ink-3); font-size: .88rem; }
+.muted { color: var(--ink-3); font-size: .88rem; }
+
+/* ══════════════════════════════════════════════════════════
+   FORMULARIOS
+   ══════════════════════════════════════════════════════════ */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+label {
+  color: var(--ink-2);
+  font-size: .88rem;
+  font-weight: 500;
+}
+
+input, select, textarea {
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  color: var(--ink);
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  outline: none;
+  font-family: var(--font-body);
+  font-size: .95rem;
+  transition: border-color .18s, box-shadow .18s;
+}
+input::placeholder, textarea::placeholder { color: var(--ink-3); }
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+select, select option {
+  background: var(--surface-2) !important;
+  color: var(--ink) !important;
+}
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 520px) { .form-grid { grid-template-columns: 1fr; } }
+
+.input-with-button { display: flex; gap: 8px; }
+.input-with-button input { flex: 1; }
+
+/* ══════════════════════════════════════════════════════════
+   BOTONES
+   ══════════════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  padding: 9px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: .92rem;
+  transition: filter .15s, transform .12s, box-shadow .15s;
+  white-space: nowrap;
+}
+.btn:active { transform: translateY(1px); }
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 3px 12px var(--accent-glow);
+}
+.btn-primary:hover { filter: brightness(1.07); box-shadow: 0 5px 18px var(--accent-glow); }
+
+.btn-secondary {
+  background: var(--surface-2);
+  color: var(--ink);
+  border-color: var(--border-2);
+}
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-2);
+  border-color: var(--border-2);
+}
+.btn-ghost:hover { background: var(--accent-soft); color: var(--accent); border-color: var(--border-acc); }
+
+.btn-full { width: 100%; }
+.btn-sm { padding: 6px 14px; font-size: .85rem; }
+
+/* ══════════════════════════════════════════════════════════
+   TABLAS
+   ══════════════════════════════════════════════════════════ */
+.table-wrapper {
+  overflow: auto;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  max-height: 380px;
   position: relative;
   z-index: 1;
 }
-/* Fondo general negro */
-body{
-  background: #000 !important;
-  color: #fff !important;
+
+table { width: 100%; border-collapse: collapse; min-width: 760px; }
+.table-small { min-width: 440px; }
+
+th, td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+
+th {
+  position: sticky;
+  top: 0;
+  background: var(--surface-2);
+  text-align: left;
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--ink-3);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  z-index: 2;
 }
-/* Modal ficha: permitir scroll vertical (sin romper header/backdrop) */
-#modal-ficha{
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--accent-soft); }
+
+/* Ordenación cabeceras */
+.th-sort {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+}
+.th-sort:hover span:first-child { color: var(--accent); }
+.th-sort-icon { font-size: .75rem; opacity: .7; }
+
+/* Portada mini */
+.portada-mini-img {
+  width: 36px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--border-2);
+}
+.portada-placeholder-mini {
+  width: 36px;
+  height: 52px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  color: var(--ink-3);
+  font-family: var(--font-display);
+  font-size: .65rem;
+  font-weight: 700;
+}
+
+/* Búsqueda + ordenación en cabecera */
+.table-search input {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: .88rem;
+  min-width: 180px;
+}
+
+.sort-mini { display: inline-flex; align-items: center; }
+.sort-select {
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: .88rem;
+  max-width: 160px;
+}
+
+/* Celda acciones */
+.celda-acciones { white-space: nowrap; }
+
+/* Badges título */
+.cell-title { display: flex; flex-direction: column; gap: 3px; }
+.title-text { font-weight: 500; line-height: 1.25; }
+.title-icons { display: flex; gap: 6px; font-size: .88em; color: var(--ink-3); }
+.badge { display: inline-flex; align-items: center; line-height: 1; white-space: nowrap; }
+.badge-fav.is-on { color: var(--accent); }
+
+/* ══════════════════════════════════════════════════════════
+   GRID DE PORTADAS
+   ══════════════════════════════════════════════════════════ */
+.ej-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  max-height: 62vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.ej-grid-item {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 10px;
+  cursor: pointer;
+  transition: transform .18s, box-shadow .18s, border-color .18s;
+}
+.ej-grid-item:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-acc);
+}
+
+.ej-grid-cover {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  display: block;
+}
+
+.ej-grid-title {
+  margin-top: 8px;
+  font-weight: 600;
+  font-size: .82rem;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  color: var(--ink);
+}
+
+.ej-grid-meta { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 4px; }
+.ej-grid-pill {
+  background: var(--accent-soft);
+  border: 1px solid var(--border-acc);
+  border-radius: 999px;
+  padding: 2px 7px;
+  font-size: .7rem;
+  color: var(--accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Portada placeholder grid */
+.portada-placeholder-grid {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.portada-placeholder-grid .ph-logo {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.8rem;
+  color: var(--ink-3);
+  line-height: 1;
+}
+.portada-placeholder-grid .ph-sub {
+  font-size: .72rem;
+  color: var(--ink-3);
+}
+
+/* ══════════════════════════════════════════════════════════
+   GRID LECTURAS + PRÉSTAMOS
+   ══════════════════════════════════════════════════════════ */
+.grid-two {
+  margin-top: var(--gap);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
+  align-items: start;
+}
+.grid-two > .card + .card { margin-top: 0; }
+@media (max-width: 980px) { .grid-two { grid-template-columns: 1fr; } }
+
+/* ══════════════════════════════════════════════════════════
+   ESCÁNER
+   ══════════════════════════════════════════════════════════ */
+.scanner {
+  margin-top: 10px;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.scanner-text {
+  padding: 8px 12px;
+  font-size: .88rem;
+  color: var(--ink-2);
+}
+.scanner-video, #video {
+  width: 100% !important;
+  height: 220px !important;
+  object-fit: cover !important;
+  border-radius: 0;
+  display: block;
+}
+
+/* Móvil: escáner como overlay */
+@media (max-width: 820px) {
+  #scanner.scanner {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.94);
+    z-index: 9500;
+    border-radius: 0;
+    border: none;
+    display: none;
+    padding: 20px;
+  }
+  #scanner.scanner[style*="display:block"],
+  #scanner.scanner[style*="display: block"] {
+    display: grid !important;
+    grid-template-rows: auto 1fr auto;
+    gap: 12px;
+    place-items: start center;
+  }
+  #scanner .scanner-video,
+  #scanner video#video {
+    width: 100% !important;
+    height: min(65vh, 500px) !important;
+    border-radius: var(--r-md);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   MODAL FICHA LIBRO
+   ══════════════════════════════════════════════════════════ */
+.modal { position: fixed; inset: 0; display: none; z-index: 5000; }
+.modal.is-visible { display: block; }
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 8, 6, .70);
+  backdrop-filter: blur(6px);
+}
+.modal-dialog {
+  position: relative;
+  margin: 3vh auto;
+  width: min(980px, calc(100% - 24px));
+  max-height: calc(100vh - 48px);
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.modal-header {
+  display: flex;
+  gap: 18px;
+  padding: 20px 20px 0;
+  align-items: flex-start;
+}
+.modal-cover { display: flex; flex-direction: column; gap: 8px; }
+.modal-cover-img {
+  width: 130px;
+  height: 190px;
+  object-fit: cover;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border-2);
+  background: var(--surface-2);
+}
+.modal-cover-img.is-placeholder {
+  background: var(--surface-2);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--ink-3);
+}
+.modal-cover-upload { width: 130px; justify-content: center; text-align: center; }
+.modal-header-info { min-width: 0; padding-top: 4px; }
+.modal-header-info h2 { font-size: 1.3rem; margin-bottom: 4px; }
+.modal-body {
+  padding: 18px 20px;
+  overflow-y: auto;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--border-2);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  z-index: 5;
+  transition: background .15s;
+}
+.modal-close:hover { background: var(--accent-soft); color: var(--accent); }
+
+/* Flechas navegación */
+.modal-nav-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--border-2);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 1.8rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: var(--shadow-md);
+  transition: background .15s, border-color .15s;
+}
+.modal-nav-arrow:hover { background: var(--accent-soft); border-color: var(--border-acc); }
+.modal-nav-arrow--prev { left: -56px; }
+.modal-nav-arrow--next { right: -56px; }
+
+/* Secciones del modal */
+.form-subsection { margin-bottom: 20px; }
+.divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+.card-inside-modal {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px;
+}
+.result-block {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  font-size: .82rem;
+  color: var(--ink-2);
+  max-width: 100%;
+}
+
+/* ══════════════════════════════════════════════════════════
+   AUTH MODAL
+   ══════════════════════════════════════════════════════════ */
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(10, 8, 6, .72);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+}
+.auth-dialog {
+  width: min(480px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+.auth-header { padding: 20px 20px 0; }
+.auth-header h2 { font-size: 1.4rem; margin-bottom: 6px; }
+.auth-body { padding: 16px 20px 20px; }
+
+/* ══════════════════════════════════════════════════════════
+   MODAL PRÉSTAMO
+   ══════════════════════════════════════════════════════════ */
+#prestamo-overlay {
   position: fixed;
   inset: 0;
   z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 8, 6, .65);
+  backdrop-filter: blur(2px);
+}
+.prestamo-dialog {
+  width: min(440px, calc(100vw - 32px));
+  padding: 20px;
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  box-shadow: var(--shadow-lg);
+}
+.prestamo-dialog h3 { margin-bottom: 14px; }
+.prestamo-dialog .form-group { margin-bottom: 10px; }
+.prestamo-dialog-buttons {
+  margin-top: 14px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
-#modal-ficha .modal-backdrop{
-  position: absolute;
+/* ══════════════════════════════════════════════════════════
+   MODAL DESEOS / COLA / SHARE
+   ══════════════════════════════════════════════════════════ */
+.deseos-overlay {
+  position: fixed;
   inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 8, 6, .65);
+  backdrop-filter: blur(2px);
 }
-
-/* La “caja” del modal no puede superar la ventana */
-#modal-ficha .modal-dialog{
-  position: relative;
+.deseos-dialog {
+  width: min(700px, calc(100vw - 32px));
   max-height: calc(100vh - 48px);
-  overflow: hidden;            /* el scroll va en el body del modal */
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  margin: 24px auto;
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-lg);
+}
+.deseos-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.deseos-toolbar {
+  padding: 12px 16px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.deseos-lista {
+  padding: 12px 16px;
+  overflow: auto;
+  flex: 1;
+  display: grid;
+  gap: 8px;
+}
+.deseo-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  transition: border-color .15s;
+}
+.deseo-item:hover { border-color: var(--border-acc); }
+.deseo-title { font-weight: 600; font-size: .95rem; }
+.deseo-meta { margin-top: 4px; font-size: .82rem; color: var(--ink-2); display: flex; gap: 8px; flex-wrap: wrap; }
+.deseo-pill {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  border: 1px solid var(--border-acc);
+  color: var(--accent);
+  font-size: .75rem;
+}
+.deseo-actions { display: flex; gap: 6px; align-items: flex-start; flex-wrap: nowrap; }
+.deseos-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+.deseo-form { padding: 12px 16px; overflow: auto; }
+
+#info-deseos { padding: 0 16px 8px; }
+#info-cola { padding: 0 14px; }
+
+/* ══════════════════════════════════════════════════════════
+   MARCAPÁGINAS (mini modal)
+   ══════════════════════════════════════════════════════════ */
+.mp-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+.mp-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 8, 6, .65);
+  backdrop-filter: blur(2px);
+}
+.mp-dialog {
+  position: relative;
+  width: min(480px, calc(100vw - 32px));
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 18px;
+  z-index: 1;
+}
+.mp-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.mp-body label { display: block; margin-bottom: 6px; color: var(--ink-2); font-size: .88rem; }
+.mp-row { display: flex; gap: 8px; align-items: center; }
+.mp-row input[type="number"] { flex: 1; min-width: 100px; text-align: center; }
+.mp-range { width: 100%; margin-top: 10px; accent-color: var(--accent); }
+.mp-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+.mp-help { margin-top: 6px; font-size: .82rem; color: var(--ink-3); }
+
+#mp-num {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 8px 12px;
+  border-radius: var(--r-sm);
+  width: 100%;
 }
 
-/* El contenido del modal (lo de abajo) es el que scrollea */
-#modal-ficha .modal-body{
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  min-height: 0;              /* clave para que flex permita scroll */
-  padding-right: 6px;         /* evita que el scroll tape contenido */
+/* ══════════════════════════════════════════════════════════
+   PANEL DEL LECTOR
+   ══════════════════════════════════════════════════════════ */
+.reader-panel { margin-top: 8px; }
+.reader-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.reader-block { margin-top: 14px; display: grid; gap: 8px; }
+.reader-label { font-weight: 600; font-size: .88rem; color: var(--ink-2); }
+.reader-tags-row { display: flex; gap: 8px; align-items: center; }
+.reader-tags-row input { flex: 1; }
+.reader-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.reader-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  border: 1px solid var(--border-acc);
+  color: var(--accent);
+  font-size: .82rem;
 }
-/* Cabecera de tarjetas dentro del modal: misma altura/estilo */
-.card-inside-modal .card-header-inline{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
+.reader-chip button { border: none; background: transparent; cursor: pointer; font-size: 12px; color: inherit; line-height: 1; }
+.reader-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.reader-list { display: grid; gap: 8px; margin-top: 6px; }
+.reader-item { padding: 10px 12px; border-radius: var(--r-sm); background: var(--surface-2); border: 1px solid var(--border); }
+.reader-item-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.reader-item small { opacity: .65; font-size: .8rem; }
+.reader-item p { margin: 6px 0 0; white-space: pre-wrap; font-size: .88rem; }
+.reader-audio-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+#reader-fav[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--border-acc); color: var(--accent); }
+
+/* ══════════════════════════════════════════════════════════
+   ESTADÍSTICAS DE LECTURA
+   ══════════════════════════════════════════════════════════ */
+#card-stats-lecturas { margin-top: calc(var(--gap) * 1.5); }
+
+.stats-year-cell { display: flex; align-items: center; gap: 6px; }
+.stats-toggle {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid var(--border-2);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  font-size: .8rem;
+  transition: background .15s, border-color .15s;
+}
+.stats-toggle:hover { background: var(--accent-soft); border-color: var(--border-acc); color: var(--accent); }
+
+.stats-detail-content { display: flex; flex-wrap: wrap; gap: 16px; padding-top: 8px; }
+.stats-detail-col { min-width: 160px; }
+.stats-list { list-style: disc; padding-left: 16px; margin: 4px 0 0; }
+.stats-list li { font-size: .85rem; line-height: 1.4; }
+
+.stats-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 600;
+  background: var(--accent-soft);
+  border: 1px solid var(--border-acc);
+  color: var(--accent);
 }
 
-/* Acción (icon-btn) en tarjetas del modal: compacta */
-.card-inside-modal .card-header-actions .icon-btn{
-  width: 34px;
-  height: 34px;
+/* Vista móvil stats */
+#stats-lecturas-mobile { display: none; }
+.stats-mobile-item {
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.stats-mobile-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.stats-mobile-year { font-weight: 600; font-size: .92rem; }
+.stats-mobile-counters { display: flex; gap: 6px; align-items: center; }
+.stats-mobile-toggle {
+  border: none;
+  background: transparent;
+  font-size: .95rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--ink-2);
+}
+.stats-mobile-detail { margin-top: 8px; }
+
+/* ══════════════════════════════════════════════════════════
+   FAB (+) MÓVIL
+   ══════════════════════════════════════════════════════════ */
+#btn-toggle-alta { display: none !important; }
+@media (max-width: 820px) {
+  #btn-toggle-alta.fab-plus {
+    display: grid !important;
+    place-items: center;
+    position: fixed !important;
+    right: 16px !important;
+    bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+    width: 56px !important;
+    height: 56px !important;
+    border-radius: 999px !important;
+    background: var(--accent) !important;
+    color: #fff !important;
+    border: none !important;
+    box-shadow: 0 8px 24px var(--accent-glow), 0 16px 40px rgba(0,0,0,.25) !important;
+    font-size: 26px !important;
+    font-weight: 700 !important;
+    z-index: 9200 !important;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s !important;
+  }
+  #btn-toggle-alta.fab-plus:active { transform: scale(.95) !important; }
+  body.alta-visible #btn-toggle-alta.fab-plus {
+    background: var(--surface) !important;
+    color: var(--ink) !important;
+    border: 1px solid var(--border-2) !important;
+  }
 }
 
-/* Préstamos: tabla más compacta (similar a la densidad de Lecturas) */
-#tabla-prestamos.table-small th,
-#tabla-prestamos.table-small td{
-  padding: 8px 10px;
-}
-#prestamos-detalle{
-  white-space: pre-wrap;
-}
-/* =========================
-MÓVIL
-========================= */
-@media (max-width: 820px){
+/* ══════════════════════════════════════════════════════════
+   MÓVIL — LAYOUT GENERAL
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 820px) {
+  .app-main { grid-template-columns: 1fr !important; gap: 14px !important; }
 
-  /* Header más compacto */
-  .app-header{
-    grid-template-columns: 1fr auto 1fr;
+  /* Header: una línea */
+  .app-header {
+    padding: 10px 14px;
     gap: 10px;
-    padding: 10px 0;
-  }
-  .logo .logo-text p{ display:none; } /* subtítulo fuera en móvil */
-  .logo .logo-text h1{ font-size: 1.05rem; }
-
-  /* Main: una columna */
-  .app-main{
-    display: grid;
-    grid-template-columns: 1fr !important;
-    gap: 14px;
-  }
-  .column-left,
-  .column-right{
-    width: 100%;
   }
 
-  /* Ocultamos el panel de alta por defecto en móvil */
-  .column-left{
-    display: none;
-  }
+  /* Panel de alta: oculto por defecto */
+  .column-left { display: none !important; }
+  body.alta-visible .column-left { display: block !important; }
 
-  /* Cuando el FAB abre el alta */
-  body.alta-visible .column-left{
-    display: block;
-  }
-
-  /* El alta en móvil como “sheet” */
-  body.alta-visible .column-left .card{
+  /* Sheet de alta */
+  body.alta-visible::before {
+    content: '';
     position: fixed;
-    left: 16px;
-    right: 16px;
-    bottom: 84px;              /* deja espacio al FAB */
+    inset: 0;
+    background: rgba(10, 8, 6, .55);
+    z-index: 8500;
+  }
+  body.alta-visible .column-left .card {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 82px;
     max-height: calc(100vh - 140px);
     overflow: auto;
     z-index: 9000;
+    border-radius: var(--r-lg) !important;
+    border: 1px solid var(--border-acc) !important;
+    box-shadow: var(--shadow-lg) !important;
   }
 
-  /* Fondo oscuro detrás cuando está abierto el alta */
-  body.alta-visible::before{
-    content:"";
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.55);
-    z-index: 8500;
-  }
+  /* Tabla ejemplares: oculta en móvil */
+  .card-ejemplares .table-wrapper { display: none !important; }
+  #ejemplares-list { display: grid !important; gap: 10px; max-height: 62vh; overflow-y: auto; }
+  #ejemplares-list.vista-ej-grid { display: none !important; }
+  #ejemplares-grid { max-height: 62vh; overflow-y: auto; }
 
-  /* Tablas: scroll horizontal agradable */
-  .table-wrapper{
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+  /* Cards tipo vista-lista móvil */
+  .ej-card {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 12px;
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: start;
+    transition: border-color .15s;
   }
-  table{
-    min-width: 780px; /* evita que se rompa todo en móvil */
-  }
-
-  /* Lecturas + Préstamos: apilar */
-  .grid-two{
-    grid-template-columns: 1fr !important;
-  }
-
-  /* Dropdown herramientas: que no se salga */
-  .tools-dropdown{
-    right: 0;
-    left: auto;
-    min-width: 200px;
-  }
-
-  /* Modal ficha (libros/ejemplar): casi full screen */
-  #modal-ficha .modal-dialog{
-    width: calc(100vw - 20px);
-    max-height: calc(100vh - 20px);
-    margin: 10px auto;
-    border-radius: 18px;
-  }
-}
-
-/* FAB visible solo en móvil (lo pediste así) */
-#btn-toggle-alta{ display:none !important; }
-@media (max-width:820px){
-  #btn-toggle-alta{ display:grid !important; }
-}
-/* =========================
-MODO PRO MÓVIL: Portada + Título + Autor + Acciones
-(mantiene ordenación en Título/Autor)
-========================= */
-@media (max-width: 820px){
-
-  /* La tabla ya no necesita ser tan ancha */
-  #tabla-ejemplares{
-    min-width: 0 !important;
-  }
-
-  /* Ocultar columnas: ISBN (4), Estado (5), Ubicación (6), Notas (7) */
-  #tabla-ejemplares th:nth-child(4),
-  #tabla-ejemplares td:nth-child(4),
-  #tabla-ejemplares th:nth-child(5),
-  #tabla-ejemplares td:nth-child(5),
-  #tabla-ejemplares th:nth-child(6),
-  #tabla-ejemplares td:nth-child(6),
-  #tabla-ejemplares th:nth-child(7),
-  #tabla-ejemplares td:nth-child(7){
-    display: none !important;
-  }
-
-  /* Ajustes de densidad */
-  #tabla-ejemplares th,
-  #tabla-ejemplares td{
-    padding: 10px 10px;
-    vertical-align: middle;
-  }
-
-  /* Portada mini más contenida */
-  .portada-mini-img{
-    width: 38px;
-    height: 56px;
+  .ej-card:hover { border-color: var(--border-acc); }
+  .ej-cover {
+    width: 48px;
+    height: 68px;
+    border-radius: 8px;
     object-fit: cover;
-    border-radius: 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
   }
-
-  /* Para que Título/Autor no se disparen */
-  #tabla-ejemplares td:nth-child(2){
-    max-width: 44vw;
-    white-space: nowrap;
+  .ej-main { min-width: 0; }
+  .ej-title {
+    font-weight: 700;
+    font-size: .95rem;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+  .ej-author { margin-top: 3px; font-size: .84rem; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ej-meta { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 5px 6px; }
+  .ej-pill {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px 9px;
+    font-size: .75rem;
+    color: var(--ink-2);
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-  #tabla-ejemplares td:nth-child(3){
-    max-width: 34vw;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    opacity: .9;
+    max-width: 100%;
   }
+  .ej-actions { display: grid; gap: 6px; align-content: start; }
 
-  /* Cabeceras ordenables: que parezcan cabecera, no botón */
-  #tabla-ejemplares .th-sort{
-    background: transparent !important;
-    border: 0 !important;
-    padding: 0 !important;
-    color: inherit;
-    font-weight: 600;
-  }
-  #tabla-ejemplares .th-sort:active{ transform: none; }
-}
-/* =========================
-MODO PRO MÓVIL: tabla en 2 líneas por fila (muestra todo)
-========================= */
-@media (max-width: 820px){
+  /* Tabla wrapper de lecturas/préstamos: visible */
+  .grid-two .table-wrapper { display: block !important; max-height: 280px; }
 
-  /* Ocultamos columnas extra porque ya van en la línea meta (más limpio) */
-  #tabla-ejemplares th:nth-child(4),
-  #tabla-ejemplares td:nth-child(4),
-  #tabla-ejemplares th:nth-child(5),
-  #tabla-ejemplares td:nth-child(5),
-  #tabla-ejemplares th:nth-child(6),
-  #tabla-ejemplares td:nth-child(6),
-  #tabla-ejemplares th:nth-child(7),
-  #tabla-ejemplares td:nth-child(7){
-    display:none !important;
-  }
-
-  /* Título: 2 líneas */
-  #tabla-ejemplares td.cell-title .title-main{
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  #tabla-ejemplares td.cell-title .title-meta{
-    margin-top: 4px;
-    font-size: .82rem;
-    opacity: .85;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  #tabla-ejemplares td.cell-author{
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    opacity: .92;
-  }
-
-  .meta-dot{ margin: 0 6px; opacity: .65; }
-}
-/* =========================
-Modal ficha full-screen en móvil
-========================= */
-@media (max-width: 820px){
-  #modal-ficha .modal-dialog{
+  /* Modal ficha: full screen */
+  #modal-ficha .modal-dialog {
     width: 100vw !important;
     height: 100vh !important;
     max-height: 100vh !important;
     margin: 0 !important;
     border-radius: 0 !important;
   }
+  #modal-ficha .modal-header { position: sticky; top: 0; z-index: 2; background: var(--surface); }
 
-  /* header del modal visible siempre arriba */
-  #modal-ficha .modal-header{
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    background: #000;
-  }
+  /* Nav arrows dentro en móvil */
+  .modal-nav-arrow--prev { left: 6px; }
+  .modal-nav-arrow--next { right: 6px; }
 
-  /* que el cuerpo scrollee bien en móvil */
-  #modal-ficha .modal-body{
-    padding-bottom: 18px;
-  }
-}
-/* =========================
-Escáner PRO: overlay negro + cámara grande + guías
-========================= */
-#scanner.scanner{
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.92);
-  z-index: 9500;
-  padding: 18px;
-  display: none; /* tu JS lo pone a block */
-}
-
-#scanner.scanner[style*="display:block"],
-#scanner.scanner[style*="display: block"]{
-  display: grid !important;
-  grid-template-rows: auto 1fr auto;
-  gap: 12px;
-}
-
-/* Vídeo grande */
-#scanner .scanner-video,
-#scanner video#video{
-  width: 100% !important;
-  height: min(65vh, 520px) !important;
-  border-radius: 18px;
-  object-fit: cover;
-  background: #000;
-  position: relative;
-}
-
-/* Marco/guía (rectángulo) */
-#scanner .scanner-video::after,
-#scanner video#video::after{
-  content: "";
-  position: absolute;
-  inset: 18%;
-  border-radius: 16px;
-  border: 2px solid rgba(232,170,196,.85);
-  box-shadow: 0 0 0 4px rgba(232,170,196,.12);
-  pointer-events: none;
-}
-
-/* Línea central */
-#scanner .scanner-video::before,
-#scanner video#video::before{
-  content: "";
-  position: absolute;
-  left: 12%;
-  right: 12%;
-  top: 50%;
-  height: 2px;
-  background: rgba(232,170,196,.85);
-  box-shadow: 0 0 12px rgba(232,170,196,.35);
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-
-/* (Nota) ::before/::after no se aplican a <video> en algunos navegadores.
-Por eso añadimos un fallback abajo usando el contenedor #scanner */
-#scanner::before{
-  content:"";
-  position:absolute;
-  left: 18px; right: 18px;
-  top: 86px; /* ajusta si ves que tapa el texto */
-  height: min(65vh, 520px);
-  border-radius: 18px;
-  pointer-events:none;
-  box-shadow: inset 0 0 0 2px rgba(232,170,196,.0); /* placeholder */
-}
-
-@media (max-width: 820px){
-  /* Botón detener grande y cómodo */
-  #scanner #btn-detener{
-    width: 100%;
-  }
-}
-/* =========================
-Header full-bleed (fondo a 100vw, contenido respeta gutter)
-========================= */
-.app-header{
-  position: relative;
-}
-
-.app-header::before{
-  content:"";
-  position: absolute;
-  top: 0; bottom: 0;
-  left: 50%;
-  width: 100vw;
-  transform: translateX(-50%);
-  background: #000;
-  z-index: -1;
-}
-/* =========================================================
-PRO MAX MÓVIL: layout a ancho completo + cards uniformes
-========================================================= */
-@media (max-width: 820px){
-
-  /* Más “pantalla completa”: menos gutter lateral en móvil */
-  body{
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-  }
-
-  /* Cards al 100% del ancho disponible */
-  .app,
-  .app-main,
-  .column,
-  .card{
-    width: 100% !important;
-    max-width: none !important;
-    border-radius: 18px;
-  }
-
-  /* Header más “importante” en móvil */
-  .logo .logo-text h1{
-    font-size: 1.15rem !important;
-    line-height: 1.15;
-  }
-  .logo-icon{
-    transform: scale(1.05);
-  }
-
-  /* Card de “Ejemplares” un poco más grande/densa */
-  #tabla-ejemplares th,
-  #tabla-ejemplares td{
-    padding: 12px 12px !important;
-  }
-  .table-search input{
-    padding: 12px 12px !important;
-    border-radius: 14px;
-  }
-  #buscador-ejemplares{
-    font-size: 1rem;
-  }
-
-  /* La cabecera de Ejemplares más cómoda */
-  .card-header-inline h2{
-    font-size: 1.1rem;
-  }
-}
-
-/* =========================================================
-FAB (+) PRO: tamaño, color, sombra, safe-area, animación
-========================================================= */
-@media (max-width: 820px){
-  #btn-toggle-alta.fab-plus{
-    width: 58px !important;
-    height: 58px !important;
-    border-radius: 999px !important;
-
-    position: fixed !important;
-    right: 16px !important;
-    bottom: calc(16px + env(safe-area-inset-bottom)) !important;
-
-    display: grid !important;
-    place-items: center !important;
-
-    background: rgba(232,170,196,.92) !important; /* rosa palo */
-    color: #000 !important;
-    border: 1px solid rgba(0,0,0,.22) !important;
-
-    box-shadow:
-    0 16px 40px rgba(0,0,0,.55),
-    0 0 0 4px rgba(232,170,196,.18) !important;
-
-    font-size: 30px !important;
-    font-weight: 700 !important;
-    line-height: 1 !important;
-
-    z-index: 9200 !important;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  #btn-toggle-alta.fab-plus:active{
-    transform: scale(.98);
-  }
-
-  /* Cuando está abierto, que se note */
-  body.alta-visible #btn-toggle-alta.fab-plus{
-    background: #000 !important;
-    color: #fff !important;
-    border-color: rgba(232,170,196,.6) !important;
-    box-shadow:
-    0 16px 40px rgba(0,0,0,.55),
-    0 0 0 4px rgba(232,170,196,.24) !important;
-  }
-}
-
-/* =========================================================
-PRO MAX: que el panel de alta (sheet) se vea premium
-========================================================= */
-@media (max-width: 820px){
-  body.alta-visible .column-left .card{
-    border-radius: 20px !important;
-    border: 1.5px solid rgba(232,170,196,.85) !important;
-    box-shadow:
-    0 24px 70px rgba(0,0,0,.72),
-    0 0 0 3px rgba(232,170,196,.18) !important;
-  }
-}
-/* =========================
-PRO MAX móvil: lista de cards + evitar desbordes
-========================= */
-*{ box-sizing: border-box; }
-html, body{ overflow-x: hidden; }
-
-@media (max-width: 820px){
-  /* En móvil: ocultamos la tabla y mostramos la lista */
-  .column-right > .card:first-child .table-wrapper{ display:none !important; }
-  .ejemplares-list{ display:grid; gap:12px; }
-
-  .ej-card{
-    width: 100%;
-    background: rgba(232,170,196,.92);   /* rosa palo */
-    color: #000;
-    border-radius: 18px;
-    padding: 12px;
-    border: 1px solid rgba(0,0,0,.12);
-    box-shadow: 0 16px 40px rgba(0,0,0,.35);
-    display: grid;
-    grid-template-columns: 46px 1fr auto;
-    gap: 12px;
-    align-items: start;
-  }
-
-  .ej-cover{
-    width: 46px; height: 66px;
-    border-radius: 12px;
-    object-fit: cover;
-    background: #000;
-  }
-
-  .ej-main{ min-width: 0; } /* clave para ellipsis */
-  .ej-title{
-    font-weight: 700;
-    font-size: 1rem;
-    line-height: 1.15;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .ej-author{
-    margin-top: 4px;
-    font-size: .9rem;
-    opacity: .9;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .ej-meta{
-    margin-top: 8px;
-    font-size: .82rem;
-    opacity: .85;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px 10px;
-  }
-  .ej-pill{
-    background: rgba(0,0,0,.08);
-    border: 1px solid rgba(0,0,0,.12);
-    border-radius: 999px;
-    padding: 5px 10px;
-    max-width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  /* Acciones a la derecha, compactas */
-  .ej-actions{
-    display: grid;
-    gap: 8px;
-    align-content: start;
-  }
-
-  /* Botones de icono dentro de la card (mantiene tu estilo actual) */
-  .ej-actions .icon-btn{
-    width: 36px;
-    height: 36px;
-  }
-
-  /* Para que el panel/otras cards no “se salgan” */
-  .card, .column, .app-main{ min-width: 0; }
-}
-/* =========================================================
-OVERRIDE FINAL MÓVIL (PRO MAX) – pegar al final del CSS
-Objetivo: móvil = lista cards / desktop = tabla
-========================================================= */
-*{ box-sizing: border-box; }
-html, body{ max-width: 100%; overflow-x: hidden; }
-
-@media (max-width: 820px){
-
-  /* Layout: una columna, todo encaja */
-  .app{ padding: 0 !important; }
-  body{
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-  }
-
-  .app-main{
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-  }
-  .column, .card, .column-left, .column-right{ min-width: 0 !important; width: 100% !important; }
-
-  /* Header más full */
-  .app-header{
-    padding: 10px 12px !important;
-    border-radius: 18px !important;
-  }
-  .logo .logo-text p{ display:none !important; }
-
-  /* ✅ MÓVIL: ocultar TABLA y mostrar LISTA */
-  .table-wrapper{ display: none !important; }
-  #ejemplares-list{ display: grid !important; gap: 12px; }
-
-  /* Cards de ejemplar */
-  .ej-card{
-    width: 100%;
-    border-radius: 18px;
-    padding: 12px;
-    background: rgba(232,170,196,.92);
-    color: #000;
-    border: 1px solid rgba(0,0,0,.14);
-    box-shadow: 0 16px 40px rgba(0,0,0,.35);
-
-    display: grid;
-    grid-template-columns: 48px minmax(0,1fr) auto;
-    gap: 12px;
-    align-items: start;
-  }
-  .ej-cover{
-    width: 48px; height: 70px;
-    border-radius: 12px;
-    object-fit: cover;
-    background: #000;
-    border: 1px solid rgba(0,0,0,.12);
-  }
-  .ej-main{ min-width: 0; }
-  .ej-title{
-    font-weight: 800;
-    font-size: 1rem;
-    line-height: 1.15;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .ej-author{
-    margin-top: 4px;
-    font-size: .9rem;
-    opacity: .9;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .ej-meta{
-    margin-top: 8px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px 8px;
-    font-size: .82rem;
-    opacity: .9;
-    min-width: 0;
-  }
-  .ej-pill{
-    max-width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-
-    background: rgba(0,0,0,.08);
-    border: 1px solid rgba(0,0,0,.12);
-    border-radius: 999px;
-    padding: 5px 10px;
-  }
-
-  .ej-actions{
-    display: grid;
-    gap: 8px;
-    align-content: start;
-  }
-
-  /* ✅ Sheet alta: NO ocultar la derecha, solo overlay + card fixed */
-  .column-left{ display: none !important; }
-  body.alta-visible .column-left{ display: block !important; }
-
-  body.alta-visible::before{
-    content:"";
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.55);
-    z-index: 8500;
-  }
-
-  body.alta-visible .column-left .card{
-    position: fixed;
-    left: 12px;
-    right: 12px;
-    bottom: 84px;
-    max-height: calc(100vh - 140px);
-    overflow: auto;
-    z-index: 9000;
-    border-radius: 20px !important;
-    border: 1.5px solid rgba(232,170,196,.85) !important;
-  }
-
-  /* FAB (+) */
-  #btn-toggle-alta.fab-plus{
-    width: 58px !important;
-    height: 58px !important;
-    right: 16px !important;
-    bottom: calc(16px + env(safe-area-inset-bottom)) !important;
-    background: rgba(232,170,196,.92) !important;
-    color: #000 !important;
-    border: 1px solid rgba(0,0,0,.22) !important;
-    box-shadow: 0 16px 40px rgba(0,0,0,.55), 0 0 0 4px rgba(232,170,196,.18) !important;
-  }
-  body.alta-visible #btn-toggle-alta.fab-plus{
-    background:#000 !important;
-    color:#fff !important;
-    border-color: rgba(232,170,196,.6) !important;
-  }
-}
-@media (max-width: 820px){
-  /* 🔧 Revertir el hide global (si existe en tu CSS anterior) */
-  .table-wrapper{ display: block !important; }
-
-  /* ✅ Ocultar solo la tabla de ejemplares (y su wrapper) en móvil */
-  #tabla-ejemplares{ display: none !important; }
-  #tabla-ejemplares{ visibility: hidden !important; } /* extra defensivo */
-
-  /* Si quieres ocultar también el “marco” vacío de su wrapper */
-  #tabla-ejemplares{ height: 0 !important; }
-}
-@media (max-width: 820px){
-  /* 🎨 Cards de ejemplares más elegantes */
-  .ej-card{
-    background: #0b0b0d !important;
-    color: #fff !important;
-    border: 1.5px solid rgba(232,170,196,.55) !important;
-    box-shadow: 0 18px 55px rgba(0,0,0,.55) !important;
-  }
-
-  .ej-pill{
-    background: rgba(255,255,255,.06) !important;
-    border-color: rgba(255,255,255,.12) !important;
-    color: #fff !important;
-  }
-
-  .ej-author{ opacity: .88 !important; }
-  .ej-meta{ opacity: .9 !important; }
-
-  /* Portada placeholder más integrado */
-  .ej-cover{
-    border-color: rgba(255,255,255,.12) !important;
-  }
-}
-/* ===== Modales Deseos (mismo estilo pro) ===== */
-.deseos-overlay{
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 9999 !important;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,.65);
-  backdrop-filter: blur(2px);
-}
-
-.deseos-dialog{
-  width: min(720px, calc(100vw - 32px));
-  max-height: calc(100vh - 48px);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-
-  background: #000;
-  color:#fff;
-  border-radius: 18px;
-  border: 1.5px solid rgba(232,170,196,.85);
-  box-shadow: 0 24px 70px rgba(0,0,0,.72), 0 0 0 3px rgba(232,170,196,.18);
-}
-
-.deseos-header{
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  padding: 14px 14px 10px;
-}
-
-.deseos-toolbar{
-  padding: 0 14px 12px;
-  display: grid;
-  grid-template-columns: 1fr 180px 220px auto;
-  gap: 10px;
-}
-
-.deseos-toolbar input,
-.deseos-toolbar select,
-.deseo-form input,
-.deseo-form select{
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12);
-  color:#fff;
-  border-radius: 12px;
-  padding: 10px 12px;
-  min-width: 0;
-}
-
-#info-deseos{ padding: 0 14px 10px; opacity: .85; margin:0; }
-
-.deseos-lista{
-  padding: 0 14px 14px;
-  overflow: auto;
-  min-height: 0;
-  display: grid;
-  gap: 10px;
-}
-
-.deseo-item{
-  display:grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px;
-  padding: 12px;
-  border-radius: 16px;
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12);
-}
-
-.deseo-title{ font-weight: 800; }
-.deseo-meta{ margin-top: 4px; font-size: .86rem; opacity: .9; display:flex; gap:10px; flex-wrap: wrap; }
-.deseo-pill{
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: rgba(232,170,196,.14);
-  border: 1px solid rgba(232,170,196,.26);
-}
-
-.deseo-actions{ display:flex; gap: 8px; align-items:flex-start; }
-
-.deseo-form{ padding: 0 14px 14px; overflow:auto; min-height:0; }
-.deseos-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top: 10px; }
-
-@media (max-width: 820px){
-  .deseos-dialog{
-    width: 100vw;
-    height: 100vh;
-    max-height: 100vh;
-    border-radius: 0;
-  }
-  .deseos-toolbar{
-    grid-template-columns: 1fr 1fr;
-  }
-}
-/* ===== Ejemplares: grid de portadas ===== */
-.ej-grid{
-  margin-top: 12px;
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-}
-
-.ej-grid-item{
-  background: #0b0b0d;
-  border: 1.5px solid rgba(232,170,196,.55);
-  border-radius: 16px;
-  padding: 10px;
-  color: #fff;
-  cursor: pointer;
-  box-shadow: 0 18px 55px rgba(0,0,0,.40);
-}
-
-.ej-grid-cover{
-  width: 100%;
-  aspect-ratio: 2 / 3;
-  border-radius: 12px;
-  object-fit: cover;
-  background: #000;
-  border: 1px solid rgba(255,255,255,.12);
-  display:block;
-}
-
-.ej-grid-title{
-  margin-top: 8px;
-  font-weight: 800;
-  font-size: .9rem;
-  line-height: 1.15;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  overflow:hidden;
-  min-height: 2.3em;
-}
-
-.ej-grid-meta{
-  margin-top: 6px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:6px;
-  font-size: .75rem;
-  opacity: .9;
-}
-
-.ej-grid-pill{
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 999px;
-  padding: 4px 8px;
-  max-width: 100%;
-  overflow:hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* =========================================================
-FIX: Vista Ejemplares (Lista vs Portadas) sin duplicados
-- En móvil, había reglas que forzaban #ejemplares-list visible
-aunque estuvieras en portadas.
-- Usamos la clase body.vista-ej-grid que pone main.js.
-========================================================= */
-@media (max-width: 820px){
-  body:not(.vista-ej-grid) #ejemplares-list{ display: grid !important; }
-  body.vista-ej-grid #ejemplares-list{ display: none !important; }
-
-  body.vista-ej-grid #ejemplares-grid{ display: grid !important; }
-  body:not(.vista-ej-grid) #ejemplares-grid{ display: none !important; }
-}
-
-/* =========================================================
-Header: botones de vista junto a Herramientas
-========================================================= */
-.header-view-toggle{
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.header-view-toggle .icon-btn{
-  width: 38px;
-  height: 38px;
-}
-
-/* =========================================================
-Ajustes solicitados (móvil + modal + ejemplares)
-========================================================= */
-
-/* 1) Título con fuente elegante */
-.logo-text h1{
-  font-family: "Fraunces", "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  letter-spacing: .2px;
-}
-
-/* 2) Móvil: sin icono Pdl; título más pequeño y debajo de botones */
-@media (max-width: 820px){
-  .logo-icon{ display:none !important; }
-  .app-header{
-    display:grid;
-    grid-template-columns: 1fr;
-    grid-template-areas:
-    "actions"
-    "title";
-    gap:10px;
-    padding: 12px 12px !important;
-  }
-  .header-right{ grid-area: actions; justify-self: end; display:flex; align-items:center; gap:10px; flex-wrap:nowrap; }
-  .logo.header-center{ grid-area: title; justify-self: center; text-align:center; }
-  .logo{ gap:0; }
-  .logo-text h1{ font-size: 1.0rem !important; line-height:1.15; }
-  .logo-text p{ display:none; } /* deja aire al buscador */
-}
-
-/* 3) Card de Ejemplares (home): menos oscura (sombra más suave) */
-/* 3) Card de Ejemplares (home): menos oscura (sombra más suave) */
-.column-right > .card:first-child{
-  box-shadow: 0 10px 22px rgba(0,0,0,.26) !important;
-  background: var(--card-bg) !important;
-}
-
-/* 4) Modal: botón "Añadir" centrado de verdad */
-.modal-cover-upload{
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-align:center !important;
-  line-height: 1 !important;
-}
-@media (max-width: 820px){
-  .modal-cover-upload{ height: 36px; }
-}
-
-/* 5) Modal: botón cerrar siempre visible y fácil de pulsar */
-.modal-close{
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 42px;
-  height: 42px;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-  font-size: 26px;
-  line-height: 1;
-  z-index: 5;
-  background: rgba(0,0,0,.72);
-  border: 1px solid rgba(214,165,181,.65);
-}
-.modal-close:hover{ filter: brightness(1.06); }
-
-/* 6) Modal Lecturas/Préstamos: nunca desbordar a la derecha */
-#lecturas-detalle,
-#prestamos-detalle{
-  white-space: pre-wrap !important;
-  overflow-wrap: anywhere !important;
-  word-break: break-word !important;
-  max-width: 100% !important;
-  display:block;
-}
-.modal-body{ overflow-x: hidden; }
-.card-inside-modal{ overflow:hidden; }
-
-/* 7) Ejemplares: máximo “5 filas visibles” y el resto scroll (lista móvil + tabla desktop) */
-#ejemplares-list{
-  max-height: 360px;          /* ~5–6 elementos según densidad */
-  overflow-y: auto;
-  padding-right: 6px;         /* para que no tape la scrollbar */
-}
-.table-wrapper{
-  max-height: 360px;
-  overflow: auto;
-}
-
-/* =========================
-Desktop (web): escáner integrado en la columna (no overlay)
-========================= */
-@media (min-width: 821px){
-  #scanner.scanner{
-    position: static !important;
-    inset: auto !important;
-    background: transparent !important;
-    z-index: auto !important;
-    padding: 0 !important;
-    margin-top: 10px;
-    border-radius: 14px;
-  }
-
-  /* Cuando tu JS lo pone a display:block, NO lo conviertas en overlay grid */
-  #scanner.scanner[style*="display:block"],
-  #scanner.scanner[style*="display: block"]{
-    display: block !important;
-  }
-
-  /* Vídeo del tamaño de la sección */
-  #scanner .scanner-video,
-  #scanner video#video{
-    width: 100% !important;
-    height: 240px !important;
-    max-height: 240px !important;
-    border-radius: 14px;
-    object-fit: cover;
-  }
-
-  /* Quita guías de overlay en desktop */
-  #scanner::before{ display: none !important; }
-  #scanner .scanner-video::before,
-  #scanner .scanner-video::after,
-  #scanner video#video::before,
-  #scanner video#video::after{ display: none !important; content: none !important; }
-
-  /* Botón detener no necesita ocupar todo */
-  #scanner #btn-detener{ width: auto; }
-}
-/* =========================
-SCANNER: en desktop dentro de la card (no overlay)
-========================= */
-@media (min-width: 761px){
-  /* mata el overlay fijo */
-  #scanner.scanner{
-    position: static !important;
-    inset: auto !important;
-    background: transparent !important;
-    padding: 0 !important;
-    z-index: auto !important;
-    border-radius: 0 !important;
-  }
-
-  /* cuando JS pone display:block → no lo conviertas en grid overlay */
-  #scanner.scanner[style*="display:block"],
-  #scanner.scanner[style*="display: block"]{
-    display: block !important;
-    grid-template-rows: none !important;
-    gap: 0 !important;
-  }
-
-  /* vídeo ajustado al ancho de la sección */
-  #scanner .scanner-video,
-  #scanner video#video{
-    width: 100% !important;
-    height: 240px !important;   /* ajusta si lo quieres más bajo/alto */
-    border-radius: 14px !important;
-    object-fit: cover !important;
-  }
-
-  /* desactiva “guías” de overlay */
-  #scanner::before,
-  #scanner .scanner-video::before,
-  #scanner .scanner-video::after,
-  #scanner video#video::before,
-  #scanner video#video::after{
-    content: none !important;
-  }
-}
-/* =========================
-EJEMPLARES (PORTADAS): scroll interno del bloque
-========================= */
-
-/* el contenedor del grid debe poder scrollear */
-#ejemplares-grid{
-  max-height: 62vh;        /* ajusta a gusto */
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-  padding-right: 4px;      /* evita que la barra tape algo */
-}
-
-/* opcional: también limita la lista móvil cuando NO es grid */
-#ejemplares-list{
-  max-height: 62vh;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-}
-/* =========================
-HEADER MÓVIL: una sola línea, botones alineados
-========================= */
-@media (max-width: 820px){
-  .app-header{
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 10px !important;
-    padding: 10px 12px !important;
-  }
-
-  .header-center{
-    flex: 1 1 auto !important;
-    min-width: 0 !important;
-  }
-
-  /* título compacto sin romper línea */
-  .logo-text h1{
-    font-size: 1.02rem !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-
-  .header-right{
-    flex: 0 0 auto !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    flex-wrap: nowrap !important;
-  }
-}
-/* =========================
-HEADER DESKTOP: todo en una línea (no wrap)
-========================= */
-@media (min-width: 821px){
-  .app-header{
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 14px !important;
-  }
-
-  .header-center{
-    flex: 1 1 auto !important;
-    min-width: 0 !important;
-  }
-
-  /* Evita que el título empuje botones a otra fila */
-  .logo-text h1{
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-
-  .header-right{
-    flex: 0 0 auto !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 10px !important;
-    flex-wrap: nowrap !important; /* clave */
-  }
-}
-
-/* --- Fix: desplegables legibles (texto blanco sobre fondo blanco) --- */
-select,
-select:focus,
-select:active {
-  background-color: #000 !important;
-  color: #fff !important;
-  border-color: #444;
-}
-
-/* Opciones del select (en algunos navegadores aplica, en otros es limitado) */
-select option {
-  background-color: #000 !important;
-  color: #fff !important;
-}
-
-/* Si usas inputs con datalist, esto ayuda al input (el popup depende del navegador) */
-input[list],
-input[list]:focus {
-  background-color: #000 !important;
-  color: #fff !important;
-  border-color: #444;
-}
-
-/* Placeholder legible */
-select::placeholder,
-input::placeholder {
-  color: rgba(255,255,255,.65);
-}
-/* Ordenación mini (móvil / discreta) */
-.sort-mini{
-  display: inline-flex;
-  align-items: center;
-}
-
-.sort-select{
-  height: 36px;
-  padding: 0 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(214,165,181,65);
-  background: rgba(0,0,0,78);
-  color: #fff;
-  font-weight: 700;
-  font-size: .9rem;
-  max-width: 160px;
-}
-/* Override para el desplegable de ordenación (sin borde rosa) */
-.sort-select{
-  border: 1px solid var(--border) !important;
-  background: var(--panel-2);
-  color: #fff;
-}
-
-/* En desktop puedes dejarlo visible o hacerlo más sutil */
-@media (min-width: 821px){
-  .sort-select{ max-width: 190px; }
-}
-
-/* =========================
-ORDENAR: en móvil se mueve a Herramientas
-========================= */
-@media (max-width: 820px){
-  /* El selector ya no va en el header de "Ejemplares" en móvil */
-  .sort-mini{ display: none !important; }
-}
-
-/* Contenedor de ordenación dentro del menú Herramientas */
-.tools-sort-wrap{
-  display: grid;
-  gap: 6px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12);
-}
-
-.tools-sort-label{
-  font-size: .86rem;
-  font-weight: 600;
-  opacity: .92;
-}
-
-.tools-sort-wrap select{
-  width: 100%;
-  background: rgba(0,0,0,.78);
-  border: 1px solid rgba(232,170,196,.45);
-  color: #fff;
-  padding: 9px 10px;
-  border-radius: 12px;
-}
+  /* Deseos dialog: full screen */
+  .deseos-dialog { width: 100vw; height: 100vh; max-height: 100vh; border-radius: 0; }
+  .deseos-toolbar { grid-template-columns: 1fr; }
 
-/* =========================================================
-FIX (móvil): quitar "marco" interno (table-wrapper) alrededor de las fichas
-- En móvil usamos #ejemplares-list / #ejemplares-grid, así que el wrapper de tabla debe
-quedar oculto para que no aparezca un contenedor negro con borde.
-========================================================= */
-/* FIX (móvil): quitar el "marco" interno SOLO en la card de Ejemplares */
-@media (max-width: 820px){
-  .card-ejemplares .table-wrapper{
-    display: none !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
-}
-
-/* MÓVIL: quitar el fondo interno (scroll) de la card de Ejemplares */
-@media (max-width: 820px){
-  .card.card-ejemplares{
-    background: transparent !important;
-    border-color: transparent !important;
-    box-shadow: none !important;
-  }
-}
-@media (max-width: 820px){
-  /* Quitar el fondo interno oscuro del área de scroll de Ejemplares */
-  .column-right > .card:first-child{
-    background: transparent !important;
-    box-shadow: none !important;
-    border: none !important;
-  }
-}
-/* Marco exterior rosa corporativo */
-.app{
-  border-radius: 22px; /* un pelín más redondo que las cards */
-  box-shadow:
-  0 0 0 6px var(--pink-2),          /* marco rosa */
-  0 18px 44px rgba(0,0,0,.35);      /* sombra exterior suave */
-}
-@media (max-width: 820px){
-
-  /* Contenedor de las fichas (sin marco rosa en móvil) */
-  #ejemplares-grid{
-    border: 0;
-    border-radius: 16px;
-    padding: 0;
-    background: transparent;
-  }
-}
-@media (max-width: 820px){
-  /* ✅ Asegurar que Lecturas/Préstamos se vean */
-  .grid-two .table-wrapper{ display:block !important; }
-}
-@media (max-width: 820px){
-
-  /* Evitar que el rosa de la card “se cuele” en las filas */
-  #tabla-lecturas-abiertas,
-  #tabla-prestamos-activos{
-    background: rgba(0,0,0,0.78) !important;
-  }
-
-  #tabla-lecturas-abiertas tbody td,
-  #tabla-prestamos-activos tbody td{
-    background: rgba(0,0,0,0.0) !important; /* base transparente dentro de tabla negra */
-  }
-
-  /* Alternancia suave para legibilidad (opcional, pero queda pro) */
-  #tabla-lecturas-abiertas tbody tr:nth-child(even) td,
-  #tabla-prestamos-activos tbody tr:nth-child(even) td{
-    background: rgba(255,255,255,0.04) !important;
-  }
-}
-@media (max-width: 820px){
-  /* Marco exterior de Ejemplares similar a las fichas */
-  .column-right > .card:first-child{
-        border: 1px solid var(--card-border) !important;
-
-    box-shadow: 0 18px 55px rgba(0,0,0,0.55) !important;
-    border-radius: 20px !important;
-  }
-}
-@media (max-width: 820px){
-  /* Marco exterior de Ejemplares similar a las fichas */
-  .column-right > .card:first-child{
-       border: 1px solid var(--card-border) !important;
-
-    box-shadow: 0 18px 55px rgba(0,0,0,0.55) !important;
-    border-radius: 20px !important;
-  }
-}
-#video{
-  transform: none !important;
-}
-#scanner{
-  overflow: visible;
-}
-#share-table-wrap{ margin-top: 10px; }
-#share-table{ width: 100%; }
-#share-table th{ white-space: nowrap; }
-#share-table{ background: rgba(0,0,0,0.0); }
-/* =========================
-FIX definitivo: Botón "Detener escaneo" visible en DESKTOP
-(sobrescribe los 2 bloques min-width 821/761)
-========================= */
-@media (min-width: 821px){
-  /* cuando el scanner esté visible */
-  #scanner.scanner[style*="display:block"],
-  #scanner.scanner[style*="display: block"]{
-    display: grid !important;
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto 260px;
-    grid-template-areas:
-    "txt btn"
-    "vid vid";
-    gap: 12px !important;
-    align-items: center;
-  }
-
-  #scanner.scanner > .scanner-text{
-    grid-area: txt;
-    margin: 0 !important;
-  }
-
-  #scanner.scanner > video#video{
-    grid-area: vid;
-    width: 100% !important;
-    height: 260px !important;
-    max-height: 260px !important;
-    border-radius: 14px !important;
-    object-fit: cover !important;
-  }
-
-  #scanner.scanner > #btn-detener{
-    grid-area: btn;
-    display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
-    width: auto !important;
-    margin: 0 !important;
-    justify-self: end;
-    z-index: 9999; /* por si algo lo tapa */
-  }
-
-  /* por si el pseudo-elemento del overlay llega a tapar algo */
-  #scanner::before{ display: none !important; content: none !important; }
-}
-#btn-detener{ display:none !important; }
-.share-page .app-main{
-  grid-template-columns: 1fr !important;
-}
-/* =========================================================
-Portada placeholder (sin imagen) – PaseoLibros
-========================================================= */
-
-.portada-placeholder-mini{
-  width: 40px;
-  height: 56px;
-  border-radius: 8px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background:
-  linear-gradient(135deg, #f4efe9 0%, #e6ded4 100%);
-  border: 1px solid rgba(0,0,0,.06);
-
-  color: #6b5e52;
-  font-family: "Fraunces", serif;
-  font-weight: 700;
-  font-size: 0.7rem;
-  letter-spacing: .04em;
-
-  box-shadow:
-  inset 0 0 0 1px rgba(255,255,255,.4),
-  0 1px 2px rgba(0,0,0,.08);
-}
-
-/* letra/logo dentro */
-.portada-placeholder-mini .ph-logo{
-  line-height: 1;
-}
-
-/* mismo tamaño que las portadas reales */
-.portada-mini-img{
-  width: 40px;
-  height: 56px;
-  object-fit: cover;
-  border-radius: 8px;
-}
-/* =========================================================
-Placeholder portada grande (modal)
-========================================================= */
-
-.modal-cover-img.is-placeholder{
-  /* Mantiene el tamaño, pero en vez de “imagen rota”, pinta una portada bonita */
-  background:
-  linear-gradient(135deg, #f4efe9 0%, #e6ded4 100%);
-  border: 1px solid rgba(0,0,0,.10);
-}
-
-/* “Logo” centrado encima cuando no hay imagen */
-.modal-cover-img.is-placeholder{
-  position: relative;
-}
-
-.modal-cover-img.is-placeholder::after{
-  content: "Pdl";
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-
-  color: #6b5e52;
-  font-family: "Fraunces", serif;
-  font-weight: 800;
-  font-size: 1.4rem;
-  letter-spacing: .05em;
-
-  /* un poco de relieve suave */
-  text-shadow: 0 1px 0 rgba(255,255,255,.55);
-}
-/* Placeholder grande para la vista grid (fichas) */
-.portada-placeholder-grid{
-  width: 100%;
-  aspect-ratio: 2 / 3;
-  border-radius: 16px;
-
-  display: grid;
-  place-items: center;
-  gap: 6px;
-
-  background: linear-gradient(135deg, #f4efe9 0%, #e6ded4 100%);
-  border: 1px solid rgba(0,0,0,.10);
-
-  box-shadow:
-  inset 0 0 0 1px rgba(255,255,255,.55),
-  0 10px 24px rgba(0,0,0,.25);
-}
-
-.portada-placeholder-grid .ph-logo{
-  font-family: "Fraunces", serif;
-  font-weight: 800;
-  font-size: 2rem;
-  letter-spacing: .06em;
-  color: rgba(107,94,82,.88);
-  line-height: 1;
-}
-
-.portada-placeholder-grid .ph-sub{
-  font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-size: .9rem;
-  color: rgba(107,94,82,.75);
-}
-/* ===== Marcapáginas (mini modal) ===== */
-.mp-overlay{
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 18px;
-}
-.mp-backdrop{
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,.65);
-  backdrop-filter: blur(2px);
-}
-.mp-dialog{
-  position: relative;
-  width: min(520px, calc(100vw - 32px));
-  background: #000;
-  color: #fff;
-  border-radius: 18px;
-  border: 1.5px solid rgba(232, 170, 196, .85);
-  box-shadow: 0 24px 70px rgba(0,0,0,.72), 0 0 0 3px rgba(232, 170, 196, .18);
-  padding: 16px;
-  z-index: 1;
-}
-.mp-header{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-.mp-body label{ display:block; margin-bottom: 6px; opacity:.92; }
-.mp-row{
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-.mp-row input[type="number"]{
-  flex: 1;
-  min-width: 110px;
-  text-align: center;
-}
-.mp-range{
-  width: 100%;
-  margin-top: 10px;
-}
-.mp-actions{
-  display:flex;
-  justify-content:flex-end;
-  gap: 10px;
-  margin-top: 12px;
-}
-.mp-help{ margin-top: 8px; font-size: .85rem; opacity: .85; }
-/* Marcapáginas: input grande y legible */
-#mp-num{
-  font-size: 2.2rem;
-  font-weight: 800;
-  text-align: center;
-  line-height: 1.1;
-  padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.22);
-  background: rgba(255,255,255,.08);
-  color: #fff;                 /* alto contraste */
-  caret-color: #fff;           /* cursor visible */
-}
-
-/* Cuando está seleccionado / en foco, que NO “desaparezca” */
-#mp-num:focus{
-  outline: 3px solid rgba(232,170,196,.75);
-  outline-offset: 2px;
-  background: rgba(255,255,255,.12);
-  border-color: rgba(232,170,196,.8);
-}
-
-/* Color del texto seleccionado */
-#mp-num::selection{
-  background: rgba(232,170,196,.45);
-  color: #fff;
-}
-
-/* Slider más pequeño (menos “tocho”) */
-#mp-range{
-  height: 22px;
-  margin-top: 8px;
-}
-#mp-range::-webkit-slider-runnable-track{ height: 6px; border-radius: 99px; }
-#mp-range::-webkit-slider-thumb{
-  -webkit-appearance: none;
-  width: 18px;
-  height: 18px;
-  margin-top: -6px;
-  border-radius: 50%;
-  background: #fff;
-  border: 2px solid rgba(232,170,196,.9);
-}
-#mp-range::-moz-range-track{ height: 6px; border-radius: 99px; }
-#mp-range::-moz-range-thumb{
-  width: 18px; height: 18px; border-radius: 50%;
-  background: #fff; border: 2px solid rgba(232,170,196,.9);
-}
-/* Home: Lecturas/Préstamos con scroll vertical en vez de cortar filas */
-#tabla-lecturas-abiertas,
-#tabla-prestamos-activos{
-  min-width: 0; /* para que no fuerce ancho */
-}
-
-#tabla-lecturas-abiertas.closest,
-#tabla-prestamos-activos.closest{
-  min-width: 0;
-}
-
-/* Ojo: limitamos altura al wrapper que contiene esas tablas */
-#tabla-lecturas-abiertas,
-#tabla-prestamos-activos{
-  width: 100%;
-}
-
-/* ✅ Solución sencilla: el wrapper que envuelve cada tabla dentro de las cards */
-.grid-two > .card .table-wrapper{
-  max-height: 340px;
-  overflow-y: auto;
-  overflow-x: auto; /* mantiene scroll horizontal en móvil si hiciera falta */
-}
-/* Flechas de reordenar: asegurar visibilidad en Android */
-.icon-btn{
-  color: #fff !important;         /* por si alguna variable pisa el color */
-}
-
-.icon-circle{
-  font-family: system-ui, "Segoe UI Symbol", "Apple Color Emoji", "Noto Color Emoji", sans-serif !important;
-  font-weight: 900;
-  font-size: 18px;                 /* un poco más grande */
-  line-height: 1;
-}
-.deseo-actions{
-  display:flex;
-  gap:8px;
-  flex-wrap: nowrap;  /* evita que se vayan “abajo” y parezcan desaparecer */
-}
-#info-cola{ padding: 0 12px; }
-.icon-btn.is-active{
-  outline: 2px solid rgba(232,170,196,.9);
-  box-shadow: 0 0 0 3px rgba(232,170,196,.25);
-}
-/* Flechas de navegación en el modal de ficha */
-#modal-ficha .modal-nav-arrow{
-  position:absolute;
-  top:50%;
-  transform:translateY(-50%);
-  width:48px;
-  height:48px;
-  border-radius:999px;
-  border:1px solid var(--border-pink);
-  background: var(--panel-2);
-  color:#fff;
-  font-size:2rem;
-  line-height:1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  z-index:10000;
-  box-shadow:0 10px 22px rgba(0,0,0,.65);
-}
-
-#modal-ficha .modal-nav-arrow--prev{
-  left:8px;
-}
+  /* Estadísticas móvil */
+  #card-stats-lecturas .table-wrapper { display: none !important; }
+  #stats-lecturas-mobile { display: flex !important; flex-direction: column; gap: 8px; margin-top: 8px; }
+  #card-stats-lecturas .stats-detail-content { flex-direction: column; gap: 6px; }
+  #card-stats-lecturas .stats-detail-col { min-width: 100%; }
 
-#modal-ficha .modal-nav-arrow--next{
-  right:8px;
-}
-
-#modal-ficha .modal-nav-arrow:hover{
-  filter:brightness(1.08);
-}
-
-/* Un poco más pequeñas en móvil */
-@media(max-width:640px){
-  #modal-ficha .modal-nav-arrow{
-    width:40px;
-    height:40px;
-    font-size:1.6rem;
-  }
-}
-#modal-ficha .modal-dialog{
-  overflow: visible;
-}
-
-#modal-ficha .modal-nav-arrow--prev{
-  left: -80px;   /* más afuera */
-}
-
-#modal-ficha .modal-nav-arrow--next{
-  right: -80px;  /* más afuera */
-}
-
-/* En móvil no exagerar tanto */
-@media (max-width: 640px){
-  #modal-ficha .modal-nav-arrow--prev{
-    left: -32px;
-  }
-  #modal-ficha .modal-nav-arrow--next{
-    right: -32px;
-  }
-}
-#card-stats-lecturas .table-wrapper{
-  overflow-x:auto;
-}
-
-#card-stats-lecturas table{
-  min-width:0;
-  width:100%;
-  table-layout:fixed;
-}
-
-#card-stats-lecturas th,
-#card-stats-lecturas td{
-  white-space:nowrap;
-}
-#card-stats-lecturas th,
-#card-stats-lecturas td{
-  white-space:normal;
-}
-/* Más espacio encima de la tarjeta de estadísticas */
-#card-stats-lecturas{
-  margin-top: calc(var(--gap) * 2); /* normalmente 32px */
-}
-/* Pills para las estadísticas de lectura */
-#card-stats-lecturas .stats-pill{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding:2px 8px;
-  border-radius:999px;
-  font-size:0.8rem;
-  font-weight:600;
-  background: var(--pill-bg);
-  min-width: 2.5em;
-}
-
-/* Empezadas (rosa del tema) */
-#card-stats-lecturas .stats-pill--start{
-  border:1px solid var(--border-pink);
-}
-
-/* Terminadas (un verde suave para diferenciar) */
-#card-stats-lecturas .stats-pill--end{
-  border:1px solid rgba(120, 200, 140, 0.85);
-}
-
-/* Centrar números en esas columnas */
-#card-stats-lecturas td:nth-child(2),
-#card-stats-lecturas td:nth-child(3){
-  text-align:center;
-}
-/* --- Estadísticas de lectura con detalle --- */
-#card-stats-lecturas .stats-year-cell {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-#card-stats-lecturas .stats-toggle {
-  width: 24px;
-  height: 24px;
-  border-radius: 999px;
-  border: 1px solid var(--border-pink);
-  background: var(--panel-2);
-  color: #fff;
-  font-weight: 700;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  padding: 0;
-}
-
-#card-stats-lecturas .stats-toggle:hover {
-  filter: brightness(1.1);
-}
-
-#card-stats-lecturas .stats-detail-row td {
-  background: var(--panel-1);
-  border-top: none;
-}
-
-#card-stats-lecturas .stats-detail-content {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  padding-top: 8px;
-}
-
-#card-stats-lecturas .stats-detail-col {
-  min-width: 180px;
-}
-/* Móvil: que el detalle de estadísticas se apile y no se salga */
-@media (max-width: 820px){
-  #card-stats-lecturas .stats-detail-content{
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  #card-stats-lecturas .stats-detail-col{
-    min-width: 100%;
-  }
-}
-
-#card-stats-lecturas .stats-list {
-  list-style: disc;
-  padding-left: 18px;
-  margin: 4px 0 0;
-}
+  /* Sort: solo en tools en móvil */
+  .sort-mini { display: none !important; }
 
-#card-stats-lecturas .stats-list li {
-  font-size: 0.9rem;
-}
-
-#card-stats-lecturas .stats-list li .muted {
-  opacity: 0.7;
-  font-size: 0.8em;
-}
-
-/* ya tenías esto, lo mantengo para separar la tarjeta del bloque superior */
-#card-stats-lecturas {
-  margin-top: calc(var(--gap) * 2);
-}
-body.theme-dark .ej-grid-item{
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-}
-
-/* Solo los botones de selección de vista */
-.header-view-toggle .icon-btn{
-  border: 1px solid var(--border);
-}
-
-.header-view-toggle .icon-btn.is-active{
-  outline: 2px solid var(--border);
-  box-shadow: 0 0 0 3px rgba(0,0,0,.5);
-}
-body.theme-dark .ej-grid-item{
-  background: var(--ej-card-bg);
-  border: 1px solid var(--ej-card-border);
-}
-/* Overrides para quitar el marco rosa en vista de fichas */
-.ej-grid-item{
-  border: 1px solid var(--border) !important;
-}
-/* Móvil: asegurar que la tarjeta de estadísticas es visible y ocupa el ancho */
-@media (max-width: 820px){
-  #card-stats-lecturas{
-    display: block !important;
-    width: 100% !important;
-    max-width: none !important;
-  }
-
-  #card-stats-lecturas .table-wrapper{
-    display: block !important;
-    overflow-x: auto;
-  }
-
-  #card-stats-lecturas table{
-    min-width: 0 !important;
-    width: 100% !important;
-    table-layout: fixed;
-  }
-}
-/* Móvil + tema dark: cards de ejemplares sin rosa */
-@media (max-width: 820px){
-  body.theme-dark .ej-card{
-    background: var(--ej-card-bg) !important;
-    border: 1px solid var(--ej-card-border) !important;
-    color: var(--ink) !important;
-    box-shadow: 0 16px 40px rgba(0,0,0,.55);
-  }
-
-  body.theme-dark .ej-pill{
-    background: var(--pill-bg) !important;
-    border-color: rgba(255,255,255,.16) !important;
-    color: var(--ink) !important;
-  }
-
-  body.theme-dark .ej-cover{
-    border-color: rgba(255,255,255,.16) !important;
-    background: #000;
-  }
-
-  /* El “sheet” del alta sin borde rosa en dark */
-  body.theme-dark.alta-visible .column-left .card{
-    border: 1px solid var(--card-border) !important;
-    box-shadow: 0 24px 70px rgba(0,0,0,.72) !important;
-  }
-}
-/* Móvil + tema dark: iconos (vista lista/portadas, tools, tema...) más neutros */
-@media (max-width: 820px){
-  body.theme-dark .icon-btn{
-    border: 1px solid var(--border) !important;
-    background: var(--panel-2);
-    color: var(--ink);
-  }
-
-  body.theme-dark .icon-btn.is-active{
-    outline: 2px solid var(--pink); /* lila del tema */
-    box-shadow: 0 0 0 3px rgba(127,90,240,.30);
-  }
-}
-/* Móvil + tema dark: FAB (+) con el color del tema dark, no rosa */
-@media (max-width: 820px){
-  body.theme-dark #btn-toggle-alta.fab-plus{
-    background: var(--btn-bg) !important;   /* morado del tema */
-    color: #fff !important;
-    border: 1px solid rgba(0,0,0,.6) !important;
-    box-shadow:
-      0 16px 40px rgba(0,0,0,.55),
-      0 0 0 4px rgba(127,90,240,.25) !important;
-  }
+  /* Grid-two vertical */
+  .grid-two { grid-template-columns: 1fr !important; }
 
-  body.theme-dark.alta-visible #btn-toggle-alta.fab-plus{
-    background: #000 !important;
-    color: #fff !important;
-    border-color: var(--pink) !important;
-    box-shadow:
-      0 16px 40px rgba(0,0,0,.55),
-      0 0 0 4px rgba(127,90,240,.40) !important;
-  }
+  /* Portada mini placeholder */
+  .portada-placeholder-mini { width: 32px; height: 46px; }
 }
-/* Móvil: título más pequeño y con ellipsis para que no choque con los iconos */
-@media (max-width: 820px){
-  .logo .logo-text h1{
-    font-size: 0.95rem !important;
-    line-height: 1.15;
-    max-width: 70vw;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-}
-/* Móvil: que se vean bien las flechas del modal */
-@media (max-width: 640px){
-  /* Dejar que algo pueda sobresalir un poco */
-  #modal-ficha .modal-dialog{
-    overflow: visible;
-  }
-
-  /* Tamaño algo más pequeño en móvil */
-  #modal-ficha .modal-nav-arrow{
-    width: 36px;
-    height: 36px;
-    font-size: 1.4rem;
-  }
-
-  /* Recolocarlas para que no queden fuera de la pantalla */
-  #modal-ficha .modal-nav-arrow--prev{
-    left: 6px;          /* si las tenías en negativo, esto las trae de vuelta */
-  }
-
-  #modal-ficha .modal-nav-arrow--next{
-    right: 6px;
-  }
-}
-/* ⛑️ FIX DEFINITIVO: ficha de estadísticas en móvil */
-@media (max-width: 820px){
-  /* La card ocupa todo el ancho y no recorta nada raro */
-  #card-stats-lecturas{
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  /* El contenedor de la tabla manda, no el global .table-wrapper */
-  #card-stats-lecturas .table-wrapper{
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: auto !important;              /* si se pasa, scroll suave */
-    -webkit-overflow-scrolling: touch;
-    border-radius: 14px;
-    border: 1px solid var(--table-border);
-    background: var(--table-bg);
-  }
-
-  /* Aquí anulamos el min-width:780px del table global SOLO para stats */
-  #card-stats-lecturas table{
-    min-width: 0 !important;                  /* clave */
-    width: 100% !important;
-    table-layout: auto !important;
-  }
-
-  /* Cabeceras más cortas para que quepan de sobra */
-  #card-stats-lecturas thead th:nth-child(2),
-  #card-stats-lecturas thead th:nth-child(3){
-    font-size: 0 !important;                  /* oculta texto “Empezadas/Terminadas” */
-    white-space: nowrap !important;
-  }
-
-  #card-stats-lecturas thead th:nth-child(2)::after{
-    content: "Emp." !important;
-    font-size: .85rem;
-  }
-
-  #card-stats-lecturas thead th:nth-child(3)::after{
-    content: "Fin." !important;
-    font-size: .85rem;
-  }
 
-  /* Las celdas de datos sí con tamaño normal */
-  #card-stats-lecturas tbody td:nth-child(1),
-  #card-stats-lecturas tbody td:nth-child(2),
-  #card-stats-lecturas tbody td:nth-child(3){
-    white-space: nowrap !important;
-    font-size: .9rem !important;
-  }
-}
-/* MÓVIL: usamos la misma tabla de estadísticas que en escritorio */
-@media (max-width: 820px){
-  #card-stats-lecturas .table-wrapper{
-    display:block !important;
-  }
-
-  #stats-lecturas-mobile{
-    display:none !important;
-  }
-}
-
-/* Borde de fichas usando los colores del tema */
-.ej-card,
-.ej-grid-item {
-  border: 1px solid var(--ej-card-border);
-}
-
-/* Vista fichas: mismo borde que el resto de la UI */
-.ej-grid-item {
-  border: 1px solid var(--border) !important;
-}
-/* Tema dark + móvil: el card principal de Ejemplares sin marco rosa */
-@media (max-width: 820px){
-  body.theme-dark .column-left .card{
-    border-radius: 20px !important;
-    border: 1.5px solid var(--card-border) !important;
-    box-shadow:
-      0 24px 70px rgba(0,0,0,.72),
-      0 0 0 3px rgba(127,90,240,.22) !important;
-  }
-
-  /* Y las cards individuales de ejemplares sin fondo rosa */
-  body.theme-dark .ej-card{
-    background: var(--card-bg) !important;
-    border: 1px solid var(--card-border) !important;
-    color: var(--ink) !important;
-  }
-}
-.app-footer{
-  margin-top:var(--gap);
-  text-align:center;
-  color:rgba(0,0,0,.55);  /* 👈 siempre negro semi */
-}
-/* Tema dark: footer legible */
-body.theme-dark .app-footer{
-  color: var(--muted);
-}
-/* === FIX vista móvil tema dark === */
+/* ══════════════════════════════════════════════════════════
+   ESTADO ALTERNANCIA DE VISTA (grid vs lista)
+   ══════════════════════════════════════════════════════════ */
 @media (max-width: 820px) {
-  body.theme-dark .card,
-  body.theme-dark .card-header,
-  body.theme-dark .ejemplares-list,
-  body.theme-dark .table-wrapper,
-  body.theme-dark input,
-  body.theme-dark select {
-    border-color: var(--card-border) !important;
-  }
-
-  body.theme-dark .sort-select {
-    border-color: var(--input-border) !important;
-    background: var(--panel-2) !important;
-    color: var(--ink) !important;
-  }
-
-  body.theme-dark .muted {
-    color: var(--ink) !important;
-    opacity: .7 !important;
-  }
-}
-/* MÓVIL: detalle de estadísticas en columna para que no se salga del lienzo */
-@media (max-width: 820px){
-  #card-stats-lecturas .stats-detail-content{
-    flex-direction: column;
-  }
-
-  #card-stats-lecturas .stats-detail-col{
-    min-width: 100%;
-  }
-}
-/* MÓVIL: abreviar cabeceras de estadísticas para que quepan las 3 columnas */
-@media (max-width: 820px){
-  /* Ocultamos el texto largo de las columnas 2 y 3 */
-  #card-stats-lecturas thead th:nth-child(2),
-  #card-stats-lecturas thead th:nth-child(3){
-    font-size: 0;              /* oculta "Empezadas" / "Terminadas" */
-    white-space: nowrap;
-  }
-
-  /* Cabecera abreviada: Emp. */
-  #card-stats-lecturas thead th:nth-child(2)::after{
-    content: "Emp.";
-    font-size: 0.85rem;
-    font-weight: 600;
-  }
-
-  /* Cabecera abreviada: Fin. (Terminadas) */
-  #card-stats-lecturas thead th:nth-child(3)::after{
-    content: "Fin.";
-    font-size: 0.85rem;
-    font-weight: 600;
-  }
-}
-/* MÓVIL: detalle de estadísticas apilado y con texto más compacto */
-@media (max-width: 820px){
-  #card-stats-lecturas .stats-detail-content{
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  #card-stats-lecturas .stats-detail-col{
-    min-width: 100%;
-  }
-
-  #card-stats-lecturas .stats-list li{
-    font-size: 0.8rem;
-    line-height: 1.2;
-  }
-}
-/* ===== Estadísticas de lectura – vista móvil ===== */
-
-/* Por defecto la lista móvil está oculta (solo la mostraremos en móvil) */
-#stats-lecturas-mobile{
-  display: none;
+  body:not(.vista-ej-grid) #ejemplares-list { display: grid !important; }
+  body.vista-ej-grid #ejemplares-list { display: none !important; }
+  body.vista-ej-grid #ejemplares-grid { display: grid !important; }
+  body:not(.vista-ej-grid) #ejemplares-grid { display: none !important; }
 }
 
-/* En móvil ocultamos la tabla y usamos la lista vertical */
-@media (max-width: 820px){
-  /* Ocultar la tabla de estadísticas en móvil */
-  #card-stats-lecturas .table-wrapper{
-    display: none !important;
-  }
-
-  /* Mostrar la lista móvil */
-  #stats-lecturas-mobile{
-    display: flex !important;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 8px;
-  }
-
-  .stats-mobile-item{
-    padding: 10px 12px;
-    border-radius: 12px;
-    border: 1px solid var(--table-border);
-    background: var(--table-bg);
-  }
-
-  .stats-mobile-header{
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-  }
-
-  .stats-mobile-year{
-    font-weight: 600;
-    font-size: 0.95rem;
-  }
-
-  .stats-mobile-counters{
-    display: flex;
-    gap: 6px;
-  }
-
-  .stats-pill{
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4px 8px;
-    border-radius: 999px;
-    border: 1px solid var(--border-pink);
-    font-size: 0.78rem;
-    white-space: nowrap;
-  }
-}
-.stats-mobile-toggle{
-  border: none;
-  background: transparent;
-  font-size: 1rem;
-  line-height: 1;
-  padding: 2px 8px;
-  border-radius: 999px;
-  cursor: pointer;
+/* ══════════════════════════════════════════════════════════
+   FOOTER
+   ══════════════════════════════════════════════════════════ */
+.app-footer {
+  margin-top: var(--gap);
+  text-align: center;
+  color: var(--ink-3);
+  font-size: .82rem;
+  padding-bottom: 8px;
 }
 
-.stats-mobile-detail{
-  margin-top: 6px;
+/* ══════════════════════════════════════════════════════════
+   MISC UTILITARIOS
+   ══════════════════════════════════════════════════════════ */
+.row-link { cursor: pointer; }
+.fila-seleccionada td { background: var(--accent-soft) !important; }
+
+/* Scroll suave en contenedores */
+.table-wrapper, #ejemplares-list, #ejemplares-grid, .deseos-lista, .modal-body {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 
+/* Evita desbordamiento global */
+* { box-sizing: border-box; }
+html, body { max-width: 100%; overflow-x: hidden; }
 
-/* === Logo header (ajuste tamaño + no ocultar botones) === */
-.header-right{ display:flex; align-items:center; gap:10px; flex-wrap:nowrap; }
-.logo.header-center{ display:flex; align-items:center; justify-content:flex-start; flex:1 1 auto; min-width:0; }
-.logo-img{ height: clamp(76px, 6.5vw, 150px); width:auto; max-width: min(980px, 70vw); object-fit:contain; }
-@media (max-width: 820px){
-  .logo.header-center{ justify-content:center; }
-  .logo-img{ height: clamp(70px, 14vw, 120px); max-width: 100%; }
-}
-.logo-img{
-  height: clamp(20px, 8vw, 80px);
-  width: auto;
-  object-fit: contain;
-}
-/* ===== Panel Del lector ===== */
-.reader-panel { margin-top: 6px; }
-.reader-panel-head{
-  display:flex; align-items:center; justify-content:space-between; gap:12px;
-}
-.reader-block{ margin-top: 12px; display:grid; gap:8px; }
-.reader-label{ font-weight:600; }
-
-.reader-tags-row{
-  display:flex; gap:8px; align-items:center;
-}
-.reader-tags-row input{ flex:1; }
-
-.reader-chips{ display:flex; flex-wrap:wrap; gap:8px; }
-.reader-chip{
-  display:inline-flex; align-items:center; gap:8px;
-  padding:6px 10px;
-  border-radius:999px;
-  background: rgba(0,0,0,.06);
-}
-.reader-chip button{
-  border:none; background:transparent; cursor:pointer; font-size:14px; line-height:1;
+/* Accesibilidad: focus visible */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
-.reader-actions{ display:flex; gap:10px; justify-content:flex-end; }
-.reader-list{ display:grid; gap:10px; margin-top: 6px; }
-.reader-item{
-  padding:10px;
-  border-radius:12px;
-  background: rgba(0,0,0,.04);
+/* Borde de la app (marco exterior) */
+.app {
+  border-radius: var(--r-xl);
+  box-shadow: 0 0 0 5px var(--accent), 0 24px 60px rgba(0,0,0,.10);
 }
-.reader-item-head{
-  display:flex; justify-content:space-between; align-items:center; gap:10px;
-}
-.reader-item small{ opacity:.7; }
-.reader-item p{ margin:8px 0 0; white-space:pre-wrap; }
-
-.reader-audio-row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-
-#reader-fav[aria-pressed="true"]{
-  border:1px solid rgba(0,0,0,.25);
-}
-.badges{
-  display:inline-flex;
-  gap:8px;
-  margin-left:10px;
-  vertical-align:middle;
+@media (max-width: 820px) {
+  .app { border-radius: 0; box-shadow: none; }
 }
 
-.badge{
-  font-size: 0.95em;
-  opacity: .85;
-  user-select:none;
-}
+/* Selects en dark legibles */
+body.theme-dark select,
+body.theme-dark select option { background: var(--surface-2) !important; color: var(--ink) !important; }
 
-.badge-fav{
-  font-weight: 800;
-  letter-spacing: .02em;
-}
-
-.badge-fav.is-on{
-  opacity: 1;
-}
-
-.title-main{
-  display:flex;
-  align-items:baseline;
-  justify-content:space-between;
-  gap:10px;
-}
-
-.title-text{
-  flex:1;
-  min-width:0;
-}
-/* Badges dentro del título: en línea y alineados */
-.title-main[data-badge-libro],
-.ej-title[data-badge-libro]{
-  display: inline-flex;
-  align-items: baseline;
-  gap: .45rem;
-}
-
-/* Los badges no deben “empujar” a otra línea */
-.badge{
-  display: inline-flex;
-  align-items: center;
-  line-height: 1;
-  white-space: nowrap;
-  flex: 0 0 auto;
-}
-.cell-title{
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-}
-
-.title-icons{
-  display:flex;
-  gap:8px;
-  font-size:0.95em;
-  opacity:.85;
-}
-
-.title-text{
-  font-weight:600;
-  line-height:1.2;
-}
-
-.title-meta{
-  font-size:.85em;
-  opacity:.7;
-}
-/* =========================
-FIX: títulos en lista móvil (wrap + no romper cards)
-========================= */
-@media (max-width: 820px){
-  /* Asegura que la card no “desborde” visualmente */
-  #ejemplares-list .ej-card{
-    overflow: hidden;
-  }
-
-  /* Clave en layouts flex: permite que el texto se encoja y envuelva */
-  #ejemplares-list .ej-main{
-    min-width: 0;
-  }
-
-  /* Permite salto de línea en el título (y evita que se salga) */
-  #ejemplares-list .ej-title{
-    white-space: normal !important;
-    overflow-wrap: anywhere;
-    word-break: break-word;
-
-    /* Por si había ellipsis/nowrap previos */
-    text-overflow: initial !important;
-    overflow: visible;
-
-    line-height: 1.15;
-  }
-}
-@media (max-width: 820px){
-  #ejemplares-list .ej-title{
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;   /* máximo 2 líneas */
-    line-clamp: 2;
-    overflow: hidden;        /* necesario para el clamp */
-  }
-}
+/* Celda acciones sin wrap */
+.celda-acciones { white-space: nowrap; }
