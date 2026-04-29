@@ -158,6 +158,14 @@ body.theme-dark .app-header {
   height: clamp(32px, 5vw, 64px);
   width: auto;
   object-fit: contain;
+  /* Elimina el fondo negro del PNG en tema claro usando multiply:
+     el negro del PNG se "multiplica" con el blanco del header → desaparece */
+  mix-blend-mode: multiply;
+}
+body.theme-dark .logo-img {
+  /* En dark el truco es screen: el negro del fondo del PNG desaparece
+     sobre fondo oscuro y el texto claro (si lo hay) se ve */
+  mix-blend-mode: screen;
 }
 
 .header-right {
@@ -451,6 +459,11 @@ table { width: 100%; border-collapse: collapse; min-width: 760px; }
 
 th, td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
 
+/* La celda título: alinea su contenido arriba para que título y badges
+   no floten en el centro cuando hay mucho padding */
+td.cell-title { vertical-align: top; padding-top: 11px; }
+td.cell-author { vertical-align: top; padding-top: 11px; font-size: .92rem; color: var(--ink-2); }
+
 th {
   position: sticky;
   top: 0;
@@ -526,12 +539,47 @@ tbody tr:hover td { background: var(--accent-soft); }
 /* Celda acciones */
 .celda-acciones { white-space: nowrap; }
 
-/* Badges título */
-.cell-title { display: flex; flex-direction: column; gap: 3px; }
-.title-text { font-weight: 500; line-height: 1.25; }
-.title-icons { display: flex; gap: 6px; font-size: .88em; color: var(--ink-3); }
-.badge { display: inline-flex; align-items: center; line-height: 1; white-space: nowrap; }
+/* Badges título — tabla desktop */
+
+/* La celda título no añade padding propio: lo hereda del td */
+.cell-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  height: 100%;          /* ocupa toda la altura de la fila */
+}
+
+.title-text {
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+/* Badges en una fila compacta debajo del título */
+.title-icons {
+  display: flex;
+  gap: 6px;
+  font-size: .80em;
+  color: var(--ink-3);
+  min-height: 0;         /* no añade altura si están vacíos */
+  empty-cells: hide;
+}
+/* Oculta la fila de badges si ambos están vacíos */
+.title-icons:empty { display: none; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
 .badge-fav.is-on { color: var(--accent); }
+
+/* Celda autor: mismo vertical-align que el resto */
+.cell-author {
+  font-size: .92rem;
+  color: var(--ink-2);
+}
 
 /* ══════════════════════════════════════════════════════════
    GRID DE PORTADAS
@@ -1289,3 +1337,60 @@ body.theme-dark select option { background: var(--surface-2) !important; color: 
 
 /* Celda acciones sin wrap */
 .celda-acciones { white-space: nowrap; }
+
+/* ══════════════════════════════════════════════════════════
+   AUTH MODAL — diseño mejorado
+   ══════════════════════════════════════════════════════════ */
+.auth-logo {
+  display: flex;
+  justify-content: center;
+  padding: 28px 24px 0;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 18px;
+}
+.auth-logo-img {
+  height: clamp(42px, 8vw, 72px);
+  width: auto;
+  object-fit: contain;
+}
+
+.auth-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 4px;
+  letter-spacing: -.01em;
+}
+.auth-subtitle {
+  color: var(--ink-3);
+  font-size: .88rem;
+  margin: 0 0 18px;
+}
+
+.auth-links {
+  margin-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: .85rem;
+}
+.auth-links a {
+  color: var(--ink-3);
+  transition: color .15s;
+}
+.auth-links a:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.auth-mensaje {
+  margin-top: 12px;
+  min-height: 1.4em;
+  text-align: center;
+}
+
+/* Quitar los estilos genéricos de .auth-header ya que ahora usamos .auth-logo */
+.auth-header { display: none; }
+
