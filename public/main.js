@@ -222,6 +222,8 @@ async function cerrarModalFicha() {
   const modal = document.getElementById('modal-ficha');
   if (!modal) return;
   modal.classList.remove('is-visible');
+  window.libroSeleccionadoId    = null;
+  window.ejemplarSeleccionadoId = null;
   await refrescarHome();
 }
 function wireSortEjemplaresSelect() {
@@ -2153,6 +2155,10 @@ async function mostrarFicha(libroId, ejemplarId) {
   libroSeleccionadoId = Number(libroId);
   ejemplarSeleccionadoId = ejemplarId ? Number(ejemplarId) : null;
 
+  // Exponer en window para módulos IIFE
+  window.libroSeleccionadoId   = libroSeleccionadoId;
+  window.ejemplarSeleccionadoId = ejemplarSeleccionadoId;
+
   // ✅ engancha el panel "Del lector"
   if (window.readerPanelOpen) window.readerPanelOpen(libroSeleccionadoId);
 
@@ -2205,6 +2211,8 @@ function moverFicha(offset) {
   // Actualizamos selección global
   libroSeleccionadoId = nuevoLibroId;
   ejemplarSeleccionadoId = nuevoEjemplarId;
+  window.libroSeleccionadoId    = libroSeleccionadoId;
+  window.ejemplarSeleccionadoId = ejemplarSeleccionadoId;
 
   // Marcamos visualmente la fila seleccionada en la tabla
   filas.forEach((tr) => tr.classList.remove('fila-seleccionada'));
