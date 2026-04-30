@@ -4359,6 +4359,12 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     const labels = [...stats].reverse().map(r => r.anio);
     const data   = [...stats].reverse().map(r => Number(r.terminadas || 0));
 
+    // Usar el acento de la app — leer la variable CSS en tiempo real
+    const accent = getComputedStyle(document.documentElement)
+      .getPropertyValue('--accent').trim() || '#b85c6e';
+    // Versión semitransparente para hover
+    const accentAlpha = accent + 'cc';
+
     if (chartAnos) chartAnos.destroy();
     chartAnos = new Chart(canvas, {
       type: 'bar',
@@ -4367,7 +4373,8 @@ window.flashErr = function flashErr(msg, ms = 3500) {
         datasets: [{
           label: 'Terminados',
           data,
-          backgroundColor: '#7F77DD',
+          backgroundColor: accent,
+          hoverBackgroundColor: accentAlpha,
           borderRadius: 5,
           borderSkipped: false,
         }]
