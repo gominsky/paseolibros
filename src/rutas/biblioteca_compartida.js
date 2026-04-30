@@ -157,6 +157,7 @@ router.get('/biblioteca-compartida/ver/:propietario_id', requireAuth, async (req
        FROM ejemplares ej
        JOIN libros l ON l.id = ej.libro_id
        WHERE ej.usuario_id = $1
+         AND ej.activo = true
        ORDER BY l.id, ej.id ASC`,
       [propietarioId]
     );

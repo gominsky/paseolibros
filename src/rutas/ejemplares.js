@@ -283,8 +283,10 @@ router.get('/', async (req, res) => {
     const parametros = [];
 
     if (usuario_id) {
-      consulta += ' WHERE e.usuario_id = $1';
+      consulta += ' WHERE e.usuario_id = $1 AND e.activo = TRUE';
       parametros.push(usuario_id);
+    } else {
+      consulta += ' WHERE e.activo = TRUE';
     }
 
     consulta += ' ORDER BY e.creado_en DESC';
@@ -351,7 +353,8 @@ router.get('/:id', async (req, res) => {
          e.creado_en
        FROM ejemplares e
        WHERE e.id = $1
-         AND e.usuario_id = $2`,
+         AND e.usuario_id = $2
+         AND e.activo = TRUE`,
       [ejemplarId, req.usuario.id]
     );
 

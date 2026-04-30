@@ -59,13 +59,15 @@ router.get('/share/:token', async (req, res) => {
         `SELECT titulo, autores, tipo, ubicacion, url_portada
          FROM deseos
          WHERE usuario_id = $1
+           AND titulo IS NOT NULL
+           AND titulo <> ''
          ORDER BY creado_en DESC`,
         [usuario_id]
       );
       items = d.rows;
     } else if (tipo === 'ejemplares') {
       const e = await pool.query(
-        `SELECT
+        `SELECT DISTINCT ON (l.id)
            e.id        AS ejemplar_id,
            e.libro_id  AS libro_id,
            l.titulo    AS titulo,
@@ -78,10 +80,14 @@ router.get('/share/:token', async (req, res) => {
          FROM ejemplares e
          JOIN libros l ON l.id = e.libro_id
          WHERE e.usuario_id = $1
-         ORDER BY e.creado_en DESC`,
+           AND e.activo = true
+         ORDER BY l.id, e.id ASC`,
         [usuario_id]
       );
-      items = e.rows;
+      // Ordenar por título en JS (DISTINCT ON requiere ORDER BY por la clave)
+      items = e.rows.sort((a, b) =>
+        (a.titulo || '').localeCompare(b.titulo || '', 'es')
+      );
         
     } else {
       return res.status(400).json({ error: 'tipo inválido en token' });
