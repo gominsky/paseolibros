@@ -2679,3 +2679,11 @@ input, select, textarea { padding: 7px 10px; font-size: .9rem; }
 /* Sin columna acciones: la fila entera es el enlace */
 #tabla-ejemplares tbody tr { cursor: pointer; }
 #tabla-ejemplares tbody tr td:last-child { width: 100px; }
+
+/* ── Cabeceras tabla lecturas/préstamos: no partir palabras en móvil ─ */
+@media (max-width: 820px) {
+  #tabla-lecturas-abiertas th,
+  #tabla-prestamos-activos th {
+    white-space: nowrap;
+  }
+}

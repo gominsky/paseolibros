@@ -212,41 +212,39 @@ async function buscarPortadaCompleta(isbn, titulo, autores) {
 }
 
 // ── POST /api/libros/:id/buscar-portada ───────────────────
-// Busca y asigna portada para un libro concreto
+// Busca portada: guarda la URL externa directamente en BD (permanente, sin depender del disco)
 router.post('/libros/:id/buscar-portada', requireAuth, async (req, res) => {
   const libroId = Number(req.params.id);
 
   try {
-    // Obtener ISBN del libro
     const { rows } = await pool.query(
-      'SELECT id, isbn, url_portada FROM libros WHERE id = $1',
+      'SELECT id, isbn, titulo, autores, url_portada FROM libros WHERE id = $1',
       [libroId]
     );
     if (!rows.length) return res.status(404).json({ error: 'Libro no encontrado' });
 
     const libro = rows[0];
 
-    // Si ya tiene portada, no sobreescribir a menos que se indique force=true
     if (libro.url_portada && !req.body?.force) {
       return res.json({ ok: true, ya_tenia: true, url_portada: libro.url_portada });
     }
 
-    if (!libro.isbn) return res.status(400).json({ error: 'El libro no tiene ISBN' });
+    if (!libro.isbn && !libro.titulo) {
+      return res.status(400).json({ error: 'El libro no tiene ISBN ni título para buscar' });
+    }
 
-    // Buscar URL
     const resultado = await buscarPortadaCompleta(libro.isbn, libro.titulo, libro.autores);
     if (!resultado) {
       return res.status(404).json({ error: 'No se encontró portada en ninguna fuente' });
     }
 
-    // Descargar imagen
+    // Descargar imagen al disco local
     const ext      = 'jpg';
     const filename = `portada_${libroId}_${Date.now()}.${ext}`;
     const destPath = path.join(UPLOADS_DIR, filename);
 
     await descargarImagen(resultado.url, destPath);
 
-    // Verificar que el archivo tiene tamaño razonable (> 1KB)
     const stats = fs.statSync(destPath);
     if (stats.size < 1024) {
       fs.unlink(destPath, () => {});
@@ -254,12 +252,7 @@ router.post('/libros/:id/buscar-portada', requireAuth, async (req, res) => {
     }
 
     const urlPortada = `/uploads/${filename}`;
-
-    // Guardar en BD
-    await pool.query(
-      'UPDATE libros SET url_portada = $1 WHERE id = $2',
-      [urlPortada, libroId]
-    );
+    await pool.query('UPDATE libros SET url_portada = $1 WHERE id = $2', [urlPortada, libroId]);
 
     res.json({ ok: true, fuente: resultado.fuente, url_portada: urlPortada });
   } catch (e) {
@@ -385,22 +378,26 @@ router.post('/libros/:id/portada-url', requireAuth, async (req, res) => {
     );
     if (!rows.length) return res.status(403).json({ error: 'Sin acceso a este libro' });
 
-    const ext      = /\.png$/i.test(urlLimpia) ? 'png' : 'jpg';
-    const filename = `portada_${libroId}_${Date.now()}.${ext}`;
-    const destPath = path.join(UPLOADS_DIR, filename);
-
-    await descargarImagen(urlLimpia, destPath);
-
-    const stats = fs.statSync(destPath);
-    if (stats.size < 1024) {
-      fs.unlink(destPath, () => {});
-      return res.status(400).json({ error: 'La imagen descargada es demasiado pequeña' });
+    // Guardar la URL externa directamente en BD — no descargamos al disco
+    // Así la portada persiste aunque Render reinicie el servidor
+    // Verificamos primero que la URL apunta a una imagen real
+    try {
+      const check = await fetch(urlLimpia, {
+        method: 'HEAD',
+        signal: AbortSignal.timeout(8000),
+        headers: { 'User-Agent': 'Mozilla/5.0' }
+      });
+      const ct = check.headers.get('content-type') || '';
+      if (!ct.startsWith('image/')) {
+        return res.status(400).json({ error: 'La URL no apunta a una imagen válida' });
+      }
+    } catch (e) {
+      return res.status(400).json({ error: 'No se pudo verificar la imagen: ' + e.message });
     }
 
-    const urlPortada = `/uploads/${filename}`;
-    await pool.query('UPDATE libros SET url_portada = $1 WHERE id = $2', [urlPortada, libroId]);
+    await pool.query('UPDATE libros SET url_portada = $1 WHERE id = $2', [urlLimpia, libroId]);
 
-    res.json({ ok: true, url_portada: urlPortada });
+    res.json({ ok: true, url_portada: urlLimpia });
   } catch (e) {
     console.error('[portadas] Error URL manual:', e);
     res.status(500).json({ error: e.message || 'Error descargando la imagen' });
