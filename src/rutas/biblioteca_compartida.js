@@ -146,18 +146,23 @@ router.get('/biblioteca-compartida/ver/:propietario_id', requireAuth, async (req
     );
     if (!propRows.length) return res.status(404).json({ error: 'Usuario no encontrado' });
 
-    // Ejemplares del propietario
+    // Ejemplares del propietario — un registro por libro (DISTINCT ON libro_id)
+    // Evita duplicados cuando el usuario tiene varios ejemplares del mismo título
     const { rows: ejemplares } = await pool.query(
-      `SELECT ej.id AS ejemplar_id, ej.estado, ej.ubicacion, ej.notas, ej.tipo,
+      `SELECT DISTINCT ON (l.id)
+              ej.id AS ejemplar_id, ej.estado, ej.ubicacion, ej.notas, ej.tipo,
               l.id AS libro_id, l.titulo, l.autores, l.isbn,
               l.editorial, l.fecha_publicacion, l.numero_paginas,
               l.url_portada
        FROM ejemplares ej
        JOIN libros l ON l.id = ej.libro_id
        WHERE ej.usuario_id = $1
-       ORDER BY l.titulo ASC`,
+       ORDER BY l.id, ej.id ASC`,
       [propietarioId]
     );
+
+    // Ordenar por título en JS (DISTINCT ON exige que el ORDER BY empiece por libro_id)
+    ejemplares.sort((a, b) => (a.titulo || '').localeCompare(b.titulo || '', 'es'));
 
     res.json({
       propietario: propRows[0],
