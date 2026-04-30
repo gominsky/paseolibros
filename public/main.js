@@ -3075,21 +3075,14 @@ document.addEventListener('DOMContentLoaded', () => {
       paginaInicial,
       onSave: async (pagina) => {
         await actualizarPaginaLectura(lecturaId, pagina);
-  
-        // ✅ actualizar UI al instante
+
+        // Actualizar UI al instante sin recargar
         tr.dataset.paginaActual = String(pagina ?? '');
         const td = tr.querySelector('.cell-pagina');
         if (td) td.textContent = (pagina ?? '—');
-  
-        // (opcional) refresca el resumen por si tu API devuelve algo distinto
-        // await cargarLecturasAbiertas();
-  
-        // ✅ después abre ficha
-        mostrarFicha(libroId, ejId);
       },
       onSkip: () => {
-        // si cierran sin guardar, abre ficha igual (opcional)
-        mostrarFicha(libroId, ejId);
+        // Cerró sin guardar — no hacer nada
       }
     });
   });
@@ -4414,7 +4407,16 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     const conteo = {};
     for (const d of Object.values(detalleCache)) {
       for (const l of (d.terminadas || [])) {
-        const autores = (l.autores || '').split(/[,;&\/]/).map(a => a.trim()).filter(Boolean);
+        const autores = (l.autores || '').split(/[,;&\/]/).map(a => a.trim()).filter(a => {
+          if (!a) return false;
+          // Descartar fragmentos que parezcan fechas (1898-1936), años solos (1936)
+          // o números puros
+          if (/^\d{4}(-\d{4})?$/.test(a)) return false;
+          if (/^\d+$/.test(a)) return false;
+          // Descartar fragmentos muy cortos (iniciales sueltas, puntos)
+          if (a.length < 2) return false;
+          return true;
+        });
         for (const a of autores) {
           conteo[a] = (conteo[a] || 0) + 1;
         }
