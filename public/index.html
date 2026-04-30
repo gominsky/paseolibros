@@ -237,11 +237,9 @@
                   <th>Portada</th>
                   <th>Título</th>
                   <th>Autor/es</th>
+                  <th>Editorial</th>
                   <th>ISBN</th>
-                  <th>Estado</th>
                   <th>Ubicación</th>
-                  <th>Notas</th>
-                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -348,33 +346,42 @@
 
         <!-- Estadísticas de lectura -->
         <div class="card" id="card-stats-lecturas">
-          <div class="card-header">
-            <div>
-              <h2>Estadísticas de lectura</h2>
-              <small id="stats-lecturas-info" class="muted">
-                Inicia sesión para ver tus estadísticas.
-              </small>
+          <div class="card-header-inline">
+            <h2>Estadísticas de lectura</h2>
+            <small id="stats-lecturas-info" class="muted"></small>
+          </div>
+
+          <!-- Métricas resumen -->
+          <div id="stats-metricas" class="stats-metricas"></div>
+
+          <!-- Gráfico de barras por año -->
+          <div class="stats-chart-wrap" id="stats-chart-anos-wrap" style="display:none;">
+            <div style="position:relative; height:160px;">
+              <canvas id="stats-chart-anos" role="img" aria-label="Libros terminados por año"></canvas>
             </div>
           </div>
-        
-                  <div class="table-wrapper table-small">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Año</th>
-                <th>Empezadas</th>
-                <th>Terminadas</th>
-              </tr>
-            </thead>
-            <tbody id="tabla-stats-lecturas">
-              <!-- Relleno desde JS -->
-            </tbody>
-          </table>
-        </div>
 
-        <!-- Vista móvil de estadísticas (lista) -->
-        <div id="stats-lecturas-mobile" class="stats-mobile-list">
-          <!-- Relleno desde JS -->
+          <!-- Panel inferior: autores + detalle por año -->
+          <div id="stats-panel-inferior" class="stats-panel-inferior" style="display:none;">
+            <!-- Autores más leídos -->
+            <div class="stats-autores-card">
+              <div class="stats-sub-title">Autores más leídos</div>
+              <div id="stats-autores-lista" class="stats-autores-lista"></div>
+            </div>
+            <!-- Detalle por año (mantiene el listado de títulos) -->
+            <div class="stats-detalle-card">
+              <div class="stats-sub-title">
+                Títulos por año
+                <select id="stats-anio-select" class="stats-anio-select"></select>
+              </div>
+              <div id="stats-detalle-contenido" class="stats-detalle-contenido"></div>
+            </div>
+          </div>
+
+          <!-- Vista móvil de estadísticas (lista legacy, oculta en desktop) -->
+          <div id="stats-lecturas-mobile" class="stats-mobile-list"></div>
+          <!-- tbody legacy (oculto, mantiene compatibilidad JS existente) -->
+          <div style="display:none;"><table><tbody id="tabla-stats-lecturas"></tbody></table></div>
         </div>
       </section>     
     </main>

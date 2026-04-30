@@ -652,6 +652,70 @@ tbody tr:hover td { background: var(--accent-soft); }
 .grid-two > .card + .card { margin-top: 0; }
 @media (max-width: 980px) { .grid-two { grid-template-columns: 1fr; } }
 
+/* ── Móvil: lecturas, préstamos y stats al ancho de ejemplares ─ */
+@media (max-width: 820px) {
+  /* El grid de dos columnas pasa a una sola, igual que ejemplares */
+  .grid-two {
+    grid-template-columns: 1fr !important;
+    width: 100%;
+  }
+
+  /* Las cards dentro del grid no se salen */
+  .grid-two > .card {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* Tablas: quitar min-width fijo para que se adapten al contenedor */
+  .grid-two .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .grid-two table,
+  .grid-two .table-small {
+    min-width: 0 !important;
+    width: 100%;
+  }
+  .grid-two th,
+  .grid-two td {
+    font-size: .8rem;
+    padding: 7px 8px;
+    /* Permitir wrap en móvil */
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  /* Stats: misma anchura */
+  #card-stats-lecturas {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+  #card-stats-lecturas .table-wrapper {
+    overflow-x: auto;
+  }
+  #card-stats-lecturas table,
+  #card-stats-lecturas .table-small {
+    min-width: 0 !important;
+    width: 100%;
+  }
+  #card-stats-lecturas th,
+  #card-stats-lecturas td {
+    font-size: .8rem;
+    padding: 7px 8px;
+    white-space: normal;
+  }
+
+  /* Columna derecha: no se sale nunca */
+  .column-right,
+  .column {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+}
+
 /* ══════════════════════════════════════════════════════════
    ESCÁNER
    ══════════════════════════════════════════════════════════ */
@@ -2422,3 +2486,196 @@ input, select, textarea { padding: 7px 10px; font-size: .9rem; }
   .modal-cover-img-wrap   { width: 80px; }
   .modal-cover-actions    { width: 80px; font-size: .6rem; }
 }
+
+/* ══════════════════════════════════════════════════════════
+   ESTADÍSTICAS VISUALES
+   ══════════════════════════════════════════════════════════ */
+
+/* Métricas resumen */
+.stats-metricas {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.stats-metric {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+}
+.stats-metric-label {
+  font-size: .75rem;
+  font-weight: 500;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 4px;
+}
+.stats-metric-value {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stats-metric-sub {
+  font-size: .75rem;
+  color: var(--ink-3);
+}
+
+/* Gráfico */
+.stats-chart-wrap {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+}
+
+/* Panel inferior: autores + detalle */
+.stats-panel-inferior {
+  display: none;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 12px;
+  margin-top: 4px;
+}
+.stats-autores-card,
+.stats-detalle-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+}
+.stats-sub-title {
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Selector de año */
+.stats-anio-select {
+  font-size: .78rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border-2);
+  background: var(--surface);
+  color: var(--ink);
+  height: 26px;
+  cursor: pointer;
+}
+
+/* Autores */
+.stats-autores-lista { display: flex; flex-direction: column; gap: 7px; }
+.stats-autor-row {
+  display: grid;
+  grid-template-columns: 110px 1fr 24px;
+  align-items: center;
+  gap: 8px;
+}
+.stats-autor-nombre {
+  font-size: .82rem;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stats-autor-bar-wrap {
+  height: 5px;
+  background: var(--border-2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.stats-autor-bar {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 999px;
+  transition: width .4s ease;
+}
+.stats-autor-n {
+  font-size: .78rem;
+  color: var(--ink-3);
+  text-align: right;
+}
+
+/* Detalle por año */
+.stats-detalle-contenido {
+  max-height: 280px;
+  overflow-y: auto;
+}
+.stats-detalle-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.stats-detalle-col { }
+.stats-detalle-label {
+  font-size: .75rem;
+  font-weight: 600;
+  color: var(--ink-3);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.stats-detalle-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 0 6px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+.stats-detalle-item:last-child { border-bottom: none; }
+.stats-detalle-titulo {
+  font-size: .84rem;
+  font-weight: 500;
+  color: var(--ink);
+  grid-column: 1;
+  grid-row: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stats-detalle-autor {
+  font-size: .76rem;
+  color: var(--ink-3);
+  grid-column: 1;
+  grid-row: 2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stats-detalle-fecha {
+  font-size: .76rem;
+  color: var(--accent);
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-self: center;
+  white-space: nowrap;
+}
+.stats-detalle-empty {
+  font-size: .82rem;
+  color: var(--ink-3);
+  padding: 6px 0;
+}
+
+/* ── Móvil ────────────────────────────────────────────── */
+@media (max-width: 820px) {
+  .stats-metricas { grid-template-columns: 1fr 1fr; }
+  .stats-metric-value { font-size: 1.4rem; }
+  .stats-panel-inferior { grid-template-columns: 1fr; }
+  .stats-detalle-cols { grid-template-columns: 1fr; }
+  .stats-autor-row { grid-template-columns: 90px 1fr 24px; }
+}
+
+/* ── Tabla ejemplares simplificada ───────────────────── */
+/* Sin columna acciones: la fila entera es el enlace */
+#tabla-ejemplares tbody tr { cursor: pointer; }
+#tabla-ejemplares tbody tr td:last-child { width: 100px; }
