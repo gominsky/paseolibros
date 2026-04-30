@@ -26,6 +26,9 @@
   </div>
 
   <div class="header-right">
+          <button id="btn-ayuda" class="icon-btn" type="button" title="Ayuda" aria-label="Abrir ayuda">
+            <span class="icon-circle" style="font-size:15px; font-weight:600;">?</span>
+          </button>
 <div class="view-toggle header-view-toggle" role="group" aria-label="Vista ejemplares">
       <button id="ej-vista-lista" type="button" class="icon-btn" aria-label="Vista lista" title="Vista lista">
         <span class="icon-circle">≣</span>
@@ -919,5 +922,193 @@
     </div>
   </div>
 </div>
+
+<!-- ── Modal: Ayuda / Manual ─────────────────────────── -->
+<div id="ayuda-overlay" class="deseos-overlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Manual de ayuda">
+  <div class="ayuda-dialog">
+
+    <div class="deseos-header">
+      <div class="ayuda-header-titulo">
+        <span class="ayuda-logo">📚</span>
+        <h3>Manual de PaseoLibros</h3>
+      </div>
+      <button id="ayuda-cerrar" class="icon-btn" type="button" aria-label="Cerrar ayuda">
+        <span class="icon-circle">✕</span>
+      </button>
+    </div>
+
+    <!-- Pestañas -->
+    <nav class="ayuda-tabs" role="tablist">
+      <button class="ayuda-tab is-active" data-ayuda-tab="inicio" role="tab">Primeros pasos</button>
+      <button class="ayuda-tab" data-ayuda-tab="biblioteca" role="tab">Biblioteca</button>
+      <button class="ayuda-tab" data-ayuda-tab="lecturas" role="tab">Lecturas</button>
+      <button class="ayuda-tab" data-ayuda-tab="prestamos" role="tab">Préstamos</button>
+      <button class="ayuda-tab" data-ayuda-tab="extras" role="tab">Extras</button>
+    </nav>
+
+    <!-- Contenido -->
+    <div class="ayuda-body">
+
+      <!-- ── PRIMEROS PASOS ───────────────────────── -->
+      <div class="ayuda-panel is-active" id="ayuda-panel-inicio">
+        <div class="ayuda-section">
+          <h4>¿Qué es PaseoLibros?</h4>
+          <p>PaseoLibros es tu biblioteca personal digital. Registra tus libros escaneando el código de barras o introduciendo el ISBN, lleva el seguimiento de tus lecturas, gestiona préstamos y comparte tu colección con otros usuarios.</p>
+        </div>
+        <div class="ayuda-section">
+          <h4>Añadir tu primer libro</h4>
+          <ol>
+            <li>En el panel izquierdo, introduce el <strong>ISBN</strong> del libro (lo encontrarás en el código de barras de la contraportada).</li>
+            <li>Pulsa <strong>Buscar</strong> — la app consulta Google Books y Open Library automáticamente.</li>
+            <li>Revisa los datos y pulsa <strong>Añadir ejemplar</strong>.</li>
+            <li>¿Tienes el libro a mano? Pulsa el botón <strong>Escanear</strong> para leer el código de barras con la cámara.</li>
+          </ol>
+        </div>
+        <div class="ayuda-section">
+          <h4>Navegar por la app</h4>
+          <div class="ayuda-grid">
+            <div class="ayuda-card">
+              <div class="ayuda-card-icon">≡</div>
+              <div>
+                <strong>Vista lista</strong>
+                <p>Tabla con todos los datos del ejemplar.</p>
+              </div>
+            </div>
+            <div class="ayuda-card">
+              <div class="ayuda-card-icon">⊞</div>
+              <div>
+                <strong>Vista portadas</strong>
+                <p>Cuadrícula visual de portadas.</p>
+              </div>
+            </div>
+            <div class="ayuda-card">
+              <div class="ayuda-card-icon">⚙</div>
+              <div>
+                <strong>Menú herramientas</strong>
+                <p>Deseos, préstamos, compartir, portadas…</p>
+              </div>
+            </div>
+            <div class="ayuda-card">
+              <div class="ayuda-card-icon">☀</div>
+              <div>
+                <strong>Tema claro/oscuro</strong>
+                <p>Cambia el aspecto visual de la app.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BIBLIOTECA ────────────────────────────── -->
+      <div class="ayuda-panel" id="ayuda-panel-biblioteca">
+        <div class="ayuda-section">
+          <h4>La ficha del libro</h4>
+          <p>Haz clic en cualquier fila o portada para abrir la ficha completa. Desde ahí puedes:</p>
+          <ul>
+            <li><strong>Pestaña Libro</strong> — editar título, autor, editorial, año, páginas y descripción.</li>
+            <li><strong>Pestaña Mi lectura</strong> — añadir etiquetas personales, notas escritas y notas de audio.</li>
+            <li><strong>Pestaña Ejemplar</strong> — cambiar estado, tipo y ubicación física. También puedes iniciar una lectura, registrar un préstamo o eliminar el ejemplar.</li>
+            <li><strong>Pestaña Historial</strong> — ver el registro completo de lecturas y préstamos pasados.</li>
+          </ul>
+        </div>
+        <div class="ayuda-section">
+          <h4>Portadas</h4>
+          <p>Bajo la portada en la ficha tienes tres botones:</p>
+          <ul>
+            <li><strong>↑ Subir</strong> — sube una imagen desde tu dispositivo.</li>
+            <li><strong>⚲ Buscar</strong> — busca automáticamente en Google Books, Open Library y Bing.</li>
+            <li><strong>⊕ URL</strong> — abre un buscador preconfigurado y pega la URL de la imagen que quieras. Esta URL se guarda de forma permanente en la base de datos.</li>
+          </ul>
+          <p>También puedes usar <strong>Buscar portadas faltantes</strong> en el menú ⚙ para rellenar todas las que falten de una vez.</p>
+        </div>
+        <div class="ayuda-section">
+          <h4>Buscar y filtrar</h4>
+          <ul>
+            <li>Usa la barra de búsqueda central para filtrar por título, autor o ISBN en tiempo real.</li>
+            <li>El menú desplegable de la derecha ordena por recientes, título o autor.</li>
+            <li>En móvil, el ordenado está dentro del menú ⚙.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ── LECTURAS ───────────────────────────────── -->
+      <div class="ayuda-panel" id="ayuda-panel-lecturas">
+        <div class="ayuda-section">
+          <h4>Iniciar una lectura</h4>
+          <ol>
+            <li>Abre la ficha del libro.</li>
+            <li>Ve a la pestaña <strong>Ejemplar</strong>.</li>
+            <li>Pulsa <strong>Iniciar lectura</strong>.</li>
+          </ol>
+          <p>La lectura aparecerá en la sección <strong>Lecturas en curso</strong> de la pantalla principal.</p>
+        </div>
+        <div class="ayuda-section">
+          <h4>Actualizar el marcapáginas</h4>
+          <p>Haz clic en una lectura en curso para abrir el marcapáginas. Escribe la página actual o usa el deslizador. El progreso se guarda automáticamente.</p>
+        </div>
+        <div class="ayuda-section">
+          <h4>Terminar una lectura</h4>
+          <p>Desde la ficha del libro, pestaña <strong>Historial</strong>, pulsa <strong>✓ Terminar</strong>. También puedes hacerlo desde el panel de lecturas en curso de la pantalla principal.</p>
+        </div>
+        <div class="ayuda-section">
+          <h4>Estadísticas</h4>
+          <p>La sección <strong>Estadísticas de lectura</strong> muestra métricas de tu actividad lectora: total histórico, libros este año, racha de años consecutivos y gráfico por año. Haz clic en una barra del gráfico para ver el listado de títulos de ese año. El panel de autores más leídos se calcula automáticamente de tu historial.</p>
+        </div>
+        <div class="ayuda-section">
+          <h4>Cola de lectura</h4>
+          <p>Organiza los libros que quieres leer a continuación. Accede desde el menú ⚙ → <strong>Cola de lecturas</strong>. Puedes reordenarlos según tus prioridades.</p>
+        </div>
+      </div>
+
+      <!-- ── PRÉSTAMOS ──────────────────────────────── -->
+      <div class="ayuda-panel" id="ayuda-panel-prestamos">
+        <div class="ayuda-section">
+          <h4>Registrar un préstamo</h4>
+          <ol>
+            <li>Abre la ficha del libro.</li>
+            <li>Ve a la pestaña <strong>Ejemplar</strong>.</li>
+            <li>Pulsa <strong>Registrar préstamo</strong>.</li>
+            <li>Indica a quién se lo prestas y la fecha límite de devolución.</li>
+          </ol>
+        </div>
+        <div class="ayuda-section">
+          <h4>Seguimiento de préstamos</h4>
+          <p>Los préstamos activos aparecen en la sección <strong>Préstamos activos</strong> de la pantalla principal con el nombre del receptor y la fecha límite.</p>
+        </div>
+        <div class="ayuda-section">
+          <h4>Marcar como devuelto</h4>
+          <p>Desde la ficha del libro, pestaña <strong>Historial</strong>, pulsa <strong>✓ Devuelto</strong>.</p>
+        </div>
+      </div>
+
+      <!-- ── EXTRAS ────────────────────────────────── -->
+      <div class="ayuda-panel" id="ayuda-panel-extras">
+        <div class="ayuda-section">
+          <h4>Lista de deseos</h4>
+          <p>Guarda los libros que quieres conseguir. Accede desde el menú ⚙ → <strong>Lista de deseos</strong>. Puedes añadir título, autor, ISBN, tipo, ubicación donde encontrarlo y prioridad.</p>
+        </div>
+        <div class="ayuda-section">
+          <h4>Compartir tu biblioteca</h4>
+          <p>Puedes dar acceso de solo lectura a tu biblioteca completa a otros usuarios registrados en PaseoLibros:</p>
+          <ol>
+            <li>Menú ⚙ → <strong>Bibliotecas compartidas</strong>.</li>
+            <li>Pestaña <strong>Las que yo comparto</strong>.</li>
+            <li>Escribe el nombre de usuario y pulsa <strong>Compartir</strong>.</li>
+          </ol>
+          <p>Para ver una biblioteca que alguien ha compartido contigo, ve a la pestaña <strong>Compartidas conmigo</strong> y pulsa <strong>Ver biblioteca</strong>.</p>
+        </div>
+        <div class="ayuda-section">
+          <h4>Compartir listas públicas</h4>
+          <p>Genera un enlace público para compartir tu biblioteca o lista de deseos con cualquier persona, aunque no tenga cuenta. Menú ⚙ → <strong>Compartir ejemplares</strong> o <strong>Compartir deseos</strong>. El enlace caduca a los 30 días.</p>
+        </div>
+        <div class="ayuda-section">
+          <h4>Escáner de ISBN</h4>
+          <p>Pulsa <strong>Escanear</strong> en el panel de alta para activar la cámara. Apunta al código de barras del libro — la app detecta automáticamente el ISBN usando BarcodeDetector nativo (si el navegador lo soporta) o ZXing como alternativa. Funciona mejor con buena iluminación.</p>
+        </div>
+      </div>
+
+    </div><!-- /ayuda-body -->
+  </div><!-- /ayuda-dialog -->
+</div><!-- /ayuda-overlay -->
 </body>
 </html>
