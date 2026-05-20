@@ -4080,6 +4080,22 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     });
     document.getElementById('btn-lanzar-busqueda')?.addEventListener('click', lanzarBusquedaMasiva);
     document.getElementById('btn-buscar-portada')?.addEventListener('click', buscarPortadaDesdeModal);
+    document.getElementById('btn-buscar-portada-movil')?.addEventListener('click', buscarPortadaDesdeModal);
+    document.getElementById('btn-portada-manual-movil')?.addEventListener('click', abrirPortadaUrl);
+
+    // Input de subir portada alternativo (móvil)
+    document.getElementById('ficha-portada-file-movil')?.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      // Reusar el input original para disparar el mismo handler
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      const originalInput = document.getElementById('ficha-portada-file');
+      if (originalInput) {
+        originalInput.files = dt.files;
+        originalInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
 
     // Delegación: buscar portada de uno en la lista
     document.getElementById('portadas-lista-sin')?.addEventListener('click', e => {

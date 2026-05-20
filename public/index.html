@@ -473,6 +473,16 @@
 
         <!-- PESTAÑA: Libro -->
         <div class="modal-panel is-active" id="tab-panel-libro" role="tabpanel">
+          <!-- Acciones de portada — visibles solo en móvil dentro de la pestaña -->
+          <div class="modal-portada-acciones-movil">
+            <span class="modal-portada-acciones-label">Portada:</span>
+            <label class="modal-cover-action-btn" title="Subir imagen">
+              <span>↑ Subir</span>
+              <input type="file" id="ficha-portada-file-movil" accept="image/*" hidden />
+            </label>
+            <button id="btn-buscar-portada-movil" class="modal-cover-action-btn" type="button">⚲ Buscar</button>
+            <button id="btn-portada-manual-movil" class="modal-cover-action-btn" type="button">⊕ URL</button>
+          </div>
           <div class="form-grid">
             <div class="form-group">
               <label for="edit-libro-titulo">Título</label>
