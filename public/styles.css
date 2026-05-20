@@ -2918,39 +2918,48 @@ input, select, textarea { padding: 7px 10px; font-size: .9rem; }
   }
 
   /* ── 2. Botón guardar siempre visible ────────────────── */
-  /* El modal-body es el que hace scroll — el footer de cada
-     panel sale del flujo normal y se pega al fondo del body */
-  .modal-body {
-    display: flex;
-    flex-direction: column;
-    padding: 12px !important;
-    /* Deja espacio abajo para que el footer no quede bajo el teclado */
-    padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
+  /* Estructura: modal-dialog (flex col, 100vh)
+       → modal-header (fijo)
+       → modal-tabs (fijo)
+       → modal-body (flex: 1, overflow-y: auto)  ← scroll aquí
+           → modal-panel (flex col, min-height: 100%)
+               → contenido (flex: 1)
+               → modal-panel-footer (sticky bottom) */
+
+  #modal-ficha .modal-dialog {
+    display: flex !important;
+    flex-direction: column !important;
   }
 
-  .modal-panel.is-active {
+  .modal-body {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px !important;
     display: flex;
     flex-direction: column;
-    flex: 1;
     min-height: 0;
   }
 
-  /* El contenido del panel hace scroll */
-  .modal-panel.is-active > *:not(.modal-panel-footer) {
-    flex-shrink: 0;
+  .modal-panel.is-active {
+    display: flex !important;
+    flex-direction: column;
+    flex: 1;
+    min-height: 100%;
   }
 
-  /* El footer se pega al fondo visible, fuera del scroll */
+  /* El footer sale del flujo de scroll y se pega al fondo del viewport */
   .modal-panel-footer {
     position: sticky;
     bottom: 0;
+    left: 0;
+    right: 0;
     background: var(--surface);
     border-top: 1px solid var(--border);
-    padding: 10px 0 !important;
+    padding: 12px 0 8px !important;
     margin-top: auto;
-    z-index: 2;
-    /* Sombra para que se vea sobre el contenido */
-    box-shadow: 0 -4px 12px rgba(26,20,16,.08);
+    z-index: 10;
+    box-shadow: 0 -6px 16px rgba(26,20,16,.10);
   }
 }
 
