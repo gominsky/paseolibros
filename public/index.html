@@ -510,9 +510,6 @@
             <textarea id="edit-libro-descripcion" rows="4"></textarea>
           </div>
           <p id="edit-mensaje" class="helper-text" style="min-height:1.4em;"></p>
-          <div class="modal-panel-footer">
-            <button id="btn-guardar-libro" class="btn btn-primary">Guardar libro</button>
-          </div>
         </div>
 
         <!-- PESTAÑA: Mi lectura (reader panel) -->
@@ -598,10 +595,7 @@
             <input id="edit-ejemplar-notas" type="text" />
           </div>
 
-          <div class="modal-panel-footer">
-            <button id="btn-eliminar-modal" class="btn btn-danger" type="button">Eliminar ejemplar</button>
-            <button id="btn-guardar-ejemplar" class="btn btn-primary">Guardar ejemplar</button>
-          </div>
+
         </div>
 
         <!-- PESTAÑA: Historial (lecturas + préstamos) -->
@@ -636,6 +630,20 @@
         </div>
 
       </div><!-- /modal-body -->
+
+      <!-- Footer fijo — siempre visible, fuera del scroll -->
+      <div class="modal-footer-fijo" id="modal-footer-fijo">
+        <!-- Libro -->
+        <div class="modal-footer-panel" id="modal-footer-libro">
+          <button id="btn-guardar-libro" class="btn btn-primary btn-full">Guardar libro</button>
+        </div>
+        <!-- Ejemplar -->
+        <div class="modal-footer-panel" id="modal-footer-ejemplar" style="display:none;">
+          <button id="btn-eliminar-modal" class="btn btn-danger" type="button">Eliminar</button>
+          <button id="btn-guardar-ejemplar" class="btn btn-primary">Guardar ejemplar</button>
+        </div>
+      </div>
+
     </div><!-- /modal-dialog -->
   </div><!-- /modal-ficha -->
   <button id="btn-toggle-alta" class="fab-plus" type="button" aria-label="Añadir ejemplar">+</button>
@@ -781,6 +789,12 @@
             const active = p.id === 'tab-panel-' + target;
             p.classList.toggle('is-active', active);
           });
+
+          // Mostrar footer correcto según pestaña
+          const fl = document.getElementById('modal-footer-libro');
+          const fe = document.getElementById('modal-footer-ejemplar');
+          if (fl) fl.style.display    = target === 'libro'    ? '' : 'none';
+          if (fe) fe.style.display    = target === 'ejemplar' ? 'flex' : 'none';
         });
       });
     }
