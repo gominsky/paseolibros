@@ -216,12 +216,14 @@ function abrirModalFicha() {
   const modal = document.getElementById('modal-ficha');
   if (!modal) return;
   modal.classList.add('is-visible');
+  document.body.classList.add('modal-abierto');
 }
 
 async function cerrarModalFicha() {
   const modal = document.getElementById('modal-ficha');
   if (!modal) return;
   modal.classList.remove('is-visible');
+  document.body.classList.remove('modal-abierto');
   window.libroSeleccionadoId    = null;
   window.ejemplarSeleccionadoId = null;
   await refrescarHome();

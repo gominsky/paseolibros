@@ -1185,6 +1185,10 @@ tbody tr:hover td { background: var(--accent-soft); }
     color: var(--ink) !important;
     border: 1px solid var(--border-2) !important;
   }
+  /* Ocultar el FAB mientras hay un modal abierto */
+  body.modal-abierto #btn-toggle-alta.fab-plus {
+    display: none !important;
+  }
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1284,8 +1288,9 @@ tbody tr:hover td { background: var(--accent-soft); }
   /* Modal ficha: full screen */
   #modal-ficha .modal-dialog {
     width: 100vw !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
+    /* dvh se actualiza cuando aparece el teclado virtual — vh no */
+    height: 100dvh !important;
+    max-height: 100dvh !important;
     margin: 0 !important;
     border-radius: 0 !important;
   }
