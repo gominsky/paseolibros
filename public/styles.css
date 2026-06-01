@@ -1890,12 +1890,14 @@ tr:hover .portada-mini-img {
 }
 .modal-panel.is-active { display: block; }
 
-/* Footer de panel con botón de guardar */
+/* Footer de panel con botón de guardar — visible en desktop */
 .modal-panel-footer {
   display: flex;
   justify-content: flex-end;
-  padding-top: 16px;
-  margin-top: 4px;
+  align-items: center;
+  gap: 8px;
+  padding-top: 14px;
+  margin-top: 8px;
   border-top: 1px solid var(--border);
 }
 
@@ -1960,12 +1962,7 @@ tr:hover .portada-mini-img {
 input, select, textarea { padding: 7px 10px; font-size: .9rem; }
 .form-grid { gap: 10px; }
 
-/* Footer de panel */
-.modal-panel-footer {
-  padding-top: 12px;
-  margin-top: 2px;
-  gap: 8px;
-}
+/* Footer de panel — estilos en la definición principal */
 
 /* ── Acciones rápidas (Leer / Prestar) ───────────────── */
 .modal-acciones {
@@ -2953,19 +2950,7 @@ input, select, textarea { padding: 7px 10px; font-size: .9rem; }
     min-height: 100%;
   }
 
-  /* El footer sale del flujo de scroll y se pega al fondo del viewport */
-  .modal-panel-footer {
-    position: sticky;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    padding: 12px 0 8px !important;
-    margin-top: auto;
-    z-index: 10;
-    box-shadow: 0 -6px 16px rgba(26,20,16,.10);
-  }
+  /* footer sticky eliminado — se usa modal-footer-fijo en móvil */
 }
 
 /* ── Botones de portada en móvil: ocultos en desktop ──── */
