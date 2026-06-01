@@ -3019,23 +3019,20 @@ input, select, textarea { padding: 7px 10px; font-size: .9rem; }
 
 /* Quitar los estilos sticky anteriores del modal-panel-footer
    (en desktop el footer sigue dentro del panel como siempre) */
-@media (min-width: 821px) {
-  .modal-footer-fijo { display: none; }   /* en desktop no se usa */
-  .modal-panel-footer { display: flex; }  /* en desktop el footer es parte del panel */
-}
+/* Footer fijo (móvil) oculto en desktop */
+.modal-footer-fijo { display: none; }
 
 @media (max-width: 820px) {
-  .modal-panel-footer { display: none !important; }  /* ocultar footer dentro del panel */
-  .modal-footer-fijo  { display: block; }            /* mostrar el footer fijo externo */
+  /* En móvil: ocultar footer dentro del panel, usar el footer fijo externo */
+  .modal-panel-footer { display: none !important; }
+  .modal-footer-fijo  { display: block; }
 
-  /* El body solo hace scroll, sin padding extra abajo */
   .modal-body {
     flex: 1 !important;
     overflow-y: auto !important;
     padding-bottom: 8px !important;
   }
 
-  /* Resetear el sticky que no funciona */
   .modal-panel.is-active {
     display: block !important;
     min-height: unset !important;
