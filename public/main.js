@@ -2983,6 +2983,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-marcar-devuelto-global')?.addEventListener('click', marcarPrestamoDevueltoGlobal);
   document.getElementById('btn-guardar-libro')?.addEventListener('click', guardarLibroEditado);
   document.getElementById('btn-guardar-ejemplar')?.addEventListener('click', guardarEjemplarEditado);
+  // Versiones móvil (footer fijo externo — IDs distintos para evitar duplicados)
+  document.getElementById('btn-guardar-libro-movil')?.addEventListener('click', guardarLibroEditado);
+  document.getElementById('btn-guardar-ejemplar-movil')?.addEventListener('click', guardarEjemplarEditado);
 
   // Acciones del modal: leer, prestar, eliminar
   document.getElementById('btn-leer-modal')?.addEventListener('click', () => {
@@ -2999,6 +3002,15 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     crearPrestamo(libroSeleccionadoId, ejemplarSeleccionadoId);
+  });
+
+  // Versión móvil del botón eliminar
+  document.getElementById('btn-eliminar-modal-movil')?.addEventListener('click', async () => {
+    if (!ejemplarSeleccionadoId) return;
+    const confirmar = confirm('¿Eliminar este ejemplar? Esta acción no se puede deshacer.');
+    if (!confirmar) return;
+    await cerrarModalFicha();
+    await eliminarEjemplar(ejemplarSeleccionadoId);
   });
 
   document.getElementById('btn-eliminar-modal')?.addEventListener('click', async () => {
