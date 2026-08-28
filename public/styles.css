@@ -131,8 +131,8 @@ a:hover { text-decoration: underline; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 12px 20px;
+  gap: 8px;
+  padding: 10px 14px;
   background: #ffffff;
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
@@ -3151,4 +3151,75 @@ body.theme-dark .ej-estanteria {
     height: clamp(120px, 22vw, 170px);
   }
   .ej-estanteria { padding: 16px 10px 6px; gap: 3px; row-gap: 24px; }
+}
+
+/* ── Buscador de ejemplares en móvil: asegurar que se ve el botón voz ─ */
+@media (max-width: 820px) {
+  .card-ejemplares .card-header-inline {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .card-ejemplares .table-search {
+    flex: 1 1 100%;   /* ocupa toda la línea */
+    order: 2;
+  }
+  .card-ejemplares .table-search input {
+    flex: 1;
+    min-width: 0;
+  }
+  .btn-voz {
+    display: inline-grid !important;  /* forzar visible en móvil */
+  }
+}
+
+/* ── Header móvil: botones más pequeños, sin desborde ─── */
+@media (max-width: 820px) {
+  .app-header {
+    padding: 8px 10px !important;
+    gap: 5px !important;
+  }
+  .header-right {
+    gap: 4px !important;
+  }
+  .icon-btn {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  .logo-img {
+    height: 28px !important;
+  }
+  /* El buscador de ejemplares ocupa línea propia con el micrófono */
+  .card-ejemplares .card-header-inline {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    gap: 8px;
+    align-items: center;
+  }
+  .card-ejemplares .card-header-inline h2 {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .card-ejemplares .sort-mini {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    display: none !important; /* ya se oculta en móvil */
+  }
+  .card-ejemplares .table-search {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+  }
+  .card-ejemplares .table-search input {
+    flex: 1;
+    min-width: 0;
+  }
+  .btn-voz {
+    display: inline-grid !important;
+    flex-shrink: 0;
+  }
 }
