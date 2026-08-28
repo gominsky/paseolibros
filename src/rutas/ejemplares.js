@@ -1,6 +1,5 @@
 // src/rutas/ejemplares.js
 import { Router } from 'express';
-import fetch from 'node-fetch';
 import pool from '../bd.js';
 
 const router = Router();
@@ -283,10 +282,8 @@ router.get('/', async (req, res) => {
     const parametros = [];
 
     if (usuario_id) {
-      consulta += ' WHERE e.usuario_id = $1 AND e.activo = TRUE';
+      consulta += ' WHERE e.usuario_id = $1';
       parametros.push(usuario_id);
-    } else {
-      consulta += ' WHERE e.activo = TRUE';
     }
 
     consulta += ' ORDER BY e.creado_en DESC';
@@ -353,8 +350,7 @@ router.get('/:id', async (req, res) => {
          e.creado_en
        FROM ejemplares e
        WHERE e.id = $1
-         AND e.usuario_id = $2
-         AND e.activo = TRUE`,
+         AND e.usuario_id = $2`,
       [ejemplarId, req.usuario.id]
     );
 
