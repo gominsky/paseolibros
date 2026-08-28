@@ -590,6 +590,7 @@ function renderEjemplaresMobileList(filtrados){
 
 // ---------- Cargar ejemplares (rellena caché y renderiza) ----------
 async function cargarEjemplares(usuarioId) {
+  if (!token || !usuarioId) return;
   const info = document.getElementById('info-ejemplares');
   if (!usuarioId) {
     if (info) info.textContent = 'Inicia sesión para ver tus ejemplares.';
@@ -859,6 +860,7 @@ async function terminarLecturaActual() {
   }
 }
 async function cargarEstadisticasLecturas() {
+  if (!token || !usuarioActual?.id) return;
   const info = document.getElementById('stats-lecturas-info');
   const tbody = document.getElementById('tabla-stats-lecturas');
   const mobileList = document.getElementById('stats-lecturas-mobile');
@@ -1154,6 +1156,7 @@ async function manejarClickStatsToggle(e) {
 
 // ---------- Resumen global lecturas / préstamos ----------
 async function cargarLecturasAbiertas() {
+  if (!token || !usuarioActual?.id) return;
   const info = document.getElementById('info-lecturas-abiertas');
   const tbody = document.querySelector('#tabla-lecturas-abiertas tbody');
   if (!info || !tbody) return;
@@ -1201,6 +1204,7 @@ async function cargarLecturasAbiertas() {
 }
 
 async function cargarPrestamosActivos() {
+  if (!token || !usuarioActual?.id) return;
   const info = document.getElementById('info-prestamos-activos');
   const tbody = document.querySelector('#tabla-prestamos-activos tbody');
   if (!info || !tbody) return;
@@ -2964,7 +2968,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const abierto = document.body.classList.toggle('alta-visible');
     fab.textContent = abierto ? '−' : '+';
     if (abierto) {
+      // No hacer focus automático en móvil para evitar que salte el teclado
+    if (window.innerWidth > 820) {
       setTimeout(() => document.getElementById('isbn')?.focus(), 50);
+    }
     } else {
       try { detenerEscaneo(); } catch {}
     }

@@ -1208,13 +1208,7 @@ tbody tr:hover td { background: var(--accent-soft); }
   body.alta-visible .column-left { display: block !important; }
 
   /* Sheet de alta */
-  body.alta-visible::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: rgba(10, 8, 6, .55);
-    z-index: 8500;
-  }
+  /* overlay de alta eliminado */
   body.alta-visible .column-left .card {
     position: fixed;
     left: 12px;
@@ -3024,3 +3018,6 @@ input, select, textarea { padding: 7px 10px; font-size: .9rem; }
     flex: unset !important;
   }
 }
+
+/* ── Ocultar flechas de navegación entre libros ─────── */
+.modal-nav-arrow { display: none !important; }
