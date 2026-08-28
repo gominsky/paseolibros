@@ -54,6 +54,7 @@ import colaRouter from './rutas/cola.js'
 import shareRutas from './rutas/share.js';
 import readerRoutes from "./rutas/reader.js";
 import bcRutas from './rutas/biblioteca_compartida.js';
+import pool from './bd.js';
 import portadasRutas from './rutas/portadas.js';
 
 dotenv.config();
@@ -89,6 +90,19 @@ app.use(express.json());
 
 // Servir frontend estático desde /public (si lo estás usando así)
 app.use(express.static(path.join(__dirname, '..', 'public')));
+
+// Servir SW y manifest con cabeceras correctas para PWA
+app.get('/service-worker.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.setHeader('Service-Worker-Allowed', '/');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.sendFile(path.join(__dirname, '..', 'public', 'service-worker.js'));
+});
+app.get('/manifest.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/manifest+json');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.sendFile(path.join(__dirname, '..', 'public', 'manifest.json'));
+});
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
@@ -131,6 +145,24 @@ app.use('/api', portadasRutas);
 // Endpoint de salud
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, mensaje: 'PaseoLibros API viva 😄' });
+});
+
+// Endpoint temporal — limpiar portadas rotas (eliminar después de usar)
+app.get('/api/admin/limpiar-portadas-rotas', async (req, res) => {
+  if (req.query.secret !== 'paseolibros2026') {
+    return res.status(403).json({ error: 'No autorizado' });
+  }
+  try {
+    const result = await pool.query(`
+      UPDATE libros 
+      SET url_portada = NULL 
+      WHERE url_portada LIKE '/uploads/%'
+      RETURNING id, titulo
+    `);
+    res.json({ ok: true, actualizados: result.rowCount, libros: result.rows });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 app.use((err, req, res, next) => {
   console.error('🔥 Unhandled error:', err);
