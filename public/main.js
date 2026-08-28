@@ -31,6 +31,9 @@ function restaurarPreferenciasUI() {
     if (v === 'lista' || v === 'grid' || v === 'estanteria') vistaEjemplares = v;
   } catch {}
 
+  // Aplicar vista al DOM inmediatamente
+  setTimeout(aplicarVistaContenedor, 0);
+
   // Ordenación
   try {
     const raw = localStorage.getItem(SORT_EJ_KEY);
@@ -2811,6 +2814,7 @@ document.addEventListener('DOMContentLoaded', () => {
   wireDeseosUI();
   wireColaUI();
   restaurarPreferenciasUI();
+  setTimeout(aplicarVistaContenedor, 100);
   actualizarBotonesVistaEjemplares();
   initOrdenacionEjemplares();
   wireSortEjemplaresSelect();
