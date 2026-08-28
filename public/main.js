@@ -275,7 +275,7 @@ async function fetchReaderMeta(libroId) {
 
       const meta = await res.json();
       
-      console.log('reader-meta', libroId, JSON.stringify(meta, null, 2));
+
 
 // soporta: notes[], notesCount, notas[], notas_count, etc.
 const notesArr =
@@ -4095,7 +4095,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     document.getElementById('btn-lanzar-busqueda')?.addEventListener('click', lanzarBusquedaMasiva);
     document.getElementById('btn-buscar-portada')?.addEventListener('click', buscarPortadaDesdeModal);
     document.getElementById('btn-buscar-portada-movil')?.addEventListener('click', buscarPortadaDesdeModal);
-    document.getElementById('btn-portada-manual-movil')?.addEventListener('click', abrirPortadaUrl);
+    document.getElementById('btn-portada-manual-movil')?.addEventListener('click', () => { if (window._abrirPortadaUrl) window._abrirPortadaUrl(); });
 
     // Input de subir portada alternativo (móvil)
     document.getElementById('ficha-portada-file-movil')?.addEventListener('change', (e) => {
@@ -4148,6 +4148,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     });
   }
 
+  window._abrirPortadaUrl = abrirPortadaUrl;
   function abrirPortadaUrl() {
     const overlay = document.getElementById('portada-url-overlay');
     if (!overlay) return;
