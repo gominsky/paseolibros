@@ -851,7 +851,8 @@ async function terminarLecturaActual() {
       return;
     }
 
-    setUserStatusOk('Lectura terminada.');
+    setUserStatusOk('¡Lectura terminada! 🎉');
+    lanzarConfeti();
     await cargarLecturas(libroSeleccionadoId);
     await refrescarHome();
   } catch (err) {
@@ -4630,6 +4631,163 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape' &&
           document.getElementById('ayuda-overlay')?.style.display !== 'none') cerrar();
+    });
+  });
+
+})();
+
+
+// ══════════════════════════════════════════════════════════
+// CONFETI — celebración al terminar una lectura
+// ══════════════════════════════════════════════════════════
+function lanzarConfeti() {
+  // Cargar canvas-confetti bajo demanda
+  if (window.confetti) {
+    _dispararConfeti();
+    return;
+  }
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js';
+  script.onload = _dispararConfeti;
+  document.head.appendChild(script);
+}
+
+function _dispararConfeti() {
+  // Colores del tema de la app
+  const colores = ['#b85c6e', '#c8738a', '#f7f0eb', '#4a9e6a', '#e07a8a'];
+
+  // Primera ráfaga desde el centro
+  confetti({
+    particleCount: 120,
+    spread: 80,
+    origin: { y: 0.6 },
+    colors: colores,
+    ticks: 200,
+  });
+
+  // Segunda ráfaga desde la izquierda
+  setTimeout(() => {
+    confetti({
+      particleCount: 60,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0, y: 0.65 },
+      colors: colores,
+      ticks: 180,
+    });
+  }, 200);
+
+  // Tercera ráfaga desde la derecha
+  setTimeout(() => {
+    confetti({
+      particleCount: 60,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1, y: 0.65 },
+      colors: colores,
+      ticks: 180,
+    });
+  }, 350);
+}
+
+
+// ══════════════════════════════════════════════════════════
+// BÚSQUEDA POR VOZ — Web Speech API
+// ══════════════════════════════════════════════════════════
+(function () {
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  // Si el navegador no soporta la API, ocultar el botón
+  if (!SpeechRecognition) {
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('btn-voz');
+      if (btn) btn.style.display = 'none';
+    });
+    return;
+  }
+
+  let recognition = null;
+  let escuchando  = false;
+
+  function iniciarVoz() {
+    if (escuchando) {
+      pararVoz();
+      return;
+    }
+
+    recognition = new SpeechRecognition();
+    recognition.lang = 'es-ES';
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+
+    const btn    = document.getElementById('btn-voz');
+    const input  = document.getElementById('buscador-ejemplares');
+
+    recognition.onstart = () => {
+      escuchando = true;
+      if (btn) {
+        btn.classList.add('btn-voz--activo');
+        btn.title = 'Escuchando… (pulsa para parar)';
+        btn.querySelector('.icon-circle').textContent = '⏹';
+      }
+      // Limpiar buscador y poner placeholder animado
+      if (input) {
+        input.value = '';
+        input.placeholder = 'Escuchando…';
+      }
+    };
+
+    recognition.onresult = (e) => {
+      const transcripcion = e.results[0][0].transcript;
+      if (input) {
+        input.value = transcripcion;
+        // Disparar el evento de búsqueda
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    };
+
+    recognition.onend = () => {
+      pararVoz();
+    };
+
+    recognition.onerror = (e) => {
+      console.warn('[voz] Error:', e.error);
+      pararVoz();
+      if (e.error === 'not-allowed') {
+        if (input) input.placeholder = 'Permiso de micrófono denegado';
+        setTimeout(() => { if (input) input.placeholder = 'Buscar por título, autor, ISBN, notas.'; }, 3000);
+      }
+    };
+
+    recognition.start();
+  }
+
+  function pararVoz() {
+    escuchando = false;
+    if (recognition) {
+      try { recognition.stop(); } catch {}
+      recognition = null;
+    }
+    const btn   = document.getElementById('btn-voz');
+    const input = document.getElementById('buscador-ejemplares');
+    if (btn) {
+      btn.classList.remove('btn-voz--activo');
+      btn.title = 'Buscar por voz';
+      btn.querySelector('.icon-circle').textContent = '🎤';
+    }
+    if (input && input.placeholder === 'Escuchando…') {
+      input.placeholder = 'Buscar por título, autor, ISBN, notas.';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('btn-voz')?.addEventListener('click', iniciarVoz);
+
+    // Parar si el usuario empieza a escribir manualmente
+    document.getElementById('buscador-ejemplares')?.addEventListener('keydown', () => {
+      if (escuchando) pararVoz();
     });
   });
 

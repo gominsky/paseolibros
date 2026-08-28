@@ -3021,3 +3021,23 @@ input, select, textarea { padding: 7px 10px; font-size: .9rem; }
 
 /* ── Ocultar flechas de navegación entre libros ─────── */
 .modal-nav-arrow { display: none !important; }
+
+/* ── Búsqueda por voz ────────────────────────────────── */
+.btn-voz {
+  flex-shrink: 0;
+  transition: background .18s, box-shadow .18s;
+}
+.btn-voz--activo {
+  background: var(--accent-soft) !important;
+  border-color: var(--border-acc) !important;
+  color: var(--accent) !important;
+  animation: voz-pulso 1s ease-in-out infinite;
+}
+@keyframes voz-pulso {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+  50%       { box-shadow: 0 0 0 6px transparent; }
+}
+/* En desktop ocultar — voz más útil en móvil */
+@media (min-width: 821px) {
+  .btn-voz { display: none; }
+}

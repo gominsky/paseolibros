@@ -208,12 +208,15 @@
         <div class="card card-ejemplares">
           <div class="card-header card-header-inline">
             <h2>Ejemplares</h2>
-<div class="table-search">
+<div class="table-search" style="display:flex; align-items:center; gap:6px;">
               <input
                 id="buscador-ejemplares"
                 type="text"
                 placeholder="Buscar por título, autor, ISBN, notas."
               />
+              <button id="btn-voz" class="icon-btn btn-voz" type="button" title="Buscar por voz" aria-label="Buscar por voz">
+                <span class="icon-circle">🎤</span>
+              </button>
             </div>
             <div class="sort-mini" aria-label="Ordenar ejemplares">
                             <select id="sort-ejemplares" class="sort-select" title="Ordenar" aria-label="Ordenar">
