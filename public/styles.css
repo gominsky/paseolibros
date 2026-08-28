@@ -1224,9 +1224,9 @@ tbody tr:hover td { background: var(--accent-soft); }
 
   /* Tabla ejemplares: oculta en móvil */
   .card-ejemplares .table-wrapper { display: none !important; }
-  #ejemplares-list { display: grid !important; gap: 10px; max-height: 62vh; overflow-y: auto; }
-  #ejemplares-list.vista-ej-grid { display: none !important; }
+  #ejemplares-list { gap: 10px; max-height: 62vh; overflow-y: auto; }
   #ejemplares-grid { max-height: 62vh; overflow-y: auto; }
+  #ejemplares-estanteria { max-height: 62vh; overflow-y: auto; }
 
   /* Cards tipo vista-lista móvil */
   .ej-card {
@@ -1318,10 +1318,7 @@ tbody tr:hover td { background: var(--accent-soft); }
    ESTADO ALTERNANCIA DE VISTA (grid vs lista)
    ══════════════════════════════════════════════════════════ */
 @media (max-width: 820px) {
-  body:not(.vista-ej-grid) #ejemplares-list { display: grid !important; }
-  body.vista-ej-grid #ejemplares-list { display: none !important; }
-  body.vista-ej-grid #ejemplares-grid { display: grid !important; }
-  body:not(.vista-ej-grid) #ejemplares-grid { display: none !important; }
+  /* visibilidad de vistas gestionada por aplicarVistaContenedor() en JS */
 }
 
 /* ══════════════════════════════════════════════════════════
