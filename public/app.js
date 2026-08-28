@@ -132,6 +132,25 @@ app.use('/api', portadasRutas);
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, mensaje: 'PaseoLibros API viva 😄' });
 });
+
+// Endpoint temporal — limpiar portadas rotas (eliminar después de usar)
+app.get('/api/admin/limpiar-portadas-rotas', async (req, res) => {
+  if (req.query.secret !== 'paseolibros2026') {
+    return res.status(403).json({ error: 'No autorizado' });
+  }
+  try {
+    const pool = (await import('./src/bd.js')).default;
+    const result = await pool.query(`
+      UPDATE libros 
+      SET url_portada = NULL 
+      WHERE url_portada LIKE '/uploads/%'
+      RETURNING id, titulo, url_portada
+    `);
+    res.json({ ok: true, actualizados: result.rowCount, libros: result.rows });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 app.use((err, req, res, next) => {
   console.error('🔥 Unhandled error:', err);
   res.status(500).json({ error: 'Error interno' });
