@@ -2,6 +2,13 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#b85c6e" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="PaseoLibros" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
   <title>PaseoLibros</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- Fuente Google bonita y juvenil -->
@@ -1150,5 +1157,14 @@
     </div><!-- /ayuda-body -->
   </div><!-- /ayuda-dialog -->
 </div><!-- /ayuda-overlay -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(reg => console.log('[PWA] SW registrado:', reg.scope))
+          .catch(err => console.warn('[PWA] SW error:', err));
+      });
+    }
+  </script>
 </body>
 </html>

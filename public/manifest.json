@@ -1,0 +1,34 @@
+{
+  "name": "PaseoLibros",
+  "short_name": "PaseoLibros",
+  "description": "Tu biblioteca personal digital",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f0eb",
+  "theme_color": "#b85c6e",
+  "orientation": "portrait-primary",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/icons/screenshot.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "categories": ["books", "lifestyle", "productivity"]
+}
