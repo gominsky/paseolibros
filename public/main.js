@@ -28,7 +28,7 @@ function restaurarPreferenciasUI() {
   // Vista
   try {
     const v = localStorage.getItem(VISTA_EJ_KEY);
-    if (v === 'lista' || v === 'grid') vistaEjemplares = v;
+    if (v === 'lista' || v === 'grid' || v === 'estanteria') vistaEjemplares = v;
   } catch {}
 
   // Ordenación
@@ -45,30 +45,43 @@ function restaurarPreferenciasUI() {
 function actualizarBotonesVistaEjemplares() {
   const bLista = document.getElementById('ej-vista-lista');
   const bGrid  = document.getElementById('ej-vista-grid');
-  if (!bLista || !bGrid) return;
+  const bEst   = document.getElementById('ej-vista-estanteria');
 
-  const isGrid = vistaEjemplares === 'grid';
-  bLista.classList.toggle('is-active', !isGrid);
-  bGrid.classList.toggle('is-active', isGrid);
+  [bLista, bGrid, bEst].forEach(b => b?.classList.remove('is-active'));
 
-  // opcional accesibilidad
-  bLista.setAttribute('aria-pressed', String(!isGrid));
-  bGrid.setAttribute('aria-pressed', String(isGrid));
+  if (vistaEjemplares === 'lista') bLista?.classList.add('is-active');
+  else if (vistaEjemplares === 'grid') bGrid?.classList.add('is-active');
+  else if (vistaEjemplares === 'estanteria') bEst?.classList.add('is-active');
+
+  bLista?.setAttribute('aria-pressed', String(vistaEjemplares === 'lista'));
+  bGrid?.setAttribute('aria-pressed', String(vistaEjemplares === 'grid'));
+  bEst?.setAttribute('aria-pressed', String(vistaEjemplares === 'estanteria'));
 }
 
-// selección actual en la tabla
-let libroSeleccionadoId = null;
-let ejemplarSeleccionadoId = null;
+function aplicarVistaContenedor() {
+  const tabla      = document.querySelector('#tabla-ejemplares')?.closest('.table-wrapper');
+  const listaMovil = document.getElementById('ejemplares-list');
+  const grid       = document.getElementById('ejemplares-grid');
+  const estanteria = document.getElementById('ejemplares-estanteria');
+  const titulo     = document.querySelector('.card-ejemplares h2');
 
-let usuariosPrestamo = [];
-let prestamoContexto = null;
+  // Asegurar que el título siempre está arriba — sacar del flujo conflictivo
+  if (titulo) titulo.style.order = '-1';
 
-// ---------- Estado tabla ejemplares (buscador + ordenación) ----------
-let ejemplaresCache = [];
-let ejemplaresQuery = '';
-let sortEjemplares = { key: 'creado_en', dir: 'desc' }; // por defecto: más nuevos primero
-// ---------- Themes ----------
-const THEMES = ['rose', 'dark'];
+  [tabla, listaMovil, grid, estanteria].forEach(el => {
+    if (el) el.style.display = 'none';
+  });
+
+  if (vistaEjemplares === 'lista') {
+    if (tabla)      tabla.style.display      = '';
+    if (listaMovil) listaMovil.style.display = '';
+  } else if (vistaEjemplares === 'grid') {
+    if (grid) grid.style.display = '';
+  } else if (vistaEjemplares === 'estanteria') {
+    if (estanteria) estanteria.style.display = '';
+  }
+}
+
 
 function aplicarTema(nombre) {
   const body = document.body;
@@ -534,6 +547,7 @@ function renderEjemplares() {
     // ✅ PRO MAX: también pinta la lista móvil (con los mismos filtrados/orden)
   renderEjemplaresMobileList(filtrados);
   renderEjemplaresGrid(filtrados);
+  aplicarVistaContenedor();
 if (token && usuarioActual?.id) {
   const ids = filtrados.map(e => e.libro_id);
   requestAnimationFrame(() => ensureReaderMetaFor(ids));
@@ -2814,15 +2828,24 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   document.getElementById('ej-vista-lista')?.addEventListener('click', () => {
     vistaEjemplares = 'lista';
-    guardarVistaEjemplares();          // ✅ NUEVO
-    actualizarBotonesVistaEjemplares(); // ✅ NUEVO
+    guardarVistaEjemplares();
+    actualizarBotonesVistaEjemplares();
+    aplicarVistaContenedor();
     renderEjemplares();
   });
   document.getElementById('ej-vista-grid')?.addEventListener('click', () => {
     vistaEjemplares = 'grid';
     guardarVistaEjemplares();
     actualizarBotonesVistaEjemplares();
+    aplicarVistaContenedor();
     renderEjemplares();
+  });
+  document.getElementById('ej-vista-estanteria')?.addEventListener('click', () => {
+    vistaEjemplares = 'estanteria';
+    guardarVistaEjemplares();
+    actualizarBotonesVistaEjemplares();
+    aplicarVistaContenedor();
+    if (window._ejemplaresCache?.length) window.renderEstanteria(window._ejemplaresCache);
   });
   
   document.getElementById('btn-escanear')?.addEventListener('click', async () => {
@@ -4913,12 +4936,6 @@ function _dispararConfeti() {
 
   // ── Wiring ────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('ej-vista-estanteria')?.addEventListener('click', () => setVista('estanteria'));
-
-    // Sobreescribir los listeners de los otros botones para sincronizar estado
-    document.getElementById('ej-vista-lista')?.addEventListener('click', () => setVista('lista'));
-    document.getElementById('ej-vista-grid')?.addEventListener('click', () => setVista('grid'));
-
     // Click en lomo → abrir ficha
     document.getElementById('ejemplares-estanteria')?.addEventListener('click', e => {
       const lomo = e.target.closest('.lomo');
@@ -4926,10 +4943,7 @@ function _dispararConfeti() {
       mostrarFicha(lomo.dataset.libroId, lomo.dataset.ejemplarId);
     });
 
-    // Restaurar vista guardada
-    if (vistaActual === 'estanteria') {
-      setTimeout(() => setVista('estanteria'), 200);
-    }
+    // Vista restaurada por el sistema principal
   });
 
 })();
