@@ -2758,18 +2758,8 @@ function renderEjemplaresGrid(lista) {
 
   const showGrid = vistaEjemplares === 'grid';
 
-
-  grid.style.display = showGrid ? 'grid' : 'none';
-
-  // En modo grid ocultamos tabla y lista móvil
-  if (showGrid) {
-    tablaWrap.style.display = 'none';
-    if (mobileList) mobileList.style.display = 'none';
-  } else {
-    tablaWrap.style.display = '';
-    if (mobileList) mobileList.style.display = '';
-  }
-
+  // Dejar que aplicarVistaContenedor gestione la visibilidad de todos los contenedores
+  // renderEjemplaresGrid solo rellena el contenido del grid, no controla visibilidad
   if (!showGrid) return;
 
   grid.innerHTML = (lista || []).map(e => {
