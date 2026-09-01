@@ -31,9 +31,6 @@ function restaurarPreferenciasUI() {
     if (v === 'lista' || v === 'grid' || v === 'estanteria') vistaEjemplares = v;
   } catch {}
 
-  // Aplicar vista al DOM inmediatamente
-  setTimeout(aplicarVistaContenedor, 0);
-
   // Ordenación
   try {
     const raw = localStorage.getItem(SORT_EJ_KEY);
@@ -192,10 +189,8 @@ async function refrescarHome() {
 
 function urlPortadaAbsoluta(url) {
   if (!url) return '';
-  if (/^https?:\/\//i.test(url)) return url; // URL externa — no tocar
-  // URL local — añadir timestamp para evitar caché de Render
-  const base = `${API_BASE}${url}`;
-  return base + (base.includes('?') ? '&' : '?') + 't=' + Date.now();
+  if (/^https?:\/\//i.test(url)) return url;
+  return `${API_BASE}${url}`; // /uploads/xxx.jpg
 }
 
 function toSortable(v) {
@@ -525,7 +520,7 @@ function renderEjemplares() {
   <td>
     ${
       e.url_portada
-        ? `<img src="${urlPortadaAbsoluta(e.url_portada)}" alt="Portada" class="portada-mini-img" />`
+        ? `<img src="${urlPortadaAbsoluta(e.url_portada)}?t=${Date.now()}" alt="Portada" class="portada-mini-img" />`
         : `<div class="portada-placeholder-mini" aria-hidden="true"><span class="ph-logo">Pdl</span></div>`
     }
   </td>
@@ -568,7 +563,7 @@ function renderEjemplaresMobileList(filtrados){
   if (!isMobile) { list.innerHTML = ''; return; }
 
   list.innerHTML = (filtrados || []).map(e => {
-    const portada = e.url_portada ? `${urlPortadaAbsoluta(e.url_portada)}` : '';
+    const portada = e.url_portada ? `${urlPortadaAbsoluta(e.url_portada)}?t=${Date.now()}` : '';
     const notas = (e.notas || '').trim();
 
     return `
@@ -2016,7 +2011,7 @@ const portada =
     const hasPortada = Boolean(portada);
   
     img.classList.toggle('is-placeholder', !hasPortada);
-    img.src = hasPortada ? `${urlPortadaAbsoluta(portada)}` : '';
+    img.src = hasPortada ? `${urlPortadaAbsoluta(portada)}?t=${Date.now()}` : '';
   
     img.onerror = () => {
       img.src = '';
@@ -2158,7 +2153,7 @@ async function subirPortadaArchivo(file) {
     setModalMsg('Portada actualizada ✅');
 
     const img = document.getElementById('ficha-portada-img');
-    if (img && data.url_portada) img.src = `${urlPortadaAbsoluta(data.url_portada)}`;
+    if (img && data.url_portada) img.src = `${urlPortadaAbsoluta(data.url_portada)}?t=${Date.now()}`;
 
     const portadaInput = document.getElementById('edit-libro-portada');
     if (portadaInput && data.url_portada) portadaInput.value = data.url_portada;
@@ -2760,12 +2755,22 @@ function renderEjemplaresGrid(lista) {
 
   const showGrid = vistaEjemplares === 'grid';
 
-  // Dejar que aplicarVistaContenedor gestione la visibilidad de todos los contenedores
-  // renderEjemplaresGrid solo rellena el contenido del grid, no controla visibilidad
+
+  grid.style.display = showGrid ? 'grid' : 'none';
+
+  // En modo grid ocultamos tabla y lista móvil
+  if (showGrid) {
+    tablaWrap.style.display = 'none';
+    if (mobileList) mobileList.style.display = 'none';
+  } else {
+    tablaWrap.style.display = '';
+    if (mobileList) mobileList.style.display = '';
+  }
+
   if (!showGrid) return;
 
   grid.innerHTML = (lista || []).map(e => {
-    const portada = e.url_portada ? `${urlPortadaAbsoluta(e.url_portada)}` : '';
+    const portada = e.url_portada ? `${urlPortadaAbsoluta(e.url_portada)}?t=${Date.now()}` : '';
     return `
       <div class="ej-grid-item" data-libro-id="${e.libro_id}" data-ejemplar-id="${e.ejemplar_id}">
         ${portada
@@ -2806,7 +2811,6 @@ document.addEventListener('DOMContentLoaded', () => {
   wireDeseosUI();
   wireColaUI();
   restaurarPreferenciasUI();
-  setTimeout(aplicarVistaContenedor, 100);
   actualizarBotonesVistaEjemplares();
   initOrdenacionEjemplares();
   wireSortEjemplaresSelect();
@@ -4060,7 +4064,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
         // Actualizar la imagen en el modal
         const img = document.getElementById('ficha-portada-img');
         if (img && data.url_portada) {
-          img.src = `${window.API_BASE}${data.url_portada}`;
+          img.src = `${window.API_BASE}${data.url_portada}?t=${Date.now()}`;
           img.classList.remove('is-placeholder');
         }
         // Refrescar lista
@@ -4256,7 +4260,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
       // Actualizar portada en el modal
       const img = document.getElementById('ficha-portada-img');
       if (img && data.url_portada) {
-        img.src = `${window.API_BASE}${data.url_portada}`;
+        img.src = `${window.API_BASE}${data.url_portada}?t=${Date.now()}`;
         img.classList.remove('is-placeholder');
       }
 
@@ -4818,10 +4822,8 @@ function _dispararConfeti() {
 // ══════════════════════════════════════════════════════════
 // MODO ESTANTERÍA
 // ══════════════════════════════════════════════════════════
-// ══════════════════════════════════════════════════════════
-// MODO ESTANTERÍA
-// ══════════════════════════════════════════════════════════
 (function () {
+
 
   const COLORES_LOMO = [
     '#8B6355','#7A8B6E','#6E7A8B','#8B7A6E',
