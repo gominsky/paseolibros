@@ -3239,4 +3239,4 @@ body.theme-dark .ej-estanteria {
 body.vista-estanteria .table-wrapper { display: none !important; }
 body.vista-estanteria #ejemplares-list { display: none !important; }
 body.vista-estanteria #ejemplares-grid { display: none !important; }
-body.vista-estanteria #ejemplares-estanteria { display: block; }
+body.vista-estanteria #ejemplares-estanteria { display: flex !important; }
