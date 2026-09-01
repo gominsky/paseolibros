@@ -31,7 +31,7 @@ function restaurarPreferenciasUI() {
     if (v === 'lista' || v === 'grid' || v === 'estanteria') vistaEjemplares = v;
   } catch {}
 
-  // Ordenaci├│n
+  // Ordenación
   try {
     const raw = localStorage.getItem(SORT_EJ_KEY);
     if (!raw) return;
@@ -76,17 +76,17 @@ function actualizarBotonesVistaEjemplares() {
   if (bEst)   bEst.setAttribute('aria-pressed', String(vistaEjemplares === 'estanteria'));
 }
 
-// selecci├│n actual en la tabla
+// selección actual en la tabla
 let libroSeleccionadoId = null;
 let ejemplarSeleccionadoId = null;
 
 let usuariosPrestamo = [];
 let prestamoContexto = null;
 
-// ---------- Estado tabla ejemplares (buscador + ordenaci├│n) ----------
+// ---------- Estado tabla ejemplares (buscador + ordenación) ----------
 let ejemplaresCache = [];
 let ejemplaresQuery = '';
-let sortEjemplares = { key: 'creado_en', dir: 'desc' }; // por defecto: m├ís nuevos primero
+let sortEjemplares = { key: 'creado_en', dir: 'desc' }; // por defecto: más nuevos primero
 // ---------- Themes ----------
 const THEMES = ['rose', 'dark'];
 
@@ -95,7 +95,7 @@ function aplicarTema(nombre) {
   // Limpia todas las clases de theme
   THEMES.forEach((t) => body.classList.remove(`theme-${t}`));
 
-  // 'rose' lo aplicamos tambi├®n por clase para que sea sim├®trico
+  // 'rose' lo aplicamos también por clase para que sea simétrico
   const theme = nombre && THEMES.includes(nombre) ? nombre : 'rose';
   body.classList.add(`theme-${theme}`);
   try {
@@ -158,8 +158,8 @@ function escapeHtml(s){
     .replaceAll("'","&#039;");
 }
 
-function setUserStatusOk(msg) { setUserStatus(msg ? `Ô£à ${msg}` : ''); }
-function setUserStatusErr(msg) { setUserStatus(msg ? `ÔØî ${msg}` : ''); }
+function setUserStatusOk(msg) { setUserStatus(msg ? `✅ ${msg}` : ''); }
+function setUserStatusErr(msg) { setUserStatus(msg ? `⚠️ ${msg}` : ''); }
 function normalizarTitulo(t) {
   return (t || '')
     .toLowerCase()
@@ -217,7 +217,7 @@ function compare(a, b, key, dir) {
     return dir === 'asc' ? da - db : db - da;
   }
 
-  // n├║meros
+  // números
   const na = Number(va);
   const nb = Number(vb);
   const bothNumeric =
@@ -264,12 +264,12 @@ function wireSortEjemplaresSelect() {
     const [key, dir] = (sel.value || 'creado_en:desc').split(':');
     sortEjemplares = { key: key || 'creado_en', dir: dir === 'asc' ? 'asc' : 'desc' };
 
-    guardarSortEjemplares();      // Ô£à CLAVE: persistir ordenaci├│n
+    guardarSortEjemplares();      // ✅ CLAVE: persistir ordenación
     renderEjemplares();           // vuelve a pintar tabla/lista
   });
 }
 // =========================
-// Reader meta cache (favorito + n┬║ notas)
+// Reader meta cache (favorito + nº notas)
 // =========================
 const readerMetaCache = new Map();        // libroId -> { favorite, notesCount, tagsCount? }
 const readerMetaInflight = new Map();     // libroId -> Promise
@@ -287,7 +287,7 @@ async function fetchReaderMeta(libroId) {
 
   const p = (async () => {
     try {
-      // OJO: aqu├¡ usamos tu API_BASE y getHeaders(false)
+      // OJO: aquí usamos tu API_BASE y getHeaders(false)
       const res = await fetch(`${API_BASE}/api/libros/${libroId}/reader-meta`, {
         headers: getHeaders(false),
       });
@@ -319,13 +319,13 @@ const audiosCount =
 const normalized = {
   favorite: Boolean(meta?.favorite ?? meta?.favorito ?? false),
   notesCount,
-  audiosCount, // Ô£à NUEVO
+  audiosCount, // ✅ NUEVO
   tagsCount: Array.isArray(meta?.tags) ? meta.tags.length : Number(meta?.tagsCount || meta?.tags_count || 0),
 };
       readerMetaCache.set(libroId, normalized);
       return normalized;
     } catch (e) {
-      // Si falla, cachea ÔÇ£vac├¡oÔÇØ para no reintentar en bucle.
+      // Si falla, cachea "vacío" para no reintentar en bucle.
       const fallback = { favorite: false, notesCount: 0, audiosCount: 0, tagsCount: 0 };
       readerMetaCache.set(libroId, fallback);
       return fallback;
@@ -378,7 +378,7 @@ function applyBadgesForLibro(libroId) {
   });
 }
 
-// ---------- Ordenaci├│n: cabeceras como botones ----------
+// ---------- Ordenación: cabeceras como botones ----------
 function initOrdenacionEjemplares() {
   const table = document.getElementById('tabla-ejemplares');
   if (!table) return;
@@ -414,7 +414,7 @@ function initOrdenacionEjemplares() {
         sortEjemplares.key = key;
         sortEjemplares.dir = 'asc';
       }
-      guardarSortEjemplares();            // Ô£à A├æADIR
+      guardarSortEjemplares();            // ✅ A├æADIR
       actualizarIconosOrden(table);
       renderEjemplares();
     });
@@ -430,7 +430,7 @@ function actualizarIconosOrden(table) {
     if (!icon) return;
 
     if (key === sortEjemplares.key) {
-      icon.textContent = sortEjemplares.dir === 'asc' ? 'Ôû▓' : 'Ôû╝';
+      icon.textContent = sortEjemplares.dir === 'asc' ? '☑' : '☒';
     } else {
       icon.textContent = '';
     }
@@ -439,7 +439,7 @@ function actualizarIconosOrden(table) {
 }
 async function importarEjemplaresCSV(file) {
   if (!token || !usuarioActual) {
-    setUserStatusErr('Debes iniciar sesi├│n para importar CSV');
+    setUserStatusErr('Debes iniciar sesión para importar CSV');
     return;
   }
 
@@ -447,7 +447,7 @@ async function importarEjemplaresCSV(file) {
   const lineas = texto.split(/\r?\n/).filter(l => l.trim());
 
   if (lineas.length < 2) {
-    setUserStatusErr('CSV vac├¡o o inv├ílido');
+    setUserStatusErr('CSV vacío o inv├ílido');
     return;
   }
 
@@ -492,11 +492,11 @@ async function importarEjemplaresCSV(file) {
     }
   }
 
-  setUserStatusOk(`Importaci├│n terminada: ${creados} creados, ${errores} errores`);
+  setUserStatusOk(`Importación terminada: ${creados} creados, ${errores} errores`);
   await cargarEjemplares(usuarioActual.id);
 }
 
-// ---------- Tabla ejemplares: render (con ordenaci├│n + buscador) ----------
+// ---------- Tabla ejemplares: render (con ordenación + buscador) ----------
 function renderEjemplares() {
   const tbody = document.querySelector('#tabla-ejemplares tbody');
   if (!tbody) return;
@@ -532,7 +532,7 @@ function renderEjemplares() {
     }
   </td>
   <td class="cell-title">
-     <!-- t├¡tulo -->
+     <!-- título -->
   <div class="title-text">
     ${escapeHtml(e.titulo || 'Libro desconocido')}
   </div>
@@ -551,7 +551,7 @@ function renderEjemplares() {
     `;
     tbody.appendChild(tr);
   }
-    // Ô£à PRO MAX: tambi├®n pinta la lista m├│vil (con los mismos filtrados/orden)
+    // ✅ PRO MAX: también pinta la lista móvil (con los mismos filtrados/orden)
   renderEjemplaresMobileList(filtrados);
   renderEjemplaresGrid(filtrados);
 if (token && usuarioActual?.id) {
@@ -585,15 +585,15 @@ function renderEjemplaresMobileList(filtrados){
           <div class="ej-title" data-badge-libro="${e.libro_id}">
   <span class="badge badge-fav" aria-hidden="true"></span>
   <span class="badge badge-notes" aria-hidden="true"></span>
-  ${escapeHtml(e.titulo || 'ÔÇö')}
+  ${escapeHtml(e.titulo || '—')}
 </div>
 
-          <div class="ej-author">${escapeHtml(e.autores || 'ÔÇö')}</div>
+          <div class="ej-author">${escapeHtml(e.autores || '—')}</div>
 
           <div class="ej-meta">
-            <span class="ej-pill">ISBN: ${escapeHtml(e.isbn || 'ÔÇö')}</span>
-            <span class="ej-pill">${escapeHtml(e.estado || 'ÔÇö')}</span>
-            <span class="ej-pill">${escapeHtml(e.ubicacion || 'ÔÇö')}</span>
+            <span class="ej-pill">ISBN: ${escapeHtml(e.isbn || '—')}</span>
+            <span class="ej-pill">${escapeHtml(e.estado || '—')}</span>
+            <span class="ej-pill">${escapeHtml(e.ubicacion || '—')}</span>
             ${notas ? `<span class="ej-pill">${escapeHtml(notas)}</span>` : ''}
           </div>
         </div>
@@ -608,11 +608,11 @@ function renderEjemplaresMobileList(filtrados){
 
 }
 
-// ---------- Cargar ejemplares (rellena cach├® y renderiza) ----------
+// ---------- Cargar ejemplares (rellena caché y renderiza) ----------
 async function cargarEjemplares(usuarioId) {
   const info = document.getElementById('info-ejemplares');
   if (!usuarioId) {
-    if (info) info.textContent = 'Inicia sesi├│n para ver tus ejemplares.';
+    if (info) info.textContent = 'Inicia sesión para ver tus ejemplares.';
     ejemplaresCache = [];
     renderEjemplares();
     return;
@@ -633,7 +633,7 @@ async function cargarEjemplares(usuarioId) {
     const ejemplares = await res.json();
 
     if (!Array.isArray(ejemplares) || ejemplares.length === 0) {
-      if (info) info.textContent = 'No tienes ejemplares todav├¡a.';
+      if (info) info.textContent = 'No tienes ejemplares todavía.';
       ejemplaresCache = [];
       renderEjemplares();
       return;
@@ -658,7 +658,7 @@ async function crearEjemplar() {
   setUserStatus('');
 
   if (!token || !usuarioActual) {
-    setUserStatusErr('Debes iniciar sesi├│n para crear ejemplares.');
+    setUserStatusErr('Debes iniciar sesión para crear ejemplares.');
     return;
   }
 
@@ -667,7 +667,7 @@ async function crearEjemplar() {
   const notas = document.getElementById('notas')?.value.trim();
 
   if (!isbn) {
-    setUserStatusErr('Introduce un ISBN (o escan├®alo).');
+    setUserStatusErr('Introduce un ISBN (o escanéalo).');
     return;
   }
   console.log('TOKEN?', token);
@@ -686,7 +686,7 @@ async function crearEjemplar() {
 
     const data = await res.json();
     if (res.status === 401) {
-      setUserStatusErr('El servidor ha respondido 401 (no autorizado). Probablemente el token haya caducado; vuelve a iniciar sesi├│n.');
+      setUserStatusErr('El servidor ha respondido 401 (no autorizado). Probablemente el token haya caducado; vuelve a iniciar sesión.');
       return;
     }
     if (!res.ok) {
@@ -701,7 +701,7 @@ async function crearEjemplar() {
     await cargarEjemplares(usuarioActual.id);
     await refrescarHome();
 
-    // cerrar panel alta en m├│vil (si existe)
+    // cerrar panel alta en móvil (si existe)
     document.body.classList.remove('alta-visible');
     const fab = document.getElementById('btn-toggle-alta');
     if (fab) fab.textContent = '+';
@@ -716,7 +716,7 @@ async function empezarLectura(libroId, ejemplarId) {
   setUserStatus('');
 
   if (!token || !usuarioActual) {
-    setUserStatusErr('Debes iniciar sesi├│n para registrar lecturas.');
+    setUserStatusErr('Debes iniciar sesión para registrar lecturas.');
     return;
   }
 
@@ -740,7 +740,7 @@ async function empezarLectura(libroId, ejemplarId) {
       setUserStatusErr(data.error || 'Error al empezar la lectura.');
       return;
     }
-    // Buscar t├¡tulo desde cache
+    // Buscar título desde cache
 const libro = (ejemplaresCache || [])
   .find(e => Number(e.libro_id) === Number(libroId));
 
@@ -781,18 +781,18 @@ async function cargarLecturas(libroId) {
 
     if (info) info.textContent = `Lecturas: ${lecturas.length}`;
 
-    // Formato ÔÇ£filaÔÇØ dentro del <pre> (compacto + resalta activas)
+    // Formato "fila" dentro del <pre> (compacto + resalta activas)
     const lineas = lecturas.map((l) => {
       const esActiva = l.estado !== 'terminado';
       const mia = esActiva && usuarioActual && l.usuario_id === usuarioActual.id;
 
-      const inicio = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : 'ÔÇö';
-      const fin = l.fin ? new Date(l.fin).toLocaleDateString('es-ES') : 'ÔÇö';
-      const pag = (l.pagina_actual ?? 'ÔÇö');
+      const inicio = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : '—';
+      const fin = l.fin ? new Date(l.fin).toLocaleDateString('es-ES') : '—';
+      const pag = (l.pagina_actual ?? '—');
 
       const badge = mia ? '­ƒƒó' : (esActiva ? '­ƒƒí' : 'ÔÜ¬');
       const user = l.nombre_usuario || `Usuario ${l.usuario_id}`;
-      return `${badge} ${user} ┬À ${l.estado || 'ÔÇö'} ┬À p├íg ${pag} ┬À ${inicio} ÔåÆ ${fin}`;
+      return `${badge} ${user} ┬À ${l.estado || '—'} ┬À p├íg ${pag} ┬À ${inicio} ÔåÆ ${fin}`;
     });
 
     if (pre) pre.textContent = lineas.join('\n');
@@ -802,7 +802,7 @@ async function cargarLecturas(libroId) {
   }
 }
 async function actualizarPaginaLectura(lecturaId, pagina_actual) {
-  if (!token) throw new Error('Sin sesi├│n');
+  if (!token) throw new Error('Sin sesión');
 
   const res = await fetch(`${API_BASE}/api/lecturas/${lecturaId}/pagina`, {
     method: 'PATCH',
@@ -821,7 +821,7 @@ async function actualizarPaginaLectura(lecturaId, pagina_actual) {
 
 async function terminarLecturaActual() {
   if (!token || !usuarioActual) {
-    setUserStatusErr('Debes iniciar sesi├│n para terminar una lectura.');
+    setUserStatusErr('Debes iniciar sesión para terminar una lectura.');
     return;
   }
   if (!libroSeleccionadoId) {
@@ -849,8 +849,8 @@ async function terminarLecturaActual() {
       return;
     }
 
-    const paginaStr = prompt('├Ültima p├ígina le├¡da (opcional):');
-    const valoracionStr = prompt('Valoraci├│n (1-5, opcional):');
+    const paginaStr = prompt('├Ültima p├ígina leída (opcional):');
+    const valoracionStr = prompt('Valoración (1-5, opcional):');
     const notas = prompt('Notas sobre la lectura (opcional):') || null;
 
     let pagina_actual = paginaStr ? Number(paginaStr) : null;
@@ -886,13 +886,13 @@ async function cargarEstadisticasLecturas() {
   if (!info || !tbody) return;
 
   if (!usuarioActual || !usuarioActual.id || !token) {
-    info.textContent = 'Inicia sesi├│n para ver tus estad├¡sticas.';
+    info.textContent = 'Inicia sesión para ver tus estadísticas.';
     tbody.innerHTML = '';
     if (mobileList) mobileList.innerHTML = '';
     return;
   }
 
-  info.textContent = 'Cargando estad├¡sticas...';
+  info.textContent = 'Cargando estadísticas...';
   tbody.innerHTML = '';
   if (mobileList) mobileList.innerHTML = '';
 
@@ -904,19 +904,19 @@ async function cargarEstadisticasLecturas() {
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      throw new Error(data.error || 'Error al obtener estad├¡sticas.');
+      throw new Error(data.error || 'Error al obtener estadísticas.');
     }
 
     const stats = await res.json(); // [{ anio, empezadas, terminadas }, ...]
 
     if (!Array.isArray(stats) || stats.length === 0) {
-      info.textContent = 'Sin datos de lectura todav├¡a.';
+      info.textContent = 'Sin datos de lectura todavía.';
       tbody.innerHTML = '';
       if (mobileList) mobileList.innerHTML = '';
       return;
     }
 
-    info.textContent = `Hist├│rico de lecturas (${stats.length} a├▒o${stats.length !== 1 ? 's' : ''})`;
+    info.textContent = `Histórico de lecturas (${stats.length} a├▒o${stats.length !== 1 ? 's' : ''})`;
     tbody.innerHTML = '';
     if (mobileList) mobileList.innerHTML = '';
 
@@ -925,7 +925,7 @@ async function cargarEstadisticasLecturas() {
       const empezadas = Number(row.empezadas ?? 0);
       const terminadas = Number(row.terminadas ?? 0);
 
-      // ====== ESCRITORIO (tabla con bot├│n +) ======
+      // ====== ESCRITORIO (tabla con botón +) ======
       const tr = document.createElement('tr');
       tr.classList.add('stats-row');
       tr.dataset.anio = anio;
@@ -968,7 +968,7 @@ async function cargarEstadisticasLecturas() {
       tbody.appendChild(tr);
       tbody.appendChild(detailTr);
 
-      // ====== M├ôVIL (tarjetita con bot├│n + y detalle) ======
+      // ====== M├ôVIL (tarjetita con botón + y detalle) ======
       if (mobileList) {
         const item = document.createElement('article');
         item.className = 'stats-mobile-item';
@@ -1009,7 +1009,7 @@ async function cargarEstadisticasLecturas() {
     }
   } catch (err) {
     console.error(err);
-    info.textContent = 'Error al cargar estad├¡sticas.';
+    info.textContent = 'Error al cargar estadísticas.';
     tbody.innerHTML = '';
     if (mobileList) mobileList.innerHTML = '';
   }
@@ -1038,7 +1038,7 @@ async function manejarClickStatsMobileToggle(e) {
   btn.textContent = 'ÔêÆ';
   btn.setAttribute('aria-expanded', 'true');
 
-  // ┬┐Ya estaba cargado?
+  // ¿Ya estaba cargado?
   if (detail.dataset.loaded) return;
 
   const ulEmpezadas = detail.querySelector('.stats-mobile-list-empezadas');
@@ -1065,9 +1065,9 @@ async function manejarClickStatsMobileToggle(e) {
         ulEmpezadas.innerHTML = '<li class="muted">Sin lecturas empezadas este a├▒o.</li>';
       } else {
         ulEmpezadas.innerHTML = empezadas.map(l => {
-          const fecha = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : 'ÔÇö';
+          const fecha = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : '—';
           const autor = l.autores ? ` ┬À ${escapeHtml(l.autores)}` : '';
-          return `<li>${escapeHtml(l.titulo || 'Sin t├¡tulo')}${autor} <span class="muted">(${fecha})</span></li>`;
+          return `<li>${escapeHtml(l.titulo || 'Sin título')}${autor} <span class="muted">(${fecha})</span></li>`;
         }).join('');
       }
     }
@@ -1077,9 +1077,9 @@ async function manejarClickStatsMobileToggle(e) {
         ulTerminadas.innerHTML = '<li class="muted">Sin lecturas terminadas este a├▒o.</li>';
       } else {
         ulTerminadas.innerHTML = terminadas.map(l => {
-          const fecha = l.fin ? new Date(l.fin).toLocaleDateString('es-ES') : 'ÔÇö';
+          const fecha = l.fin ? new Date(l.fin).toLocaleDateString('es-ES') : '—';
           const autor = l.autores ? ` ┬À ${escapeHtml(l.autores)}` : '';
-          return `<li>${escapeHtml(l.titulo || 'Sin t├¡tulo')}${autor} <span class="muted">(${fecha})</span></li>`;
+          return `<li>${escapeHtml(l.titulo || 'Sin título')}${autor} <span class="muted">(${fecha})</span></li>`;
         }).join('');
       }
     }
@@ -1146,9 +1146,9 @@ async function manejarClickStatsToggle(e) {
         ulEmpezadas.innerHTML = '<li class="muted">Sin lecturas empezadas este a├▒o.</li>';
       } else {
         ulEmpezadas.innerHTML = empezadas.map(l => {
-          const fecha = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : 'ÔÇö';
+          const fecha = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : '—';
           const autor = l.autores ? ` ┬À ${escapeHtml(l.autores)}` : '';
-          return `<li>${escapeHtml(l.titulo || 'Sin t├¡tulo')}${autor} <span class="muted">(${fecha})</span></li>`;
+          return `<li>${escapeHtml(l.titulo || 'Sin título')}${autor} <span class="muted">(${fecha})</span></li>`;
         }).join('');
       }
     }
@@ -1158,9 +1158,9 @@ async function manejarClickStatsToggle(e) {
         ulTerminadas.innerHTML = '<li class="muted">Sin lecturas terminadas este a├▒o.</li>';
       } else {
         ulTerminadas.innerHTML = terminadas.map(l => {
-          const fecha = l.fin ? new Date(l.fin).toLocaleDateString('es-ES') : 'ÔÇö';
+          const fecha = l.fin ? new Date(l.fin).toLocaleDateString('es-ES') : '—';
           const autor = l.autores ? ` ┬À ${escapeHtml(l.autores)}` : '';
-          return `<li>${escapeHtml(l.titulo || 'Sin t├¡tulo')}${autor} <span class="muted">(${fecha})</span></li>`;
+          return `<li>${escapeHtml(l.titulo || 'Sin título')}${autor} <span class="muted">(${fecha})</span></li>`;
         }).join('');
       }
     }
@@ -1173,14 +1173,14 @@ async function manejarClickStatsToggle(e) {
   }
 }
 
-// ---------- Resumen global lecturas / pr├®stamos ----------
+// ---------- Resumen global lecturas / préstamos ----------
 async function cargarLecturasAbiertas() {
   const info = document.getElementById('info-lecturas-abiertas');
   const tbody = document.querySelector('#tabla-lecturas-abiertas tbody');
   if (!info || !tbody) return;
 
   if (!usuarioActual) {
-    info.textContent = 'Inicia sesi├│n para ver tus lecturas en curso.';
+    info.textContent = 'Inicia sesión para ver tus lecturas en curso.';
     tbody.innerHTML = '';
     return;
   }
@@ -1207,10 +1207,10 @@ async function cargarLecturasAbiertas() {
       if (l.ejemplar_id) tr.dataset.ejemplarId = l.ejemplar_id;
       tr.dataset.lecturaId = l.id;                      // ­ƒæê ID de la lectura
       tr.dataset.paginaActual = (l.pagina_actual ?? ''); // ­ƒæê para prellenar modal
-      const fecha = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : 'ÔÇö';
+      const fecha = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : '—';
       tr.innerHTML = `
-  <td>${l.titulo || 'Sin t├¡tulo'}</td>
-  <td class="cell-pagina">${l.pagina_actual ?? 'ÔÇö'}</td>
+  <td>${l.titulo || 'Sin título'}</td>
+  <td class="cell-pagina">${l.pagina_actual ?? '—'}</td>
   <td>${fecha}</td>
 `;
       tbody.appendChild(tr);
@@ -1227,12 +1227,12 @@ async function cargarPrestamosActivos() {
   if (!info || !tbody) return;
 
   if (!usuarioActual) {
-    info.textContent = 'Inicia sesi├│n para ver tus pr├®stamos activos.';
+    info.textContent = 'Inicia sesión para ver tus préstamos activos.';
     tbody.innerHTML = '';
     return;
   }
 
-  info.textContent = 'Cargando pr├®stamos activos...';
+  info.textContent = 'Cargando préstamos activos...';
   tbody.innerHTML = '';
 
   try {
@@ -1242,21 +1242,21 @@ async function cargarPrestamosActivos() {
     const prestamos = await res.json();
 
     if (!Array.isArray(prestamos) || prestamos.length === 0) {
-      info.textContent = 'No tienes pr├®stamos activos.';
+      info.textContent = 'No tienes préstamos activos.';
       return;
     }
-    info.textContent = `Pr├®stamos: ${prestamos.length}`;
+    info.textContent = `Préstamos: ${prestamos.length}`;
     for (const p of prestamos) {
       const tr = document.createElement('tr');
       tr.classList.add('row-link');
       tr.dataset.libroId = p.libro_id;
       if (p.ejemplar_id) tr.dataset.ejemplarId = p.ejemplar_id;
 
-      const nombreReceptor = p.nombre_receptor_usuario || p.nombre_receptor || 'ÔÇö';
-      const fechaLimite = p.fecha_limite ? new Date(p.fecha_limite).toLocaleDateString('es-ES') : 'ÔÇö';
+      const nombreReceptor = p.nombre_receptor_usuario || p.nombre_receptor || '—';
+      const fechaLimite = p.fecha_limite ? new Date(p.fecha_limite).toLocaleDateString('es-ES') : '—';
 
       tr.innerHTML = `
-        <td>${p.titulo || 'Sin t├¡tulo'}</td>
+        <td>${p.titulo || 'Sin título'}</td>
         <td>${nombreReceptor}</td>
         <td>${fechaLimite}</td>
       `;
@@ -1264,7 +1264,7 @@ async function cargarPrestamosActivos() {
     }
   } catch (err) {
     console.error(err);
-    info.textContent = 'Error al cargar los pr├®stamos activos.';
+    info.textContent = 'Error al cargar los préstamos activos.';
   }
 }
 function crearUIMarcapagina() {
@@ -1300,7 +1300,7 @@ function crearUIMarcapagina() {
 
         <input id="mp-range" class="mp-range" type="range" min="0" max="600" step="1" />
 
-        <p class="helper-text mp-help">Puedes escribir el n├║mero o ajustarlo con la rueda.</p>
+        <p class="helper-text mp-help">Puedes escribir el número o ajustarlo con la rueda.</p>
       </div>
 
       <div class="mp-actions">
@@ -1322,12 +1322,12 @@ function crearUIMarcapagina() {
   if (document.visibilityState !== 'visible') return;
   if (!token || !usuarioActual?.id) return;
 
-  // Re-pedir lista (si el backend ahora trae url_portada, aparecer├ín)
+  // Re-pedir lista (si el backend ahora trae url_portada, aparecerán)
   try {
     await cargarEjemplares(usuarioActual.id);
   } catch {}
 });
-  // pasos +/- y sincron├¡a input <-> range
+  // pasos +/- y sincronía input <-> range
   div.addEventListener('click', (e) => {
     const btn = e.target.closest('.mp-step');
     if (!btn) return;
@@ -1344,7 +1344,7 @@ function crearUIMarcapagina() {
     const range = document.getElementById('mp-range');
     const v = Math.max(0, Number(e.target.value || 0));
   
-    // Ô£à si el usuario pone 1200, el slider se adapta
+    // ✅ si el usuario pone 1200, el slider se adapta
     if (v > Number(range.max)) range.max = String(Math.ceil(v / 50) * 50);
   
     range.value = String(v);
@@ -1400,7 +1400,7 @@ function cerrarUIMarcapagina(action, value) {
   if (action !== 'save' && typeof ctx.onSkip === 'function') ctx.onSkip();
 }
 
-// ---------- Pr├®stamos UI ----------
+// ---------- Préstamos UI ----------
 let prestamoKeyHandler = null;
 
 function crearUIPrestamo() {
@@ -1412,13 +1412,13 @@ function crearUIPrestamo() {
   overlay.style.display = 'none';
 
   overlay.innerHTML = `
-    <div class="prestamo-dialog" role="dialog" aria-modal="true" aria-label="Nuevo pr├®stamo">
-      <h3>Nuevo pr├®stamo</h3>
+    <div class="prestamo-dialog" role="dialog" aria-modal="true" aria-label="Nuevo préstamo">
+      <h3>Nuevo préstamo</h3>
 
       <div class="form-group">
         <label for="prestamo-receptor-select">Receptor (usuario de la app)</label>
         <select id="prestamo-receptor-select">
-          <option value="">ÔÇö Persona externa ÔÇö</option>
+          <option value="">— Persona externa —</option>
         </select>
         <p class="helper-text">
           Elige un usuario de la app o deja "Persona externa" para escribir un nombre.
@@ -1431,7 +1431,7 @@ function crearUIPrestamo() {
       </div>
 
       <div class="form-group">
-        <label for="prestamo-fecha-limite">Fecha l├¡mite de devoluci├│n</label>
+        <label for="prestamo-fecha-limite">Fecha límite de devolución</label>
         <input id="prestamo-fecha-limite" type="date" />
       </div>
 
@@ -1442,18 +1442,18 @@ function crearUIPrestamo() {
 
       <div class="prestamo-dialog-buttons">
         <button id="prestamo-cancelar" class="btn btn-ghost btn-sm" type="button">Cancelar</button>
-        <button id="prestamo-confirmar" class="btn btn-secondary btn-sm" type="button">Crear pr├®stamo</button>
+        <button id="prestamo-confirmar" class="btn btn-secondary btn-sm" type="button">Crear préstamo</button>
       </div>
     </div>
   `;
 
   document.body.appendChild(overlay);
 
-  // Cerrar con bot├│n cancelar
+  // Cerrar con botón cancelar
   document.getElementById('prestamo-cancelar')?.addEventListener('click', cerrarUIPrestamo);
   document.getElementById('prestamo-confirmar')?.addEventListener('click', confirmarPrestamoDesdeUI);
 
-  // Ô£à Cerrar al click fuera (solo si pinchas el overlay, no el di├ílogo)
+  // ✅ Cerrar al click fuera (solo si pinchas el overlay, no el di├ílogo)
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) cerrarUIPrestamo();
   });
@@ -1464,7 +1464,7 @@ function abrirUIPrestamo() {
   if (!overlay) return;
 
   overlay.style.display = 'flex';
-  document.documentElement.style.overflow = 'hidden'; // Ô£à bloquea scroll fondo
+  document.documentElement.style.overflow = 'hidden'; // ✅ bloquea scroll fondo
 
   // Reset campos
   document.getElementById('prestamo-receptor-select').value = '';
@@ -1472,7 +1472,7 @@ function abrirUIPrestamo() {
   document.getElementById('prestamo-fecha-limite').value = '';
   document.getElementById('prestamo-notas').value = '';
 
-  // Ô£à ESC para cerrar
+  // ✅ ESC para cerrar
   prestamoKeyHandler = (e) => {
     if (e.key === 'Escape') cerrarUIPrestamo();
   };
@@ -1489,7 +1489,7 @@ function cerrarUIPrestamo() {
   if (!overlay) return;
 
   overlay.style.display = 'none';
-  document.documentElement.style.overflow = ''; // Ô£à recupera scroll
+  document.documentElement.style.overflow = ''; // ✅ recupera scroll
 
   if (prestamoKeyHandler) {
     document.removeEventListener('keydown', prestamoKeyHandler);
@@ -1510,7 +1510,7 @@ async function cargarUsuariosParaPrestamo() {
     const data = await res.json();
     usuariosPrestamo = Array.isArray(data) ? data : [];
   } catch (err) {
-    console.error('Error cargando usuarios para pr├®stamo', err);
+    console.error('Error cargando usuarios para préstamo', err);
     usuariosPrestamo = [];
   }
 
@@ -1520,7 +1520,7 @@ async function cargarUsuariosParaPrestamo() {
 function rellenarSelectPrestamo() {
   const select = document.getElementById('prestamo-receptor-select');
   if (!select) return;
-  select.innerHTML = '<option value="">ÔÇö Persona externa ÔÇö</option>';
+  select.innerHTML = '<option value="">— Persona externa —</option>';
 
   for (const u of usuariosPrestamo) {
     const opt = document.createElement('option');
@@ -1532,7 +1532,7 @@ function rellenarSelectPrestamo() {
 
 async function crearPrestamo(libroId, ejemplarId) {
   if (!token || !usuarioActual) {
-    setUserStatusErr('Debes iniciar sesi├│n para prestar libros.');
+    setUserStatusErr('Debes iniciar sesión para prestar libros.');
     return;
   }
 
@@ -1545,11 +1545,11 @@ async function crearPrestamo(libroId, ejemplarId) {
 async function confirmarPrestamoDesdeUI() {
   if (!prestamoContexto || !usuarioActual || !token) {
     cerrarUIPrestamo();
-    setUserStatusErr('No hay contexto de pr├®stamo v├ílido.');
+    setUserStatusErr('No hay contexto de préstamo v├ílido.');
     return;
   }
 
-  // Ô£à Guardar contexto ANTES de cerrar (porque cerrarUIPrestamo lo borra)
+  // ✅ Guardar contexto ANTES de cerrar (porque cerrarUIPrestamo lo borra)
   const libroId = Number(prestamoContexto.libroId);
   const ejemplarId = Number(prestamoContexto.ejemplarId);
 
@@ -1583,14 +1583,14 @@ async function confirmarPrestamoDesdeUI() {
 
     const data = await res.json();
     if (!res.ok) {
-      setUserStatusErr(data.error || 'Error al crear el pr├®stamo.');
+      setUserStatusErr(data.error || 'Error al crear el préstamo.');
       return;
     }
 
     cerrarUIPrestamo();
-    setUserStatusOk('Pr├®stamo creado.');
+    setUserStatusOk('Préstamo creado.');
 
-    // Ô£à refrescar ÔÇ£principalÔÇØ (widgets) + detalle de pr├®stamos del libro
+    // ✅ refrescar "principal" (widgets) + detalle de préstamos del libro
     await cargarPrestamos(libroId);
     await refrescarHome();
 
@@ -1598,18 +1598,18 @@ async function confirmarPrestamoDesdeUI() {
     // await cargarEjemplares(usuarioActual.id);
   } catch (err) {
     console.error(err);
-    setUserStatusErr('Error de red al crear el pr├®stamo.');
+    setUserStatusErr('Error de red al crear el préstamo.');
   }
 }
 
 
-// ---------- Pr├®stamos (modal) ----------
+// ---------- Préstamos (modal) ----------
 async function cargarPrestamos(libroId) {
   const info = document.getElementById('info-prestamos');
   const pre = document.getElementById('prestamos-detalle');
   if (!info || !pre) return;
 
-  info.textContent = 'Cargando pr├®stamos...';
+  info.textContent = 'Cargando préstamos...';
   pre.textContent = '';
 
   try {
@@ -1619,38 +1619,38 @@ async function cargarPrestamos(libroId) {
     const prestamos = await res.json();
 
     if (!res.ok) {
-      info.textContent = prestamos.error || 'Error al cargar los pr├®stamos.';
+      info.textContent = prestamos.error || 'Error al cargar los préstamos.';
       return;
     }
 
     if (!Array.isArray(prestamos) || prestamos.length === 0) {
-      info.textContent = 'Este libro no tiene pr├®stamos registrados.';
+      info.textContent = 'Este libro no tiene préstamos registrados.';
       return;
     }
 
-    info.textContent = `Pr├®stamos: ${prestamos.length}`;
+    info.textContent = `Préstamos: ${prestamos.length}`;
 
     const lineas = prestamos.map((p) => {
       const activo = p.estado !== 'devuelto' && !p.fecha_devolucion;
       const badge = activo ? '­ƒƒí' : 'ÔÜ¬';
 
-      const receptor = p.nombre_receptor_usuario || p.nombre_receptor || 'ÔÇö';
-      const prestado = p.fecha_prestamo ? new Date(p.fecha_prestamo).toLocaleDateString('es-ES') : 'ÔÇö';
-      const limite = p.fecha_limite ? new Date(p.fecha_limite).toLocaleDateString('es-ES') : 'ÔÇö';
-      const dev = p.fecha_devolucion ? new Date(p.fecha_devolucion).toLocaleDateString('es-ES') : 'ÔÇö';
+      const receptor = p.nombre_receptor_usuario || p.nombre_receptor || '—';
+      const prestado = p.fecha_prestamo ? new Date(p.fecha_prestamo).toLocaleDateString('es-ES') : '—';
+      const limite = p.fecha_limite ? new Date(p.fecha_limite).toLocaleDateString('es-ES') : '—';
+      const dev = p.fecha_devolucion ? new Date(p.fecha_devolucion).toLocaleDateString('es-ES') : '—';
 
-      return `${badge} #${p.id} ┬À a ${receptor} ┬À ${p.estado || 'ÔÇö'} ┬À ${prestado} ÔåÆ ${limite} ┬À dev: ${dev}`;
+      return `${badge} #${p.id} ┬À a ${receptor} ┬À ${p.estado || '—'} ┬À ${prestado} ÔåÆ ${limite} ┬À dev: ${dev}`;
     });
 
     pre.textContent = lineas.join('\n');
   } catch (err) {
     console.error(err);
-    info.textContent = 'Error al cargar los pr├®stamos.';
+    info.textContent = 'Error al cargar los préstamos.';
   }
 }
 
 async function marcarPrestamoDevuelto(prestamoId, libroId) {
-  const notas = prompt('Notas sobre la devoluci├│n (opcional):') || null;
+  const notas = prompt('Notas sobre la devolución (opcional):') || null;
 
   try {
     const res = await fetch(`${API_BASE}/api/prestamos/${prestamoId}/devolver`, {
@@ -1665,18 +1665,18 @@ async function marcarPrestamoDevuelto(prestamoId, libroId) {
       return;
     }
 
-    setUserStatusOk('Pr├®stamo devuelto.');
+    setUserStatusOk('Préstamo devuelto.');
     await cargarPrestamos(libroId);
     await refrescarHome();
   } catch (err) {
     console.error(err);
-    setUserStatusErr('Error de red al actualizar el pr├®stamo.');
+    setUserStatusErr('Error de red al actualizar el préstamo.');
   }
 }
 
 async function marcarPrestamoDevueltoGlobal() {
   if (!token || !usuarioActual) {
-    setUserStatusErr('Debes iniciar sesi├│n para actualizar pr├®stamos.');
+    setUserStatusErr('Debes iniciar sesión para actualizar préstamos.');
     return;
   }
   if (!libroSeleccionadoId) {
@@ -1691,7 +1691,7 @@ async function marcarPrestamoDevueltoGlobal() {
     const prestamos = await res.json();
 
     if (!res.ok) {
-      setUserStatusErr(prestamos.error || 'Error cargando pr├®stamos.');
+      setUserStatusErr(prestamos.error || 'Error cargando préstamos.');
       return;
     }
 
@@ -1700,20 +1700,20 @@ async function marcarPrestamoDevueltoGlobal() {
       : null;
 
     if (!prestamoActivo) {
-      setUserStatusErr('No tienes ning├║n pr├®stamo activo para este libro.');
+      setUserStatusErr('No tienes ningún préstamo activo para este libro.');
       return;
     }
 
-    const confirmar = confirm(`┬┐Marcar como devuelto el pr├®stamo #${prestamoActivo.id}?`);
+    const confirmar = confirm(`¿Marcar como devuelto el préstamo #${prestamoActivo.id}?`);
     if (!confirmar) return;
 
     await marcarPrestamoDevuelto(prestamoActivo.id, libroSeleccionadoId);
   } catch (err) {
     console.error(err);
-    setUserStatusErr('Error de red al marcar pr├®stamo como devuelto.');
+    setUserStatusErr('Error de red al marcar préstamo como devuelto.');
   }
 }
-// ---------- Esc├íner (REHECHO desde cero) ----------
+// ---------- Escáner (REHECHO desde cero) ----------
 const { BrowserMultiFormatReader, DecodeHintType, BarcodeFormat } = ZXing;
 
 let scanLocked = false;
@@ -1722,7 +1722,7 @@ const STABLE_FRAMES = 2; // pide 2 lecturas iguales seguidas para aceptar
 
 function isLikelyISBN(code) {
   const v = String(code || "").trim();
-  // EAN-13 num├®rico (muchos ISBN vienen como 978/979...)
+  // EAN-13 numérico (muchos ISBN vienen como 978/979...)
   return /^\d{13}$/.test(v);
 }
 
@@ -1737,7 +1737,7 @@ async function pickBackCameraDeviceId() {
   const byLabel = cams.find(d => /back|rear|environment|trasera/i.test(d.label || ""));
   if (byLabel) return byLabel.deviceId;
 
-  // fallback t├¡pico: ├║ltima c├ímara suele ser trasera en muchos m├│viles
+  // fallback típico: última c├ímara suele ser trasera en muchos móviles
   return cams[cams.length - 1].deviceId;
 }
 
@@ -1752,7 +1752,7 @@ async function aplicarMejorasDeCamara(stream) {
     const adv = [];
     if (caps.focusMode?.includes?.("continuous")) adv.push({ focusMode: "continuous" });
 
-    // torch si existe (opcional; en algunos m├│viles ayuda MUCHO)
+    // torch si existe (opcional; en algunos móviles ayuda MUCHO)
     if (caps.torch) adv.push({ torch: true });
 
     if (adv.length) {
@@ -1763,13 +1763,13 @@ async function aplicarMejorasDeCamara(stream) {
   }
 }
 function extraerISBN(texto) {
-  const digits = String(texto || "").replace(/\D/g, ""); // solo n├║meros
-  // Busca un EAN-13 t├¡pico de ISBN: empieza por 978 o 979
+  const digits = String(texto || "").replace(/\D/g, ""); // solo números
+  // Busca un EAN-13 típico de ISBN: empieza por 978 o 979
   for (let i = 0; i <= digits.length - 13; i++) {
     const cand = digits.slice(i, i + 13);
     if (cand.startsWith("978") || cand.startsWith("979")) return cand;
   }
-  // fallback: si solo hay 13 d├¡gitos y no empieza 978/979, igual te sirve
+  // fallback: si solo hay 13 dígitos y no empieza 978/979, igual te sirve
   if (digits.length === 13) return digits;
   return null;
 }
@@ -1790,7 +1790,7 @@ async function iniciarEscaneo() {
   if (!scannerDiv || !video) return;
 
   if (!window.isSecureContext) {
-    setUserStatusErr(`La c├ímara requiere HTTPS (o localhost). Est├ís en: ${window.location.origin}`);
+    setUserStatusErr(`La c├ímara requiere HTTPS (o localhost). Estás en: ${window.location.origin}`);
     return;
   }
 
@@ -1800,10 +1800,10 @@ async function iniciarEscaneo() {
   detenerEscaneo({ keepButtonState: true, keepScannerRunning: true });
   scannerDiv.style.display = "block";
   setScanButtonState(true);
-  if (textEl) textEl.textContent = "Apunta al c├│digo de barrasÔÇª";
+  if (textEl) textEl.textContent = "Apunta al código de barrasÔÇª";
 
   try {
-    // 1) Abre c├ímara con constraints ÔÇ£para cercaÔÇØ
+    // 1) Abre c├ímara con constraints "para cerca"
     const stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: { ideal: "environment" },
@@ -1930,11 +1930,11 @@ function detenerEscaneo(opts = {}) {
 // ---------- Eliminar ejemplar ----------
 async function eliminarEjemplar(ejemplarId) {
   if (!token || !usuarioActual) {
-    setUserStatusErr('Debes iniciar sesi├│n para eliminar ejemplares.');
+    setUserStatusErr('Debes iniciar sesión para eliminar ejemplares.');
     return;
   }
 
-  const confirmar = confirm('┬┐Seguro que quieres eliminar este ejemplar?');
+  const confirmar = confirm('¿Seguro que quieres eliminar este ejemplar?');
   if (!confirmar) return;
 
   try {
@@ -2015,15 +2015,15 @@ const portada =
       img.classList.add('is-placeholder');
     };
   }
-    document.getElementById('ficha-titulo').textContent = libro.titulo || 'Sin t├¡tulo';
+    document.getElementById('ficha-titulo').textContent = libro.titulo || 'Sin título';
     document.getElementById('ficha-autores').textContent = libro.autores || 'Autor desconocido';
-    document.getElementById('ficha-isbn').textContent = libro.isbn || 'ÔÇö';
+    document.getElementById('ficha-isbn').textContent = libro.isbn || '—';
 
     const creadoSpan = document.getElementById('ficha-creado-en');
     if (creadoSpan) {
       creadoSpan.textContent = ejemplar.creado_en
         ? new Date(ejemplar.creado_en).toLocaleString('es-ES')
-        : 'ÔÇö';
+        : '—';
     }
   } catch (err) {
     console.error(err);
@@ -2035,7 +2035,7 @@ async function guardarLibroEditado() {
   const msg = document.getElementById('edit-mensaje');
   if (msg) msg.textContent = '';
 
-  if (!token || !usuarioActual) { if (msg) msg.textContent = 'Debes iniciar sesi├│n para editar libros.'; return; }
+  if (!token || !usuarioActual) { if (msg) msg.textContent = 'Debes iniciar sesión para editar libros.'; return; }
   if (!libroSeleccionadoId) { if (msg) msg.textContent = 'Selecciona un libro.'; return; }
 
   const titulo = document.getElementById('edit-libro-titulo').value.trim();
@@ -2063,9 +2063,9 @@ async function guardarLibroEditado() {
   const data = await res.json();
   if (!res.ok) { if (msg) msg.textContent = data.error || 'Error guardando libro.'; return; }
 
-  if (msg) msg.textContent = 'Libro guardado Ô£à';
+  if (msg) msg.textContent = 'Libro guardado ✅';
   if (usuarioActual?.id) await cargarEjemplares(usuarioActual.id);
-  await cargarFormEdicion();   // Ô£à refresca inputs + header del modal
+  await cargarFormEdicion();   // ✅ refresca inputs + header del modal
 }
 
 async function guardarEjemplarEditado() {
@@ -2073,7 +2073,7 @@ async function guardarEjemplarEditado() {
   if (msg) msg.textContent = '';
 
   if (!token || !usuarioActual) {
-    if (msg) msg.textContent = 'Debes iniciar sesi├│n para editar ejemplares.';
+    if (msg) msg.textContent = 'Debes iniciar sesión para editar ejemplares.';
     return;
   }
   if (!ejemplarSeleccionadoId) {
@@ -2104,9 +2104,9 @@ async function guardarEjemplarEditado() {
       return;
     }
 
-    if (msg) msg.textContent = 'Ejemplar guardado Ô£à';
+    if (msg) msg.textContent = 'Ejemplar guardado ✅';
     if (usuarioActual?.id) await cargarEjemplares(usuarioActual.id);
-    await cargarFormEdicion();   // Ô£à para que el tipo/estado/notas y header se actualicen
+    await cargarFormEdicion();   // ✅ para que el tipo/estado/notas y header se actualicen
   } catch (err) {
     console.error(err);
     if (msg) msg.textContent = 'Error de red al guardar ejemplar.';
@@ -2147,7 +2147,7 @@ async function subirPortadaArchivo(file) {
         setModalMsg(msg);
         return;
       }
-    setModalMsg('Portada actualizada Ô£à');
+    setModalMsg('Portada actualizada ✅');
 
     const img = document.getElementById('ficha-portada-img');
     if (img && data.url_portada) img.src = `${urlPortadaAbsoluta(data.url_portada)}?t=${Date.now()}`;
@@ -2171,11 +2171,11 @@ async function mostrarFicha(libroId, ejemplarId) {
   libroSeleccionadoId = Number(libroId);
   ejemplarSeleccionadoId = ejemplarId ? Number(ejemplarId) : null;
 
-  // Exponer en window para m├│dulos IIFE
+  // Exponer en window para módulos IIFE
   window.libroSeleccionadoId   = libroSeleccionadoId;
   window.ejemplarSeleccionadoId = ejemplarSeleccionadoId;
 
-  // Ô£à engancha el panel "Del lector"
+  // ✅ engancha el panel "Del lector"
   if (window.readerPanelOpen) window.readerPanelOpen(libroSeleccionadoId);
 
   // reset visual
@@ -2201,7 +2201,7 @@ function moverFicha(offset) {
   const filas = Array.from(tbody.querySelectorAll('tr'));
   if (!filas.length || ejemplarSeleccionadoId == null) return;
 
-  // Buscar ├¡ndice de la fila actual seg├║n el ejemplar seleccionado
+  // Buscar índice de la fila actual según el ejemplar seleccionado
   const idxActual = filas.findIndex(
     (tr) => Number(tr.dataset.ejemplarId) === Number(ejemplarSeleccionadoId)
   );
@@ -2224,7 +2224,7 @@ function moverFicha(offset) {
 
   if (!nuevoLibroId || !nuevoEjemplarId) return;
 
-  // Actualizamos selecci├│n global
+  // Actualizamos selección global
   libroSeleccionadoId = nuevoLibroId;
   ejemplarSeleccionadoId = nuevoEjemplarId;
   window.libroSeleccionadoId    = libroSeleccionadoId;
@@ -2241,7 +2241,7 @@ function moverFicha(offset) {
 // compartir deseos
 async function compartirLista(tipo) {
   if (!token || !usuarioActual?.id) {
-    alert('Debes iniciar sesi├│n para compartir.');
+    alert('Debes iniciar sesión para compartir.');
     return;
   }
 
@@ -2276,7 +2276,7 @@ async function compartirLista(tipo) {
 
   const shareToken = payload?.token || payload?.share_token || payload?.id;
   if (!shareToken && !payload?.url) {
-    alert('El servidor respondi├│ OK pero no devolvi├│ token/url.');
+    alert('El servidor respondió OK pero no devolvió token/url.');
     return;
   }
 
@@ -2284,7 +2284,7 @@ async function compartirLista(tipo) {
 
   try {
     await navigator.clipboard.writeText(url);
-    alert('Enlace copiado Ô£à');
+    alert('Enlace copiado ✅');
   } catch {
     prompt('Copia este enlace:', url);
   }
@@ -2307,7 +2307,7 @@ function cerrarShareOverlay() {
 
 async function crearEnlaceCompartir(tipo) {
   if (!token || !usuarioActual?.id) {
-    alert('Debes iniciar sesi├│n para compartir.');
+    alert('Debes iniciar sesión para compartir.');
     return;
   }
 
@@ -2334,7 +2334,7 @@ async function crearEnlaceCompartir(tipo) {
   }
 
   if (input) input.value = data.url || '';
-  if (status) status.textContent = 'Enlace listo Ô£à';
+  if (status) status.textContent = 'Enlace listo ✅';
 }
 // ===== Cola =====
 async function cargarCola() {
@@ -2366,7 +2366,7 @@ async function cargarCola() {
   lista.innerHTML = data.map(item => `
     <div class="deseo-item" data-id="${item.id}">
       <div>
-        <div class="deseo-title">${escapeHtml(item.titulo || 'ÔÇö')}</div>
+        <div class="deseo-title">${escapeHtml(item.titulo || '—')}</div>
         <div class="deseo-meta">
           ${item.autores ? `<span>${escapeHtml(item.autores)}</span>` : ''}
           ${item.isbn ? `<span class="deseo-pill">ISBN: ${escapeHtml(item.isbn)}</span>` : ''}
@@ -2376,10 +2376,10 @@ async function cargarCola() {
       </div>
       <div class="deseo-actions">
   <button class="icon-btn cola-up" type="button" title="Subir">
-    <span class="icon-circle">Ôû▓</span>
+    <span class="icon-circle">☑</span>
   </button>
   <button class="icon-btn cola-down" type="button" title="Bajar">
-    <span class="icon-circle">Ôû╝</span>
+    <span class="icon-circle">☒</span>
   </button>
   <button class="icon-btn cola-del" type="button" title="Quitar">
     <span class="icon-circle">Ô£ò</span>
@@ -2417,7 +2417,7 @@ async function moverColaSwap(id, dir) {
   const params = new URLSearchParams();
   if (q) params.set('q', q);
 
-  // Importante: para reordenar, mejor usar el orden ÔÇ£posicion ascÔÇØ
+  // Importante: para reordenar, mejor usar el orden "posicion asc"
   const res = await fetch(`${API_BASE}/api/usuarios/${usuarioActual.id}/cola?${params.toString()}`, {
     headers: getHeaders(false),
   });
@@ -2485,7 +2485,7 @@ function renderColaPickList() {
   list.innerHTML = items.map(e => `
     <div class="deseo-item" data-ejemplar-id="${e.ejemplar_id}">
       <div>
-        <div class="deseo-title">${escapeHtml(e.titulo || 'ÔÇö')}</div>
+        <div class="deseo-title">${escapeHtml(e.titulo || '—')}</div>
         <div class="deseo-meta">
           ${e.autores ? `<span>${escapeHtml(e.autores)}</span>` : ''}
           ${e.isbn ? `<span class="deseo-pill">ISBN: ${escapeHtml(e.isbn)}</span>` : ''}
@@ -2528,7 +2528,7 @@ function wireColaUI() {
   });
   document.getElementById('cola-pick-q')?.addEventListener('input', () => renderColaPickList());
 
-  // delegaci├│n: a├▒adir
+  // delegación: a├▒adir
   document.getElementById('cola-pick-lista')?.addEventListener('click', async (e) => {
     const card = e.target.closest('.deseo-item');
     if (!card) return;
@@ -2590,7 +2590,7 @@ async function cargarDeseos() {
   lista.innerHTML = data.map(d => `
     <div class="deseo-item" data-id="${d.id}">
       <div>
-        <div class="deseo-title">${escapeHtml(d.titulo || 'ÔÇö')}</div>
+        <div class="deseo-title">${escapeHtml(d.titulo || '—')}</div>
         <div class="deseo-meta">
           ${d.autores ? `<span>${escapeHtml(d.autores)}</span>` : ''}
           ${d.tipo ? `<span class="deseo-pill">${escapeHtml(d.tipo)}</span>` : ''}
@@ -2626,7 +2626,7 @@ async function crearDeseoDesdeForm() {
   const url_portada = document.getElementById('deseo-portada')?.value?.trim() || '';
 
   if (!titulo) {
-    alert('El t├¡tulo es obligatorio.');
+    alert('El título es obligatorio.');
     return;
   }
 
@@ -2720,14 +2720,14 @@ function wireDeseosUI() {
   // Guardar
   document.getElementById('btn-guardar-deseo')?.addEventListener('click', crearDeseoDesdeForm);
 
-  // Delegaci├│n eliminar
+  // Delegación eliminar
   document.getElementById('deseos-lista')?.addEventListener('click', (e) => {
     const btn = e.target.closest('.deseo-del');
     if (!btn) return;
     const item = e.target.closest('.deseo-item');
     const id = Number(item?.dataset?.id);
     if (!id) return;
-    if (confirm('┬┐Eliminar este deseo?')) borrarDeseo(id);
+    if (confirm('¿Eliminar este deseo?')) borrarDeseo(id);
   });
 
   // ESC para cerrar overlays
@@ -2743,16 +2743,16 @@ function wireDeseosUI() {
 function renderEjemplaresGrid(lista) {
   const grid = document.getElementById('ejemplares-grid');
   const tablaWrap = document.querySelector('#tabla-ejemplares')?.closest('.table-wrapper');
-  const mobileList = document.getElementById('ejemplares-list'); // tu lista m├│vil (si existe)
+  const mobileList = document.getElementById('ejemplares-list'); // tu lista móvil (si existe)
 
-  // Marca la card contenedora para estilos espec├¡ficos en m├│vil
+  // Marca la card contenedora para estilos específicos en móvil
   grid.closest('.card')?.classList.add('card-ejemplares');
 
   if (!grid || !tablaWrap) return;
 
   const showGrid = vistaEjemplares === 'grid';
 
-  // Ô£à Estado global para CSS (m├│vil): evita que se vean lista + grid a la vez
+  // ✅ Estado global para CSS (móvil): evita que se vean lista + grid a la vez
   // Ocultar estantería cuando no corresponde
   const estanteriaEl = document.getElementById('ejemplares-estanteria');
   if (estanteriaEl) estanteriaEl.style.display = (vistaEjemplares === 'estanteria') ? '' : 'none';
@@ -2762,7 +2762,7 @@ function renderEjemplaresGrid(lista) {
 
   grid.style.display = showGrid ? 'grid' : 'none';
 
-  // En modo grid ocultamos tabla y lista m├│vil
+  // En modo grid ocultamos tabla y lista móvil
   if (showGrid) {
     tablaWrap.style.display = 'none';
     if (mobileList) mobileList.style.display = 'none';
@@ -2785,7 +2785,7 @@ function renderEjemplaresGrid(lista) {
                <span class="ph-sub">Sin portada</span>
              </div>`
         }
-        <div class="ej-grid-title">${escapeHtml(e.titulo || 'ÔÇö')}</div>
+        <div class="ej-grid-title">${escapeHtml(e.titulo || '—')}</div>
         <div class="ej-grid-meta">
           ${e.autores ? `<span class="ej-grid-pill">${escapeHtml(e.autores)}</span>` : ''}
           ${e.tipo ? `<span class="ej-grid-pill">${escapeHtml(e.tipo)}</span>` : ''}
@@ -2803,7 +2803,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('paseolibros_theme') || 'rose';
     aplicarTema(savedTheme);
   
-    // 2) Bot├│n toggle de tema
+    // 2) Botón toggle de tema
     const themeBtn = document.getElementById('btn-toggle-theme');
     if (themeBtn) {
       themeBtn.addEventListener('click', () => {
@@ -2829,8 +2829,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   document.getElementById('ej-vista-lista')?.addEventListener('click', () => {
     vistaEjemplares = 'lista';
-    guardarVistaEjemplares();          // Ô£à NUEVO
-    actualizarBotonesVistaEjemplares(); // Ô£à NUEVO
+    guardarVistaEjemplares();          // ✅ NUEVO
+    actualizarBotonesVistaEjemplares(); // ✅ NUEVO
     renderEjemplares();
   });
   document.getElementById('ej-vista-grid')?.addEventListener('click', () => {
@@ -2867,7 +2867,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mostrarFicha(Number(item.dataset.libroId), Number(item.dataset.ejemplarId));
   });
   
-  // restaurar sesi├│n
+  // restaurar sesión
   try {
     const savedToken = localStorage.getItem(TOKEN_KEY);
     const savedUser = localStorage.getItem(USER_KEY);
@@ -2878,7 +2878,7 @@ document.addEventListener('DOMContentLoaded', () => {
   } catch {}
   actualizarUIAutenticacion();
 
-  // Botones b├ísicos
+  // Botones básicos
   document.getElementById('btn-crear')?.addEventListener('click', (e) => {
     e.preventDefault();
     crearEjemplar();
@@ -2886,10 +2886,10 @@ document.addEventListener('DOMContentLoaded', () => {
   
   document.getElementById('btn-login')?.addEventListener('click', hacerLogin);
   document.getElementById('btn-logout')?.addEventListener('click', hacerLogout);
-  // Stats lecturas: desplegar a├▒os (desktop + m├│vil)
+  // Stats lecturas: desplegar a├▒os (desktop + móvil)
   document.getElementById('tabla-stats-lecturas')?.addEventListener('click', manejarClickStatsToggle);
   document.getElementById('stats-lecturas-mobile')?.addEventListener('click', manejarClickStatsMobileToggle);
-  // Lista m├│vil: acciones y abrir ficha
+  // Lista móvil: acciones y abrir ficha
   document.getElementById('ejemplares-list')?.addEventListener('click', (e) => {
     const card = e.target.closest('.ej-card');
     if (!card) return;
@@ -2905,9 +2905,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const dups = titulosDuplicadosEnCache(tituloInput.value, libroSeleccionadoId);
 
     if (dups.length > 0) {
-      setModalMsg(`ÔÜá´©Å Ojo: ya tienes ${dups.length} libro(s) con ese t├¡tulo en tu biblioteca.`);
+      setModalMsg(`ÔÜá´©Å Ojo: ya tienes ${dups.length} libro(s) con ese título en tu biblioteca.`);
     } else {
-      // no borres otros mensajes importantes si los usas; si quieres, comenta esta l├¡nea
+      // no borres otros mensajes importantes si los usas; si quieres, comenta esta línea
       setModalMsg('');
     }
   });
@@ -2946,7 +2946,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
     if (!url) return;
   
-    // 1) Intentar compartir nativo (m├│vil)
+    // 1) Intentar compartir nativo (móvil)
     if (navigator.share) {
       try {
         await navigator.share({
@@ -2954,7 +2954,7 @@ document.addEventListener('DOMContentLoaded', () => {
           text: title,
           url,
         });
-        if (status) status.textContent = 'Compartido Ô£à';
+        if (status) status.textContent = 'Compartido ✅';
         return;
       } catch (err) {
         // Si el usuario cancela o falla, seguimos con copiar
@@ -2966,18 +2966,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navigator.clipboard?.writeText) {
       try {
         await navigator.clipboard.writeText(url);
-        if (status) status.textContent = 'Copiado al portapapeles Ô£à';
+        if (status) status.textContent = 'Copiado al portapapeles ✅';
         return;
       } catch (e) {
-        // seguimos al fallback cl├ísico
+        // seguimos al fallback clásico
       }
     }
   
-    // 3) Fallback cl├ísico (para navegadores viejos)
+    // 3) Fallback clásico (para navegadores viejos)
     if (input) {
       input.select();
       document.execCommand?.('copy');
-      if (status) status.textContent = 'Copiado (modo compatibilidad) Ô£à';
+      if (status) status.textContent = 'Copiado (modo compatibilidad) ✅';
     } else {
       // ├Ültimo recurso: un prompt
       prompt('Copia este enlace:', url);
@@ -3017,7 +3017,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-marcar-devuelto-global')?.addEventListener('click', marcarPrestamoDevueltoGlobal);
   document.getElementById('btn-guardar-libro')?.addEventListener('click', guardarLibroEditado);
   document.getElementById('btn-guardar-ejemplar')?.addEventListener('click', guardarEjemplarEditado);
-  // Versiones m├│vil (footer fijo externo ÔÇö IDs distintos para evitar duplicados)
+  // Versiones móvil (footer fijo externo — IDs distintos para evitar duplicados)
   document.getElementById('btn-guardar-libro-movil')?.addEventListener('click', guardarLibroEditado);
   document.getElementById('btn-guardar-ejemplar-movil')?.addEventListener('click', guardarEjemplarEditado);
 
@@ -3038,10 +3038,10 @@ document.addEventListener('DOMContentLoaded', () => {
     crearPrestamo(libroSeleccionadoId, ejemplarSeleccionadoId);
   });
 
-  // Versi├│n m├│vil del bot├│n eliminar
+  // Versión móvil del botón eliminar
   document.getElementById('btn-eliminar-modal-movil')?.addEventListener('click', async () => {
     if (!ejemplarSeleccionadoId) return;
-    const confirmar = confirm('┬┐Eliminar este ejemplar? Esta acci├│n no se puede deshacer.');
+    const confirmar = confirm('¿Eliminar este ejemplar? Esta acción no se puede deshacer.');
     if (!confirmar) return;
     await cerrarModalFicha();
     await eliminarEjemplar(ejemplarSeleccionadoId);
@@ -3049,17 +3049,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('btn-eliminar-modal')?.addEventListener('click', async () => {
     if (!ejemplarSeleccionadoId) return;
-    const confirmar = confirm('┬┐Eliminar este ejemplar? Esta acci├│n no se puede deshacer.');
+    const confirmar = confirm('¿Eliminar este ejemplar? Esta acción no se puede deshacer.');
     if (!confirmar) return;
     await cerrarModalFicha();
     await eliminarEjemplar(ejemplarSeleccionadoId);
   });
 
   
-  // UI pr├®stamo overlay
+  // UI préstamo overlay
   crearUIPrestamo();
 
-  // Buscador ejemplares (usa render, no ÔÇ£oculta filasÔÇØ)
+  // Buscador ejemplares (usa render, no "oculta filas")
   const buscador = document.getElementById('buscador-ejemplares');
   if (buscador) {
     buscador.addEventListener('input', () => {
@@ -3067,7 +3067,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderEjemplares();
     });
   }
-    // Ordenaci├│n compacta (m├│vil): t├¡tulo / autor / recientes
+    // Ordenación compacta (móvil): título / autor / recientes
     const sortSel = document.getElementById('sort-ejemplares');
   // Clicks en tabla ejemplares (acciones vs abrir ficha)
   const tbodyEjemplares = document.querySelector('#tabla-ejemplares tbody');
@@ -3084,7 +3084,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cualquier click en la fila abre la ficha
     mostrarFicha(fila.dataset.libroId, fila.dataset.ejemplarId);
   });
-  // Cerrar ÔÇ£altaÔÇØ al tocar fuera (solo m├│vil)
+  // Cerrar "alta" al tocar fuera (solo móvil)
   document.addEventListener('click', (e) => {
     if (!document.body.classList.contains('alta-visible')) return;
 
@@ -3098,7 +3098,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Click en lecturas/pr├®stamos home => abrir ficha (resuelve ejemplar si falta)
+  // Click en lecturas/préstamos home => abrir ficha (resuelve ejemplar si falta)
   document.querySelector('#tabla-lecturas-abiertas tbody')?.addEventListener('click', async (e) => {
     const tr = e.target.closest('tr');
     if (!tr) return;
@@ -3127,10 +3127,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Actualizar UI al instante sin recargar
         tr.dataset.paginaActual = String(pagina ?? '');
         const td = tr.querySelector('.cell-pagina');
-        if (td) td.textContent = (pagina ?? 'ÔÇö');
+        if (td) td.textContent = (pagina ?? '—');
       },
       onSkip: () => {
-        // Cerr├│ sin guardar ÔÇö no hacer nada
+        // Cerró sin guardar — no hacer nada
       }
     });
   });
@@ -3144,7 +3144,7 @@ document.querySelector('#tabla-prestamos-activos tbody')?.addEventListener('clic
   const ejId = tr.dataset.ejemplarId ? Number(tr.dataset.ejemplarId) : resolverEjemplarIdDesdeCache(libroId);
 
   if (!ejId) {
-    setUserStatusErr('No encuentro el ejemplar de ese libro en tu lista (┬┐tienes alg├║n ejemplar cargado?).');
+    setUserStatusErr('No encuentro el ejemplar de ese libro en tu lista (¿tienes algún ejemplar cargado?).');
     return;
   }
   mostrarFicha(libroId, ejId);
@@ -3180,7 +3180,7 @@ document.addEventListener('keydown', (e) => {
   // Evita que un click dentro del dropdown lo cierre (necesario para el selector de ordenar)
   toolsDropdown?.addEventListener('click', (ev) => ev.stopPropagation());
 
-  // --- Ordenar: en m├│vil vive dentro de Herramientas ---
+  // --- Ordenar: en móvil vive dentro de Herramientas ---
   const mqlMobile = window.matchMedia('(max-width: 820px)');
   const sortSelect = document.getElementById('sort-ejemplares');
   const sortMiniHost = document.querySelector('.sort-mini');
@@ -3226,7 +3226,7 @@ document.addEventListener('keydown', (e) => {
   else mqlMobile.addListener(placeSortControl);
 
 
-  // Delegaci├│n: marcar devuelto desde tabla pr├®stamos modal
+  // Delegación: marcar devuelto desde tabla préstamos modal
 
   async function apiPost(path, body) {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -3246,7 +3246,7 @@ function mostrarRegistro() {
   if (loginBox) loginBox.style.display = 'none';
   if (registerBox) registerBox.style.display = 'block';
 
-  setUserStatus?.(''); // si existe en tu c├│digo
+  setUserStatus?.(''); // si existe en tu código
 }
 
 function mostrarLogin() {
@@ -3271,8 +3271,8 @@ document.getElementById('link-show-login')?.addEventListener('click', (e) => {
 });
 document.getElementById('link-forgot')?.addEventListener('click', (e) => {
   e.preventDefault();
-  // ÔÇ£Zona en obrasÔÇØ
-  alert('­ƒöº Recuperaci├│n de contrase├▒a: en obras (pendiente configurar SMTP).');
+  // "Zona en obras"
+  alert('­ƒöº Recuperación de contrase├▒a: en obras (pendiente configurar SMTP).');
 });
 
 function getQueryParam(name) {
@@ -3336,7 +3336,7 @@ btnRegister?.addEventListener('click', async (e) => {
       return;
     }
 
-    if (msg) msg.textContent = 'Cuenta creada Ô£à Ya puedes iniciar sesi├│n.';
+    if (msg) msg.textContent = 'Cuenta creada ✅ Ya puedes iniciar sesión.';
     // opcional: limpiar campos
     document.getElementById('reg-usuario').value = '';
     document.getElementById('reg-correo').value = '';
@@ -3498,7 +3498,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 
     // 2) Convierte a blob y reproduce
     const blob = await res.blob();
-    if (!blob || blob.size === 0) throw new Error("Audio vac├¡o (0 bytes)");
+    if (!blob || blob.size === 0) throw new Error("Audio vacío (0 bytes)");
 
     const objectUrl = URL.createObjectURL(blob);
 
@@ -3546,7 +3546,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 
   async function startRec(){
     if (!navigator.mediaDevices?.getUserMedia) {
-      els.audioStatus.textContent = "Tu navegador no permite grabaci├│n.";
+      els.audioStatus.textContent = "Tu navegador no permite grabación.";
       return;
     }
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -3748,7 +3748,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 
       bcCache = data;
 
-      if (!data.length) { info.textContent = 'Nadie ha compartido su biblioteca contigo a├║n.'; return; }
+      if (!data.length) { info.textContent = 'Nadie ha compartido su biblioteca contigo aún.'; return; }
 
       info.textContent = `${data.length} biblioteca${data.length > 1 ? 's' : ''} compartida${data.length > 1 ? 's' : ''} contigo`;
       lista.innerHTML = data.map(b => `
@@ -3767,7 +3767,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     }
   }
 
-  // ÔöÇÔöÇ Cargar a qui├®n he compartido yo ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ÔöÇÔöÇ Cargar a quién he compartido yo ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
   async function cargarMisCompartidas() {
     const info  = document.getElementById('bc-info-miscompartidas');
     const lista = document.getElementById('bc-lista-miscompartidas');
@@ -3816,18 +3816,18 @@ window.flashErr = function flashErr(msg, ms = 3500) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      msg.textContent = 'Ô£à ' + data.mensaje;
+      msg.textContent = '✅ ' + data.mensaje;
       input.value = '';
       await cargarMisCompartidas();
       setTimeout(() => { msg.textContent = ''; }, 3000);
     } catch (e) {
-      msg.textContent = 'ÔØî ' + e.message;
+      msg.textContent = '⚠️ ' + e.message;
     }
   }
 
   // ÔöÇÔöÇ Revocar acceso ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
   async function revocarAcceso(bcId, nombre) {
-    if (!confirm(`┬┐Revocar el acceso de ${nombre} a tu biblioteca?`)) return;
+    if (!confirm(`¿Revocar el acceso de ${nombre} a tu biblioteca?`)) return;
     try {
       const res = await bcFetch(`/api/biblioteca-compartida/${bcId}`, { method: 'DELETE' });
       if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
@@ -3883,8 +3883,8 @@ window.flashErr = function flashErr(msg, ms = 3500) {
         <div class="bc-ver-item">
           ${portada}
           <div class="bc-ver-info-item">
-            <div class="bc-ver-titulo">${escHtml(e.titulo || 'ÔÇö')}</div>
-            <div class="bc-ver-autor">${escHtml(e.autores || 'ÔÇö')}</div>
+            <div class="bc-ver-titulo">${escHtml(e.titulo || '—')}</div>
+            <div class="bc-ver-autor">${escHtml(e.autores || '—')}</div>
             <div class="bc-ver-meta">
               ${e.isbn ? `<span class="deseo-pill">ISBN: ${escHtml(e.isbn)}</span>` : ''}
               ${e.estado ? `<span class="deseo-pill">${escHtml(e.estado)}</span>` : ''}
@@ -3916,7 +3916,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     document.getElementById('bc-btn-compartir')?.addEventListener('click', compartirCon);
     document.getElementById('bc-input-usuario')?.addEventListener('keydown', e => { if (e.key === 'Enter') compartirCon(); });
 
-    // Delegaci├│n: ver biblioteca / revocar
+    // Delegación: ver biblioteca / revocar
     document.getElementById('bc-lista-conmigo')?.addEventListener('click', e => {
       const btn = e.target.closest('.bc-btn-ver');
       if (!btn) return;
@@ -3948,7 +3948,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 
 
 // ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
-// B├ÜSQUEDA AUTOM├üTICA DE PORTADAS
+// B├ÜSQUEDA AUTOMüTICA DE PORTADAS
 // ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
 (function () {
 
@@ -3985,7 +3985,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
       if (!res.ok) throw new Error(data.error);
 
       if (!data.length) {
-        infoEl.innerHTML = '<span class="portadas-ok">Ô£à Todos tus libros tienen portada</span>';
+        infoEl.innerHTML = '<span class="portadas-ok">✅ Todos tus libros tienen portada</span>';
         document.getElementById('btn-lanzar-busqueda').disabled = true;
         return;
       }
@@ -3996,9 +3996,9 @@ window.flashErr = function flashErr(msg, ms = 3500) {
       listaEl.innerHTML = data.map(l => `
         <div class="portadas-item" id="portada-item-${l.id}">
           <div class="portadas-item-info">
-            <span class="portadas-item-titulo">${escapeHtmlLocal(l.titulo || 'ÔÇö')}</span>
+            <span class="portadas-item-titulo">${escapeHtmlLocal(l.titulo || '—')}</span>
             <span class="portadas-item-autor">${escapeHtmlLocal(l.autores || '')}</span>
-            <span class="portadas-item-isbn">ISBN: ${escapeHtmlLocal(l.isbn || 'ÔÇö')}</span>
+            <span class="portadas-item-isbn">ISBN: ${escapeHtmlLocal(l.isbn || '—')}</span>
           </div>
           <button class="btn btn-secondary btn-sm portadas-btn-uno" data-libro-id="${l.id}" type="button">
             Buscar
@@ -4023,7 +4023,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 
       if (item) {
         item.classList.add('portadas-item--ok');
-        item.querySelector('.portadas-btn-uno').textContent = 'Ô£à';
+        item.querySelector('.portadas-btn-uno').textContent = '✅';
       }
 
       // Refrescar cache de ejemplares para que aparezca la portada en la lista
@@ -4035,13 +4035,13 @@ window.flashErr = function flashErr(msg, ms = 3500) {
       if (item) {
         const err = document.createElement('span');
         err.className = 'portadas-item-err';
-        err.textContent = 'ÔØî ' + e.message;
+        err.textContent = '⚠️ ' + e.message;
         item.appendChild(err);
       }
     }
   }
 
-  // ÔöÇÔöÇ Desde la ficha del libro: bot├│n "Buscar portada" ÔöÇÔöÇ
+  // ÔöÇÔöÇ Desde la ficha del libro: botón "Buscar portada" ÔöÇÔöÇ
   async function buscarPortadaDesdeModal() {
     const btn = document.getElementById('btn-buscar-portada');
     if (!btn || !window.libroSeleccionadoId) return;
@@ -4061,7 +4061,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
       if (data.ya_tenia) {
         btn.textContent = 'Ya tiene portada';
       } else {
-        btn.textContent = 'Ô£à Portada encontrada';
+        btn.textContent = '✅ Portada encontrada';
         // Actualizar la imagen en el modal
         const img = document.getElementById('ficha-portada-img');
         if (img && data.url_portada) {
@@ -4074,13 +4074,13 @@ window.flashErr = function flashErr(msg, ms = 3500) {
         }
       }
     } catch (e) {
-      btn.textContent = 'ÔØî ' + e.message;
+      btn.textContent = '⚠️ ' + e.message;
     } finally {
       setTimeout(() => { btn.disabled = false; btn.textContent = original; }, 3000);
     }
   }
 
-  // ÔöÇÔöÇ Lanzar b├║squeda masiva ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ÔöÇÔöÇ Lanzar búsqueda masiva ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
   async function lanzarBusquedaMasiva() {
     const btnLanzar = document.getElementById('btn-lanzar-busqueda');
     const progresoEl = document.getElementById('portadas-progreso');
@@ -4089,7 +4089,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 
     if (btnLanzar) btnLanzar.disabled = true;
     if (progresoEl) progresoEl.style.display = 'block';
-    if (msgEl) msgEl.textContent = 'Lanzando b├║squeda en segundo planoÔÇª';
+    if (msgEl) msgEl.textContent = 'Lanzando búsqueda en segundo planoÔÇª';
     if (fillEl) fillEl.style.width = '10%';
 
     try {
@@ -4110,7 +4110,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
         if (btnLanzar)  btnLanzar.disabled = false;
       }, 4000);
     } catch (e) {
-      if (msgEl) msgEl.textContent = 'ÔØî ' + e.message;
+      if (msgEl) msgEl.textContent = '⚠️ ' + e.message;
       if (btnLanzar) btnLanzar.disabled = false;
     }
   }
@@ -4131,7 +4131,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     document.getElementById('btn-buscar-portada-movil')?.addEventListener('click', buscarPortadaDesdeModal);
     document.getElementById('btn-portada-manual-movil')?.addEventListener('click', abrirPortadaUrl);
 
-    // Input de subir portada alternativo (m├│vil)
+    // Input de subir portada alternativo (móvil)
     document.getElementById('ficha-portada-file-movil')?.addEventListener('change', (e) => {
       const file = e.target.files?.[0];
       if (!file) return;
@@ -4145,7 +4145,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
       }
     });
 
-    // Delegaci├│n: buscar portada de uno en la lista
+    // Delegación: buscar portada de uno en la lista
     document.getElementById('portadas-lista-sin')?.addEventListener('click', e => {
       const btn = e.target.closest('.portadas-btn-uno');
       if (!btn) return;
@@ -4186,13 +4186,13 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     const overlay = document.getElementById('portada-url-overlay');
     if (!overlay) return;
 
-    // Construir queries de b├║squeda con los datos del libro actual
+    // Construir queries de búsqueda con los datos del libro actual
     const titulo  = document.getElementById('ficha-titulo')?.textContent || '';
     const autores = document.getElementById('ficha-autores')?.textContent || '';
     const isbn    = document.getElementById('ficha-isbn')?.textContent || '';
 
     const q = encodeURIComponent([titulo, autores, 'portada libro'].filter(Boolean).join(' '));
-    const qIsbn = isbn && isbn !== 'ÔÇö' ? encodeURIComponent(isbn + ' portada libro') : q;
+    const qIsbn = isbn && isbn !== '—' ? encodeURIComponent(isbn + ' portada libro') : q;
 
     const linkGoogle = document.getElementById('portada-url-google-link');
     const linkBing   = document.getElementById('portada-url-bing-link');
@@ -4264,7 +4264,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
         img.classList.remove('is-placeholder');
       }
 
-      if (msg) msg.textContent = 'Ô£à Portada guardada';
+      if (msg) msg.textContent = '✅ Portada guardada';
       setTimeout(cerrarPortadaUrl, 1200);
 
       // Refrescar lista
@@ -4272,7 +4272,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
         window.cargarEjemplares(window.usuarioActual.id);
       }
     } catch (e) {
-      if (msg) msg.textContent = 'ÔØî ' + e.message;
+      if (msg) msg.textContent = '⚠️ ' + e.message;
     } finally {
       if (btn) btn.disabled = false;
     }
@@ -4309,7 +4309,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     // Eliminar portada
     document.getElementById('btn-eliminar-portada')?.addEventListener('click', async () => {
       if (!window.libroSeleccionadoId) return;
-      if (!confirm('┬┐Eliminar la portada de este libro?')) return;
+      if (!confirm('¿Eliminar la portada de este libro?')) return;
 
       try {
         const res = await apiFetch(`/api/libros/${window.libroSeleccionadoId}/portada`, { method: 'DELETE' });
@@ -4333,7 +4333,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 })();
 
 // ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
-// ESTAD├ìSTICAS VISUALES ÔÇö Chart.js + detalle de t├¡tulos
+// ESTAD├ìSTICAS VISUALES — Chart.js + detalle de títulos
 // ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ
 (function () {
 
@@ -4355,7 +4355,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     });
   }
 
-  // ÔöÇÔöÇ M├®tricas resumen ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ÔöÇÔöÇ Métricas resumen ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
   function renderMetricas(stats) {
     const el = document.getElementById('stats-metricas');
     if (!el) return;
@@ -4369,7 +4369,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     const diff = terminadasAnio - terminadasAnterior;
     const diffStr = diff > 0 ? `+${diff} vs ${anioActual-1}` : diff < 0 ? `${diff} vs ${anioActual-1}` : `igual que ${anioActual-1}`;
 
-    // Racha: a├▒os consecutivos con al menos 1 lectura terminada desde hoy hacia atr├ís
+    // Racha: a├▒os consecutivos con al menos 1 lectura terminada desde hoy hacia atrás
     let racha = 0;
     for (let y = anioActual; y >= anioActual - 20; y--) {
       const r = stats.find(r => Number(r.anio) === y);
@@ -4379,7 +4379,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 
     el.innerHTML = `
       <div class="stats-metric">
-        <div class="stats-metric-label">Total le├¡dos</div>
+        <div class="stats-metric-label">Total leídos</div>
         <div class="stats-metric-value">${fmt(totalTerminadas)}</div>
         <div class="stats-metric-sub">libros terminados</div>
       </div>
@@ -4416,10 +4416,10 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     const labels = [...stats].reverse().map(r => r.anio);
     const data   = [...stats].reverse().map(r => Number(r.terminadas || 0));
 
-    // Usar el acento de la app ÔÇö leer la variable CSS en tiempo real
+    // Usar el acento de la app — leer la variable CSS en tiempo real
     const accent = getComputedStyle(document.documentElement)
       .getPropertyValue('--accent').trim() || '#b85c6e';
-    // Versi├│n semitransparente para hover
+    // Versión semitransparente para hover
     const accentAlpha = accent + 'cc';
 
     if (chartAnos) chartAnos.destroy();
@@ -4456,7 +4456,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     });
   }
 
-  // ÔöÇÔöÇ Autores m├ís le├¡dos ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ÔöÇÔöÇ Autores más leídos ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
   async function renderAutores(usuarioId) {
     const lista = document.getElementById('stats-autores-lista');
     if (!lista) return;
@@ -4474,7 +4474,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
         const autores = (l.autores || '').split(/[,;&\/]/).map(a => a.trim()).filter(a => {
           if (!a) return false;
           // Descartar fragmentos que parezcan fechas (1898-1936), a├▒os solos (1936)
-          // o n├║meros puros
+          // o números puros
           if (/^\d{4}(-\d{4})?$/.test(a)) return false;
           if (/^\d+$/.test(a)) return false;
           // Descartar fragmentos muy cortos (iniciales sueltas, puntos)
@@ -4488,7 +4488,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     }
 
     const top = Object.entries(conteo).sort((a,b) => b[1]-a[1]).slice(0, 6);
-    if (!top.length) { lista.innerHTML = '<p class="muted">Sin datos todav├¡a.</p>'; return; }
+    if (!top.length) { lista.innerHTML = '<p class="muted">Sin datos todavía.</p>'; return; }
 
     const max = top[0][1];
     lista.innerHTML = top.map(([autor, n]) => `
@@ -4513,7 +4513,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     } catch { return { empezadas: [], terminadas: [] }; }
   }
 
-  // ÔöÇÔöÇ Detalle de t├¡tulos por a├▒o ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ÔöÇÔöÇ Detalle de títulos por a├▒o ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
   async function renderDetalle(usuarioId, anio) {
     const contenido = document.getElementById('stats-detalle-contenido');
     if (!contenido) return;
@@ -4525,9 +4525,9 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     const listaHtml = (items, campo, etiqueta) => {
       if (!items.length) return `<p class="muted stats-detalle-empty">Sin ${etiqueta.toLowerCase()} este a├▒o.</p>`;
       return items.map(l => {
-        const fecha = l[campo] ? new Date(l[campo]).toLocaleDateString('es-ES', { day:'numeric', month:'short' }) : 'ÔÇö';
+        const fecha = l[campo] ? new Date(l[campo]).toLocaleDateString('es-ES', { day:'numeric', month:'short' }) : '—';
         return `<div class="stats-detalle-item">
-          <span class="stats-detalle-titulo">${esc(l.titulo || 'Sin t├¡tulo')}</span>
+          <span class="stats-detalle-titulo">${esc(l.titulo || 'Sin título')}</span>
           <span class="stats-detalle-autor">${esc(l.autores || '')}</span>
           <span class="stats-detalle-fecha">${fecha}</span>
         </div>`;
@@ -4563,7 +4563,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     const panel = document.getElementById('stats-panel-inferior');
 
     if (!window.usuarioActual?.id || !window.token) {
-      if (info) info.textContent = 'Inicia sesi├│n para ver tus estad├¡sticas.';
+      if (info) info.textContent = 'Inicia sesión para ver tus estadísticas.';
       return;
     }
 
@@ -4585,7 +4585,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
       statsCache = await res.json();
 
       if (!Array.isArray(statsCache) || !statsCache.length) {
-        if (info) info.textContent = 'Sin datos de lectura todav├¡a.';
+        if (info) info.textContent = 'Sin datos de lectura todavía.';
         return;
       }
 
@@ -4598,7 +4598,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 
       if (panel) panel.style.display = 'grid';
 
-      // Renderizar detalle del a├▒o m├ís reciente por defecto
+      // Renderizar detalle del a├▒o más reciente por defecto
       const anioDefault = statsCache[0]?.anio;
       if (anioDefault) await renderDetalle(window.usuarioActual.id, anioDefault);
 
@@ -4606,7 +4606,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
       renderAutores(window.usuarioActual.id);
 
     } catch (e) {
-      if (info) info.textContent = 'Error al cargar estad├¡sticas.';
+      if (info) info.textContent = 'Error al cargar estadísticas.';
     }
   };
 
