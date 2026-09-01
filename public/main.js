@@ -6,10 +6,7 @@ let currentStream = null;
 let lastScanValue = null;
 let lastScanCount = 0;
 let scannerRunning = false;
-let vistaEjemplares  = 'lista';
-let ejemplaresQuery  = '';
-
-const THEMES = ['rose', 'dark'];
+let vistaEjemplares = 'lista';
 
 // Preferencias UI (persisten en el navegador)
 const VISTA_EJ_KEY = 'paseolibros_vista_ejemplares';   // 'lista' | 'grid'
@@ -43,31 +40,15 @@ function restaurarPreferenciasUI() {
     const dirOk = s && (s.dir === 'asc' || s.dir === 'desc');
     if (keyOk && dirOk) sortEjemplares = { key: s.key, dir: s.dir };
   } catch {}
-  setTimeout(aplicarVistaContenedor, 100);
-}
-
-function actualizarBotonesVistaEjemplares() {
-  const bLista = document.getElementById('ej-vista-lista');
-  const bGrid  = document.getElementById('ej-vista-grid');
-  const bEst   = document.getElementById('ej-vista-estanteria');
-
-  [bLista, bGrid, bEst].forEach(b => b?.classList.remove('is-active'));
-  if (vistaEjemplares === 'lista') bLista?.classList.add('is-active');
-  else if (vistaEjemplares === 'grid') bGrid?.classList.add('is-active');
-  else if (vistaEjemplares === 'estanteria') bEst?.classList.add('is-active');
-
-  bLista?.setAttribute('aria-pressed', String(vistaEjemplares === 'lista'));
-  bGrid?.setAttribute('aria-pressed', String(vistaEjemplares === 'grid'));
-  bEst?.setAttribute('aria-pressed', String(vistaEjemplares === 'estanteria'));
 }
 
 function aplicarVistaContenedor() {
-  const tabla      = document.querySelector('#tabla-ejemplares')?.closest('.table-wrapper');
-  const listaMovil = document.getElementById('ejemplares-list');
-  const grid       = document.getElementById('ejemplares-grid');
-  const estanteria = document.getElementById('ejemplares-estanteria');
+  var tabla      = document.querySelector('#tabla-ejemplares') ? document.querySelector('#tabla-ejemplares').closest('.table-wrapper') : null;
+  var listaMovil = document.getElementById('ejemplares-list');
+  var grid       = document.getElementById('ejemplares-grid');
+  var estanteria = document.getElementById('ejemplares-estanteria');
 
-  [tabla, listaMovil, grid, estanteria].forEach(el => { if (el) el.style.display = 'none'; });
+  [tabla, listaMovil, grid, estanteria].forEach(function(el) { if (el) el.style.display = 'none'; });
 
   if (vistaEjemplares === 'lista') {
     if (tabla)      tabla.style.display      = '';
@@ -79,6 +60,35 @@ function aplicarVistaContenedor() {
   }
 }
 
+function actualizarBotonesVistaEjemplares() {
+  const bLista = document.getElementById('ej-vista-lista');
+  const bGrid  = document.getElementById('ej-vista-grid');
+  const bEst   = document.getElementById('ej-vista-estanteria');
+
+  [bLista, bGrid, bEst].forEach(function(b) { if (b) b.classList.remove('is-active'); });
+
+  if (vistaEjemplares === 'lista') { if (bLista) bLista.classList.add('is-active'); }
+  else if (vistaEjemplares === 'grid') { if (bGrid) bGrid.classList.add('is-active'); }
+  else if (vistaEjemplares === 'estanteria') { if (bEst) bEst.classList.add('is-active'); }
+
+  if (bLista) bLista.setAttribute('aria-pressed', String(vistaEjemplares === 'lista'));
+  if (bGrid)  bGrid.setAttribute('aria-pressed', String(vistaEjemplares === 'grid'));
+  if (bEst)   bEst.setAttribute('aria-pressed', String(vistaEjemplares === 'estanteria'));
+}
+
+// selecci├│n actual en la tabla
+let libroSeleccionadoId = null;
+let ejemplarSeleccionadoId = null;
+
+let usuariosPrestamo = [];
+let prestamoContexto = null;
+
+// ---------- Estado tabla ejemplares (buscador + ordenaci├│n) ----------
+let ejemplaresCache = [];
+let ejemplaresQuery = '';
+let sortEjemplares = { key: 'creado_en', dir: 'desc' }; // por defecto: m├ís nuevos primero
+// ---------- Themes ----------
+const THEMES = ['rose', 'dark'];
 
 function aplicarTema(nombre) {
   const body = document.body;
@@ -544,8 +554,6 @@ function renderEjemplares() {
     // Ô£à PRO MAX: tambi├®n pinta la lista m├│vil (con los mismos filtrados/orden)
   renderEjemplaresMobileList(filtrados);
   renderEjemplaresGrid(filtrados);
-  aplicarVistaContenedor();
-  if (window._ejemplaresCache !== undefined) window._ejemplaresCache = filtrados;
 if (token && usuarioActual?.id) {
   const ids = filtrados.map(e => e.libro_id);
   requestAnimationFrame(() => ensureReaderMetaFor(ids));
@@ -635,9 +643,6 @@ async function cargarEjemplares(usuarioId) {
     ejemplaresCache = ejemplares;
     window._ejemplaresCache = ejemplares;
     renderEjemplares();
-    if (window.renderEstanteria && document.getElementById('ejemplares-estanteria')?.style.display !== 'none') {
-      window.renderEstanteria(ejemplares);
-    }
   } catch (err) {
     console.error(err);
     if (info) info.textContent = 'Error al cargar los ejemplares.';
@@ -2746,6 +2751,26 @@ function renderEjemplaresGrid(lista) {
   if (!grid || !tablaWrap) return;
 
   const showGrid = vistaEjemplares === 'grid';
+
+  // Ô£à Estado global para CSS (m├│vil): evita que se vean lista + grid a la vez
+  // Ocultar estantería cuando no corresponde
+  const estanteriaEl = document.getElementById('ejemplares-estanteria');
+  if (estanteriaEl) estanteriaEl.style.display = (vistaEjemplares === 'estanteria') ? '' : 'none';
+
+    document.body.classList.toggle('vista-ej-grid', showGrid);
+
+
+  grid.style.display = showGrid ? 'grid' : 'none';
+
+  // En modo grid ocultamos tabla y lista m├│vil
+  if (showGrid) {
+    tablaWrap.style.display = 'none';
+    if (mobileList) mobileList.style.display = 'none';
+  } else {
+    tablaWrap.style.display = '';
+    if (mobileList) mobileList.style.display = '';
+  }
+
   if (!showGrid) return;
 
   grid.innerHTML = (lista || []).map(e => {
@@ -2804,16 +2829,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   document.getElementById('ej-vista-lista')?.addEventListener('click', () => {
     vistaEjemplares = 'lista';
-    guardarVistaEjemplares();
-    actualizarBotonesVistaEjemplares();
-    aplicarVistaContenedor();
+    guardarVistaEjemplares();          // Ô£à NUEVO
+    actualizarBotonesVistaEjemplares(); // Ô£à NUEVO
     renderEjemplares();
   });
   document.getElementById('ej-vista-grid')?.addEventListener('click', () => {
     vistaEjemplares = 'grid';
     guardarVistaEjemplares();
     actualizarBotonesVistaEjemplares();
-    aplicarVistaContenedor();
     renderEjemplares();
   });
   document.getElementById('ej-vista-estanteria')?.addEventListener('click', () => {
@@ -2821,7 +2844,9 @@ document.addEventListener('DOMContentLoaded', () => {
     guardarVistaEjemplares();
     actualizarBotonesVistaEjemplares();
     aplicarVistaContenedor();
-    if (window._ejemplaresCache?.length) window.renderEstanteria(window._ejemplaresCache);
+    if (window._ejemplaresCache && window._ejemplaresCache.length) {
+      window.renderEstanteria(window._ejemplaresCache);
+    }
   });
   
   document.getElementById('btn-escanear')?.addEventListener('click', async () => {
@@ -4637,27 +4662,26 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 })();
 
 // ══════════════════════════════════════════════════════════
-
-
-// ══════════════════════════════════════════════════════════
 // MODO ESTANTERÍA
 // ══════════════════════════════════════════════════════════
 (function () {
 
-  const COLORES_LOMO = [
+  var COLORES_LOMO = [
     '#8B6355','#7A8B6E','#6E7A8B','#8B7A6E',
     '#6E8B7A','#8B6E7A','#7A6E8B','#8B8B6E',
     '#6E8B8B','#8B7A8B','#6E7A6E','#8B8B8B',
   ];
 
   function colorLomo(titulo) {
-    let hash = 0;
-    for (const c of (titulo || '')) hash = ((hash << 5) - hash) + c.charCodeAt(0);
+    var hash = 0;
+    for (var i = 0; i < (titulo || '').length; i++) {
+      hash = ((hash << 5) - hash) + (titulo || '').charCodeAt(i);
+    }
     return COLORES_LOMO[Math.abs(hash) % COLORES_LOMO.length];
   }
 
   window.renderEstanteria = function(ejemplares) {
-    const contenedor = document.getElementById('ejemplares-estanteria');
+    var contenedor = document.getElementById('ejemplares-estanteria');
     if (!contenedor) return;
 
     if (!ejemplares || !ejemplares.length) {
@@ -4666,20 +4690,20 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     }
 
     contenedor.innerHTML = ejemplares.map(function(e) {
-      const titulo  = e.titulo  || 'Sin título';
-      const autores = e.autores || '';
-      const color   = colorLomo(titulo);
-      const autorCorto = autores ? escapeHtml(autores.split(',')[0].trim()) : '';
-      const tituloEsc  = escapeHtml(titulo);
-      const tooltip    = tituloEsc + (autores ? ' — ' + escapeHtml(autores) : '');
+      var titulo   = e.titulo  || 'Sin título';
+      var autores  = e.autores || '';
+      var color    = colorLomo(titulo);
+      var tEsc     = escapeHtml(titulo);
+      var tooltip  = tEsc + (autores ? ' — ' + escapeHtml(autores) : '');
+      var autorCorto = autores ? escapeHtml(autores.split(',')[0].trim()) : '';
 
       if (e.url_portada) {
-        const src = urlPortadaAbsoluta(e.url_portada);
+        var src = urlPortadaAbsoluta(e.url_portada);
         return '<div class="lomo lomo--portada"' +
                ' data-libro-id="' + e.libro_id + '"' +
                ' data-ejemplar-id="' + e.ejemplar_id + '"' +
                ' title="' + tooltip + '">' +
-               '<img src="' + src + '" alt="' + tituloEsc + '" class="lomo-portada-img" />' +
+               '<img src="' + src + '" alt="' + tEsc + '" class="lomo-portada-img" />' +
                '</div>';
       }
 
@@ -4688,18 +4712,21 @@ window.flashErr = function flashErr(msg, ms = 3500) {
              ' data-ejemplar-id="' + e.ejemplar_id + '"' +
              ' style="--lomo-color:' + color + ';"' +
              ' title="' + tooltip + '">' +
-             '<span class="lomo-titulo">' + tituloEsc + '</span>' +
+             '<span class="lomo-titulo">' + tEsc + '</span>' +
              (autorCorto ? '<span class="lomo-autor">' + autorCorto + '</span>' : '') +
              '</div>';
     }).join('');
   };
 
   document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('ejemplares-estanteria').addEventListener('click', function(e) {
-      const lomo = e.target.closest('.lomo');
-      if (!lomo) return;
-      mostrarFicha(lomo.dataset.libroId, lomo.dataset.ejemplarId);
-    });
+    var cont = document.getElementById('ejemplares-estanteria');
+    if (cont) {
+      cont.addEventListener('click', function(e) {
+        var lomo = e.target.closest('.lomo');
+        if (!lomo) return;
+        mostrarFicha(lomo.dataset.libroId, lomo.dataset.ejemplarId);
+      });
+    }
   });
 
 })();
