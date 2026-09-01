@@ -556,6 +556,11 @@ function renderEjemplares() {
     // ✅ PRO MAX: también pinta la lista móvil (con los mismos filtrados/orden)
   renderEjemplaresMobileList(filtrados);
   renderEjemplaresGrid(filtrados);
+  // Siempre aplicar la vista correcta al final — evita solapamientos
+  aplicarVistaContenedor();
+  if (vistaEjemplares === 'estanteria' && window._ejemplaresCache && window._ejemplaresCache.length) {
+    window.renderEstanteria(window._ejemplaresCache);
+  }
 if (token && usuarioActual?.id) {
   const ids = filtrados.map(e => e.libro_id);
   requestAnimationFrame(() => ensureReaderMetaFor(ids));
