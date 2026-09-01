@@ -192,8 +192,10 @@ async function refrescarHome() {
 
 function urlPortadaAbsoluta(url) {
   if (!url) return '';
-  if (/^https?:\/\//i.test(url)) return url;
-  return `${API_BASE}${url}`; // /uploads/xxx.jpg
+  if (/^https?:\/\//i.test(url)) return url; // URL externa — no tocar
+  // URL local — añadir timestamp para evitar caché de Render
+  const base = `${API_BASE}${url}`;
+  return base + (base.includes('?') ? '&' : '?') + 't=' + Date.now();
 }
 
 function toSortable(v) {
@@ -523,7 +525,7 @@ function renderEjemplares() {
   <td>
     ${
       e.url_portada
-        ? `<img src="${urlPortadaAbsoluta(e.url_portada)}?t=${Date.now()}" alt="Portada" class="portada-mini-img" />`
+        ? `<img src="${urlPortadaAbsoluta(e.url_portada)}" alt="Portada" class="portada-mini-img" />`
         : `<div class="portada-placeholder-mini" aria-hidden="true"><span class="ph-logo">Pdl</span></div>`
     }
   </td>
@@ -566,7 +568,7 @@ function renderEjemplaresMobileList(filtrados){
   if (!isMobile) { list.innerHTML = ''; return; }
 
   list.innerHTML = (filtrados || []).map(e => {
-    const portada = e.url_portada ? `${urlPortadaAbsoluta(e.url_portada)}?t=${Date.now()}` : '';
+    const portada = e.url_portada ? `${urlPortadaAbsoluta(e.url_portada)}` : '';
     const notas = (e.notas || '').trim();
 
     return `
@@ -2014,7 +2016,7 @@ const portada =
     const hasPortada = Boolean(portada);
   
     img.classList.toggle('is-placeholder', !hasPortada);
-    img.src = hasPortada ? `${urlPortadaAbsoluta(portada)}?t=${Date.now()}` : '';
+    img.src = hasPortada ? `${urlPortadaAbsoluta(portada)}` : '';
   
     img.onerror = () => {
       img.src = '';
@@ -2156,7 +2158,7 @@ async function subirPortadaArchivo(file) {
     setModalMsg('Portada actualizada ✅');
 
     const img = document.getElementById('ficha-portada-img');
-    if (img && data.url_portada) img.src = `${urlPortadaAbsoluta(data.url_portada)}?t=${Date.now()}`;
+    if (img && data.url_portada) img.src = `${urlPortadaAbsoluta(data.url_portada)}`;
 
     const portadaInput = document.getElementById('edit-libro-portada');
     if (portadaInput && data.url_portada) portadaInput.value = data.url_portada;
@@ -2763,7 +2765,7 @@ function renderEjemplaresGrid(lista) {
   if (!showGrid) return;
 
   grid.innerHTML = (lista || []).map(e => {
-    const portada = e.url_portada ? `${urlPortadaAbsoluta(e.url_portada)}?t=${Date.now()}` : '';
+    const portada = e.url_portada ? `${urlPortadaAbsoluta(e.url_portada)}` : '';
     return `
       <div class="ej-grid-item" data-libro-id="${e.libro_id}" data-ejemplar-id="${e.ejemplar_id}">
         ${portada
@@ -4058,7 +4060,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
         // Actualizar la imagen en el modal
         const img = document.getElementById('ficha-portada-img');
         if (img && data.url_portada) {
-          img.src = `${window.API_BASE}${data.url_portada}?t=${Date.now()}`;
+          img.src = `${window.API_BASE}${data.url_portada}`;
           img.classList.remove('is-placeholder');
         }
         // Refrescar lista
@@ -4254,7 +4256,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
       // Actualizar portada en el modal
       const img = document.getElementById('ficha-portada-img');
       if (img && data.url_portada) {
-        img.src = `${window.API_BASE}${data.url_portada}?t=${Date.now()}`;
+        img.src = `${window.API_BASE}${data.url_portada}`;
         img.classList.remove('is-placeholder');
       }
 
@@ -4816,5 +4818,64 @@ function _dispararConfeti() {
 // ══════════════════════════════════════════════════════════
 // MODO ESTANTERÍA
 // ══════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+// MODO ESTANTERÍA
+// ══════════════════════════════════════════════════════════
 (function () {
 
+  const COLORES_LOMO = [
+    '#8B6355','#7A8B6E','#6E7A8B','#8B7A6E',
+    '#6E8B7A','#8B6E7A','#7A6E8B','#8B8B6E',
+    '#6E8B8B','#8B7A8B','#6E7A6E','#8B8B8B',
+  ];
+
+  function colorLomo(titulo) {
+    let hash = 0;
+    for (const c of (titulo || '')) hash = ((hash << 5) - hash) + c.charCodeAt(0);
+    return COLORES_LOMO[Math.abs(hash) % COLORES_LOMO.length];
+  }
+
+  window.renderEstanteria = function(ejemplares) {
+    const contenedor = document.getElementById('ejemplares-estanteria');
+    if (!contenedor) return;
+
+    if (!ejemplares?.length) {
+      contenedor.innerHTML = '<p class="muted" style="padding:16px;">Sin ejemplares que mostrar.</p>';
+      return;
+    }
+
+    contenedor.innerHTML = ejemplares.map(e => {
+      const titulo  = e.titulo  || 'Sin título';
+      const autores = e.autores || '';
+      const color   = colorLomo(titulo);
+
+      if (e.url_portada) {
+        const src = urlPortadaAbsoluta(e.url_portada);
+        return `<div class="lomo lomo--portada"
+               data-libro-id="${e.libro_id}"
+               data-ejemplar-id="${e.ejemplar_id}"
+               title="${escapeHtml(titulo)}${autores ? ' — ' + escapeHtml(autores) : ''}">
+            <img src="${src}" alt="${escapeHtml(titulo)}" class="lomo-portada-img" />
+          </div>`;
+      }
+
+      return `<div class="lomo lomo--color"
+             data-libro-id="${e.libro_id}"
+             data-ejemplar-id="${e.ejemplar_id}"
+             style="--lomo-color:${color};"
+             title="${escapeHtml(titulo)}${autores ? ' — ' + escapeHtml(autores) : ''}">
+          <span class="lomo-titulo">${escapeHtml(titulo)}</span>
+          ${autores ? `<span class="lomo-autor">${escapeHtml(autores.split(',')[0].trim())}</span>` : ''}
+        </div>`;
+    }).join('');
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('ejemplares-estanteria')?.addEventListener('click', e => {
+      const lomo = e.target.closest('.lomo');
+      if (!lomo) return;
+      mostrarFicha(lomo.dataset.libroId, lomo.dataset.ejemplarId);
+    });
+  });
+
+})();

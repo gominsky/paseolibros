@@ -91,6 +91,9 @@ app.use(express.json());
 // Servir frontend estático desde /public (si lo estás usando así)
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+// Servir carpeta icons/ para PWA
+app.use('/icons', express.static(path.join(__dirname, '..', 'public', 'icons')));
+
 // Servir SW y manifest con cabeceras correctas para PWA
 app.get('/service-worker.js', (req, res) => {
   res.setHeader('Content-Type', 'application/javascript');
