@@ -45,7 +45,9 @@ function restaurarPreferenciasUI() {
 }
 
 function aplicarVistaContenedor() {
-  var tabla      = document.querySelector('#tabla-ejemplares') ? document.querySelector('#tabla-ejemplares').closest('.table-wrapper') : null;
+  // Seleccionar SOLO el wrapper de la tabla de ejemplares (no las de lecturas/préstamos)
+  var cardEj     = document.querySelector('.card-ejemplares');
+  var tabla      = cardEj ? cardEj.querySelector('.table-wrapper') : null;
   var listaMovil = document.getElementById('ejemplares-list');
   var grid       = document.getElementById('ejemplares-grid');
   var estanteria = document.getElementById('ejemplares-estanteria');
