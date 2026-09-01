@@ -8,6 +8,9 @@ let lastScanCount = 0;
 let scannerRunning = false;
 let vistaEjemplares = 'lista';
 
+// Temas disponibles
+const THEMES = ['rose', 'dark'];
+
 // Preferencias UI (persisten en el navegador)
 const VISTA_EJ_KEY = 'paseolibros_vista_ejemplares';   // 'lista' | 'grid'
 const SORT_EJ_KEY  = 'paseolibros_sort_ejemplares';    // { key, dir }
