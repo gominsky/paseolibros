@@ -6,7 +6,8 @@ let currentStream = null;
 let lastScanValue = null;
 let lastScanCount = 0;
 let scannerRunning = false;
-let vistaEjemplares = 'lista';
+let vistaEjemplares  = 'lista';
+let ejemplaresQuery  = '';
 
 const THEMES = ['rose', 'dark'];
 
