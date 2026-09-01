@@ -923,7 +923,7 @@ async function cargarEstadisticasLecturas() {
       return;
     }
 
-    info.textContent = `Histórico de lecturas (${stats.length} a├▒o${stats.length !== 1 ? 's' : ''})`;
+    info.textContent = `Histórico de lecturas (${stats.length} año${stats.length !== 1 ? 's' : ''})`;
     tbody.innerHTML = '';
     if (mobileList) mobileList.innerHTML = '';
 
@@ -1042,7 +1042,7 @@ async function manejarClickStatsMobileToggle(e) {
 
   // Abro
   detail.removeAttribute('hidden');
-  btn.textContent = 'ÔêÆ';
+  btn.textContent = '−';
   btn.setAttribute('aria-expanded', 'true');
 
   // ¿Ya estaba cargado?
@@ -1051,7 +1051,7 @@ async function manejarClickStatsMobileToggle(e) {
   const ulEmpezadas = detail.querySelector('.stats-mobile-list-empezadas');
   const ulTerminadas = detail.querySelector('.stats-mobile-list-terminadas');
 
-  if (ulEmpezadas) ulEmpezadas.innerHTML = '<li class="muted">CargandoÔÇª</li>';
+  if (ulEmpezadas) ulEmpezadas.innerHTML = '<li class="muted">Cargando…</li>';
   if (ulTerminadas) ulTerminadas.innerHTML = '';
 
   try {
@@ -1069,7 +1069,7 @@ async function manejarClickStatsMobileToggle(e) {
 
     if (ulEmpezadas) {
       if (!empezadas.length) {
-        ulEmpezadas.innerHTML = '<li class="muted">Sin lecturas empezadas este a├▒o.</li>';
+        ulEmpezadas.innerHTML = '<li class="muted">Sin lecturas empezadas este año.</li>';
       } else {
         ulEmpezadas.innerHTML = empezadas.map(l => {
           const fecha = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : '—';
@@ -1081,7 +1081,7 @@ async function manejarClickStatsMobileToggle(e) {
 
     if (ulTerminadas) {
       if (!terminadas.length) {
-        ulTerminadas.innerHTML = '<li class="muted">Sin lecturas terminadas este a├▒o.</li>';
+        ulTerminadas.innerHTML = '<li class="muted">Sin lecturas terminadas este año.</li>';
       } else {
         ulTerminadas.innerHTML = terminadas.map(l => {
           const fecha = l.fin ? new Date(l.fin).toLocaleDateString('es-ES') : '—';
@@ -1124,7 +1124,7 @@ async function manejarClickStatsToggle(e) {
 
   // Primero despliego, luego relleno si hace falta
   detailRow.style.display = '';
-  btn.textContent = 'ÔêÆ';
+  btn.textContent = '−';
   btn.setAttribute('aria-expanded', 'true');
 
   if (detailRow.dataset.loaded) return;
@@ -1132,7 +1132,7 @@ async function manejarClickStatsToggle(e) {
   const ulEmpezadas = detailRow.querySelector('.stats-list-empezadas');
   const ulTerminadas = detailRow.querySelector('.stats-list-terminadas');
 
-  if (ulEmpezadas) ulEmpezadas.innerHTML = '<li class="muted">CargandoÔÇª</li>';
+  if (ulEmpezadas) ulEmpezadas.innerHTML = '<li class="muted">Cargando…</li>';
   if (ulTerminadas) ulTerminadas.innerHTML = '';
 
   try {
@@ -1150,7 +1150,7 @@ async function manejarClickStatsToggle(e) {
 
     if (ulEmpezadas) {
       if (!empezadas.length) {
-        ulEmpezadas.innerHTML = '<li class="muted">Sin lecturas empezadas este a├▒o.</li>';
+        ulEmpezadas.innerHTML = '<li class="muted">Sin lecturas empezadas este año.</li>';
       } else {
         ulEmpezadas.innerHTML = empezadas.map(l => {
           const fecha = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : '—';
@@ -1162,7 +1162,7 @@ async function manejarClickStatsToggle(e) {
 
     if (ulTerminadas) {
       if (!terminadas.length) {
-        ulTerminadas.innerHTML = '<li class="muted">Sin lecturas terminadas este a├▒o.</li>';
+        ulTerminadas.innerHTML = '<li class="muted">Sin lecturas terminadas este año.</li>';
       } else {
         ulTerminadas.innerHTML = terminadas.map(l => {
           const fecha = l.fin ? new Date(l.fin).toLocaleDateString('es-ES') : '—';
@@ -1807,7 +1807,7 @@ async function iniciarEscaneo() {
   detenerEscaneo({ keepButtonState: true, keepScannerRunning: true });
   scannerDiv.style.display = "block";
   setScanButtonState(true);
-  if (textEl) textEl.textContent = "Apunta al código de barrasÔÇª";
+  if (textEl) textEl.textContent = "Apunta al código de barras…";
 
   try {
     // 1) Abre c├ímara con constraints "para cerca"
@@ -2187,7 +2187,7 @@ async function mostrarFicha(libroId, ejemplarId) {
 
   // reset visual
   const t = document.getElementById('ficha-titulo');
-  if (t) t.textContent = 'CargandoÔÇª';
+  if (t) t.textContent = 'Cargando…';
   const pre = document.getElementById('lecturas-detalle');
   if (pre) pre.textContent = '';
   const preP = document.getElementById('prestamos-detalle');
@@ -2324,7 +2324,7 @@ async function crearEnlaceCompartir(tipo) {
 
   if (title) title.textContent = (tipo === 'deseos') ? 'Compartir deseos' : 'Compartir ejemplares';
   if (input) input.value = '';
-  if (status) status.textContent = 'Generando enlaceÔÇª';
+  if (status) status.textContent = 'Generando enlace…';
 
   abrirShareOverlay();
 
@@ -2403,7 +2403,7 @@ async function addEjemplarToCola(ejemplarId) {
   });
   const data = await res.json();
   if (!res.ok) {
-    alert(data.error || 'Error a├▒adiendo a cola');
+    alert(data.error || 'Error añadiendo a cola');
     return;
   }
   await cargarCola();
@@ -2458,7 +2458,7 @@ async function moverColaSwap(id, dir) {
   await cargarCola();
 }
 async function normalizarPosicionesCola(items) {
-  // deja posiciones 10,20,30ÔÇª para evitar colisiones
+  // deja posiciones 10,20,30… para evitar colisiones
   const updates = items.map((it, k) => {
     const nueva = (k + 1) * 10;
     return actualizarCola(it.id, { posicion: nueva });
@@ -2500,7 +2500,7 @@ function renderColaPickList() {
         </div>
       </div>
       <div class="deseo-actions">
-        <button class="btn btn-secondary btn-sm cola-add" type="button">A├▒adir</button>
+        <button class="btn btn-secondary btn-sm cola-add" type="button">Añadir</button>
       </div>
     </div>
   `).join('');
@@ -2535,7 +2535,7 @@ function wireColaUI() {
   });
   document.getElementById('cola-pick-q')?.addEventListener('input', () => renderColaPickList());
 
-  // delegación: a├▒adir
+  // delegación: añadir
   document.getElementById('cola-pick-lista')?.addEventListener('click', async (e) => {
     const card = e.target.closest('.deseo-item');
     if (!card) return;
@@ -2769,10 +2769,15 @@ function renderEjemplaresGrid(lista) {
 
   grid.style.display = showGrid ? 'grid' : 'none';
 
-  // En modo grid ocultamos tabla y lista móvil
+  // Gestión de visibilidad según vista activa
   if (showGrid) {
     tablaWrap.style.display = 'none';
     if (mobileList) mobileList.style.display = 'none';
+  } else if (vistaEjemplares === 'estanteria') {
+    // En estantería no mostrar tabla ni lista
+    tablaWrap.style.display = 'none';
+    if (mobileList) mobileList.style.display = 'none';
+    return; // No rellenar el grid
   } else {
     tablaWrap.style.display = '';
     if (mobileList) mobileList.style.display = '';
@@ -2897,7 +2902,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   document.getElementById('btn-login')?.addEventListener('click', hacerLogin);
   document.getElementById('btn-logout')?.addEventListener('click', hacerLogout);
-  // Stats lecturas: desplegar a├▒os (desktop + móvil)
+  // Stats lecturas: desplegar años (desktop + móvil)
   document.getElementById('tabla-stats-lecturas')?.addEventListener('click', manejarClickStatsToggle);
   document.getElementById('stats-lecturas-mobile')?.addEventListener('click', manejarClickStatsMobileToggle);
   // Lista móvil: acciones y abrir ficha
@@ -2916,7 +2921,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dups = titulosDuplicadosEnCache(tituloInput.value, libroSeleccionadoId);
 
     if (dups.length > 0) {
-      setModalMsg(`ÔÜá´©Å Ojo: ya tienes ${dups.length} libro(s) con ese título en tu biblioteca.`);
+      setModalMsg(`⚠️ Ojo: ya tienes ${dups.length} libro(s) con ese título en tu biblioteca.`);
     } else {
       // no borres otros mensajes importantes si los usas; si quieres, comenta esta línea
       setModalMsg('');
@@ -2969,7 +2974,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       } catch (err) {
         // Si el usuario cancela o falla, seguimos con copiar
-        if (status) status.textContent = 'Compartir cancelado, intentando copiarÔÇª';
+        if (status) status.textContent = 'Compartir cancelado, intentando copiar…';
       }
     }
   
@@ -2990,7 +2995,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.execCommand?.('copy');
       if (status) status.textContent = 'Copiado (modo compatibilidad) ✅';
     } else {
-      // ├Ültimo recurso: un prompt
+      // Último recurso: un prompt
       prompt('Copia este enlace:', url);
     }
   });
@@ -3007,7 +3012,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const fab = document.getElementById('btn-toggle-alta');
   fab?.addEventListener('click', () => {
     const abierto = document.body.classList.toggle('alta-visible');
-    fab.textContent = abierto ? 'ÔêÆ' : '+';
+    fab.textContent = abierto ? '−' : '+';
     if (abierto) {
       setTimeout(() => document.getElementById('isbn')?.focus(), 50);
     } else {
@@ -3283,7 +3288,7 @@ document.getElementById('link-show-login')?.addEventListener('click', (e) => {
 document.getElementById('link-forgot')?.addEventListener('click', (e) => {
   e.preventDefault();
   // "Zona en obras"
-  alert('­ƒöº Recuperación de contrase├▒a: en obras (pendiente configurar SMTP).');
+  alert('­ƒöº Recuperación de contraseña: en obras (pendiente configurar SMTP).');
 });
 
 function getQueryParam(name) {
@@ -3328,7 +3333,7 @@ btnRegister?.addEventListener('click', async (e) => {
   if (msg) msg.textContent = '';
 
   if (!nombre_usuario || !correo || !contrasena) {
-    if (msg) msg.textContent = 'Completa usuario, correo y contrase├▒a.';
+    if (msg) msg.textContent = 'Completa usuario, correo y contraseña.';
     return;
   }
 
@@ -3581,7 +3586,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     mr.start();
     els.rec.disabled = true;
     els.stop.disabled = false;
-    els.audioStatus.textContent = "GrabandoÔÇª";
+    els.audioStatus.textContent = "Grabando…";
   }
 
   function stopRec(){
@@ -3729,7 +3734,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 
   function escHtml(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  // ÔöÇÔöÇ Pesta├▒as del modal ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ÔöÇÔöÇ Pestañas del modal ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
   function initBCTabs() {
     document.querySelectorAll('.bc-tab').forEach(tab => {
       tab.addEventListener('click', () => {
@@ -3749,7 +3754,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     const lista = document.getElementById('bc-lista-conmigo');
     if (!info || !lista) return;
 
-    info.textContent = 'CargandoÔÇª';
+    info.textContent = 'Cargando…';
     lista.innerHTML  = '';
 
     try {
@@ -3784,7 +3789,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     const lista = document.getElementById('bc-lista-miscompartidas');
     if (!info || !lista) return;
 
-    info.textContent = 'CargandoÔÇª';
+    info.textContent = 'Cargando…';
     lista.innerHTML  = '';
 
     try {
@@ -3818,7 +3823,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     const nombre = (input?.value || '').trim();
     if (!nombre) return;
 
-    msg.textContent = 'EnviandoÔÇª';
+    msg.textContent = 'Enviando…';
     try {
       const res  = await bcFetch('/api/biblioteca-compartida', {
         method: 'POST',
@@ -3852,7 +3857,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
   async function verBiblioteca(propietarioId, nombre) {
     bcVerPropId = propietarioId;
     document.getElementById('bc-ver-titulo').textContent = `Biblioteca de ${nombre}`;
-    document.getElementById('bc-ver-info').textContent   = 'CargandoÔÇª';
+    document.getElementById('bc-ver-info').textContent   = 'Cargando…';
     document.getElementById('bc-ver-lista').innerHTML    = '';
     document.getElementById('bc-ver-q').value            = '';
     abrirBCVer();
@@ -3987,7 +3992,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     const listaEl = document.getElementById('portadas-lista-sin');
     if (!infoEl || !listaEl) return;
 
-    infoEl.textContent = 'CargandoÔÇª';
+    infoEl.textContent = 'Cargando…';
     listaEl.innerHTML  = '';
 
     try {
@@ -4023,7 +4028,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 
   // ÔöÇÔöÇ Buscar portada de un libro concreto ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
   async function buscarPortadaUno(libroId, btnEl) {
-    if (btnEl) { btnEl.disabled = true; btnEl.textContent = 'ÔÇª'; }
+    if (btnEl) { btnEl.disabled = true; btnEl.textContent = '…'; }
     const item = document.getElementById(`portada-item-${libroId}`);
 
     try {
@@ -4059,7 +4064,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 
     const original = btn.textContent;
     btn.disabled = true;
-    btn.textContent = 'BuscandoÔÇª';
+    btn.textContent = 'Buscando…';
 
     try {
       const res  = await apiFetch(`/api/libros/${window.libroSeleccionadoId}/buscar-portada`, {
@@ -4100,7 +4105,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 
     if (btnLanzar) btnLanzar.disabled = true;
     if (progresoEl) progresoEl.style.display = 'block';
-    if (msgEl) msgEl.textContent = 'Lanzando búsqueda en segundo planoÔÇª';
+    if (msgEl) msgEl.textContent = 'Lanzando búsqueda en segundo plano…';
     if (fillEl) fillEl.style.width = '10%';
 
     try {
@@ -4258,7 +4263,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     if (!window.libroSeleccionadoId) { if (msg) msg.textContent = 'No hay libro seleccionado.'; return; }
 
     if (btn) btn.disabled = true;
-    if (msg) msg.textContent = 'Descargando imagenÔÇª';
+    if (msg) msg.textContent = 'Descargando imagen…';
 
     try {
       const res  = await apiFetch(`/api/libros/${window.libroSeleccionadoId}/portada-url`, {
@@ -4380,7 +4385,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     const diff = terminadasAnio - terminadasAnterior;
     const diffStr = diff > 0 ? `+${diff} vs ${anioActual-1}` : diff < 0 ? `${diff} vs ${anioActual-1}` : `igual que ${anioActual-1}`;
 
-    // Racha: a├▒os consecutivos con al menos 1 lectura terminada desde hoy hacia atrás
+    // Racha: años consecutivos con al menos 1 lectura terminada desde hoy hacia atrás
     let racha = 0;
     for (let y = anioActual; y >= anioActual - 20; y--) {
       const r = stats.find(r => Number(r.anio) === y);
@@ -4395,24 +4400,24 @@ window.flashErr = function flashErr(msg, ms = 3500) {
         <div class="stats-metric-sub">libros terminados</div>
       </div>
       <div class="stats-metric">
-        <div class="stats-metric-label">Este a├▒o</div>
+        <div class="stats-metric-label">Este año</div>
         <div class="stats-metric-value">${terminadasAnio}</div>
         <div class="stats-metric-sub">${diffStr}</div>
       </div>
       <div class="stats-metric">
-        <div class="stats-metric-label">A├▒os activos</div>
+        <div class="stats-metric-label">Años activos</div>
         <div class="stats-metric-value">${stats.length}</div>
         <div class="stats-metric-sub">con lecturas</div>
       </div>
       <div class="stats-metric">
         <div class="stats-metric-label">Racha</div>
         <div class="stats-metric-value">${racha}</div>
-        <div class="stats-metric-sub">a├▒o${racha !== 1 ? 's' : ''} consecutivo${racha !== 1 ? 's' : ''}</div>
+        <div class="stats-metric-sub">año${racha !== 1 ? 's' : ''} consecutivo${racha !== 1 ? 's' : ''}</div>
       </div>
     `;
   }
 
-  // ÔöÇÔöÇ Gr├ífico de barras por a├▒o ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ÔöÇÔöÇ Gr├ífico de barras por año ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
   function renderChartAnos(stats) {
     const wrap = document.getElementById('stats-chart-anos-wrap');
     const canvas = document.getElementById('stats-chart-anos');
@@ -4484,7 +4489,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
       for (const l of (d.terminadas || [])) {
         const autores = (l.autores || '').split(/[,;&\/]/).map(a => a.trim()).filter(a => {
           if (!a) return false;
-          // Descartar fragmentos que parezcan fechas (1898-1936), a├▒os solos (1936)
+          // Descartar fragmentos que parezcan fechas (1898-1936), años solos (1936)
           // o números puros
           if (/^\d{4}(-\d{4})?$/.test(a)) return false;
           if (/^\d+$/.test(a)) return false;
@@ -4513,7 +4518,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     `).join('');
   }
 
-  // ÔöÇÔöÇ Cargar detalle de un a├▒o ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ÔöÇÔöÇ Cargar detalle de un año ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
   async function cargarDetalle(usuarioId, anio) {
     if (detalleCache[anio]) return detalleCache[anio];
     try {
@@ -4524,17 +4529,17 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     } catch { return { empezadas: [], terminadas: [] }; }
   }
 
-  // ÔöÇÔöÇ Detalle de títulos por a├▒o ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ÔöÇÔöÇ Detalle de títulos por año ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
   async function renderDetalle(usuarioId, anio) {
     const contenido = document.getElementById('stats-detalle-contenido');
     if (!contenido) return;
-    contenido.innerHTML = '<p class="muted" style="padding:8px 0;">CargandoÔÇª</p>';
+    contenido.innerHTML = '<p class="muted" style="padding:8px 0;">Cargando…</p>';
 
     const data = await cargarDetalle(usuarioId, anio);
     const { empezadas = [], terminadas = [] } = data;
 
     const listaHtml = (items, campo, etiqueta) => {
-      if (!items.length) return `<p class="muted stats-detalle-empty">Sin ${etiqueta.toLowerCase()} este a├▒o.</p>`;
+      if (!items.length) return `<p class="muted stats-detalle-empty">Sin ${etiqueta.toLowerCase()} este año.</p>`;
       return items.map(l => {
         const fecha = l[campo] ? new Date(l[campo]).toLocaleDateString('es-ES', { day:'numeric', month:'short' }) : '—';
         return `<div class="stats-detalle-item">
@@ -4559,7 +4564,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     `;
   }
 
-  // ÔöÇÔöÇ Rellenar selector de a├▒os ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ÔöÇÔöÇ Rellenar selector de años ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
   function fillAnioSelect(stats) {
     const sel = document.getElementById('stats-anio-select');
     if (!sel) return;
@@ -4578,7 +4583,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
       return;
     }
 
-    if (info) info.textContent = 'CargandoÔÇª';
+    if (info) info.textContent = 'Cargando…';
 
     // Cargar Chart.js si no est├í
     if (!window.Chart) {
@@ -4609,7 +4614,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 
       if (panel) panel.style.display = 'grid';
 
-      // Renderizar detalle del a├▒o más reciente por defecto
+      // Renderizar detalle del año más reciente por defecto
       const anioDefault = statsCache[0]?.anio;
       if (anioDefault) await renderDetalle(window.usuarioActual.id, anioDefault);
 
@@ -4621,7 +4626,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     }
   };
 
-  // ÔöÇÔöÇ Listener del selector de a├▒o ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ÔöÇÔöÇ Listener del selector de año ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
   document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('stats-anio-select')?.addEventListener('change', async e => {
       if (!window.usuarioActual?.id) return;
