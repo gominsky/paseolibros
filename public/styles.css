@@ -3034,10 +3034,9 @@ input, select, textarea { padding: 7px 10px; font-size: .9rem; }
   0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
   50%       { box-shadow: 0 0 0 6px transparent; }
 }
-/* En desktop ocultar — voz más útil en móvil */
-@media (min-width: 821px) {
-  .btn-voz { display: none; }
-}
+/* Voz: oculto en desktop, visible en móvil */
+@media (min-width: 821px) { .btn-voz { display: none !important; } }
+@media (max-width: 820px) { .btn-voz { display: inline-grid !important; } }
 
 /* ══════════════════════════════════════════════════════════
    MODO ESTANTERÍA
@@ -3220,3 +3219,24 @@ body.theme-dark .ej-estanteria {
     flex-shrink: 0;
   }
 }
+
+/* ── Header móvil: ocultar toggle de vistas (ya está en la card) ── */
+@media (max-width: 820px) {
+  .header-view-toggle { display: none !important; }
+  .icon-btn {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 13px !important;
+  }
+  .app-header {
+    padding: 6px 10px !important;
+    gap: 4px !important;
+  }
+}
+
+/* ── Vista estantería: ocultar tabla por defecto cuando es la vista activa ─ */
+/* Se activa via JS al cargar — evita el flash inicial */
+body.vista-estanteria .table-wrapper { display: none !important; }
+body.vista-estanteria #ejemplares-list { display: none !important; }
+body.vista-estanteria #ejemplares-grid { display: none !important; }
+body.vista-estanteria #ejemplares-estanteria { display: block; }

@@ -40,6 +40,8 @@ function restaurarPreferenciasUI() {
     const dirOk = s && (s.dir === 'asc' || s.dir === 'desc');
     if (keyOk && dirOk) sortEjemplares = { key: s.key, dir: s.dir };
   } catch {}
+  // Aplicar clase al body para evitar flash de vista incorrecta
+  document.body.classList.toggle('vista-estanteria', vistaEjemplares === 'estanteria');
 }
 
 function aplicarVistaContenedor() {
@@ -2829,18 +2831,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   document.getElementById('ej-vista-lista')?.addEventListener('click', () => {
     vistaEjemplares = 'lista';
-    guardarVistaEjemplares();          // ✅ NUEVO
-    actualizarBotonesVistaEjemplares(); // ✅ NUEVO
+    document.body.classList.remove('vista-estanteria');
+    guardarVistaEjemplares();
+    actualizarBotonesVistaEjemplares();
+    aplicarVistaContenedor();
     renderEjemplares();
   });
   document.getElementById('ej-vista-grid')?.addEventListener('click', () => {
     vistaEjemplares = 'grid';
+    document.body.classList.remove('vista-estanteria');
     guardarVistaEjemplares();
     actualizarBotonesVistaEjemplares();
     renderEjemplares();
   });
   document.getElementById('ej-vista-estanteria')?.addEventListener('click', () => {
     vistaEjemplares = 'estanteria';
+    document.body.classList.add('vista-estanteria');
     guardarVistaEjemplares();
     actualizarBotonesVistaEjemplares();
     aplicarVistaContenedor();
