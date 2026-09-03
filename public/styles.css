@@ -2960,7 +2960,27 @@ input, select, textarea { padding: 7px 10px; font-size: .9rem; }
 
 /* ── Botones de portada en móvil: ocultos en desktop ──── */
 /* Barra portada visible en todos los tamaños */
-.modal-portada-acciones-movil { display: flex; }
+.modal-portada-acciones-movil {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 5px 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+}
+.modal-portada-acciones-movil .modal-cover-action-btn {
+  flex: 1;
+  font-size: .76rem !important;
+  padding: 5px 8px !important;
+}
+.modal-portada-acciones-label {
+  font-size: .78rem;
+  font-weight: 500;
+  color: var(--ink-3);
+  flex-shrink: 0;
+}
 
 @media (max-width: 820px) {
   /* Ocultar los tres botones de la cabecera */
