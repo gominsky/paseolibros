@@ -2408,7 +2408,7 @@ input, select, textarea { padding: 7px 10px; font-size: .9rem; }
   flex-direction: row;
   gap: 4px;
   margin-top: 7px;
-  width: 90px;
+  width: 100%;
   flex-wrap: nowrap;
 }
 
@@ -3236,7 +3236,7 @@ body.theme-dark .ej-estanteria {
 
 /* ── Vista estantería: ocultar tabla por defecto cuando es la vista activa ─ */
 /* Se activa via JS al cargar — evita el flash inicial */
-body.vista-estanteria .table-wrapper { display: none !important; }
+body.vista-estanteria .card-ejemplares .table-wrapper { display: none !important; }
 body.vista-estanteria #ejemplares-list { display: none !important; }
 body.vista-estanteria #ejemplares-grid { display: none !important; }
 body.vista-estanteria #ejemplares-estanteria { display: flex !important; }
