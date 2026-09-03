@@ -211,8 +211,15 @@ body.theme-dark .app-header {
   box-shadow: none !important;
 }
 
-/* Vista toggle */
+/* Vista toggle — header (oculto en móvil) */
 .header-view-toggle { display: inline-flex; align-items: center; gap: 6px; }
+
+/* Vista toggle — card de ejemplares (siempre visible) */
+.card-view-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 
 /* ══════════════════════════════════════════════════════════
    TOOLS DROPDOWN
@@ -1698,13 +1705,15 @@ tr:hover .portada-mini-img {
 }
 
 /* ── 20. SELECTOR DE VISTA (lista/grid): toggle visual ───── */
-.header-view-toggle .icon-btn.is-active {
+.header-view-toggle .icon-btn.is-active,
+.card-view-toggle .icon-btn.is-active {
   background: var(--accent);
   color: #fff;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
-.header-view-toggle .icon-btn.is-active:hover {
+.header-view-toggle .icon-btn.is-active:hover,
+.card-view-toggle .icon-btn.is-active:hover {
   filter: brightness(1.08);
 }
 
