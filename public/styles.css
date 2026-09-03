@@ -2441,6 +2441,11 @@ input, select, textarea { padding: 7px 10px; font-size: .9rem; }
 .modal-cover-search-btn,
 .modal-cover-search-btn--alt { display: none !important; }
 
+/* Ocultar botones bajo portada en desktop */
+@media (min-width: 821px) {
+  .modal-cover-actions { display: none !important; }
+}
+
 @media (max-width: 820px) {
   .modal-cover-img-wrap { width: 80px; }
   .modal-cover-actions  { width: 80px; }
@@ -2945,7 +2950,8 @@ input, select, textarea { padding: 7px 10px; font-size: .9rem; }
 }
 
 /* ── Botones de portada en móvil: ocultos en desktop ──── */
-.modal-portada-acciones-movil { display: none; }
+/* Barra portada visible en todos los tamaños */
+.modal-portada-acciones-movil { display: flex; }
 
 @media (max-width: 820px) {
   /* Ocultar los tres botones de la cabecera */
