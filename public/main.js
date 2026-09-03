@@ -374,10 +374,10 @@ function applyBadgesForLibro(libroId) {
     }
    if (notes) {
   const parts = [];
-  if (meta.notesCount) parts.push(`­ƒôØ ${meta.notesCount}`);
-  if (meta.audiosCount) parts.push(`­ƒÄÖ´©Å ${meta.audiosCount}`);
+  if (meta.notesCount) parts.push(`­ƒ📝 ${meta.notesCount}`);
+  if (meta.audiosCount) parts.push(`­ƒ🎵 ${meta.audiosCount}`);
   notes.textContent = parts.join(' ');
-  notes.title = parts.length ? `Notas: ${meta.notesCount || 0} ┬À Audios: ${meta.audiosCount || 0}` : '';
+  notes.title = parts.length ? `Notas: ${meta.notesCount || 0} · Audios: ${meta.audiosCount || 0}` : '';
 }
   });
 }
@@ -418,7 +418,7 @@ function initOrdenacionEjemplares() {
         sortEjemplares.key = key;
         sortEjemplares.dir = 'asc';
       }
-      guardarSortEjemplares();            // ✅ A├æADIR
+      guardarSortEjemplares();            // ✅ AÑADIR
       actualizarIconosOrden(table);
       renderEjemplares();
     });
@@ -451,7 +451,7 @@ async function importarEjemplaresCSV(file) {
   const lineas = texto.split(/\r?\n/).filter(l => l.trim());
 
   if (lineas.length < 2) {
-    setUserStatusErr('CSV vacío o inv├ílido');
+    setUserStatusErr('CSV vacío o inválido');
     return;
   }
 
@@ -608,7 +608,7 @@ function renderEjemplaresMobileList(filtrados){
         </div>
 
         <div class="ej-actions">
-          <button class="icon-btn m-open" type="button" title="Ver ficha"><span class="icon-circle">ÔÇ║</span></button>
+          <button class="icon-btn m-open" type="button" title="Ver ficha"><span class="icon-circle">✕</span></button>
         </div>
       </div>
     `;
@@ -754,7 +754,7 @@ const libro = (ejemplaresCache || [])
   .find(e => Number(e.libro_id) === Number(libroId));
 
 flashOk(
-  `Lectura iniciada ­ƒôû${libro?.titulo ? ': ' + libro.titulo : ''}`
+  `Lectura iniciada ­ƒ📖${libro?.titulo ? ': ' + libro.titulo : ''}`
 );
     setUserStatusOk('Lectura iniciada.');
     await cargarLecturas(libroId);
@@ -799,9 +799,9 @@ async function cargarLecturas(libroId) {
       const fin = l.fin ? new Date(l.fin).toLocaleDateString('es-ES') : '—';
       const pag = (l.pagina_actual ?? '—');
 
-      const badge = mia ? '­ƒƒó' : (esActiva ? '­ƒƒí' : 'ÔÜ¬');
+      const badge = mia ? '­ƒƒó' : (esActiva ? '­ƒƒí' : '↩');
       const user = l.nombre_usuario || `Usuario ${l.usuario_id}`;
-      return `${badge} ${user} ┬À ${l.estado || '—'} ┬À p├íg ${pag} ┬À ${inicio} ÔåÆ ${fin}`;
+      return `${badge} ${user} · ${l.estado || '—'} · pág ${pag} · ${inicio} → ${fin}`;
     });
 
     if (pre) pre.textContent = lineas.join('\n');
@@ -821,10 +821,10 @@ async function actualizarPaginaLectura(lecturaId, pagina_actual) {
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.error || `Error guardando p├ígina (HTTP ${res.status})`);
+    throw new Error(data.error || `Error guardando página (HTTP ${res.status})`);
   }
 
-  setUserStatusOk('P├ígina guardada');
+  setUserStatusOk('Página guardada');
   return data;
 }
 
@@ -858,7 +858,7 @@ async function terminarLecturaActual() {
       return;
     }
 
-    const paginaStr = prompt('├Ültima p├ígina leída (opcional):');
+    const paginaStr = prompt('Áltima página leída (opcional):');
     const valoracionStr = prompt('Valoración (1-5, opcional):');
     const notas = prompt('Notas sobre la lectura (opcional):') || null;
 
@@ -977,7 +977,7 @@ async function cargarEstadisticasLecturas() {
       tbody.appendChild(tr);
       tbody.appendChild(detailTr);
 
-      // ====== M├ôVIL (tarjetita con botón + y detalle) ======
+      // ====== MÓVIL (tarjetita con botón + y detalle) ======
       if (mobileList) {
         const item = document.createElement('article');
         item.className = 'stats-mobile-item';
@@ -1075,7 +1075,7 @@ async function manejarClickStatsMobileToggle(e) {
       } else {
         ulEmpezadas.innerHTML = empezadas.map(l => {
           const fecha = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : '—';
-          const autor = l.autores ? ` ┬À ${escapeHtml(l.autores)}` : '';
+          const autor = l.autores ? ` · ${escapeHtml(l.autores)}` : '';
           return `<li>${escapeHtml(l.titulo || 'Sin título')}${autor} <span class="muted">(${fecha})</span></li>`;
         }).join('');
       }
@@ -1087,7 +1087,7 @@ async function manejarClickStatsMobileToggle(e) {
       } else {
         ulTerminadas.innerHTML = terminadas.map(l => {
           const fecha = l.fin ? new Date(l.fin).toLocaleDateString('es-ES') : '—';
-          const autor = l.autores ? ` ┬À ${escapeHtml(l.autores)}` : '';
+          const autor = l.autores ? ` · ${escapeHtml(l.autores)}` : '';
           return `<li>${escapeHtml(l.titulo || 'Sin título')}${autor} <span class="muted">(${fecha})</span></li>`;
         }).join('');
       }
@@ -1156,7 +1156,7 @@ async function manejarClickStatsToggle(e) {
       } else {
         ulEmpezadas.innerHTML = empezadas.map(l => {
           const fecha = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : '—';
-          const autor = l.autores ? ` ┬À ${escapeHtml(l.autores)}` : '';
+          const autor = l.autores ? ` · ${escapeHtml(l.autores)}` : '';
           return `<li>${escapeHtml(l.titulo || 'Sin título')}${autor} <span class="muted">(${fecha})</span></li>`;
         }).join('');
       }
@@ -1168,7 +1168,7 @@ async function manejarClickStatsToggle(e) {
       } else {
         ulTerminadas.innerHTML = terminadas.map(l => {
           const fecha = l.fin ? new Date(l.fin).toLocaleDateString('es-ES') : '—';
-          const autor = l.autores ? ` ┬À ${escapeHtml(l.autores)}` : '';
+          const autor = l.autores ? ` · ${escapeHtml(l.autores)}` : '';
           return `<li>${escapeHtml(l.titulo || 'Sin título')}${autor} <span class="muted">(${fecha})</span></li>`;
         }).join('');
       }
@@ -1286,16 +1286,16 @@ function crearUIMarcapagina() {
 
   div.innerHTML = `
     <div class="mp-backdrop" data-close="1"></div>
-    <div class="mp-dialog" role="dialog" aria-modal="true" aria-label="Marcap├íginas">
+    <div class="mp-dialog" role="dialog" aria-modal="true" aria-label="Marcapáginas">
       <div class="mp-header">
-        <h3>Marcap├íginas</h3>
+        <h3>Marcapáginas</h3>
         <button class="icon-btn" type="button" id="mp-close" title="Cerrar" aria-label="Cerrar">
-          <span class="icon-circle">Ô£ò</span>
+          <span class="icon-circle">✕</span>
         </button>
       </div>
 
       <div class="mp-body">
-        <label for="mp-num">P├ígina actual</label>
+        <label for="mp-num">Página actual</label>
 
         <div class="mp-row">
           <button class="btn btn-ghost mp-step" type="button" data-step="-5">-5</button>
@@ -1462,7 +1462,7 @@ function crearUIPrestamo() {
   document.getElementById('prestamo-cancelar')?.addEventListener('click', cerrarUIPrestamo);
   document.getElementById('prestamo-confirmar')?.addEventListener('click', confirmarPrestamoDesdeUI);
 
-  // ✅ Cerrar al click fuera (solo si pinchas el overlay, no el di├ílogo)
+  // ✅ Cerrar al click fuera (solo si pinchas el overlay, no el diálogo)
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) cerrarUIPrestamo();
   });
@@ -1554,7 +1554,7 @@ async function crearPrestamo(libroId, ejemplarId) {
 async function confirmarPrestamoDesdeUI() {
   if (!prestamoContexto || !usuarioActual || !token) {
     cerrarUIPrestamo();
-    setUserStatusErr('No hay contexto de préstamo v├ílido.');
+    setUserStatusErr('No hay contexto de préstamo válido.');
     return;
   }
 
@@ -1641,14 +1641,14 @@ async function cargarPrestamos(libroId) {
 
     const lineas = prestamos.map((p) => {
       const activo = p.estado !== 'devuelto' && !p.fecha_devolucion;
-      const badge = activo ? '­ƒƒí' : 'ÔÜ¬';
+      const badge = activo ? '­ƒƒí' : '↩';
 
       const receptor = p.nombre_receptor_usuario || p.nombre_receptor || '—';
       const prestado = p.fecha_prestamo ? new Date(p.fecha_prestamo).toLocaleDateString('es-ES') : '—';
       const limite = p.fecha_limite ? new Date(p.fecha_limite).toLocaleDateString('es-ES') : '—';
       const dev = p.fecha_devolucion ? new Date(p.fecha_devolucion).toLocaleDateString('es-ES') : '—';
 
-      return `${badge} #${p.id} ┬À a ${receptor} ┬À ${p.estado || '—'} ┬À ${prestado} ÔåÆ ${limite} ┬À dev: ${dev}`;
+      return `${badge} #${p.id} · a ${receptor} · ${p.estado || '—'} · ${prestado} → ${limite} · dev: ${dev}`;
     });
 
     pre.textContent = lineas.join('\n');
@@ -1746,7 +1746,7 @@ async function pickBackCameraDeviceId() {
   const byLabel = cams.find(d => /back|rear|environment|trasera/i.test(d.label || ""));
   if (byLabel) return byLabel.deviceId;
 
-  // fallback típico: última c├ímara suele ser trasera en muchos móviles
+  // fallback típico: última cámara suele ser trasera en muchos móviles
   return cams[cams.length - 1].deviceId;
 }
 
@@ -1799,7 +1799,7 @@ async function iniciarEscaneo() {
   if (!scannerDiv || !video) return;
 
   if (!window.isSecureContext) {
-    setUserStatusErr(`La c├ímara requiere HTTPS (o localhost). Estás en: ${window.location.origin}`);
+    setUserStatusErr(`La cámara requiere HTTPS (o localhost). Estás en: ${window.location.origin}`);
     return;
   }
 
@@ -1812,7 +1812,7 @@ async function iniciarEscaneo() {
   if (textEl) textEl.textContent = "Apunta al código de barras…";
 
   try {
-    // 1) Abre c├ímara con constraints "para cerca"
+    // 1) Abre cámara con constraints "para cerca"
     const stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: { ideal: "environment" },
@@ -1846,7 +1846,7 @@ async function iniciarEscaneo() {
 
   } catch (e) {
     console.error(e);
-    setUserStatusErr(`No se pudo iniciar la c├ímara: ${e?.name || "error"}`);
+    setUserStatusErr(`No se pudo iniciar la cámara: ${e?.name || "error"}`);
     detenerEscaneo({ keepButtonState: false });
     scannerRunning = false;
   }
@@ -2391,7 +2391,7 @@ async function cargarCola() {
     <span class="icon-circle">☒</span>
   </button>
   <button class="icon-btn cola-del" type="button" title="Quitar">
-    <span class="icon-circle">Ô£ò</span>
+    <span class="icon-circle">✕</span>
   </button>
 </div>
     </div>
@@ -2437,7 +2437,7 @@ async function moverColaSwap(id, dir) {
   if (idx === -1) return;
 
   const j = idx + dir;
-  if (j < 0 || j >= items.length) return; // ya est├í arriba/abajo
+  if (j < 0 || j >= items.length) return; // ya está arriba/abajo
 
   const a = items[idx];
   const b = items[j];
@@ -2609,7 +2609,7 @@ async function cargarDeseos() {
         ${d.notas ? `<div style="margin-top:6px; opacity:.85;">${escapeHtml(d.notas)}</div>` : ''}
       </div>
       <div class="deseo-actions">
-        <button class="icon-btn deseo-del" type="button" title="Eliminar"><span class="icon-circle">Ô£ò</span></button>
+        <button class="icon-btn deseo-del" type="button" title="Eliminar"><span class="icon-circle">✕</span></button>
       </div>
     </div>
   `).join('');
@@ -3290,7 +3290,7 @@ document.getElementById('link-show-login')?.addEventListener('click', (e) => {
 document.getElementById('link-forgot')?.addEventListener('click', (e) => {
   e.preventDefault();
   // "Zona en obras"
-  alert('­ƒöº Recuperación de contraseña: en obras (pendiente configurar SMTP).');
+  alert('­ƒ🔑 Recuperación de contraseña: en obras (pendiente configurar SMTP).');
 });
 
 function getQueryParam(name) {
@@ -3449,7 +3449,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     for (const tag of tags) {
       const chip = document.createElement("span");
       chip.className = "reader-chip";
-      chip.innerHTML = `<span>${escapeHtml(tag)}</span><button type="button" aria-label="Quitar">Ô£ò</button>`;
+      chip.innerHTML = `<span>${escapeHtml(tag)}</span><button type="button" aria-label="Quitar">✕</button>`;
       chip.querySelector("button").onclick = async () => {
         const next = tags.filter(x => x.toLowerCase() !== tag.toLowerCase());
         await api(`/api/libros/${currentLibroId}/tags`, {
@@ -3493,7 +3493,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
         <div class="reader-item-head">
           <small>${escapeHtml(created)}</small>
           <div style="display:flex; gap:8px; align-items:center;">
-            <button class="btn btn-secondary btn-sm" type="button">ÔûÂ Reproducir</button>
+            <button class="btn btn-secondary btn-sm" type="button">▶ Reproducir</button>
             <button class="btn btn-ghost btn-sm" type="button">Borrar</button>
           </div>
         </div>
@@ -3716,12 +3716,12 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 // ⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹
 (function () {
 
-  // ÔöÇÔöÇ Estado ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ Estado ══════════════════════════════════════════════════════════
   let bcCache = [];          // lista que otros comparten conmigo
   let bcVerCache = [];       // ejemplares de la biblioteca que estoy viendo
   let bcVerPropId = null;
 
-  // ÔöÇÔöÇ Helpers ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ Helpers ══════════════════════════════════════════════════════════
   function abrirBC()  { document.getElementById('bc-overlay').style.display = 'flex'; document.documentElement.style.overflow = 'hidden'; }
   function cerrarBC() { document.getElementById('bc-overlay').style.display = 'none'; document.documentElement.style.overflow = ''; }
   function abrirBCVer()  { document.getElementById('bc-ver-overlay').style.display = 'flex'; document.documentElement.style.overflow = 'hidden'; }
@@ -3736,7 +3736,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 
   function escHtml(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  // ÔöÇÔöÇ Pestañas del modal ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ Pestañas del modal ══════════════════════════════════════════════════════════
   function initBCTabs() {
     document.querySelectorAll('.bc-tab').forEach(tab => {
       tab.addEventListener('click', () => {
@@ -3750,7 +3750,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     });
   }
 
-  // ÔöÇÔöÇ Cargar bibliotecas que comparten conmigo ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ Cargar bibliotecas que comparten conmigo ══════════════════════════════════════════════════════════
   async function cargarConmigo() {
     const info  = document.getElementById('bc-info-conmigo');
     const lista = document.getElementById('bc-lista-conmigo');
@@ -3785,7 +3785,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     }
   }
 
-  // ÔöÇÔöÇ Cargar a quién he compartido yo ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ Cargar a quién he compartido yo ══════════════════════════════════════════════════════════
   async function cargarMisCompartidas() {
     const info  = document.getElementById('bc-info-miscompartidas');
     const lista = document.getElementById('bc-lista-miscompartidas');
@@ -3818,7 +3818,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     }
   }
 
-  // ÔöÇÔöÇ Compartir con un usuario ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ Compartir con un usuario ══════════════════════════════════════════════════════════
   async function compartirCon() {
     const input = document.getElementById('bc-input-usuario');
     const msg   = document.getElementById('bc-msg-compartir');
@@ -3843,7 +3843,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     }
   }
 
-  // ÔöÇÔöÇ Revocar acceso ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ Revocar acceso ══════════════════════════════════════════════════════════
   async function revocarAcceso(bcId, nombre) {
     if (!confirm(`¿Revocar el acceso de ${nombre} a tu biblioteca?`)) return;
     try {
@@ -3855,7 +3855,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     }
   }
 
-  // ÔöÇÔöÇ Ver biblioteca de otro usuario ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ Ver biblioteca de otro usuario ══════════════════════════════════════════════════════════
   async function verBiblioteca(propietarioId, nombre) {
     bcVerPropId = propietarioId;
     document.getElementById('bc-ver-titulo').textContent = `Biblioteca de ${nombre}`;
@@ -3914,7 +3914,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     }).join('');
   }
 
-  // ÔöÇÔöÇ Wiring ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ Wiring ══════════════════════════════════════════════════════════
   document.addEventListener('DOMContentLoaded', () => {
     initBCTabs();
 
@@ -3966,11 +3966,11 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 
 
 // ⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹
-// B├ÜSQUEDA AUTOMüTICA DE PORTADAS
+// BÁSQUEDA AUTOMüTICA DE PORTADAS
 // ⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹
 (function () {
 
-  // ÔöÇÔöÇ Helpers ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ Helpers ══════════════════════════════════════════════════════════
   function apiFetch(path, opts = {}) {
     return fetch(`${window.API_BASE}${path}`, {
       ...opts,
@@ -3988,7 +3988,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     document.documentElement.style.overflow = '';
   }
 
-  // ÔöÇÔöÇ Cargar lista de libros sin portada ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ Cargar lista de libros sin portada ══════════════════════════════════════════════════════════
   async function cargarSinPortada() {
     const infoEl = document.getElementById('portadas-sin-portada-info');
     const listaEl = document.getElementById('portadas-lista-sin');
@@ -4028,7 +4028,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     }
   }
 
-  // ÔöÇÔöÇ Buscar portada de un libro concreto ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ Buscar portada de un libro concreto ══════════════════════════════════════════════════════════
   async function buscarPortadaUno(libroId, btnEl) {
     if (btnEl) { btnEl.disabled = true; btnEl.textContent = '…'; }
     const item = document.getElementById(`portada-item-${libroId}`);
@@ -4059,7 +4059,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     }
   }
 
-  // ÔöÇÔöÇ Desde la ficha del libro: botón "Buscar portada" ÔöÇÔöÇ
+  // ══ Desde la ficha del libro: botón "Buscar portada" ══
   async function buscarPortadaDesdeModal() {
     const btn = document.getElementById('btn-buscar-portada');
     if (!btn || !window.libroSeleccionadoId) return;
@@ -4098,7 +4098,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     }
   }
 
-  // ÔöÇÔöÇ Lanzar búsqueda masiva ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ Lanzar búsqueda masiva ══════════════════════════════════════════════════════════
   async function lanzarBusquedaMasiva() {
     const btnLanzar = document.getElementById('btn-lanzar-busqueda');
     const progresoEl = document.getElementById('portadas-progreso');
@@ -4137,7 +4137,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  // ÔöÇÔöÇ Wiring ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ Wiring ══════════════════════════════════════════════════════════
   document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-rellenar-portadas')?.addEventListener('click', abrirPortadas);
     document.getElementById('portadas-cerrar')?.addEventListener('click', cerrarPortadas);
@@ -4351,7 +4351,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 })();
 
 // ⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹
-// ESTAD├ìSTICAS VISUALES — Chart.js + detalle de títulos
+// ESTADÍSTICAS VISUALES — Chart.js + detalle de títulos
 // ⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹⏹
 (function () {
 
@@ -4359,7 +4359,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
   let statsCache = [];   // [{ anio, empezadas, terminadas }]
   let detalleCache = {}; // { anio: { empezadas:[], terminadas:[] } }
 
-  // ÔöÇÔöÇ helpers ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ helpers ══════════════════════════════════════════════════════════
   function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
   function fmt(n) { return Number(n).toLocaleString('es-ES'); }
@@ -4373,7 +4373,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     });
   }
 
-  // ÔöÇÔöÇ Métricas resumen ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ Métricas resumen ══════════════════════════════════════════════════════════
   function renderMetricas(stats) {
     const el = document.getElementById('stats-metricas');
     if (!el) return;
@@ -4419,7 +4419,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     `;
   }
 
-  // ÔöÇÔöÇ Gr├ífico de barras por año ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ Gráfico de barras por año ══════════════════════════════════════════════════════════
   function renderChartAnos(stats) {
     const wrap = document.getElementById('stats-chart-anos-wrap');
     const canvas = document.getElementById('stats-chart-anos');
@@ -4474,7 +4474,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     });
   }
 
-  // ÔöÇÔöÇ Autores más leídos ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ Autores más leídos ══════════════════════════════════════════════════════════
   async function renderAutores(usuarioId) {
     const lista = document.getElementById('stats-autores-lista');
     if (!lista) return;
@@ -4520,7 +4520,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     `).join('');
   }
 
-  // ÔöÇÔöÇ Cargar detalle de un año ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ Cargar detalle de un año ══════════════════════════════════════════════════════════
   async function cargarDetalle(usuarioId, anio) {
     if (detalleCache[anio]) return detalleCache[anio];
     try {
@@ -4531,7 +4531,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     } catch { return { empezadas: [], terminadas: [] }; }
   }
 
-  // ÔöÇÔöÇ Detalle de títulos por año ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ Detalle de títulos por año ══════════════════════════════════════════════════════════
   async function renderDetalle(usuarioId, anio) {
     const contenido = document.getElementById('stats-detalle-contenido');
     if (!contenido) return;
@@ -4566,14 +4566,14 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     `;
   }
 
-  // ÔöÇÔöÇ Rellenar selector de años ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ Rellenar selector de años ══════════════════════════════════════════════════════════
   function fillAnioSelect(stats) {
     const sel = document.getElementById('stats-anio-select');
     if (!sel) return;
     sel.innerHTML = stats.map(r => `<option value="${r.anio}">${r.anio}</option>`).join('');
   }
 
-  // ÔöÇÔöÇ Entrada principal: sobreescribe cargarEstadisticasLecturas ÔöÇ
+  // ══ Entrada principal: sobreescribe cargarEstadisticasLecturas ═
   const _orig = window.cargarEstadisticasLecturas;
 
   window.cargarEstadisticasLecturas = async function () {
@@ -4587,7 +4587,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 
     if (info) info.textContent = 'Cargando…';
 
-    // Cargar Chart.js si no est├í
+    // Cargar Chart.js si no está
     if (!window.Chart) {
       await new Promise((resolve, reject) => {
         const s = document.createElement('script');
@@ -4628,7 +4628,7 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     }
   };
 
-  // ÔöÇÔöÇ Listener del selector de año ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+  // ══ Listener del selector de año ══════════════════════════════════════════════════════════
   document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('stats-anio-select')?.addEventListener('change', async e => {
       if (!window.usuarioActual?.id) return;
