@@ -1,7 +1,7 @@
 // service-worker.js
 // PaseoLibros PWA — caché offline básico
 // Versión: actualizar este número para forzar recarga del SW
-const CACHE_VERSION = 'paseolibros-v11';
+const CACHE_VERSION = 'paseolibros-v12';
 
 // Archivos estáticos que se cachean al instalar
 const CACHE_STATIC = [
@@ -44,6 +44,7 @@ self.addEventListener('activate', event => {
 
 // ── Fetch: estrategia por tipo de recurso ────────────────
 self.addEventListener('fetch', event => {
+  if (!event.request.url.startsWith('http')) return;
   const url = new URL(event.request.url);
 
   // Las peticiones a la API siempre van a la red (no cachear datos)
