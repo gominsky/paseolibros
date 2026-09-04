@@ -374,8 +374,8 @@ function applyBadgesForLibro(libroId) {
     }
    if (notes) {
   const parts = [];
-  if (meta.notesCount) parts.push(`­ƒ📝 ${meta.notesCount}`);
-  if (meta.audiosCount) parts.push(`­ƒ🎵 ${meta.audiosCount}`);
+  if (meta.notesCount) parts.push(` ${meta.notesCount}`);
+  if (meta.audiosCount) parts.push(` ${meta.audiosCount}`);
   notes.textContent = parts.join(' ');
   notes.title = parts.length ? `Notas: ${meta.notesCount || 0} · Audios: ${meta.audiosCount || 0}` : '';
 }
@@ -560,8 +560,8 @@ function renderEjemplares() {
   renderEjemplaresGrid(filtrados);
   // Siempre aplicar la vista correcta al final — evita solapamientos
   aplicarVistaContenedor();
-  if (vistaEjemplares === 'estanteria' && window._ejemplaresCache && window._ejemplaresCache.length) {
-    window.renderEstanteria(window._ejemplaresCache);
+  if (vistaEjemplares === 'estanteria' && window.renderEstanteria) {
+    window.renderEstanteria(filtrados);
   }
 if (token && usuarioActual?.id) {
   const ids = filtrados.map(e => e.libro_id);
@@ -754,7 +754,7 @@ const libro = (ejemplaresCache || [])
   .find(e => Number(e.libro_id) === Number(libroId));
 
 flashOk(
-  `Lectura iniciada ­ƒ📖${libro?.titulo ? ': ' + libro.titulo : ''}`
+  `Lectura iniciada libro?.titulo ? ': ' + libro.titulo : ''}`
 );
     setUserStatusOk('Lectura iniciada.');
     await cargarLecturas(libroId);
@@ -799,7 +799,7 @@ async function cargarLecturas(libroId) {
       const fin = l.fin ? new Date(l.fin).toLocaleDateString('es-ES') : '—';
       const pag = (l.pagina_actual ?? '—');
 
-      const badge = mia ? '­ƒƒó' : (esActiva ? '­ƒƒí' : '↩');
+      const badge = mia ? '📖' : (esActiva ? '📚' : '↩');
       const user = l.nombre_usuario || `Usuario ${l.usuario_id}`;
       return `${badge} ${user} · ${l.estado || '—'} · pág ${pag} · ${inicio} → ${fin}`;
     });
@@ -1214,8 +1214,8 @@ async function cargarLecturasAbiertas() {
       tr.classList.add('row-link');
       tr.dataset.libroId = l.libro_id;
       if (l.ejemplar_id) tr.dataset.ejemplarId = l.ejemplar_id;
-      tr.dataset.lecturaId = l.id;                      // ­ƒæê ID de la lectura
-      tr.dataset.paginaActual = (l.pagina_actual ?? ''); // ­ƒæê para prellenar modal
+      tr.dataset.lecturaId = l.id;                      //  ID de la lectura
+      tr.dataset.paginaActual = (l.pagina_actual ?? ''); //  para prellenar modal
       const fecha = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : '—';
       tr.innerHTML = `
   <td>${l.titulo || 'Sin título'}</td>
@@ -1641,7 +1641,7 @@ async function cargarPrestamos(libroId) {
 
     const lineas = prestamos.map((p) => {
       const activo = p.estado !== 'devuelto' && !p.fecha_devolucion;
-      const badge = activo ? '­ƒƒí' : '↩';
+      const badge = activo ? '📚' : '↩';
 
       const receptor = p.nombre_receptor_usuario || p.nombre_receptor || '—';
       const prestado = p.fecha_prestamo ? new Date(p.fecha_prestamo).toLocaleDateString('es-ES') : '—';
@@ -3290,7 +3290,7 @@ document.getElementById('link-show-login')?.addEventListener('click', (e) => {
 document.getElementById('link-forgot')?.addEventListener('click', (e) => {
   e.preventDefault();
   // "Zona en obras"
-  alert('­ƒ🔑 Recuperación de contraseña: en obras (pendiente configurar SMTP).');
+  alert(' Recuperación de contraseña: en obras (pendiente configurar SMTP).');
 });
 
 function getQueryParam(name) {
