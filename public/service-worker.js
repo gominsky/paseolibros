@@ -1,7 +1,7 @@
 // service-worker.js
 // PaseoLibros PWA — caché offline básico
 // Versión: actualizar este número para forzar recarga del SW
-const CACHE_VERSION = 'paseolibros-v12';
+const CACHE_VERSION = 'paseolibros-v13';
 
 // Archivos estáticos que se cachean al instalar
 const CACHE_STATIC = [
