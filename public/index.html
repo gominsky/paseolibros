@@ -69,6 +69,8 @@
 <div class="tools-sep" aria-hidden="true"></div>
 <button id="btn-open-biblioteca-compartida" class="tools-item" type="button">Bibliotecas compartidas</button>
 <button id="btn-rellenar-portadas" class="tools-item" type="button">Buscar portadas faltantes</button>
+<div class="tools-sep" aria-hidden="true"></div>
+<button id="btn-open-libros-recibidos" class="tools-item" type="button">Libros que me han prestado</button>
 
 <div class="tools-sep" aria-hidden="true"></div>
         <!-- Logout aquí (mantenemos el ID para tu JS) -->
@@ -1167,5 +1169,60 @@
       });
     }
   </script>
+
+<!-- ── Modal: Libros que me han prestado ─────────────── -->
+<div id="lr-overlay" class="deseos-overlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Libros que me han prestado">
+  <div class="deseos-dialog lr-dialog">
+
+    <div class="deseos-header">
+      <h3>📚 Libros que me han prestado</h3>
+      <button id="lr-cerrar" class="icon-btn" type="button" aria-label="Cerrar">
+        <span class="icon-circle">✕</span>
+      </button>
+    </div>
+
+    <!-- Formulario de nuevo registro -->
+    <div class="lr-form">
+      <div class="lr-form-row">
+        <div class="form-group" style="flex:2;">
+          <label for="lr-titulo">Título *</label>
+          <input id="lr-titulo" type="text" placeholder="Título del libro" />
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label for="lr-autores">Autor/es</label>
+          <input id="lr-autores" type="text" placeholder="Autor" />
+        </div>
+      </div>
+      <div class="lr-form-row">
+        <div class="form-group" style="flex:1;">
+          <label for="lr-prestador">Me lo presta *</label>
+          <input id="lr-prestador" type="text" placeholder="Nombre de quien me lo prestó" />
+        </div>
+        <div class="form-group" style="flex:1;">
+          <label for="lr-fecha-devolver">Devolver antes del</label>
+          <input id="lr-fecha-devolver" type="date" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="lr-notas">Notas</label>
+        <input id="lr-notas" type="text" placeholder="Notas opcionales" />
+      </div>
+      <div class="lr-form-footer">
+        <p id="lr-msg" class="muted" style="min-height:1.2em; font-size:.85rem;"></p>
+        <button id="lr-btn-guardar" class="btn btn-primary btn-sm" type="button">Registrar</button>
+      </div>
+    </div>
+
+    <!-- Lista -->
+    <div class="lr-tabs">
+      <button class="lr-tab is-active" data-lr-tab="pendientes">Pendientes de devolver</button>
+      <button class="lr-tab" data-lr-tab="devueltos">Devueltos</button>
+    </div>
+
+    <p id="lr-info" class="muted" style="padding: 6px 16px; font-size:.85rem;">Cargando…</p>
+    <div id="lr-lista" class="lr-lista"></div>
+
+  </div>
+</div>
 </body>
 </html>

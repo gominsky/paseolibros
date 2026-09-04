@@ -56,6 +56,7 @@ import readerRoutes from "./rutas/reader.js";
 import bcRutas from './rutas/biblioteca_compartida.js';
 import pool from './bd.js';
 import portadasRutas from './rutas/portadas.js';
+import librosRecibidosRutas from './rutas/libros_recibidos.js';
 
 dotenv.config();
 if (!process.env.JWT_SECRETO) {
@@ -90,9 +91,6 @@ app.use(express.json());
 
 // Servir frontend estático desde /public (si lo estás usando así)
 app.use(express.static(path.join(__dirname, '..', 'public')));
-
-// Servir carpeta icons/ para PWA
-app.use('/icons', express.static(path.join(__dirname, '..', 'public', 'icons')));
 
 // Servir SW y manifest con cabeceras correctas para PWA
 app.get('/service-worker.js', (req, res) => {
@@ -145,6 +143,7 @@ app.use('/api', colaRouter);
 app.use("/api", readerRoutes);
 app.use('/api', bcRutas);
 app.use('/api', portadasRutas);
+app.use('/api', librosRecibidosRutas);
 // Endpoint de salud
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, mensaje: 'PaseoLibros API viva 😄' });

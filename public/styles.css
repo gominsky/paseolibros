@@ -3275,3 +3275,85 @@ body.vista-estanteria .card-ejemplares .table-wrapper { display: none !important
 body.vista-estanteria #ejemplares-list { display: none !important; }
 body.vista-estanteria #ejemplares-grid { display: none !important; }
 body.vista-estanteria #ejemplares-estanteria { display: flex !important; }
+
+/* ══════════════════════════════════════════════════════════
+   LIBROS RECIBIDOS EN PRÉSTAMO
+   ══════════════════════════════════════════════════════════ */
+.lr-dialog { width: min(680px, calc(100vw - 32px)); }
+
+/* Formulario */
+.lr-form {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lr-form-row { display: flex; gap: 10px; }
+.lr-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+/* Pestañas */
+.lr-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.lr-tab {
+  padding: 8px 14px;
+  border: none;
+  background: transparent;
+  color: var(--ink-3);
+  font-family: var(--font-body);
+  font-size: .88rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color .15s, border-color .15s;
+  white-space: nowrap;
+}
+.lr-tab:hover { color: var(--ink); }
+.lr-tab.is-active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+/* Lista */
+.lr-lista {
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 16px 14px;
+}
+.lr-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  transition: border-color .15s;
+}
+.lr-item--vencido { border-color: rgba(184,85,85,.4); background: rgba(184,85,85,.05); }
+.lr-item-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.lr-item-titulo { font-weight: 600; font-size: .92rem; }
+.lr-item-autor  { font-size: .82rem; color: var(--ink-2); }
+.lr-item-meta   { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.lr-item-notas  { font-size: .8rem; color: var(--ink-3); margin-top: 2px; }
+.lr-item-actions { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+
+.deseo-pill--warn { background: rgba(184,85,85,.12); color: #b85555; border-color: rgba(184,85,85,.3); }
+.deseo-pill--ok   { background: rgba(74,158,106,.10); color: #4a9e6a; border-color: rgba(74,158,106,.3); }
+
+@media (max-width: 820px) {
+  .lr-dialog { width: 100vw; max-height: 100vh; border-radius: 0; }
+  .lr-form-row { flex-direction: column; }
+}
