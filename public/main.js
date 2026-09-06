@@ -4867,11 +4867,12 @@ window.flashErr = function flashErr(msg, ms = 3500) {
 
   function apiFetch(path, opts) {
     opts = opts || {};
-    return fetch(API_BASE + path, {
+    var tok = window.token || token;
+    return fetch(window.API_BASE + path, {
       method: opts.method || 'GET',
       headers: Object.assign(
         opts.body ? { 'Content-Type': 'application/json' } : {},
-        token ? { 'Authorization': 'Bearer ' + token, 'X-Access-Token': token } : {}
+        tok ? { 'Authorization': 'Bearer ' + tok, 'X-Access-Token': tok, 'Authorization-Token': tok } : {}
       ),
       body: opts.body ? JSON.stringify(opts.body) : undefined
     });
