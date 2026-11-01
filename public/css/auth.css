@@ -1,0 +1,55 @@
+/* css/auth.css — Pantalla de acceso (rediseño)
+   (El servidor une todos los ficheros de css/ en /styles.css según css/orden.json) */
+
+/* ══════════════════════════════════════════════════════════
+   AUTH MODAL — diseño mejorado
+   ══════════════════════════════════════════════════════════ */
+.auth-logo {
+  display: flex;
+  justify-content: center;
+  padding: 28px 24px 0;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 18px;
+}
+.auth-logo-img {
+  height: clamp(42px, 8vw, 72px);
+  width: auto;
+  object-fit: contain;
+}
+
+.auth-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 4px;
+  letter-spacing: -.01em;
+}
+.auth-subtitle {
+  color: var(--ink-3);
+  font-size: .88rem;
+  margin: 0 0 18px;
+}
+
+.auth-links {
+  margin-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: .85rem;
+}
+.auth-links a {
+  color: var(--ink-3);
+  transition: color .15s;
+}
+.auth-links a:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.auth-mensaje {
+  margin-top: 12px;
+  min-height: 1.4em;
+  text-align: center;
+}

@@ -2,12 +2,13 @@
 import { Router } from 'express';
 import pool from '../bd.js';
 import { verificarToken } from '../middlewares/auth.js';
+import { soloPropio } from '../middlewares/acceso.js';
 const router = Router();
 
 // Helper: normaliza con Postgres unaccent+lower (lo hacemos en SQL, no aquí)
 
 // GET /api/usuarios/:usuarioId/deseos?q=&tipo=&ubicacion=&order=
-router.get('/usuarios/:usuarioId/deseos', verificarToken, async (req, res) => {
+router.get('/usuarios/:usuarioId/deseos', verificarToken, soloPropio('usuarioId'), async (req, res) => {
   const { usuarioId } = req.params;
   const q = String(req.query.q || '').trim();
   const tipo = String(req.query.tipo || '').trim();

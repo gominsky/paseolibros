@@ -64,8 +64,96 @@ Medido en navegador móvil simulado: carga 9,2 s → 2,8 s.
 - Las insignias (⭐, notas) se actualizan al marcar favorito o añadir notas.
 - Eliminada la dependencia `bcrypt` (nativa, no se usaba; acelera el despliegue). Añadida `compression`.
 
-## Pendiente recomendado (no tocado)
+---
 
-- `main.js` tiene 5.000 líneas y `styles.css` ha vuelto a 3.300 (había quedado en ~550). Conviene dividirlo por módulos.
-- `schema.sql` no incluye las tablas `biblioteca_compartida` ni `libros_recibidos`.
-- `helmet` y `express-rate-limit` están instalados pero no se usan.
+# Segunda tanda — noviembre 2026
+
+## ⚠️ Antes de desplegar
+
+1. **Ejecutar en la base de datos de Render** (no borra nada; se puede repetir):
+   `psql "<External Database URL de Render>" -f db/add3.sql`
+   Crea las tablas `biblioteca_compartida` y `libros_recibidos` si faltaran, y un índice para el listado.
+2. **Borrar los ficheros antiguos** (ahora se generan desde `public/js/` y `public/css/`):
+   `git rm public/main.js public/styles.css`
+3. Para que funcione «He olvidado mi contraseña» hay que configurar en Render
+   `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` y `APP_URL`.
+   Antes el enlace **nunca se enviaba**: solo se escribía en el log (con el token).
+
+## ➕ Vista previa y aviso de duplicado al dar de alta
+
+- Al escribir o escanear un ISBN aparece debajo una tarjeta con portada, título, autor, editorial, año y páginas.
+- Si ya lo tienes: «⚠️ Ya lo tienes (2 ejemplares): Salón, Dormitorio» con botón **Ver ficha**.
+- Si el número tiene el dígito de control mal, lo dice antes de buscar. Si nadie lo conoce, avisa de que se creará como «Libro desconocido».
+- Al pulsar **Crear ejemplar** sobre un libro que ya tienes, pide confirmación. La importación CSV cuenta aparte los que ya tenías.
+- Servidor: `GET /api/ejemplares/consulta/:isbn`. El libro consultado queda en el catálogo, así el alta posterior es instantánea.
+
+## 🔒 Seguridad (rutas que faltaban)
+
+| Fallo | Riesgo | Corrección |
+|---|---|---|
+| Subir portada sin sesión, a cualquier libro y de cualquier tipo | Subir un `.html` a `/uploads` = página maliciosa dentro de tu dominio | Sesión + ser dueño + solo JPG/PNG/WebP/GIF |
+| Audios publicados en `/uploads/audios/` | Cualquiera podía oír tus notas de voz; también admitía `.html` | Ya no son públicos; solo por la API y solo audio |
+| `url_portada` admitía `/uploads/../src/app.js` | Al «quitar portada» se borraba ese fichero del servidor | Validación + borrado limitado a `uploads/` |
+| «Portada por URL» consultaba cualquier dirección | El servidor podía usarse para sondear su red interna | Bloqueadas IPs privadas/locales y redirecciones |
+| Cola y deseos de otro usuario visibles cambiando el número | Fuga de datos | Solo los propios |
+| Meter en tu cola ejemplares ajenos; buscar portada de libros ajenos | Manipulación | Comprobación de propiedad |
+| Recuperar contraseña: el enlace con el token se escribía en el log | Quien viera los logs podía cambiar contraseñas | Se envía por correo; no se registra en producción |
+| Sin límite de intentos en registro y recuperación | Abuso / spam | Mismo límite que el login |
+| Contraseñas de cualquier longitud | Cuentas débiles | Mínimo 8 caracteres |
+| Secretos JWT de respaldo escritos en el código | Si faltaba la variable, sesiones falsificables | Eliminados |
+
+Verificado con 46 pruebas automáticas (dos usuarios intentando acceder a lo del otro, subidas trampa, etc.).
+
+## 🗄️ schema.sql completo
+
+`schema.sql` crea ahora las **14 tablas** en una base vacía (antes 7: faltaban deseos normalizados, cola, favoritos,
+etiquetas, notas, audios, biblioteca compartida y libros recibidos). Probado en PostgreSQL 17 desde cero.
+Scripts: `npm run bd:init` (base nueva) y `npm run bd:actualizar` (base existente).
+
+## 🧹 Código ordenado
+
+`main.js` (4.900 líneas) y `styles.css` (3.400) se han dividido por secciones:
+
+```
+public/js/   core · ejemplares · vista-previa · lecturas · prestamos · ficha · cola-deseos · init ·
+             lector · compartir · portadas · estadisticas · ayuda · estanteria · voz · libros-recibidos
+public/css/  base · componentes · escaner · modales · movil · auth · estetica · ficha · compartir ·
+             portadas · estadisticas · ayuda · ficha-movil · estanteria · libros-recibidos · escaner-isbn · vista-previa
+```
+
+- El orden de carga está en `js/orden.json` y `css/orden.json`. **Un fichero nuevo hay que añadirlo ahí.**
+- El servidor (`src/bundle.js`) los une al vuelo en `/main.js` y `/styles.css`: el móvil sigue haciendo una sola descarga.
+  En desarrollo se regenera en cada recarga; en producción se cachea con ETag.
+- Comprobado que la unión es idéntica al original y que la app se ve **píxel a píxel igual** (capturas antes/después).
+- Eliminadas 22 reglas CSS que ya no se usaban (80 líneas) y separadores con caracteres corruptos.
+
+## Otros arreglos
+
+- Iconos 📝 y 🎙️ de las insignias (se habían perdido; salía «⭐ 1 1 Título»).
+- Estadísticas: si Chart.js no carga (sin conexión), se muestran las cifras igualmente.
+
+## Pendiente
+
+- Portadas en Render: siguen perdiéndose en cada despliegue (disco efímero).
+- Escaneo en ráfaga e ISBN-10 → 13 (puntos 1 y 4 de la lista de mejoras).
+
+---
+
+# Tercera tanda — login obligatorio
+
+**Problema:** la app se abría «como si hubiera sesión» sin estarlo. Causas:
+1. La versión anterior del servidor no comprobaba la sesión: con un token caducado seguía devolviendo los libros.
+2. La app daba por buena la sesión guardada en el móvil sin mirar si había caducado. Con Render dormido (hasta ~1 min)
+   o sin conexión, se quedaba así todo ese tiempo.
+3. Al cerrar o caducar la sesión, los libros quedaban pintados detrás del login, que era semitransparente.
+4. Algunas partes de la app no reaccionaban cuando el servidor respondía «sesión no válida» (401).
+
+**Solución:**
+- Al arrancar, un token caducado se descarta al instante (sin esperar al servidor) → login directo.
+- Después se confirma con el servidor (`GET /api/auth/sesion`): token de otro secreto o usuario borrado → login.
+- Cualquier respuesta 401 de la API, desde cualquier parte de la app, cierra la sesión y muestra el login.
+- Si la sesión caduca con la app abierta, o al volver a ella tras tenerla en segundo plano, se pide login.
+- Cerrar sesión en una pestaña la cierra en las demás.
+- Pantalla de login opaca y por encima de todo; al cerrar sesión se borran de pantalla y de memoria los datos.
+
+Probado: token válido, sin sesión, caducado, de otro secreto, usuario borrado, login, logout y caducidad con la app abierta.

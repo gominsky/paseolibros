@@ -6,7 +6,10 @@ window.actualizarUIAutenticacion = function actualizarUIAutenticacion() {
   const userBar = document.getElementById('user-bar');
   const nombreSpan = document.getElementById('nombre-usuario-actual');
 
-  const loggedIn = Boolean(window.token && window.usuarioActual);
+  // Sesión válida = hay token, no ha caducado y hay usuario
+  const loggedIn = Boolean(window.token && window.usuarioActual?.id &&
+    !(window.tokenCaducado && window.tokenCaducado(window.token)));
+  document.body.classList.toggle('sin-sesion', !loggedIn);
 
   // Modal de login + barra superior
   if (loginModal) loginModal.style.display = loggedIn ? 'none' : 'flex';
@@ -26,7 +29,8 @@ window.actualizarUIAutenticacion = function actualizarUIAutenticacion() {
     return;
   }
 
-  // Si no logueado: limpiar tablas
+  // Si no logueado: borrar de pantalla TODOS los datos del usuario anterior
+  if (window.limpiarDatosUsuario) window.limpiarDatosUsuario();
   const tbodyEj = document.querySelector('#tabla-ejemplares tbody');
   if (tbodyEj) tbodyEj.innerHTML = '';
 
@@ -77,7 +81,7 @@ window.hacerLogin = async function hacerLogin() {
 
     window.saveSession();
 
-    if (mensaje) mensaje.textContent = 'Login correcto ✅';
+    if (mensaje) mensaje.textContent = '';
     if (usuarioInput) usuarioInput.value = '';
     if (passInput) passInput.value = '';
 

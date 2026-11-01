@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import pool from '../bd.js';
 import { verificarToken } from '../middlewares/auth.js';
+import { soloPropio } from '../middlewares/acceso.js';
 
 const router = Router();
 
 // GET /api/usuarios/:usuarioId/cola?q=&order=
-router.get('/usuarios/:usuarioId/cola', verificarToken, async (req, res) => {
+router.get('/usuarios/:usuarioId/cola', verificarToken, soloPropio('usuarioId'), async (req, res) => {
   const { usuarioId } = req.params;
   const q = String(req.query.q || '').trim();
   const order = String(req.query.order || 'pos_asc').trim();
@@ -66,7 +67,7 @@ router.post('/cola', verificarToken, async (req, res) => {
 
   try {
     // Verifica que el ejemplar exista (y opcionalmente que sea del usuario, si tu modelo lo exige)
-    const ex = await pool.query(`SELECT id FROM ejemplares WHERE id = $1`, [ejemplar_id]);
+    const ex = await pool.query(`SELECT id FROM ejemplares WHERE id = $1 AND usuario_id = $2`, [ejemplar_id, usuario_id]);
     if (ex.rowCount === 0) return res.status(404).json({ error: 'Ejemplar no existe' });
 
     const r = await pool.query(

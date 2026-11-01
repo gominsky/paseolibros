@@ -3,8 +3,28 @@ import { Router } from 'express';
 import pool from '../bd.js';
 import multer from 'multer';
 import path from 'path';
+import { requiereUsuario } from '../middlewares/acceso.js';
 
 const router = Router();
+
+// ¿Tiene el usuario algún ejemplar activo de este libro?
+async function tieneEjemplar(libroId, usuarioId) {
+  const r = await pool.query(
+    `SELECT 1 FROM ejemplares
+     WHERE libro_id = $1 AND usuario_id = $2 AND activo = TRUE
+     LIMIT 1`,
+    [libroId, usuarioId]
+  );
+  return r.rowCount > 0;
+}
+
+// Solo se aceptan portadas http(s) o subidas propias (/uploads/nombre.ext).
+// Evita guardar rutas tipo '/uploads/../src/app.js' que luego se borrarían.
+function portadaValida(url) {
+  if (url === undefined || url === null || url === '') return true;
+  const u = String(url).trim();
+  return /^https?:\/\/[^\s"'<>]+$/i.test(u) || /^\/uploads\/[\w.-]+$/.test(u);
+}
 
 // Obtener un libro por ID (solo si el usuario tiene algún ejemplar de ese libro)
 router.get('/:id', async (req, res) => {
@@ -71,6 +91,10 @@ router.put('/:id', async (req, res) => {
     url_portada,
   } = req.body;
 
+  if (!portadaValida(url_portada)) {
+    return res.status(400).json({ error: 'La portada debe ser una URL http(s)' });
+  }
+
   try {
     // de nuevo, sólo si el usuario tiene ejemplares de este libro
     const tieneEjemplar = await pool.query(
@@ -125,26 +149,42 @@ router.put('/:id', async (req, res) => {
 });
 const uploadsDir = path.join(process.cwd(), 'uploads');
 
+// La extensión sale del tipo de imagen, nunca del nombre que manda el navegador
+// (antes se podía subir un .html y quedaba publicado en /uploads → XSS).
+const EXT_IMAGEN = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'image/gif': '.gif' };
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadsDir),
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname || '').toLowerCase() || '.jpg';
-    cb(null, `libro_${req.params.id}_${Date.now()}${ext}`);
+    cb(null, `libro_${Number(req.params.id) || 0}_${Date.now()}${EXT_IMAGEN[file.mimetype]}`);
   },
 });
 
 const upload = multer({
   storage,
-  limits: { fileSize: 6 * 1024 * 1024 }, // 6MB
+  limits: { fileSize: 6 * 1024 * 1024, files: 1 }, // 6MB
+  fileFilter: (req, file, cb) => cb(null, Boolean(EXT_IMAGEN[file.mimetype])),
 });
+
+// Comprueba sesión y propiedad ANTES de aceptar el fichero
+async function puedeSubirPortada(req, res, next) {
+  const libroId = Number(req.params.id);
+  if (!libroId) return res.status(400).json({ error: 'ID de libro no válido' });
+  try {
+    if (!(await tieneEjemplar(libroId, req.usuario.id))) {
+      return res.status(403).json({ error: 'No tienes ejemplares de este libro' });
+    }
+    next();
+  } catch (e) {
+    next(e);
+  }
+}
 
 // Subir portada y guardar su URL en libros.url_portada
 // POST /api/libros/:id/portada
-router.post('/:id/portada', upload.single('portada'), async (req, res) => {
+router.post('/:id/portada', requiereUsuario, puedeSubirPortada, upload.single('portada'), async (req, res) => {
   const libroId = Number(req.params.id);
-  if (!libroId) return res.status(400).json({ error: 'ID de libro no válido' });
-
-  if (!req.file) return res.status(400).json({ error: 'No se recibió archivo' });
+  if (!req.file) return res.status(400).json({ error: 'No se recibió ninguna imagen (JPG, PNG, WebP o GIF)' });
 
   try {
     const urlPortada = `/uploads/${req.file.filename}`;

@@ -1,3 +1,14 @@
+-- ============================================================
+-- PaseoLibros — esquema COMPLETO de la base de datos
+-- Crea todo desde cero en una base vacía:
+--   psql -U postgres -d paseolibros -f schema.sql
+--
+-- Contiene: el volcado original de producción + db/add1.sql (deseos, cola)
+-- + db/add2.sql (favoritos, etiquetas, notas, audios)
+-- + db/add3.sql (biblioteca compartida, libros recibidos, índices).
+-- Para una base YA existente basta con ejecutar db/add3.sql.
+-- ============================================================
+
 --
 -- PostgreSQL database dump
 --
@@ -689,3 +700,221 @@ ALTER TABLE ONLY public.prestamos
 -- PostgreSQL database dump complete
 --
 
+
+-- ============================================================
+-- db/add1.sql — Lista de deseos (normalización) y cola de lectura
+-- ============================================================
+SET search_path = public;
+
+CREATE EXTENSION IF NOT EXISTS unaccent;
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+ALTER TABLE ejemplares
+  ADD COLUMN IF NOT EXISTS tipo TEXT;
+
+ALTER TABLE ejemplares
+  ALTER COLUMN tipo SET DEFAULT 'libro';
+
+CREATE TABLE IF NOT EXISTS deseos (
+  id            BIGSERIAL PRIMARY KEY,
+  usuario_id    BIGINT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+
+  titulo        TEXT NOT NULL,
+  autores       TEXT,
+  isbn          TEXT,
+
+  tipo          TEXT DEFAULT 'libro',
+  ubicacion     TEXT,   -- ← aquí guardas “Salón - Estantería 1”, etc.
+
+  prioridad     INT  NOT NULL DEFAULT 2 CHECK (prioridad BETWEEN 1 AND 3),
+  notas         TEXT,
+  url_portada   TEXT,
+
+  titulo_norm   TEXT NOT NULL DEFAULT '',
+  autores_norm  TEXT NOT NULL DEFAULT '',
+  ubicacion_norm TEXT NOT NULL DEFAULT '',
+
+  creado_en     TIMESTAMPTZ NOT NULL DEFAULT now(),
+  actualizado_en TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE OR REPLACE FUNCTION deseos_set_norm()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.titulo_norm :=
+    regexp_replace(lower(unaccent(coalesce(NEW.titulo,''))), '\s+', ' ', 'g');
+
+  NEW.autores_norm :=
+    regexp_replace(lower(unaccent(coalesce(NEW.autores,''))), '\s+', ' ', 'g');
+
+  NEW.ubicacion_norm :=
+    regexp_replace(lower(unaccent(coalesce(NEW.ubicacion,''))), '\s+', ' ', 'g');
+
+  NEW.actualizado_en := now();
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_deseos_set_norm ON deseos;
+
+CREATE TRIGGER trg_deseos_set_norm
+BEFORE INSERT OR UPDATE OF titulo, autores, isbn, tipo, ubicacion, prioridad, notas, url_portada
+ON deseos
+FOR EACH ROW
+EXECUTE FUNCTION deseos_set_norm();
+CREATE INDEX IF NOT EXISTS idx_deseos_usuario_creado
+  ON deseos (usuario_id, creado_en DESC);
+
+CREATE INDEX IF NOT EXISTS idx_deseos_titulo_trgm
+  ON deseos USING gin (titulo_norm gin_trgm_ops)
+  WHERE titulo_norm <> '';
+
+CREATE INDEX IF NOT EXISTS idx_deseos_autores_trgm
+  ON deseos USING gin (autores_norm gin_trgm_ops)
+  WHERE autores_norm <> '';
+
+CREATE INDEX IF NOT EXISTS idx_deseos_ubicacion_trgm
+  ON deseos USING gin (ubicacion_norm gin_trgm_ops)
+  WHERE ubicacion_norm <> '';
+
+CREATE INDEX IF NOT EXISTS idx_deseos_usuario_tipo
+  ON deseos (usuario_id, tipo);
+
+-- Evitar duplicados si hay ISBN
+CREATE UNIQUE INDEX IF NOT EXISTS uq_deseos_usuario_isbn
+  ON deseos (usuario_id, isbn)
+  WHERE isbn IS NOT NULL AND length(trim(isbn)) > 0;
+
+CREATE TABLE cola_lecturas (
+  id SERIAL PRIMARY KEY,
+  usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  ejemplar_id INTEGER NOT NULL REFERENCES ejemplares(id) ON DELETE CASCADE,
+  posicion INTEGER NOT NULL DEFAULT 999999,
+  notas TEXT,
+  creado_en TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- Evita duplicados del mismo ejemplar en la cola de un usuario
+CREATE UNIQUE INDEX cola_lecturas_usuario_ejemplar_uq
+  ON cola_lecturas(usuario_id, ejemplar_id);
+
+-- Para ordenar rápido
+CREATE INDEX cola_lecturas_usuario_posicion_idx
+  ON cola_lecturas(usuario_id, posicion, creado_en DESC);
+
+-- ============================================================
+-- db/add2.sql — Panel del lector: favoritos, etiquetas, notas y audios
+-- ============================================================
+SET search_path = public;
+
+BEGIN;
+
+-- 1) Favoritos (1 fila por usuario+libro)
+CREATE TABLE IF NOT EXISTS public.libro_favoritos (
+  usuario_id integer NOT NULL REFERENCES public.usuarios(id) ON DELETE CASCADE,
+  libro_id   integer NOT NULL REFERENCES public.libros(id)   ON DELETE CASCADE,
+  creado_en  timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (usuario_id, libro_id)
+);
+
+-- 2) Etiquetas (tags) (varias filas por usuario+libro)
+CREATE TABLE IF NOT EXISTS public.libro_tags (
+  id         bigserial PRIMARY KEY,
+  usuario_id integer NOT NULL REFERENCES public.usuarios(id) ON DELETE CASCADE,
+  libro_id   integer NOT NULL REFERENCES public.libros(id)   ON DELETE CASCADE,
+  tag        text NOT NULL,
+  creado_en  timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT libro_tags_tag_len CHECK (length(btrim(tag)) > 0)
+);
+
+-- Evita duplicados del mismo tag en el mismo libro para el mismo usuario
+CREATE UNIQUE INDEX IF NOT EXISTS uq_libro_tags_usuario_libro_tag
+  ON public.libro_tags (usuario_id, libro_id, lower(tag));
+
+CREATE INDEX IF NOT EXISTS idx_libro_tags_usuario_libro
+  ON public.libro_tags (usuario_id, libro_id);
+
+-- 3) Notas de texto (historial por libro)
+CREATE TABLE IF NOT EXISTS public.libro_notas (
+  id            bigserial PRIMARY KEY,
+  usuario_id    integer NOT NULL REFERENCES public.usuarios(id) ON DELETE CASCADE,
+  libro_id      integer NOT NULL REFERENCES public.libros(id)   ON DELETE CASCADE,
+  texto         text NOT NULL,
+  creado_en     timestamptz NOT NULL DEFAULT now(),
+  actualizado_en timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT libro_notas_texto_len CHECK (length(btrim(texto)) > 0)
+);
+
+CREATE INDEX IF NOT EXISTS idx_libro_notas_usuario_libro
+  ON public.libro_notas (usuario_id, libro_id, creado_en DESC);
+
+-- Trigger para actualizar actualizado_en
+CREATE OR REPLACE FUNCTION public.set_actualizado_en()
+RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  NEW.actualizado_en := now();
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_libro_notas_actualizado ON public.libro_notas;
+CREATE TRIGGER trg_libro_notas_actualizado
+BEFORE UPDATE OF texto ON public.libro_notas
+FOR EACH ROW EXECUTE FUNCTION public.set_actualizado_en();
+
+-- 4) Audios (metadata en BD; el archivo va a disco o S3)
+CREATE TABLE IF NOT EXISTS public.libro_audios (
+  id          bigserial PRIMARY KEY,
+  usuario_id  integer NOT NULL REFERENCES public.usuarios(id) ON DELETE CASCADE,
+  libro_id    integer NOT NULL REFERENCES public.libros(id)   ON DELETE CASCADE,
+  storage     text NOT NULL DEFAULT 'local',   -- 'local' o 's3'
+  path        text NOT NULL,                  -- ruta local o key/url
+  mime        text NOT NULL,
+  bytes       bigint NOT NULL,
+  duracion_ms integer,
+  creado_en   timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_libro_audios_usuario_libro
+  ON public.libro_audios (usuario_id, libro_id, creado_en DESC);
+
+COMMIT;
+
+-- ============================================================
+-- db/add3.sql — Biblioteca compartida, libros recibidos e índices
+-- ============================================================
+SET search_path = public;
+
+-- db/add3.sql
+-- Tablas que usaba la aplicación pero no estaban en schema.sql
+-- (biblioteca compartida y libros que me prestan) + índices de rendimiento.
+-- Se puede ejecutar varias veces sin problema.
+
+CREATE TABLE IF NOT EXISTS public.biblioteca_compartida (
+  id             SERIAL PRIMARY KEY,
+  propietario_id INTEGER NOT NULL REFERENCES public.usuarios(id) ON DELETE CASCADE,
+  invitado_id    INTEGER NOT NULL REFERENCES public.usuarios(id) ON DELETE CASCADE,
+  creado_en      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (propietario_id, invitado_id)
+);
+CREATE INDEX IF NOT EXISTS idx_bc_invitado ON public.biblioteca_compartida (invitado_id);
+
+CREATE TABLE IF NOT EXISTS public.libros_recibidos (
+  id             SERIAL PRIMARY KEY,
+  usuario_id     INTEGER NOT NULL REFERENCES public.usuarios(id) ON DELETE CASCADE,
+  titulo         TEXT NOT NULL,
+  autores        TEXT,
+  prestador      TEXT NOT NULL,
+  fecha_recibido DATE DEFAULT CURRENT_DATE,
+  fecha_devolver DATE,
+  notas          TEXT,
+  devuelto       BOOLEAN NOT NULL DEFAULT FALSE,
+  fecha_devuelto DATE,
+  creado_en      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_lr_usuario ON public.libros_recibidos (usuario_id, devuelto);
+
+-- Rendimiento: listado de ejemplares del usuario y comprobaciones de acceso
+CREATE INDEX IF NOT EXISTS idx_ejemplares_usuario_activo
+  ON public.ejemplares (usuario_id, libro_id) WHERE activo = TRUE;

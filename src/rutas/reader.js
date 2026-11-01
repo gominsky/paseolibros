@@ -225,20 +225,44 @@ router.delete("/libros/:id/notes/:noteId", verificarToken, async (req, res) => {
 const audiosDir = path.join(process.cwd(), "uploads", "audios");
 fs.mkdirSync(audiosDir, { recursive: true });
 
+// Solo audio; la extensión sale del tipo (no del nombre que manda el navegador).
+// Los audios ya NO se publican en /uploads (ver app.js): solo se sirven por
+// GET /api/libros/:id/audios/:audioId, que comprueba que son tuyos.
+function extAudio(mime) {
+  const m = String(mime || "").split(";")[0].trim().toLowerCase();
+  return { "audio/webm": ".webm", "audio/ogg": ".ogg", "audio/mp4": ".m4a", "audio/aac": ".aac",
+           "audio/mpeg": ".mp3", "audio/wav": ".wav", "audio/x-wav": ".wav", "video/webm": ".webm" }[m] || null;
+}
+
 const audioStorage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, audiosDir),
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname || "").toLowerCase() || ".webm";
-    cb(null, `audio_libro_${req.params.id}_${Date.now()}${ext}`);
+    cb(null, `audio_libro_${Number(req.params.id) || 0}_${Date.now()}${extAudio(file.mimetype)}`);
   },
 });
 
 const uploadAudio = multer({
   storage: audioStorage,
-  limits: { fileSize: 25 * 1024 * 1024 }, // 25MB
+  limits: { fileSize: 25 * 1024 * 1024, files: 1 }, // 25MB
+  fileFilter: (_req, file, cb) => cb(null, Boolean(extAudio(file.mimetype))),
 });
 
-router.post("/libros/:id/audios", verificarToken, uploadAudio.single("audio"), async (req, res) => {
+// Comprueba el acceso ANTES de guardar el fichero en disco
+async function puedeSubirAudio(req, res, next) {
+  try {
+    const usuarioId = Number(req.usuario?.id);
+    const libroId = Number(req.params.id);
+    if (!libroId) return res.status(400).json({ error: "ID de libro no válido" });
+    if (!(await assertAccesoLibro({ usuarioId, libroId }))) {
+      return res.status(403).json({ error: "No puedes subir audios a un libro sin ejemplares" });
+    }
+    next();
+  } catch (e) {
+    next(e);
+  }
+}
+
+router.post("/libros/:id/audios", verificarToken, puedeSubirAudio, uploadAudio.single("audio"), async (req, res) => {
   const usuarioId = Number(req.usuario?.id);
   const libroId = Number(req.params.id);
   if (!usuarioId) return res.status(401).json({ error: "Usuario no autenticado" });
@@ -307,7 +331,8 @@ router.get("/libros/:id/audios/:audioId", verificarToken, async (req, res) => {
     if (r.rowCount === 0) return res.status(404).json({ error: "Audio no encontrado" });
 
     res.setHeader("Content-Type", r.rows[0].mime);
-    return res.sendFile(path.join(audiosDir, r.rows[0].path));
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    return res.sendFile(path.join(audiosDir, path.basename(r.rows[0].path)));
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Error sirviendo audio" });

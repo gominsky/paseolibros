@@ -25,11 +25,18 @@ const transporter = process.env.SMTP_HOST
     })
   : null;
 
+const MIN_CONTRASENA = 8;
+
 async function enviarEmail({ to, subject, text }) {
   if (!transporter) {
-    console.log('📧 Email simulado a:', to);
-    console.log(subject);
-    console.log(text);
+    // Sin SMTP configurado: solo en desarrollo se muestra el contenido
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('📧 Email simulado a:', to);
+      console.log(subject);
+      console.log(text);
+    } else {
+      console.warn('📧 SMTP no configurado: no se ha podido enviar el correo de recuperación');
+    }
     return;
   }
   await transporter.sendMail({
@@ -44,6 +51,12 @@ router.post('/register', async (req, res) => {
   const { nombre_usuario, correo, contrasena } = req.body || {};
   if (!nombre_usuario || !correo || !contrasena) {
     return res.status(400).json({ error: 'Faltan campos.' });
+  }
+  if (String(contrasena).length < MIN_CONTRASENA) {
+    return res.status(400).json({ error: `La contraseña debe tener al menos ${MIN_CONTRASENA} caracteres.` });
+  }
+  if (!/^[\w.\-áéíóúñü]{3,50}$/i.test(String(nombre_usuario).trim())) {
+    return res.status(400).json({ error: 'El nombre de usuario debe tener 3–50 letras, números, punto, guion o guion bajo.' });
   }
 
   try {
@@ -104,7 +117,12 @@ router.post('/forgot-password', async (req, res) => {
     const appUrl = process.env.APP_URL || 'http://localhost:3011';
     const link = `${appUrl}/?reset=${token}`;
 
-    console.log('🔗 [DEV] Reset link:', link);
+    // Antes el enlace solo se escribía en el log (con el token) y nunca se enviaba
+    await enviarEmail({
+      to: r.rows[0].correo,
+      subject: 'PaseoLibros · Recuperar contraseña',
+      text: `Hola,\n\nPara elegir una contraseña nueva abre este enlace (caduca en 30 minutos):\n\n${link}\n\nSi no lo has pedido tú, ignora este correo.`,
+    });
 
     if (process.env.NODE_ENV === 'development') {
       return res.json({ ok: true, dev_reset_link: link });
@@ -125,6 +143,9 @@ router.post('/forgot-password', async (req, res) => {
 router.post('/reset-password', async (req, res) => {
   const { token, nuevaContrasena } = req.body || {};
   if (!token || !nuevaContrasena) return res.status(400).json({ error: 'Faltan campos.' });
+  if (String(nuevaContrasena).length < MIN_CONTRASENA) {
+    return res.status(400).json({ error: `La contraseña debe tener al menos ${MIN_CONTRASENA} caracteres.` });
+  }
 
   try {
     const tokenHash = sha256(token);
@@ -183,7 +204,7 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign(
       { id: usuario.id, nombre_usuario: usuario.nombre_usuario },
-      process.env.JWT_SECRETO || 'cambia_esto_en_.env',
+      process.env.JWT_SECRETO,
       { expiresIn: process.env.JWT_EXPIRACION || '7d' }
     );
 
@@ -193,6 +214,21 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error en el login' });
+  }
+});
+
+// Comprobar la sesión: GET /api/auth/sesion
+// La app lo llama al arrancar para no mostrar nada con un token caducado,
+// firmado con otro secreto o de un usuario que ya no existe.
+router.get('/sesion', async (req, res) => {
+  if (!req.usuario?.id) return res.status(401).json({ error: 'Sesión no válida' });
+  try {
+    const r = await pool.query('SELECT id, nombre_usuario, correo FROM usuarios WHERE id = $1', [req.usuario.id]);
+    if (!r.rowCount) return res.status(401).json({ error: 'El usuario ya no existe' });
+    res.json({ usuario: r.rows[0] });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Error comprobando la sesión' });
   }
 });
 

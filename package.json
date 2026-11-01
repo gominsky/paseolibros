@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "bd:init": "psql -U postgres -d paseolibros -f db/init.sql"
+    "bd:init": "psql -U postgres -d paseolibros -f schema.sql",
+    "bd:actualizar": "psql -U postgres -d paseolibros -f db/add3.sql"
   },
   "keywords": [],
   "author": "",

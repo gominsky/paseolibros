@@ -1,0 +1,66 @@
+[
+  {
+    "fichero": "core.js",
+    "descripcion": "Estado global, temas, utilidades, modal e insignias del lector"
+  },
+  {
+    "fichero": "ejemplares.js",
+    "descripcion": "Listado de ejemplares: ordenación, pintado (tabla/lista/cuadrícula), carga y alta"
+  },
+  {
+    "fichero": "vista-previa.js",
+    "descripcion": "Vista previa del libro y aviso de duplicado al dar de alta"
+  },
+  {
+    "fichero": "lecturas.js",
+    "descripcion": "Lecturas: empezar/terminar, marcapáginas, estadísticas y resumen de la portada"
+  },
+  {
+    "fichero": "prestamos.js",
+    "descripcion": "Préstamos: diálogo de préstamo, histórico y devolución"
+  },
+  {
+    "fichero": "ficha.js",
+    "descripcion": "Ficha del libro: eliminar ejemplar, edición, subida de portada y modal de ficha"
+  },
+  {
+    "fichero": "cola-deseos.js",
+    "descripcion": "Cola de lectura y lista de deseos"
+  },
+  {
+    "fichero": "init.js",
+    "descripcion": "Arranque: enlaza botones y eventos al cargar la página; mensajes flash"
+  },
+  {
+    "fichero": "lector.js",
+    "descripcion": "Panel \"Del lector\": favorito, etiquetas, notas y audios"
+  },
+  {
+    "fichero": "compartir.js",
+    "descripcion": "Bibliotecas compartidas entre usuarios"
+  },
+  {
+    "fichero": "portadas.js",
+    "descripcion": "Búsqueda automática de portadas y portada por URL manual"
+  },
+  {
+    "fichero": "estadisticas.js",
+    "descripcion": "Estadísticas visuales (Chart.js) y detalle por año"
+  },
+  {
+    "fichero": "ayuda.js",
+    "descripcion": "Ayuda / manual"
+  },
+  {
+    "fichero": "estanteria.js",
+    "descripcion": "Modo estantería"
+  },
+  {
+    "fichero": "voz.js",
+    "descripcion": "Búsqueda por voz (Web Speech API)"
+  },
+  {
+    "fichero": "libros-recibidos.js",
+    "descripcion": "Libros que me han prestado"
+  }
+]

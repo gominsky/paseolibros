@@ -1,0 +1,72 @@
+/* css/vista-previa.css — Vista previa del libro y aviso de duplicado al dar de alta
+   (El servidor une todos los ficheros de css/ en /styles.css según css/orden.json) */
+
+.isbn-preview {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 2px 0 12px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  animation: isbn-preview-in .18s ease-out;
+}
+.isbn-preview[hidden] { display: none !important; }
+@keyframes isbn-preview-in { from { opacity: 0; transform: translateY(-4px); } }
+@media (prefers-reduced-motion: reduce) { .isbn-preview { animation: none; } }
+
+.isbn-preview.is-ok        { border-color: var(--border-acc); }
+.isbn-preview.is-duplicado { border-color: #d9a441; background: rgba(217, 164, 65, .12); }
+.isbn-preview.is-aviso     { border-style: dashed; }
+.isbn-preview.is-cargando  { opacity: .75; }
+
+.isbn-preview-cover {
+  flex: 0 0 52px;
+  width: 52px;
+  height: 78px;
+  object-fit: cover;
+  border-radius: 4px;
+  box-shadow: var(--shadow-sm);
+  background: var(--surface);
+}
+.isbn-preview-cover--vacia {
+  display: grid;
+  place-items: center;
+  color: var(--ink-3);
+  font-size: .8rem;
+  border: 1px dashed var(--border-2);
+  box-shadow: none;
+}
+.isbn-preview-info { min-width: 0; flex: 1; }
+.isbn-preview-titulo {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.isbn-preview-autor { color: var(--ink-2); font-size: .9rem; margin-top: 2px; }
+.isbn-preview-meta  { color: var(--ink-3); font-size: .8rem; margin-top: 4px; line-height: 1.35; }
+
+.isbn-preview-duplicado {
+  margin-top: 8px;
+  font-size: .85rem;
+  font-weight: 500;
+  color: var(--ink);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: center;
+}
+.isbn-preview-ver {
+  border: 1px solid var(--border-2);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font: inherit;
+  font-size: .8rem;
+  cursor: pointer;
+}
+.isbn-preview-ver:hover { border-color: var(--accent); }

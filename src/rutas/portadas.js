@@ -20,6 +20,30 @@ function requireAuth(req, res, next) {
   next();
 }
 
+// Impide que el servidor consulte direcciones internas (localhost, red privada…)
+// cuando el usuario pega una URL de portada.
+function urlPublicaPermitida(u) {
+  let url;
+  try { url = new URL(u); } catch { return false; }
+  if (!/^https?:$/.test(url.protocol)) return false;
+  const h = url.hostname.toLowerCase().replace(/^\[|\]$/g, '');
+  if (h === 'localhost' || h.endsWith('.localhost') || h.endsWith('.local') || h.endsWith('.internal')) return false;
+  if (/^(0|10|127)\./.test(h) || /^169\.254\./.test(h) || /^192\.168\./.test(h)
+      || /^172\.(1[6-9]|2\d|3[01])\./.test(h) || /^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./.test(h)) return false;
+  if (h === '::1' || h.startsWith('fc') || h.startsWith('fd') || h.startsWith('fe80')) return false;
+  if (!h.includes('.') && !h.includes(':')) return false; // nombres sin dominio
+  return true;
+}
+
+// ¿Tiene el usuario un ejemplar de este libro?
+async function tieneEjemplar(libroId, usuarioId) {
+  const r = await pool.query(
+    'SELECT 1 FROM ejemplares WHERE libro_id = $1 AND usuario_id = $2 AND activo = TRUE LIMIT 1',
+    [libroId, usuarioId]
+  );
+  return r.rowCount > 0;
+}
+
 // ── Descarga una URL a disco y devuelve la ruta local ─────
 function descargarImagen(url, destPath) {
   return new Promise((resolve, reject) => {
@@ -217,6 +241,9 @@ router.post('/libros/:id/buscar-portada', requireAuth, async (req, res) => {
   const libroId = Number(req.params.id);
 
   try {
+    if (!(await tieneEjemplar(libroId, req.usuario.id))) {
+      return res.status(403).json({ error: 'Sin acceso a este libro' });
+    }
     const { rows } = await pool.query(
       'SELECT id, isbn, titulo, autores, url_portada FROM libros WHERE id = $1',
       [libroId]
@@ -366,6 +393,9 @@ router.post('/libros/:id/portada-url', requireAuth, async (req, res) => {
   if (!/^https?:\/\//.test(urlLimpia)) {
     return res.status(400).json({ error: 'La URL debe empezar por http:// o https://' });
   }
+  if (!urlPublicaPermitida(urlLimpia) || /[\s"'<>]/.test(urlLimpia)) {
+    return res.status(400).json({ error: 'URL no permitida' });
+  }
 
   try {
     // Verificar que el libro existe y pertenece a un ejemplar del usuario
@@ -385,8 +415,12 @@ router.post('/libros/:id/portada-url', requireAuth, async (req, res) => {
       const check = await fetch(urlLimpia, {
         method: 'HEAD',
         signal: AbortSignal.timeout(8000),
+        redirect: 'manual', // no seguir redirecciones hacia direcciones internas
         headers: { 'User-Agent': 'Mozilla/5.0' }
       });
+      if (check.status >= 300 && check.status < 400) {
+        return res.status(400).json({ error: 'Esa URL redirige a otra. Abre la imagen y copia su dirección final.' });
+      }
       const ct = check.headers.get('content-type') || '';
       if (!ct.startsWith('image/')) {
         return res.status(400).json({ error: 'La URL no apunta a una imagen válida' });
@@ -425,7 +459,8 @@ router.delete('/libros/:id/portada', requireAuth, async (req, res) => {
 
     // Borrar archivo local si es un upload propio (no una URL externa)
     if (urlPortada && urlPortada.startsWith('/uploads/')) {
-      const filePath = path.join(process.cwd(), urlPortada);
+      // basename: nunca salir de la carpeta uploads (antes '/uploads/../src/app.js' borraba código)
+      const filePath = path.join(UPLOADS_DIR, path.basename(urlPortada));
       fs.unlink(filePath, () => {}); // silencioso si no existe
     }
 

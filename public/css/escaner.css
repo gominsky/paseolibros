@@ -1,0 +1,52 @@
+/* css/escaner.css — Escáner (estilos base y overlay en móvil)
+   (El servidor une todos los ficheros de css/ en /styles.css según css/orden.json) */
+
+/* ══════════════════════════════════════════════════════════
+   ESCÁNER
+   ══════════════════════════════════════════════════════════ */
+.scanner {
+  margin-top: 10px;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.scanner-text {
+  padding: 8px 12px;
+  font-size: .88rem;
+  color: var(--ink-2);
+}
+.scanner-video, #video {
+  width: 100% !important;
+  height: 220px !important;
+  object-fit: cover !important;
+  border-radius: 0;
+  display: block;
+}
+
+/* Móvil: escáner como overlay */
+@media (max-width: 820px) {
+  #scanner.scanner {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.94);
+    z-index: 9500;
+    border-radius: 0;
+    border: none;
+    display: none;
+    padding: 20px;
+  }
+  #scanner.scanner[style*="display:block"],
+  #scanner.scanner[style*="display: block"] {
+    display: grid !important;
+    grid-template-rows: auto 1fr auto;
+    gap: 12px;
+    place-items: start center;
+  }
+  #scanner .scanner-video,
+  #scanner video#video {
+    width: 100% !important;
+    height: min(65vh, 500px) !important;
+    border-radius: var(--r-md);
+  }
+}

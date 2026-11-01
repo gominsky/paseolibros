@@ -6,8 +6,8 @@ import jwt from 'jsonwebtoken';
 
 const router = Router();
 
-// OJO: usa el mismo secreto que app.js
-const JWT_SECRET = process.env.JWT_SECRETO || 'paseolibros_JWT_$9fK2!xQmA7zR';
+// Mismo secreto que el login (app.js exige que exista; sin valor por defecto)
+const JWT_SECRET = process.env.JWT_SECRETO;
 
 // POST /api/share  (requiere login)
 router.post('/share', verificarToken, (req, res) => {

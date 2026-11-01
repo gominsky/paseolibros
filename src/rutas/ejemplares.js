@@ -179,6 +179,7 @@ async function crearLibroEnBD(datosLibro) {
        numero_paginas, descripcion, url_portada
      )
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+     ON CONFLICT (isbn) DO UPDATE SET isbn = EXCLUDED.isbn
      RETURNING *`,
     [
       isbn,
@@ -195,8 +196,61 @@ async function crearLibroEnBD(datosLibro) {
   return resultado.rows[0];
 }
 
+// Busca el libro en la BD; si no está, lo consulta fuera y lo guarda en el catálogo.
+// Devuelve null si nadie lo conoce.
+async function obtenerLibro(isbn) {
+  let libro = await buscarLibroEnBD(isbn);
+  if (libro) return libro;
+  const datos = await obtenerDatosLibroDeApi(isbn);
+  if (!datos) return null;
+  return crearLibroEnBD(datos);
+}
+
+// Ejemplares activos que el usuario ya tiene de un libro
+async function misEjemplaresDe(libroId, usuarioId) {
+  const r = await pool.query(
+    `SELECT id AS ejemplar_id, estado, ubicacion, creado_en
+     FROM ejemplares
+     WHERE libro_id = $1 AND usuario_id = $2 AND activo = TRUE
+     ORDER BY creado_en`,
+    [libroId, usuarioId]
+  );
+  return r.rows;
+}
+
+// Vista previa antes de dar de alta: datos del libro + si ya lo tienes
+// GET /api/ejemplares/consulta/:isbn
+router.get('/consulta/:isbn', requiereUsuario, async (req, res) => {
+  const isbn = limpiarIsbn(req.params.isbn);
+  if (!isbn || !(isbn.length === 10 || isbn.length === 13)) {
+    return res.status(400).json({ error: 'ISBN no válido' });
+  }
+  try {
+    const libro = await obtenerLibro(isbn);
+    const mios = libro ? await misEjemplaresDe(libro.id, req.usuario.id) : [];
+    res.json({
+      isbn,
+      encontrado: Boolean(libro),
+      libro: libro && {
+        id: libro.id,
+        titulo: libro.titulo,
+        autores: libro.autores,
+        editorial: libro.editorial,
+        fecha_publicacion: libro.fecha_publicacion,
+        numero_paginas: libro.numero_paginas,
+        url_portada: libro.url_portada,
+      },
+      mios,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error consultando el ISBN' });
+  }
+});
+
 // Crear un ejemplar a partir de un ISBN
-router.post('/', async (req, res) => {
+// (devuelve 409 si ya tienes ese libro, salvo que se envíe duplicar: true)
+router.post('/', requiereUsuario, async (req, res) => {
   // usuario viene del token, NO del body
   const usuario_id = req.usuario?.id;
   let { isbn, estado, ubicacion, notas, tipo } = req.body;
@@ -216,27 +270,34 @@ router.post('/', async (req, res) => {
   }
 
   try {
-    // 1. ¿El libro ya existe en la BD?
-    let libro = await buscarLibroEnBD(isbnLimpio);
+    // 1. Libro del catálogo (BD → Google Books / Open Library)
+    let libro = await obtenerLibro(isbnLimpio);
 
-    // 2. Si no existe, lo obtenemos de la API o creamos mínimo
+    // 2. Si nadie lo conoce, se crea con datos mínimos
     if (!libro) {
-      let datosLibro = await obtenerDatosLibroDeApi(isbnLimpio);
+      libro = await crearLibroEnBD({
+        isbn: isbnLimpio,
+        titulo: `Libro desconocido (${isbnLimpio})`,
+        autores: null,
+        editorial: null,
+        fecha_publicacion: null,
+        numero_paginas: null,
+        descripcion: null,
+        url_portada: null,
+      });
+    }
 
-      if (!datosLibro) {
-        datosLibro = {
-          isbn: isbnLimpio,
-          titulo: `Libro desconocido (${isbnLimpio})`,
-          autores: null,
-          editorial: null,
-          fecha_publicacion: null,
-          numero_paginas: null,
-          descripcion: null,
-          url_portada: null,
-        };
+    // 3. ¿Ya lo tienes? Pedimos confirmación antes de crear otro ejemplar
+    if (!req.body?.duplicar) {
+      const mios = await misEjemplaresDe(libro.id, usuario_id);
+      if (mios.length) {
+        return res.status(409).json({
+          error: 'Ya tienes este libro',
+          duplicado: true,
+          libro: { id: libro.id, titulo: libro.titulo },
+          mios,
+        });
       }
-
-      libro = await crearLibroEnBD(datosLibro);
     }
 
 const resultadoEjemplar = await pool.query(
@@ -304,7 +365,7 @@ router.get('/', requiereUsuario, async (req, res) => {
   }
 });
 // Eliminar (borrado lógico) un ejemplar
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requiereUsuario, async (req, res) => {
   const ejemplarId = Number(req.params.id);
 
   if (!ejemplarId) {
@@ -376,7 +437,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Actualizar un ejemplar (estado / ubicación / notas)
-router.put('/:id', async (req, res) => {
+router.put('/:id', requiereUsuario, async (req, res) => {
   const ejemplarId = Number(req.params.id);
   if (!ejemplarId) return res.status(400).json({ error: 'ID de ejemplar no válido' });
 

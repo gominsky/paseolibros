@@ -3,16 +3,18 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import compression from 'compression';
+import { servirBundle } from './bundle.js';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 
-// Rate limiter simple en memoria para /api/auth/login
+// Rate limiter simple en memoria para login, registro y recuperación de contraseña
 const loginAttempts = new Map();
 function loginRateLimiter(req, res, next) {
-  const ip = req.ip || 'unknown'; // con 'trust proxy' req.ip es la IP real del cliente
+  // con 'trust proxy' req.ip es la IP real del cliente; contador separado por ruta
+  const ip = `${req.ip || 'unknown'}|${req.baseUrl}`;
   const now = Date.now();
   const windowMs = 15 * 60 * 1000; // 15 minutos
   const maxAttempts = 15;
@@ -31,7 +33,7 @@ function loginRateLimiter(req, res, next) {
     const retryAfter = Math.ceil((entry.resetAt - now) / 1000);
     res.setHeader('Retry-After', retryAfter);
     return res.status(429).json({
-      error: `Demasiados intentos de login. Espera ${Math.ceil(retryAfter / 60)} minutos.`
+      error: `Demasiados intentos. Espera ${Math.ceil(retryAfter / 60)} minutos.`
     });
   }
   next();
@@ -75,8 +77,13 @@ app.use(compression());
 
 const uploadsDir = path.join(process.cwd(), 'uploads');
 fs.mkdirSync(uploadsDir, { recursive: true });
-// Cada portada subida tiene un nombre único → se puede cachear "para siempre"
-app.use('/uploads', express.static(uploadsDir, { maxAge: '30d', immutable: true }));
+// Solo se publican IMÁGENES de /uploads (los audios van por /api, con permisos).
+// Cada portada subida tiene un nombre único → se puede cachear "para siempre".
+app.use('/uploads', (req, res, next) => {
+  if (!/^\/[\w.-]+\.(jpe?g|png|webp|gif)$/i.test(req.path)) return res.status(404).end();
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  next();
+}, express.static(uploadsDir, { maxAge: '30d', immutable: true, index: false }));
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -96,9 +103,23 @@ app.use(cors({
   credentials: false,
 }));
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'tiny' : 'dev'));
-app.use(express.json());
+app.use(express.json({ limit: '200kb' }));
+// Cabeceras de seguridad básicas (sin helmet completo para no romper fuentes/CDN)
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  next();
+});
 
 // Servir frontend estático desde /public (si lo estás usando así)
+// main.js y styles.css se generan uniendo public/js/ y public/css/ (ver src/bundle.js)
+const publicDir = path.join(__dirname, '..', 'public');
+app.get('/main.js', servirBundle(path.join(publicDir, 'js'), 'application/javascript; charset=utf-8'));
+app.get('/styles.css', servirBundle(path.join(publicDir, 'css'), 'text/css; charset=utf-8'));
+// Las piezas sueltas no se publican (evita servir código a medias)
+app.use(['/js', '/css'], (req, res) => res.status(404).end());
+
 // El HTML/JS/CSS se revalida (ETag) para que las actualizaciones lleguen;
 // iconos e imágenes se cachean una semana.
 app.use(express.static(path.join(__dirname, '..', 'public'), {
@@ -150,6 +171,9 @@ app.use((req, res, next) => {
 
 // Rutas API
 app.use('/api/auth/login', loginRateLimiter);
+app.use('/api/auth/register', loginRateLimiter);
+app.use('/api/auth/forgot-password', loginRateLimiter);
+app.use('/api/auth/reset-password', loginRateLimiter);
 app.use('/api/auth', authRutas);
 app.use('/api/usuarios', usuariosRutas);
 app.use('/api/ejemplares', ejemplaresRutas);

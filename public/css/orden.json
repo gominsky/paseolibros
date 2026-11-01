@@ -1,0 +1,70 @@
+[
+  {
+    "fichero": "base.css",
+    "descripcion": "Variables de tema, reset, cabecera, botones de icono, menú de herramientas y layout"
+  },
+  {
+    "fichero": "componentes.css",
+    "descripcion": "Tarjetas, tipografía, formularios, botones, tablas y cuadrícula de portadas"
+  },
+  {
+    "fichero": "escaner.css",
+    "descripcion": "Escáner (estilos base y overlay en móvil)"
+  },
+  {
+    "fichero": "modales.css",
+    "descripcion": "Modales: ficha, acceso, préstamo, deseos/cola, marcapáginas, panel del lector y estadísticas"
+  },
+  {
+    "fichero": "movil.css",
+    "descripcion": "Botón flotante y diseño móvil general; utilidades varias"
+  },
+  {
+    "fichero": "auth.css",
+    "descripcion": "Pantalla de acceso (rediseño)"
+  },
+  {
+    "fichero": "estetica.css",
+    "descripcion": "Mejoras estéticas generales (texturas, sombras, animaciones)"
+  },
+  {
+    "fichero": "ficha.css",
+    "descripcion": "Modal de ficha: cabecera, pestañas y acciones"
+  },
+  {
+    "fichero": "compartir.css",
+    "descripcion": "Bibliotecas compartidas"
+  },
+  {
+    "fichero": "portadas.css",
+    "descripcion": "Búsqueda de portadas y zona de portada"
+  },
+  {
+    "fichero": "estadisticas.css",
+    "descripcion": "Estadísticas visuales"
+  },
+  {
+    "fichero": "ayuda.css",
+    "descripcion": "Ayuda / manual"
+  },
+  {
+    "fichero": "ficha-movil.css",
+    "descripcion": "Ajustes del modal en móvil"
+  },
+  {
+    "fichero": "estanteria.css",
+    "descripcion": "Modo estantería"
+  },
+  {
+    "fichero": "libros-recibidos.css",
+    "descripcion": "Libros que me han prestado"
+  },
+  {
+    "fichero": "escaner-isbn.css",
+    "descripcion": "Escáner ISBN: marco guía, linterna y cancelar"
+  },
+  {
+    "fichero": "vista-previa.css",
+    "descripcion": "Vista previa del libro y aviso de duplicado al dar de alta"
+  }
+]
