@@ -2,6 +2,7 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import compression from 'compression';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import path from 'path';
@@ -11,7 +12,7 @@ import { fileURLToPath } from 'url';
 // Rate limiter simple en memoria para /api/auth/login
 const loginAttempts = new Map();
 function loginRateLimiter(req, res, next) {
-  const ip = req.ip || req.headers['x-forwarded-for'] || 'unknown';
+  const ip = req.ip || 'unknown'; // con 'trust proxy' req.ip es la IP real del cliente
   const now = Date.now();
   const windowMs = 15 * 60 * 1000; // 15 minutos
   const maxAttempts = 15;
@@ -65,9 +66,17 @@ if (!process.env.JWT_SECRETO) {
 
 const app = express();
 
+// Render (y casi cualquier hosting) pone un proxy delante: sin esto req.ip es
+// la IP del proxy y el límite de intentos de login se comparte entre TODOS.
+app.set('trust proxy', 1);
+
+// Comprime JS/CSS/HTML/JSON (main.js pasa de ~180 KB a ~40 KB por la red)
+app.use(compression());
+
 const uploadsDir = path.join(process.cwd(), 'uploads');
 fs.mkdirSync(uploadsDir, { recursive: true });
-app.use('/uploads', express.static(uploadsDir));
+// Cada portada subida tiene un nombre único → se puede cachear "para siempre"
+app.use('/uploads', express.static(uploadsDir, { maxAge: '30d', immutable: true }));
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -86,11 +95,21 @@ app.use(cors({
   },
   credentials: false,
 }));
-app.use(morgan('dev'));
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'tiny' : 'dev'));
 app.use(express.json());
 
 // Servir frontend estático desde /public (si lo estás usando así)
-app.use(express.static(path.join(__dirname, '..', 'public')));
+// El HTML/JS/CSS se revalida (ETag) para que las actualizaciones lleguen;
+// iconos e imágenes se cachean una semana.
+app.use(express.static(path.join(__dirname, '..', 'public'), {
+  setHeaders(res, filePath) {
+    if (/\.(png|jpe?g|webp|svg|ico)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=604800');
+    } else {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  },
+}));
 
 // Servir SW y manifest con cabeceras correctas para PWA
 app.get('/service-worker.js', (req, res) => {
@@ -149,23 +168,8 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true, mensaje: 'PaseoLibros API viva 😄' });
 });
 
-// Endpoint temporal — limpiar portadas rotas (eliminar después de usar)
-app.get('/api/admin/limpiar-portadas-rotas', async (req, res) => {
-  if (req.query.secret !== 'paseolibros2026') {
-    return res.status(403).json({ error: 'No autorizado' });
-  }
-  try {
-    const result = await pool.query(`
-      UPDATE libros 
-      SET url_portada = NULL 
-      WHERE url_portada LIKE '/uploads/%'
-      RETURNING id, titulo
-    `);
-    res.json({ ok: true, actualizados: result.rowCount, libros: result.rows });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
+// (Eliminado /api/admin/limpiar-portadas-rotas: tenía la clave escrita en el código,
+//  que es público en GitHub. Si se necesita, hacerlo con SQL desde la consola de Render.)
 app.use((err, req, res, next) => {
   console.error('🔥 Unhandled error:', err);
   res.status(500).json({ error: 'Error interno' });

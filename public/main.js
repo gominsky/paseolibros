@@ -1,11 +1,6 @@
 const API_BASE = window.API_BASE;
-let codeReader = null;
-let currentStream = null;
  
 // estabilidad de lectura (EAN)
-let lastScanValue = null;
-let lastScanCount = 0;
-let scannerRunning = false;
 let vistaEjemplares = 'lista';
  
 // Preferencias UI (persisten en el navegador)
@@ -204,6 +199,23 @@ function urlPortadaAbsoluta(url) {
   return `${API_BASE}${url}`; // /uploads/xxx.jpg
 }
  
+// Caché de portadas: el navegador las guarda y solo se fuerza la recarga
+// de una portada concreta cuando se cambia (antes se añadía ?t=Date.now()
+// a TODAS en cada repintado → se volvían a descargar todas al buscar u ordenar).
+const portadaVersion = new Map(); // url absoluta -> marca de versión
+function marcarPortadaCambiada(url) {
+  const abs = urlPortadaAbsoluta(url);
+  if (abs) portadaVersion.set(abs, Date.now());
+}
+function srcPortada(url) {
+  const abs = urlPortadaAbsoluta(url);
+  if (!abs) return '';
+  const v = portadaVersion.get(abs);
+  return v ? `${abs}${abs.includes('?') ? '&' : '?'}v=${v}` : abs;
+}
+window.srcPortada = srcPortada;
+window.marcarPortadaCambiada = marcarPortadaCambiada;
+ 
 function toSortable(v) {
   if (v === null || v === undefined) return '';
   return normalizarTitulo(String(v));
@@ -299,7 +311,6 @@ async function fetchReaderMeta(libroId) {
  
       const meta = await res.json();
       
-      console.log('reader-meta', libroId, JSON.stringify(meta, null, 2));
  
 // soporta: notes[], notesCount, notas[], notas_count, etc.
 const notesArr =
@@ -520,8 +531,12 @@ function renderEjemplares() {
   });
  
   tbody.innerHTML = '';
+  const esMovil = window.matchMedia && window.matchMedia('(max-width: 820px)').matches;
+  // En móvil la tabla está oculta por CSS: no la rellenamos (ahorra DOM y descargas)
+  const filasTabla = (esMovil || vistaEjemplares !== 'lista') ? [] : filtrados;
+  const frag = document.createDocumentFragment();
  
-  for (const e of filtrados) {
+  for (const e of filasTabla) {
     const tr = document.createElement('tr');
     tr.dataset.libroId = e.libro_id;
     tr.dataset.ejemplarId = e.ejemplar_id;
@@ -531,7 +546,7 @@ function renderEjemplares() {
   <td>
     ${
       e.url_portada
-        ? `<img src="${urlPortadaAbsoluta(e.url_portada)}?t=${Date.now()}" alt="Portada" class="portada-mini-img" />`
+        ? `<img src="${srcPortada(e.url_portada)}" alt="Portada" class="portada-mini-img" loading="lazy" decoding="async" width="40" height="60" />`
         : `<div class="portada-placeholder-mini" aria-hidden="true"><span class="ph-logo">Pdl</span></div>`
     }
   </td>
@@ -548,13 +563,14 @@ function renderEjemplares() {
 </td>
  
  
-    <td class="cell-author">${e.autores || ''}</td>
-  <td>${e.editorial || ''}</td>
-  <td>${e.isbn || ''}</td>
-  <td>${e.ubicacion || ''}</td>
+    <td class="cell-author">${escapeHtml(e.autores || '')}</td>
+  <td>${escapeHtml(e.editorial || '')}</td>
+  <td>${escapeHtml(e.isbn || '')}</td>
+  <td>${escapeHtml(e.ubicacion || '')}</td>
     `;
-    tbody.appendChild(tr);
+    frag.appendChild(tr);
   }
+  tbody.appendChild(frag);
     // ✅ PRO MAX: también pinta la lista móvil (con los mismos filtrados/orden)
   renderEjemplaresMobileList(filtrados);
   renderEjemplaresGrid(filtrados);
@@ -565,7 +581,11 @@ function renderEjemplares() {
   }
 if (token && usuarioActual?.id) {
   const ids = filtrados.map(e => e.libro_id);
-  requestAnimationFrame(() => ensureReaderMetaFor(ids));
+  // Las insignias ya vienen en el listado; esto solo pinta (y pide lo que falte)
+  requestAnimationFrame(() => {
+    ids.forEach(applyBadgesForLibro);
+    ensureReaderMetaFor(ids);
+  });
 }
  
 }
@@ -575,16 +595,16 @@ function renderEjemplaresMobileList(filtrados){
   if (!list) return;
  
   const isMobile = window.matchMedia && window.matchMedia('(max-width: 820px)').matches;
-  if (!isMobile) { list.innerHTML = ''; return; }
+  if (!isMobile || vistaEjemplares !== 'lista') { list.innerHTML = ''; return; }
  
   list.innerHTML = (filtrados || []).map(e => {
-    const portada = e.url_portada ? `${urlPortadaAbsoluta(e.url_portada)}?t=${Date.now()}` : '';
+    const portada = e.url_portada ? srcPortada(e.url_portada) : '';
     const notas = (e.notas || '').trim();
  
     return `
       <div class="ej-card" data-libro-id="${e.libro_id}" data-ejemplar-id="${e.ejemplar_id}">
         ${portada
-          ? `<img class="ej-cover" src="${portada}" alt="Portada" />`
+          ? `<img class="ej-cover" src="${portada}" alt="Portada" loading="lazy" decoding="async" />`
           : `<div class="portada-placeholder-mini" aria-hidden="true">
   <span class="ph-logo">Pdl</span>
 </div>`
@@ -613,8 +633,6 @@ function renderEjemplaresMobileList(filtrados){
       </div>
     `;
   }).join('');
-  ensureReaderMetaFor((filtrados || []).map(x => x.libro_id));
- 
 }
  
 // ---------- Cargar ejemplares (rellena caché y renderiza) ----------
@@ -649,6 +667,16 @@ async function cargarEjemplares(usuarioId) {
     }
  
     if (info) info.textContent = `Total ejemplares: ${ejemplares.length}`;
+    // El servidor ya devuelve favorito/nº notas/audios/etiquetas en el listado
+    for (const e of ejemplares) {
+      if (e.rm_favorito === undefined) continue;
+      readerMetaCache.set(Number(e.libro_id), {
+        favorite: Boolean(e.rm_favorito),
+        notesCount: Number(e.rm_notas || 0),
+        audiosCount: Number(e.rm_audios || 0),
+        tagsCount: Number(e.rm_tags || 0),
+      });
+    }
     ejemplaresCache = ejemplares;
     window._ejemplaresCache = ejemplares;
     renderEjemplares();
@@ -679,8 +707,6 @@ async function crearEjemplar() {
     setUserStatusErr('Introduce un ISBN (o escanéalo).');
     return;
   }
-  console.log('TOKEN?', token);
-  console.log('HEADERS', getHeaders());
   try {
     const res = await fetch(`${API_BASE}/api/ejemplares`, {
       method: 'POST',
@@ -754,7 +780,7 @@ const libro = (ejemplaresCache || [])
   .find(e => Number(e.libro_id) === Number(libroId));
  
 flashOk(
-  `Lectura iniciada libro?.titulo ? ': ' + libro.titulo : ''}`
+  `Lectura iniciada${libro?.titulo ? ': ' + libro.titulo : ''}`
 );
     setUserStatusOk('Lectura iniciada.');
     await cargarLecturas(libroId);
@@ -1722,219 +1748,7 @@ async function marcarPrestamoDevueltoGlobal() {
     setUserStatusErr('Error de red al marcar préstamo como devuelto.');
   }
 }
-// ---------- Escáner (REHECHO desde cero) ----------
-const { BrowserMultiFormatReader, DecodeHintType, BarcodeFormat } = ZXing;
- 
-let scanLocked = false;
- 
-const STABLE_FRAMES = 2; // pide 2 lecturas iguales seguidas para aceptar
- 
-function isLikelyISBN(code) {
-  const v = String(code || "").trim();
-  // EAN-13 numérico (muchos ISBN vienen como 978/979...)
-  return /^\d{13}$/.test(v);
-}
- 
-async function pickBackCameraDeviceId() {
-  if (!navigator.mediaDevices?.enumerateDevices) return null;
- 
-  const devices = await navigator.mediaDevices.enumerateDevices();
-  const cams = devices.filter(d => d.kind === "videoinput");
-  if (!cams.length) return null;
- 
-  // si hay labels (normalmente tras aceptar permisos), intenta detectar trasera
-  const byLabel = cams.find(d => /back|rear|environment|trasera/i.test(d.label || ""));
-  if (byLabel) return byLabel.deviceId;
- 
-  // fallback típico: última cámara suele ser trasera en muchos móviles
-  return cams[cams.length - 1].deviceId;
-}
- 
-async function aplicarMejorasDeCamara(stream) {
-  try {
-    const track = stream.getVideoTracks?.()[0];
-    if (!track) return;
- 
-    const caps = track.getCapabilities?.() || {};
- 
-    // autofocus continuo si existe
-    const adv = [];
-    if (caps.focusMode?.includes?.("continuous")) adv.push({ focusMode: "continuous" });
- 
-    // torch si existe (opcional; en algunos móviles ayuda MUCHO)
-    if (caps.torch) adv.push({ torch: true });
- 
-    if (adv.length) {
-      await track.applyConstraints({ advanced: adv });
-    }
-  } catch {
-    // silencioso: no todos los navegadores soportan esto
-  }
-}
-function extraerISBN(texto) {
-  const digits = String(texto || "").replace(/\D/g, ""); // solo números
-  // Busca un EAN-13 típico de ISBN: empieza por 978 o 979
-  for (let i = 0; i <= digits.length - 13; i++) {
-    const cand = digits.slice(i, i + 13);
-    if (cand.startsWith("978") || cand.startsWith("979")) return cand;
-  }
-  // fallback: si solo hay 13 dígitos y no empieza 978/979, igual te sirve
-  if (digits.length === 13) return digits;
-  return null;
-}
- 
-function resetStability() {
-  scanLocked = false;
-  lastScanValue = null;
-  lastScanCount = 0;
-}
-let bd = null;
-let bdRunning = false;
- 
-async function iniciarEscaneo() {
-  const scannerDiv = document.getElementById("scanner");
-  const video = document.getElementById("video");
-  const textEl = document.querySelector("#scanner .scanner-text");
- 
-  if (!scannerDiv || !video) return;
- 
-  if (!window.isSecureContext) {
-    setUserStatusErr(`La cámara requiere HTTPS (o localhost). Estás en: ${window.location.origin}`);
-    return;
-  }
- 
-  if (scannerRunning) return;
-  scannerRunning = true;
- 
-  detenerEscaneo({ keepButtonState: true, keepScannerRunning: true });
-  scannerDiv.style.display = "block";
-  setScanButtonState(true);
-  if (textEl) textEl.textContent = "Apunta al código de barras…";
- 
-  try {
-    // 1) Abre cámara con constraints "para cerca"
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: { ideal: "environment" },
-        width: { ideal: 1920 },
-        height: { ideal: 1080 }
-      },
-      audio: false
-    });
-    currentStream = stream;
-    video.srcObject = stream;
-    video.setAttribute("playsinline", "true");
-    await video.play().catch(()=>{});
- 
-    // 2) Intenta autofocus/torch si existe
-    await aplicarMejorasDeCamara(stream);
- 
-    // 3) Motor nativo (Chrome): EAN-13
-    if ("BarcodeDetector" in window) {
-      const formats = await BarcodeDetector.getSupportedFormats();
-      const wanted = ["ean_13", "ean_8", "upc_a", "code_128"];
-      const use = wanted.filter(f => formats.includes(f));
-      bd = new BarcodeDetector({ formats: use.length ? use : formats });
- 
-      bdRunning = true;
-      detectarConBarcodeDetector(video, textEl);
-      return;
-    }
- 
-    // 4) Fallback: ZXing si no hay BarcodeDetector
-    iniciarZXingFallback(video, textEl);
- 
-  } catch (e) {
-    console.error(e);
-    setUserStatusErr(`No se pudo iniciar la cámara: ${e?.name || "error"}`);
-    detenerEscaneo({ keepButtonState: false });
-    scannerRunning = false;
-  }
-}
- 
-async function detectarConBarcodeDetector(video, textEl) {
-  if (!bdRunning) return;
- 
-  try {
-    const barcodes = await bd.detect(video);
-    if (barcodes && barcodes.length) {
-      const raw = barcodes[0].rawValue || "";
-      if (textEl) textEl.textContent = `Detectado: ${raw}`;
- 
-      const isbn = extraerISBN(raw);
-      if (isbn) {
-        document.getElementById("isbn").value = isbn;
-        setUserStatusOk(`ISBN detectado: ${isbn}`);
-        bdRunning = false;
-        detenerEscaneo({ keepButtonState: false });
-        scannerRunning = false;
-        return;
-      }
-    }
-  } catch (e) {
-    // silencioso
-  }
- 
-  requestAnimationFrame(() => detectarConBarcodeDetector(video, textEl));
-}
- 
-function iniciarZXingFallback(video, textEl) {
-  const hints = new Map();
-  hints.set(DecodeHintType.TRY_HARDER, true);
-  hints.set(DecodeHintType.POSSIBLE_FORMATS, [
-    BarcodeFormat.EAN_13,
-    BarcodeFormat.EAN_8,
-    BarcodeFormat.UPC_A,
-    BarcodeFormat.CODE_128
-  ]);
- 
-  codeReader = new BrowserMultiFormatReader(hints);
- 
-  codeReader.decodeFromVideoElement(video, (result, err) => {
-    if (!result?.text) return;
-    const raw = String(result.text);
-    if (textEl) textEl.textContent = `Detectado: ${raw}`;
- 
-    const isbn = extraerISBN(raw);
-    if (!isbn) return;
- 
-    document.getElementById("isbn").value = isbn;
-    setUserStatusOk(`ISBN detectado: ${isbn}`);
-    detenerEscaneo({ keepButtonState: false });
-    scannerRunning = false;
-  });
-}
- 
-function detenerEscaneo(opts = {}) {
-  const { keepButtonState = false, keepScannerRunning = false } = opts;
- 
-  const scannerDiv = document.getElementById("scanner");
-  const video = document.getElementById("video");
- 
-  resetStability();
- 
-  bdRunning = false;
- 
-  if (codeReader) {
-    try { codeReader.reset(); } catch {}
-    codeReader = null;
-  }
- 
-  if (currentStream) {
-    try { currentStream.getTracks().forEach(t => t.stop()); } catch {}
-    currentStream = null;
-  }
- 
-  if (video) {
-    try { video.pause(); } catch {}
-    video.srcObject = null;
-  }
- 
-  if (scannerDiv) scannerDiv.style.display = "none";
- 
-  if (!keepButtonState) setScanButtonState(false);
-  if (!keepScannerRunning) scannerRunning = false;
-}
+// ---------- Escáner: ver scanner.js (window.Scanner) ----------
  
 // ---------- Eliminar ejemplar ----------
 async function eliminarEjemplar(ejemplarId) {
@@ -2017,7 +1831,7 @@ const portada =
     const hasPortada = Boolean(portada);
   
     img.classList.toggle('is-placeholder', !hasPortada);
-    img.src = hasPortada ? `${urlPortadaAbsoluta(portada)}?t=${Date.now()}` : '';
+    img.src = hasPortada ? srcPortada(portada) : '';
   
     img.onerror = () => {
       img.src = '';
@@ -2159,7 +1973,8 @@ async function subirPortadaArchivo(file) {
     setModalMsg('Portada actualizada ✅');
  
     const img = document.getElementById('ficha-portada-img');
-    if (img && data.url_portada) img.src = `${urlPortadaAbsoluta(data.url_portada)}?t=${Date.now()}`;
+    if (data.url_portada) marcarPortadaCambiada(data.url_portada);
+    if (img && data.url_portada) img.src = srcPortada(data.url_portada);
  
     const portadaInput = document.getElementById('edit-libro-portada');
     if (portadaInput && data.url_portada) portadaInput.value = data.url_portada;
@@ -2788,11 +2603,11 @@ function renderEjemplaresGrid(lista) {
   if (!showGrid) return;
  
   grid.innerHTML = (lista || []).map(e => {
-    const portada = e.url_portada ? `${urlPortadaAbsoluta(e.url_portada)}?t=${Date.now()}` : '';
+    const portada = e.url_portada ? srcPortada(e.url_portada) : '';
     return `
       <div class="ej-grid-item" data-libro-id="${e.libro_id}" data-ejemplar-id="${e.ejemplar_id}">
         ${portada
-          ? `<img class="ej-grid-cover" src="${portada}" alt="Portada"
+          ? `<img class="ej-grid-cover" src="${portada}" alt="Portada" loading="lazy" decoding="async"
                onerror="this.onerror=null;this.outerHTML='<div class=&quot;portada-placeholder-grid&quot; aria-hidden=&quot;true&quot;><span class=&quot;ph-logo&quot;>Pdl</span><span class=&quot;ph-sub&quot;>Sin portada</span></div>';">`
           : `<div class="portada-placeholder-grid" aria-hidden="true">
                <span class="ph-logo">Pdl</span>
@@ -2869,14 +2684,8 @@ document.addEventListener('DOMContentLoaded', () => {
   
   document.getElementById('btn-escanear')?.addEventListener('click', async () => {
     const btn = document.getElementById('btn-escanear');
-    const isOn = btn?.dataset?.scanning === '1';
-    if (isOn) {
-      detenerEscaneo();
-      setScanButtonState(false);
-    } else {
-      setScanButtonState(true);
-      await iniciarEscaneo();
-    }
+    if (window.Scanner) await window.Scanner.toggle();
+    else setUserStatusErr('El escáner no está disponible.');
   });
   
   document.getElementById('ejemplares-grid')?.addEventListener('click', (e) => {
@@ -3018,7 +2827,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (abierto) {
       setTimeout(() => document.getElementById('isbn')?.focus(), 50);
     } else {
-      try { detenerEscaneo(); } catch {}
+      try { window.Scanner?.stop(); } catch {}
     }
   });
  
@@ -3080,11 +2889,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // Buscador ejemplares (usa render, no "oculta filas")
   const buscador = document.getElementById('buscador-ejemplares');
   if (buscador) {
+    let tBusqueda = null;
     buscador.addEventListener('input', () => {
-      ejemplaresQuery = buscador.value || '';
-      renderEjemplares();
+      clearTimeout(tBusqueda);
+      tBusqueda = setTimeout(() => {
+        ejemplaresQuery = buscador.value || '';
+        renderEjemplares();
+      }, 180);
     });
   }
+  // Al cruzar el punto de corte móvil/escritorio hay que repintar la vista correcta
+  window.matchMedia?.('(max-width: 820px)').addEventListener?.('change', () => renderEjemplares());
     // Ordenación compacta (móvil): título / autor / recientes
     const sortSel = document.getElementById('sort-ejemplares');
   // Clicks en tabla ejemplares (acciones vs abrir ficha)
@@ -3112,7 +2927,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.classList.remove('alta-visible');
       const fab = document.getElementById('btn-toggle-alta');
       if (fab) fab.textContent = '+';
-      try { detenerEscaneo(); } catch {}
+      try { window.Scanner?.stop(); } catch {}
     }
   });
  
@@ -3432,6 +3247,14 @@ window.flashErr = function flashErr(msg, ms = 3500) {
     if (!res.ok) {
       const msg = payload?.error || (typeof payload === 'string' ? payload : '') || `${res.status} ${res.statusText}`;
       throw new Error(msg);
+    }
+ 
+    // Si cambia favorito/notas/etiquetas/audios, refresca las insignias del listado
+    const cambio = /^\/api\/libros\/(\d+)\/(favorite|tags|notes|audios)/.exec(path);
+    if (cambio && String(opts.method || 'GET').toUpperCase() !== 'GET') {
+      const id = Number(cambio[1]);
+      readerMetaCache.delete(id);
+      fetchReaderMeta(id).then(() => applyBadgesForLibro(id)).catch(() => {});
     }
  
     return payload;
@@ -4089,7 +3912,8 @@ window.flashErr = function flashErr(msg, ms = 3500) {
         // Actualizar la imagen en el modal
         const img = document.getElementById('ficha-portada-img');
         if (img && data.url_portada) {
-          img.src = `${window.API_BASE}${data.url_portada}?t=${Date.now()}`;
+          window.marcarPortadaCambiada(data.url_portada);
+          img.src = window.srcPortada(data.url_portada);
           img.classList.remove('is-placeholder');
         }
         // Refrescar lista
@@ -4295,7 +4119,8 @@ window.flashErr = function flashErr(msg, ms = 3500) {
       // Actualizar portada en el modal
       const img = document.getElementById('ficha-portada-img');
       if (img && data.url_portada) {
-        img.src = `${window.API_BASE}${data.url_portada}?t=${Date.now()}`;
+        window.marcarPortadaCambiada(data.url_portada);
+        img.src = window.srcPortada(data.url_portada);
         img.classList.remove('is-placeholder');
       }
  
@@ -4733,12 +4558,12 @@ window.flashErr = function flashErr(msg, ms = 3500) {
       var autorCorto = autores ? escapeHtml(autores.split(',')[0].trim()) : '';
  
       if (e.url_portada) {
-        var src = urlPortadaAbsoluta(e.url_portada);
+        var src = srcPortada(e.url_portada);
         return '<div class="lomo lomo--portada"' +
                ' data-libro-id="' + e.libro_id + '"' +
                ' data-ejemplar-id="' + e.ejemplar_id + '"' +
                ' title="' + tooltip + '">' +
-               '<img src="' + src + '" alt="' + tEsc + '" class="lomo-portada-img" />' +
+               '<img src="' + src + '" alt="' + tEsc + '" class="lomo-portada-img" loading="lazy" decoding="async" />' +
                '</div>';
       }
  
@@ -5057,4 +4882,4 @@ window.flashErr = function flashErr(msg, ms = 3500) {
   });
  
 })();
- 
+ 

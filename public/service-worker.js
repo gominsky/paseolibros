@@ -1,10 +1,20 @@
 // service-worker.js
-// PaseoLibros PWA — caché offline básico
-// Versión: actualizar este número para forzar recarga del SW
-const CACHE_VERSION = 'paseolibros-v15';   // antes: 'paseolibros-v14'
+// PaseoLibros PWA — caché offline
+//
+// Estrategias:
+//  · /api/*        → siempre red (los datos no se cachean).
+//  · /uploads/*    → cache-first (cada portada tiene nombre único, nunca cambia).
+//  · Portadas externas (Google Books, Open Library…) → caché HTTP del navegador
+//    (las respuestas opacas ocupan ~7 MB cada una en Cache Storage de Chrome).
+//  · App (html/js/css) → stale-while-revalidate: abre al instante desde caché
+//    y se actualiza en segundo plano. Ya no hace falta subir la versión a mano
+//    para que el móvil reciba los cambios (basta con recargar una vez).
+const CACHE_VERSION = 'paseolibros-v16';
+const CACHE_STATIC = `${CACHE_VERSION}-static`;
+const CACHE_IMG = `${CACHE_VERSION}-img`;
+const MAX_IMGS = 600;
 
-// Archivos estáticos que se cachean al instalar
-const CACHE_STATIC = [
+const PRECACHE = [
   '/',
   '/index.html',
   '/styles.css',
@@ -16,74 +26,89 @@ const CACHE_STATIC = [
   '/manifest.json',
 ];
 
-// ── Install: cachear archivos estáticos ──────────────────
-self.addEventListener('install', event => {
+self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_VERSION).then(cache => {
-      return cache.addAll(CACHE_STATIC).catch(err => {
-        console.warn('[SW] Error cacheando algunos archivos:', err);
-      });
-    })
+    caches.open(CACHE_STATIC)
+      .then((cache) => cache.addAll(PRECACHE))
+      .catch((err) => console.warn('[SW] Precarga incompleta:', err))
   );
   self.skipWaiting();
 });
 
-// ── Activate: limpiar cachés antiguas ────────────────────
-self.addEventListener('activate', event => {
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys
-          .filter(key => key !== CACHE_VERSION)
-          .map(key => caches.delete(key))
-      )
-    )
+    caches.keys()
+      .then((keys) => Promise.all(
+        keys.filter((k) => k !== CACHE_STATIC && k !== CACHE_IMG).map((k) => caches.delete(k))
+      ))
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// ── Fetch: estrategia por tipo de recurso ────────────────
-self.addEventListener('fetch', event => {
-  if (!event.request.url.startsWith('http')) return;
-  const url = new URL(event.request.url);
+async function recortarCache(nombre, max) {
+  const cache = await caches.open(nombre);
+  const keys = await cache.keys();
+  for (let i = 0; i < keys.length - max; i++) await cache.delete(keys[i]);
+}
 
-  // Las peticiones a la API siempre van a la red (no cachear datos)
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(event.request).catch(() =>
-        new Response(JSON.stringify({ error: 'Sin conexión' }), {
-          status: 503,
-          headers: { 'Content-Type': 'application/json' }
-        })
-      )
-    );
-    return;
+async function cacheFirst(request, nombre) {
+  const cache = await caches.open(nombre);
+  const hit = await cache.match(request);
+  if (hit) return hit;
+  const res = await fetch(request);
+  if (res && res.ok) {
+    cache.put(request, res.clone()).then(() => recortarCache(nombre, MAX_IMGS)).catch(() => {});
   }
+  return res;
+}
 
-  // Las portadas: network-first con fallback a caché
-  if (url.pathname.startsWith('/uploads/')) {
-    event.respondWith(
-      fetch(event.request)
-        .then(res => {
-          const copia = res.clone();
-          caches.open(CACHE_VERSION).then(cache => cache.put(event.request, copia));
-          return res;
-        })
-        .catch(() => caches.match(event.request))
-    );
-    return;
-  }
-
-  // Archivos estáticos: cache-first
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(res => {
-        if (!res || res.status !== 200 || res.type === 'opaque') return res;
-        const copia = res.clone();
-        caches.open(CACHE_VERSION).then(cache => cache.put(event.request, copia));
-        return res;
-      });
+async function staleWhileRevalidate(event) {
+  const cache = await caches.open(CACHE_STATIC);
+  const hit = await cache.match(event.request, { ignoreSearch: event.request.mode === 'navigate' });
+  const red = fetch(event.request)
+    .then((res) => {
+      if (res && res.ok && res.type === 'basic') cache.put(event.request, res.clone());
+      return res;
     })
-  );
+    .catch(() => null);
+  if (hit) {
+    event.waitUntil(red);
+    return hit;
+  }
+  const res = await red;
+  if (res) return res;
+  if (event.request.mode === 'navigate') {
+    const index = await cache.match('/index.html');
+    if (index) return index;
+  }
+  return new Response('Sin conexión', { status: 503 });
+}
+
+self.addEventListener('fetch', (event) => {
+  const req = event.request;
+  if (req.method !== 'GET' || !req.url.startsWith('http')) return;
+  const url = new URL(req.url);
+
+  // Datos: siempre red
+  if (url.origin === self.location.origin && url.pathname.startsWith('/api/')) {
+    event.respondWith(
+      fetch(req).catch(() => new Response(JSON.stringify({ error: 'Sin conexión' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      }))
+    );
+    return;
+  }
+
+  // Imágenes propias (portadas subidas, logo, iconos)
+  if (url.origin === self.location.origin && (req.destination === 'image' || url.pathname.startsWith('/uploads/'))) {
+    event.respondWith(cacheFirst(req, CACHE_IMG).catch(() => caches.match(req)));
+    return;
+  }
+
+  // App propia
+  if (url.origin === self.location.origin) {
+    event.respondWith(staleWhileRevalidate(event));
+  }
+  // El resto (fuentes, CDN) lo gestiona el navegador con su propia caché HTTP
 });

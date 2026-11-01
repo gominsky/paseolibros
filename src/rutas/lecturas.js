@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import pool from '../bd.js';
+import { requiereUsuario, soloPropio } from '../middlewares/acceso.js';
 
 const router = Router();
 
 // 🔢 estadísticas
 // 🔢 estadisticas
-router.get('/usuarios/:id/lecturas/estadisticas', async (req, res) => {
+router.get('/usuarios/:id/lecturas/estadisticas', soloPropio('id'), async (req, res) => {
   try {
     const usuarioId = Number(req.params.id);
 
@@ -49,7 +50,7 @@ router.get('/usuarios/:id/lecturas/estadisticas', async (req, res) => {
   }
 });
 
-router.get('/usuarios/:id/lecturas/estadisticas/:anio', async (req, res) => {
+router.get('/usuarios/:id/lecturas/estadisticas/:anio', soloPropio('id'), async (req, res) => {
   try {
     const usuarioId = Number(req.params.id);
     const anio = Number(req.params.anio);
@@ -114,7 +115,7 @@ router.get('/usuarios/:id/lecturas/estadisticas/:anio', async (req, res) => {
 
 // Histórico de lecturas de un libro:
 // GET /api/libros/:libroId/lecturas
-router.get('/libros/:libroId/lecturas', async (req, res) => {
+router.get('/libros/:libroId/lecturas', requiereUsuario, async (req, res) => {
   const { libroId } = req.params;
 
   try {
@@ -134,8 +135,9 @@ router.get('/libros/:libroId/lecturas', async (req, res) => {
        FROM lecturas le
        JOIN usuarios u ON u.id = le.usuario_id
        WHERE le.libro_id = $1
+         AND le.usuario_id = $2
        ORDER BY le.inicio DESC`,
-      [libroId]
+      [libroId, req.usuario.id]
     );
     res.json(resultado.rows);
   } catch (error) {
@@ -146,8 +148,10 @@ router.get('/libros/:libroId/lecturas', async (req, res) => {
 
 // Crear una nueva lectura (empezar a leer):
 // POST /api/lecturas
-router.post('/lecturas', async (req, res) => {
-  const { usuario_id, libro_id, ejemplar_id, estado, pagina_actual, notas } = req.body;
+router.post('/lecturas', requiereUsuario, async (req, res) => {
+  // El usuario sale del token, nunca del cuerpo de la petición
+  const usuario_id = req.usuario.id;
+  const { libro_id, ejemplar_id, estado, pagina_actual, notas } = req.body;
 
   if (!usuario_id || !libro_id) {
     return res.status(400).json({ error: 'usuario_id y libro_id son obligatorios' });
@@ -179,7 +183,7 @@ router.post('/lecturas', async (req, res) => {
 
 // Finalizar una lectura:
 // PATCH /api/lecturas/:id/finalizar
-router.patch('/lecturas/:id/finalizar', async (req, res) => {
+router.patch('/lecturas/:id/finalizar', requiereUsuario, async (req, res) => {
   const { id } = req.params;
   const { pagina_actual, valoracion, notas } = req.body;
 
@@ -192,8 +196,9 @@ router.patch('/lecturas/:id/finalizar', async (req, res) => {
            valoracion = COALESCE($2, valoracion),
            notas = COALESCE($3, notas)
        WHERE id = $4
+         AND usuario_id = $5
        RETURNING *`,
-      [pagina_actual || null, valoracion || null, notas || null, id]
+      [pagina_actual || null, valoracion || null, notas || null, id, req.usuario.id]
     );
 
     if (resultado.rows.length === 0) {
@@ -207,7 +212,7 @@ router.patch('/lecturas/:id/finalizar', async (req, res) => {
   }
 });
 // Lecturas abiertas de un usuario (no terminadas)
-router.get('/usuarios/:usuarioId/lecturas-abiertas', async (req, res) => {
+router.get('/usuarios/:usuarioId/lecturas-abiertas', soloPropio('usuarioId'), async (req, res) => {
   const { usuarioId } = req.params;
 
   try {
@@ -240,7 +245,7 @@ router.get('/usuarios/:usuarioId/lecturas-abiertas', async (req, res) => {
 });
 // Actualizar marca-páginas (pagina_actual):
 // PATCH /api/lecturas/:id/pagina
-router.patch('/lecturas/:id/pagina', async (req, res) => {
+router.patch('/lecturas/:id/pagina', requiereUsuario, async (req, res) => {
   const { id } = req.params;
   const { pagina_actual } = req.body;
 
@@ -258,8 +263,9 @@ router.patch('/lecturas/:id/pagina', async (req, res) => {
       `UPDATE lecturas
        SET pagina_actual = $1
        WHERE id = $2
+         AND usuario_id = $3
        RETURNING *`,
-      [pagina, id]
+      [pagina, id, req.usuario.id]
     );
 
     if (resultado.rows.length === 0) {

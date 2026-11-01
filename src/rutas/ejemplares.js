@@ -1,8 +1,15 @@
 // src/rutas/ejemplares.js
 import { Router } from 'express';
 import pool from '../bd.js';
+import { requiereUsuario } from '../middlewares/acceso.js';
 
 const router = Router();
+
+// Tiempo máximo por consulta externa: si Google u Open Library tardan,
+// no dejamos al usuario esperando indefinidamente al dar de alta un libro.
+const TIMEOUT_EXTERNO_MS = 6000;
+const conTimeout = () => ({ signal: AbortSignal.timeout(TIMEOUT_EXTERNO_MS) });
+const https = (u) => (u ? String(u).replace(/^http:\/\//i, 'https://') : u);
 
 /**
  * Limpia el ISBN (quita espacios, guiones, etc.)
@@ -42,7 +49,7 @@ async function obtenerDatosLibroDeApi(isbn) {
   // 1) GOOGLE BOOKS (gratis con cuota)
   try {
     const urlGoogle = `https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(isbn)}`;
-    const rG = await fetch(urlGoogle);
+    const rG = await fetch(urlGoogle, conTimeout());
 
     if (rG.ok) {
       const g = await rG.json();
@@ -69,7 +76,7 @@ async function obtenerDatosLibroDeApi(isbn) {
           fecha_publicacion,
           numero_paginas,
           descripcion,
-          url_portada: img, // a veces viene en http/https
+          url_portada: https(img), // Google a veces la da en http (contenido mixto)
         };
       }
     }
@@ -80,7 +87,7 @@ async function obtenerDatosLibroDeApi(isbn) {
   // 2) OPEN LIBRARY BOOKS API (por ISBN)
   try {
     const urlOLBooks = `https://openlibrary.org/api/books?bibkeys=ISBN:${encodeURIComponent(isbn)}&format=json&jscmd=data`;
-    const rB = await fetch(urlOLBooks);
+    const rB = await fetch(urlOLBooks, conTimeout());
 
     if (rB.ok) {
       const b = await rB.json();
@@ -123,7 +130,7 @@ async function obtenerDatosLibroDeApi(isbn) {
   // 3) OPEN LIBRARY SEARCH (tu implementación actual, como fallback final)
   try {
     const url = `https://openlibrary.org/search.json?isbn=${encodeURIComponent(isbn)}`;
-    const respuesta = await fetch(url);
+    const respuesta = await fetch(url, conTimeout());
 
     if (!respuesta.ok) {
       console.warn(`Open Library search devolvió estado ${respuesta.status} para ISBN ${isbn}`);
@@ -255,9 +262,10 @@ const resultadoEjemplar = await pool.query(
   }
 });
 
-// Listar ejemplares (opcionalmente filtrando por usuario_id ?usuario_id=1)
-router.get('/', async (req, res) => {
-  const { usuario_id } = req.query;
+// Listar ejemplares del usuario autenticado
+// (antes devolvía los de TODOS los usuarios sin pedir sesión)
+router.get('/', requiereUsuario, async (req, res) => {
+  const usuario_id = req.usuario.id;
 
   try {
     let consulta = `

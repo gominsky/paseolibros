@@ -1,12 +1,13 @@
 // src/rutas/prestamos.js
 import { Router } from 'express';
 import pool from '../bd.js';
+import { requiereUsuario, soloPropio } from '../middlewares/acceso.js';
 
 const router = Router();
 
 // Histórico de préstamos de un libro:
 // GET /api/libros/:libroId/prestamos
-router.get('/libros/:libroId/prestamos', async (req, res) => {
+router.get('/libros/:libroId/prestamos', requiereUsuario, async (req, res) => {
   const { libroId } = req.params;
 
   try {
@@ -30,8 +31,9 @@ router.get('/libros/:libroId/prestamos', async (req, res) => {
        JOIN usuarios prestador ON prestador.id = p.usuario_prestador_id
        LEFT JOIN usuarios receptor ON receptor.id = p.usuario_receptor_id
        WHERE l.id = $1
+         AND (p.usuario_prestador_id = $2 OR p.usuario_receptor_id = $2)
        ORDER BY p.fecha_prestamo DESC`,
-      [libroId]
+      [libroId, req.usuario.id]
     );
     res.json(resultado.rows);
   } catch (error) {
@@ -42,10 +44,11 @@ router.get('/libros/:libroId/prestamos', async (req, res) => {
 
 // Crear un préstamo:
 // POST /api/prestamos
-router.post('/prestamos', async (req, res) => {
+router.post('/prestamos', requiereUsuario, async (req, res) => {
+  // Quien presta es siempre el usuario autenticado
+  const usuario_prestador_id = req.usuario.id;
   const {
     ejemplar_id,
-    usuario_prestador_id,
     usuario_receptor_id,
     nombre_receptor,
     fecha_limite,
@@ -57,6 +60,15 @@ router.post('/prestamos', async (req, res) => {
   }
 
   try {
+    // Solo se pueden prestar ejemplares propios
+    const propio = await pool.query(
+      'SELECT 1 FROM ejemplares WHERE id = $1 AND usuario_id = $2',
+      [ejemplar_id, usuario_prestador_id]
+    );
+    if (!propio.rowCount) {
+      return res.status(403).json({ error: 'Ese ejemplar no es tuyo' });
+    }
+
     const resultado = await pool.query(
       `INSERT INTO prestamos (
          ejemplar_id,
@@ -87,7 +99,7 @@ router.post('/prestamos', async (req, res) => {
 
 // Devolver un préstamo:
 // PATCH /api/prestamos/:id/devolver
-router.patch('/prestamos/:id/devolver', async (req, res) => {
+router.patch('/prestamos/:id/devolver', requiereUsuario, async (req, res) => {
   const { id } = req.params;
   const { notas } = req.body;
 
@@ -98,8 +110,9 @@ router.patch('/prestamos/:id/devolver', async (req, res) => {
            fecha_devolucion = NOW(),
            notas = COALESCE($1, notas)
        WHERE id = $2
+         AND (usuario_prestador_id = $3 OR usuario_receptor_id = $3)
        RETURNING *`,
-      [notas || null, id]
+      [notas || null, id, req.usuario.id]
     );
 
     if (resultado.rows.length === 0) {
@@ -114,7 +127,7 @@ router.patch('/prestamos/:id/devolver', async (req, res) => {
 });
 // Préstamos activos de un usuario
 // GET /api/usuarios/:usuarioId/prestamos-activos
-router.get('/usuarios/:usuarioId/prestamos-activos', async (req, res) => {
+router.get('/usuarios/:usuarioId/prestamos-activos', soloPropio('usuarioId'), async (req, res) => {
   const { usuarioId } = req.params;
 
   try {

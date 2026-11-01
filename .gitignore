@@ -82,3 +82,14 @@ bower_components/
 docker-data/
 *.pid
 
+
+# ------------------------
+# Datos y secretos que nunca deben subirse
+# ------------------------
+uploads/
+*.sql.bak
+backup*.sql
+id_*
+sshdani*
+*.pem
+*.key

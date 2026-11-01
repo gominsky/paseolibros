@@ -11,17 +11,10 @@
   <link rel="apple-touch-icon" href="/icons/icon-192.png" />
   <title>PaseoLibros</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Fuente Google bonita y juvenil -->
+  <!-- Fuentes: Fraunces (títulos) + DM Sans (texto). Una sola petición, sin @import en el CSS -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-    rel="stylesheet"
-  />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
   <!-- CSS propio -->
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -29,7 +22,7 @@
   <div class="app">
       <header class="app-header">
   <div class="logo header-center" aria-label="Paseo de los libros">
-    <img class="logo-img" src="logo.png" alt="Paseo de los libros" />
+    <img class="logo-img" src="logo.png" alt="Paseo de los libros" width="800" height="188" decoding="async" />
   </div>
 
   <div class="header-right">
@@ -87,7 +80,7 @@
 
         <!-- Logo dentro del modal -->
         <div class="auth-logo">
-          <img src="logo.png" alt="Paseo de los Libros" class="auth-logo-img" />
+          <img src="logo.png" alt="Paseo de los Libros" class="auth-logo-img" width="800" height="188" decoding="async" />
         </div>
 
         <div class="auth-body">
@@ -409,8 +402,7 @@
       <p>¡Ubícate!</p>
     </footer>
   </div>
-  <!-- Librería ZXing y JS de la app -->
-  <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
+  <!-- JS de la app (ZXing ya no se carga aquí: scanner.js lo pide solo si el navegador no tiene lector nativo) -->
   <script>
   window.__API_BASE__ = ""; // "" = mismo dominio (recomendado si sirves frontend desde el backend)
   </script>
@@ -1153,7 +1145,7 @@
         </div>
         <div class="ayuda-section">
           <h4>Escáner de ISBN</h4>
-          <p>Pulsa <strong>Escanear</strong> en el panel de alta para activar la cámara. Apunta al código de barras del libro — la app detecta automáticamente el ISBN usando BarcodeDetector nativo (si el navegador lo soporta) o ZXing como alternativa. Funciona mejor con buena iluminación.</p>
+          <p>Pulsa <strong>Escanear</strong> en el panel de alta para activar la cámara. Centra el código de barras del libro dentro del recuadro, a unos 15–20 cm. La app lo lee sola y comprueba que es un ISBN válido. Si hay poca luz usa el botón 💡 Linterna (evita reflejos en portadas brillantes).</p>
         </div>
       </div>
 

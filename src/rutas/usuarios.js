@@ -1,14 +1,16 @@
 // src/rutas/usuarios.js
 import { Router } from 'express';
 import pool from '../bd.js';
-import bcrypt from 'bcryptjs';
+import { requiereUsuario, soloPropio } from '../middlewares/acceso.js';
+
 const router = Router();
 
-// Listar usuarios: GET /api/usuarios
-router.get('/', async (req, res) => {
+// Listar usuarios (para elegir a quién se presta un libro): GET /api/usuarios
+// Requiere sesión y ya no devuelve correos.
+router.get('/', requiereUsuario, async (req, res) => {
   try {
     const resultado = await pool.query(
-      'SELECT id, nombre_usuario, correo, creado_en FROM usuarios ORDER BY id'
+      'SELECT id, nombre_usuario FROM usuarios ORDER BY nombre_usuario'
     );
     res.json(resultado.rows);
   } catch (error) {
@@ -17,43 +19,18 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Crear usuario: POST /api/usuarios
-// Crear usuario: POST /api/usuarios
-router.post('/', async (req, res) => {
-  const { nombre_usuario, correo, contrasena } = req.body;
+// (Eliminado POST /api/usuarios: creaba cuentas sin control de abusos.
+//  El alta se hace por POST /api/auth/register.)
 
-  if (!nombre_usuario || !contrasena) {
-    return res.status(400).json({ error: 'nombre_usuario y contrasena son obligatorios' });
-  }
-
-  try {
-    // generar hash seguro
-    const salt = await bcrypt.genSalt(10);
-    const hash = await bcrypt.hash(contrasena, salt);
-
-    const resultado = await pool.query(
-      `INSERT INTO usuarios (nombre_usuario, correo, contrasena_hash)
-       VALUES ($1, $2, $3)
-       RETURNING id, nombre_usuario, correo, creado_en`,
-      [nombre_usuario, correo || null, hash]
-    );
-    res.status(201).json(resultado.rows[0]);
-  } catch (error) {
-    console.error(error);
-    if (error.code === '23505') {
-      return res.status(400).json({ error: 'El nombre de usuario ya está en uso' });
-    }
-    res.status(500).json({ error: 'Error creando usuario' });
-  }
-});
-
-// Listar ejemplares de un usuario: GET /api/usuarios/:usuarioId/ejemplares
-router.get('/:usuarioId/ejemplares', async (req, res) => {
-  const { usuarioId } = req.params;
+// Ejemplares del usuario: GET /api/usuarios/:usuarioId/ejemplares
+// Incluye las insignias del lector (favorito, nº de notas, audios y etiquetas)
+// para que el navegador no tenga que hacer una petición por cada libro.
+router.get('/:usuarioId/ejemplares', soloPropio('usuarioId'), async (req, res) => {
+  const usuarioId = Number(req.params.usuarioId);
 
   try {
     const resultado = await pool.query(
-      `SELECT 
+      `SELECT
          e.id AS ejemplar_id,
          l.id AS libro_id,
          l.isbn,
@@ -66,11 +43,19 @@ router.get('/:usuarioId/ejemplares', async (req, res) => {
          e.estado,
          e.ubicacion,
          e.notas,
-         e.creado_en
+         e.creado_en,
+         EXISTS (SELECT 1 FROM libro_favoritos f
+                  WHERE f.usuario_id = $1 AND f.libro_id = l.id)            AS rm_favorito,
+         (SELECT COUNT(*)::int FROM libro_notas n
+           WHERE n.usuario_id = $1 AND n.libro_id = l.id)                  AS rm_notas,
+         (SELECT COUNT(*)::int FROM libro_audios a
+           WHERE a.usuario_id = $1 AND a.libro_id = l.id)                  AS rm_audios,
+         (SELECT COUNT(*)::int FROM libro_tags t
+           WHERE t.usuario_id = $1 AND t.libro_id = l.id)                  AS rm_tags
        FROM ejemplares e
        JOIN libros l ON l.id = e.libro_id
        WHERE e.usuario_id = $1
-      AND e.activo = TRUE
+         AND e.activo = TRUE
        ORDER BY e.creado_en DESC`,
       [usuarioId]
     );
