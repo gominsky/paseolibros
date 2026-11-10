@@ -189,3 +189,6 @@ Ahora:
 - Estilos nuevos en `css/nuevo-look.css` (último de `css/orden.json`).
 - **Logo**: «Paseo de los» ocupa ahora casi toda la altura de «LIBROS» y con trazo más grueso; logo más grande
   en la cabecera (66 px escritorio, 44 px móvil) y en la pantalla de acceso. Imagen 1000×220 px, 56 KB.
+- **Icono de la app (acceso directo)**: nuevo, en verde tinta con «Paseo de los / LIBROS» y filete dorado.
+  Versiones normales (192/512), «maskable» con margen para los móviles que recortan en círculo, icono de iPhone (180)
+  y favicon. Para verlo en el móvil hay que quitar el acceso directo y volver a añadirlo.
