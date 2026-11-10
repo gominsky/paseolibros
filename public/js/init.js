@@ -70,10 +70,16 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   // Restaurar sesión: solo si el token guardado no ha caducado (ver api.js).
-  // Luego se confirma con el servidor; si no la acepta, se pide login.
+  // La app no se muestra hasta que el servidor la confirma; si no la acepta, se pide login.
   const haySesion = restoreSession();
   actualizarUIAutenticacion();
   if (haySesion) verificarSesion();
+  document.getElementById('btn-auth-reintentar')?.addEventListener('click', () => verificarSesion());
+  document.getElementById('btn-auth-otra-cuenta')?.addEventListener('click', () => {
+    hacerLogout();
+    const m = document.getElementById('login-mensaje');
+    if (m) m.textContent = '';
+  });
  
   // Botones básicos
   document.getElementById('btn-crear')?.addEventListener('click', (e) => {

@@ -6,10 +6,18 @@ window.actualizarUIAutenticacion = function actualizarUIAutenticacion() {
   const userBar = document.getElementById('user-bar');
   const nombreSpan = document.getElementById('nombre-usuario-actual');
 
-  // Sesión válida = hay token, no ha caducado y hay usuario
-  const loggedIn = Boolean(window.token && window.usuarioActual?.id &&
+  // Sesión válida = hay token, no ha caducado, hay usuario Y el servidor la ha confirmado
+  const tokenVigente = Boolean(window.token && window.usuarioActual?.id &&
     !(window.tokenCaducado && window.tokenCaducado(window.token)));
+  const loggedIn = tokenVigente && window.sesionVerificada === true;
+  const comprobando = tokenVigente && !window.sesionVerificada;
   document.body.classList.toggle('sin-sesion', !loggedIn);
+
+  // Dentro del cuadro: «Comprobando tu sesión…» o el formulario de acceso
+  const zonaLogin = document.getElementById('zona-no-autenticado');
+  const zonaComprobando = document.getElementById('auth-comprobando');
+  if (zonaLogin) zonaLogin.hidden = comprobando;
+  if (zonaComprobando) zonaComprobando.hidden = !comprobando;
 
   // Modal de login + barra superior
   if (loginModal) loginModal.style.display = loggedIn ? 'none' : 'flex';
@@ -73,6 +81,7 @@ window.hacerLogin = async function hacerLogin() {
 
     window.token = data.token ?? null;
     window.usuarioActual = data.usuario ?? null;
+    window.sesionVerificada = Boolean(window.token); // recién emitido por el servidor
 
     if (!window.token || !window.usuarioActual) {
       if (mensaje) mensaje.textContent = 'Respuesta inesperada del servidor. Inténtalo de nuevo.';
@@ -96,6 +105,7 @@ window.hacerLogin = async function hacerLogin() {
 window.hacerLogout = function hacerLogout() {
   window.token = null;
   window.usuarioActual = null;
+  window.sesionVerificada = false;
 
   try {
     localStorage.removeItem(window.TOKEN_KEY);

@@ -157,3 +157,15 @@ public/css/  base · componentes · escaner · modales · movil · auth · estet
 - Pantalla de login opaca y por encima de todo; al cerrar sesión se borran de pantalla y de memoria los datos.
 
 Probado: token válido, sin sesión, caducado, de otro secreto, usuario borrado, login, logout y caducidad con la app abierta.
+
+### Ajuste (10/11): la app no se muestra hasta confirmar la sesión
+
+Seguía apareciendo la pantalla principal cuando el móvil tenía guardada una sesión **sin caducar pero que el servidor
+ya no acepta** (por ejemplo, tras cambiar `JWT_SECRETO`). La app se enseñaba mientras esperaba la respuesta del
+servidor, y con Render dormido eso podía durar hasta un minuto.
+
+Ahora:
+- Con sesión guardada, el cuadro de login muestra «Comprobando tu sesión…» y la app sigue oculta hasta que el servidor responde.
+- A los 4 s avisa: «El servidor se está despertando, puede tardar hasta un minuto…».
+- Si el servidor no acepta la sesión → formulario de login. Si la acepta → la app.
+- Sin conexión: «No se puede conectar con el servidor» con botones **Reintentar** y **Entrar con otra cuenta**.

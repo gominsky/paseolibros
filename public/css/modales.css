@@ -382,3 +382,22 @@ body.sin-sesion #btn-toggle-alta { visibility: hidden; }
   color: var(--ink-2);
 }
 .stats-mobile-detail { margin-top: 8px; }
+
+/* Comprobando la sesión guardada con el servidor */
+.auth-comprobando { text-align: center; padding: 18px 4px 6px; }
+.auth-comprobando[hidden], #zona-no-autenticado[hidden],
+.auth-comprobando-acciones [hidden] { display: none !important; }
+.auth-comprobando .auth-subtitle { margin: 14px 0 18px; min-height: 2.6em; }
+.auth-comprobando-acciones { display: flex; flex-direction: column; gap: 8px; }
+.auth-spinner {
+  display: inline-block;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid var(--border-2);
+  border-top-color: var(--accent);
+  animation: auth-giro .8s linear infinite;
+}
+.auth-comprobando.con-error .auth-spinner { animation: none; border-top-color: var(--border-2); }
+@keyframes auth-giro { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .auth-spinner { animation-duration: 2.4s; } }

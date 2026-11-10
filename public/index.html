@@ -18,7 +18,7 @@
   <!-- CSS propio -->
   <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
+<body class="sin-sesion">
   <div class="app">
       <header class="app-header">
   <div class="logo header-center" aria-label="Paseo de los libros">
@@ -84,6 +84,16 @@
         </div>
 
         <div class="auth-body">
+          <!-- Mientras se confirma con el servidor una sesión guardada -->
+          <div id="auth-comprobando" class="auth-comprobando" hidden>
+            <span class="auth-spinner" aria-hidden="true"></span>
+            <p id="auth-comprobando-texto" class="auth-subtitle">Comprobando tu sesión…</p>
+            <div class="auth-comprobando-acciones">
+              <button id="btn-auth-reintentar" class="btn btn-primary" type="button" hidden>Reintentar</button>
+              <button id="btn-auth-otra-cuenta" class="btn btn-secondary" type="button">Entrar con otra cuenta</button>
+            </div>
+          </div>
+
           <div id="zona-no-autenticado">
 
             <!-- LOGIN -->
