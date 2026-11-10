@@ -443,26 +443,17 @@ function renderEjemplaresGrid(lista) {
  
   if (!showGrid) return;
  
-  grid.innerHTML = (lista || []).map(e => {
-    const portada = e.url_portada ? srcPortada(e.url_portada) : '';
-    return `
-      <div class="ej-grid-item" data-libro-id="${e.libro_id}" data-ejemplar-id="${e.ejemplar_id}">
-        ${portada
-          ? `<img class="ej-grid-cover" src="${portada}" alt="Portada" loading="lazy" decoding="async"
-               onerror="this.onerror=null;this.outerHTML='<div class=&quot;portada-placeholder-grid&quot; aria-hidden=&quot;true&quot;><span class=&quot;ph-logo&quot;>Pdl</span><span class=&quot;ph-sub&quot;>Sin portada</span></div>';">`
-          : `<div class="portada-placeholder-grid" aria-hidden="true">
-               <span class="ph-logo">Pdl</span>
-               <span class="ph-sub">Sin portada</span>
-             </div>`
-        }
-        <div class="ej-grid-title">${escapeHtml(e.titulo || '—')}</div>
-        <div class="ej-grid-meta">
-          ${e.autores ? `<span class="ej-grid-pill">${escapeHtml(e.autores)}</span>` : ''}
-          ${e.tipo ? `<span class="ej-grid-pill">${escapeHtml(e.tipo)}</span>` : ''}
-          ${e.ubicacion ? `<span class="ej-grid-pill">${escapeHtml(e.ubicacion)}</span>` : ''}
+  // Cuadrícula de portadas grandes: la portada manda; debajo, título y autor
+  grid.innerHTML = (lista || []).map(e => `
+      <div class="ej-grid-item" data-libro-id="${e.libro_id}" data-ejemplar-id="${e.ejemplar_id}" role="button" tabindex="0">
+        <div class="ej-grid-cover-wrap" data-badge-libro="${e.libro_id}">
+          ${imgPortada(e.url_portada, e.titulo, e.autores, 'ej-grid-cover', 'grid')}
+          <span class="badge badge-fav" aria-hidden="true"></span>
+          <span class="badge badge-notes" aria-hidden="true"></span>
         </div>
+        <div class="ej-grid-title">${escapeHtml(e.titulo || 'Sin título')}</div>
+        ${e.autores ? `<div class="ej-grid-autor">${escapeHtml(autorCorto(e.autores))}</div>` : ''}
       </div>
-    `;
-  }).join('');
+    `).join('');
   
 }

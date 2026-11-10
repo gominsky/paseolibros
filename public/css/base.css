@@ -15,28 +15,32 @@
    TOKENS
    ══════════════════════════════════════════════════════════ */
 :root {
-  /* Paleta base — tema rosa / papel */
-  --bg:          #f7f0eb;
-  --surface:     #fffdf9;
-  --surface-2:   #f2e8df;
-  --ink:         #1a1410;
-  --ink-2:       #4a3f36;
-  --ink-3:       #8a7a70;
+  /* Paleta base — verde tinta sobre papel */
+  --bg:          #f6f1e7;
+  --surface:     #fffdf8;
+  --surface-2:   #efe8da;
+  --ink:         #1c2420;
+  --ink-2:       #46504b;
+  --ink-3:       #7c847f;
 
-  /* Acento */
-  --accent:      #b85c6e;
-  --accent-soft: rgba(184, 92, 110, .12);
-  --accent-glow: rgba(184, 92, 110, .28);
+  /* Acento: verde tinta + detalle dorado */
+  --accent:      #2f5d50;
+  --accent-hover:#244a40;
+  --on-accent:   #ffffff;            /* texto sobre el acento */
+  --accent-soft: rgba(47, 93, 80, .10);
+  --accent-glow: rgba(47, 93, 80, .22);
+  --gold:        #b8913a;
+  --gold-soft:   rgba(184, 145, 58, .14);
 
   /* Borders */
-  --border:      rgba(26, 20, 16, .10);
-  --border-2:    rgba(26, 20, 16, .18);
-  --border-acc:  rgba(184, 92, 110, .40);
+  --border:      rgba(28, 36, 32, .10);
+  --border-2:    rgba(28, 36, 32, .18);
+  --border-acc:  rgba(47, 93, 80, .35);
 
-  /* Sombras */
-  --shadow-sm:   0 2px 6px rgba(26, 20, 16, .07);
-  --shadow-md:   0 8px 24px rgba(26, 20, 16, .10);
-  --shadow-lg:   0 20px 50px rgba(26, 20, 16, .14);
+  /* Sombras (suaves) */
+  --shadow-sm:   0 1px 3px rgba(28, 36, 32, .06);
+  --shadow-md:   0 4px 14px rgba(28, 36, 32, .07);
+  --shadow-lg:   0 14px 36px rgba(28, 36, 32, .12);
 
   /* Radios */
   --r-sm:  10px;
@@ -55,24 +59,28 @@
 
 /* Tema oscuro */
 body.theme-dark {
-  --bg:          #0e0b09;
-  --surface:     #1a1410;
-  --surface-2:   #251e18;
-  --ink:         #f0e8e0;
-  --ink-2:       #c8b8ac;
-  --ink-3:       #7a6a60;
+  --bg:          #0f1412;
+  --surface:     #171f1c;
+  --surface-2:   #212b27;
+  --ink:         #ece6da;
+  --ink-2:       #bdb6a8;
+  --ink-3:       #7d847f;
 
-  --accent:      #e07a8a;
-  --accent-soft: rgba(224, 122, 138, .12);
-  --accent-glow: rgba(224, 122, 138, .25);
+  --accent:      #7fb8a4;
+  --accent-hover:#97c8b6;
+  --on-accent:   #0f1412;
+  --accent-soft: rgba(127, 184, 164, .12);
+  --accent-glow: rgba(127, 184, 164, .22);
+  --gold:        #d4b26a;
+  --gold-soft:   rgba(212, 178, 106, .14);
 
-  --border:      rgba(240, 232, 224, .08);
-  --border-2:    rgba(240, 232, 224, .14);
-  --border-acc:  rgba(224, 122, 138, .35);
+  --border:      rgba(236, 230, 218, .08);
+  --border-2:    rgba(236, 230, 218, .15);
+  --border-acc:  rgba(127, 184, 164, .35);
 
-  --shadow-sm:   0 2px 8px rgba(0, 0, 0, .30);
-  --shadow-md:   0 8px 28px rgba(0, 0, 0, .40);
-  --shadow-lg:   0 22px 56px rgba(0, 0, 0, .55);
+  --shadow-sm:   0 1px 4px rgba(0, 0, 0, .30);
+  --shadow-md:   0 6px 20px rgba(0, 0, 0, .38);
+  --shadow-lg:   0 18px 44px rgba(0, 0, 0, .50);
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -106,8 +114,8 @@ body::before {
   position: fixed;
   inset: 0;
   background-image:
-    radial-gradient(ellipse 80vw 50vh at 10% 0%, rgba(184,92,110,.06), transparent),
-    radial-gradient(ellipse 60vw 40vh at 90% 80%, rgba(184,92,110,.04), transparent);
+    radial-gradient(ellipse 80vw 50vh at 10% 0%, rgba(47,93,80,.05), transparent),
+    radial-gradient(ellipse 60vw 40vh at 90% 80%, rgba(184,145,58,.05), transparent);
   pointer-events: none;
   z-index: 0;
 }

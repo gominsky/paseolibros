@@ -63,6 +63,16 @@ document.addEventListener('DOMContentLoaded', () => {
     else setUserStatusErr('El escáner no está disponible.');
   });
   
+  // Tarjetas y portadas con teclado (Enter / espacio abre la ficha)
+  ['ejemplares-list', 'ejemplares-grid'].forEach((id) => {
+    document.getElementById(id)?.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const el = e.target.closest('.ej-card, .ej-grid-item');
+      if (!el) return;
+      e.preventDefault();
+      el.click();
+    });
+  });
   document.getElementById('ejemplares-grid')?.addEventListener('click', (e) => {
     const item = e.target.closest('.ej-grid-item');
     if (!item) return;

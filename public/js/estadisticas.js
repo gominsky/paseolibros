@@ -87,7 +87,7 @@
  
     // Usar el acento de la app — leer la variable CSS en tiempo real
     const accent = getComputedStyle(document.documentElement)
-      .getPropertyValue('--accent').trim() || '#b85c6e';
+      .getPropertyValue('--accent').trim() || '#2f5d50';
     // Versión semitransparente para hover
     const accentAlpha = accent + 'cc';
  

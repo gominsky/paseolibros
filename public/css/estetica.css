@@ -58,23 +58,13 @@ input:focus, select:focus, textarea:focus {
   background: var(--surface);
 }
 
-/* ── 5. BOTÓN PRIMARIO: gradiente sutil + shimmer en hover── */
+/* ── 5. BOTÓN PRIMARIO: liso, sin degradado ─────────────── */
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent), #9e4558);
-  position: relative;
-  overflow: hidden;
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: none;
 }
-.btn-primary::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.15) 50%, transparent 100%);
-  transform: translateX(-100%);
-  transition: transform .4s;
-}
-.btn-primary:hover::after {
-  transform: translateX(100%);
-}
+.btn-primary:hover { background: var(--accent-hover); }
 
 /* ── 6. TABLA: cabeceras con letra espaciada ─────────────── */
 th {
@@ -172,9 +162,7 @@ tr:hover .portada-mini-img {
   content: '';
   display: block;
   height: 3px;
-  background: linear-gradient(90deg, var(--accent), #c8738a, var(--accent));
-  background-size: 200% 100%;
-  animation: shimmer 3s linear infinite;
+  background: var(--accent);
   flex-shrink: 0;
 }
 @keyframes shimmer {
@@ -274,7 +262,7 @@ tr:hover .portada-mini-img {
 .header-view-toggle .icon-btn.is-active,
 .card-view-toggle .icon-btn.is-active {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-glow);
 }

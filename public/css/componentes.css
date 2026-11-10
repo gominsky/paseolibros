@@ -107,9 +107,9 @@ select, select option {
 
 .btn-primary {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   border-color: transparent;
-  box-shadow: 0 3px 12px var(--accent-glow);
+  box-shadow: none;
 }
 .btn-primary:hover { filter: brightness(1.07); box-shadow: 0 5px 18px var(--accent-glow); }
 

@@ -75,7 +75,7 @@ window.VistaPreviaISBN = (function () {
 
     if (!d.encontrado) {
       el.className = 'isbn-preview is-aviso';
-      el.innerHTML = `<div class="isbn-preview-cover isbn-preview-cover--vacia"><span class="ph-logo">?</span></div>
+      el.innerHTML = `<div class="isbn-preview-cover isbn-preview-cover--vacia"><span>?</span></div>
         <div class="isbn-preview-info">
           <div class="isbn-preview-titulo">ISBN ${escapeHtml(d.isbn)} no encontrado</div>
           <div class="isbn-preview-meta">No aparece en Google Books ni en Open Library. Si lo añades se creará como
@@ -87,10 +87,7 @@ window.VistaPreviaISBN = (function () {
     const l = d.libro;
     const anio = l.fecha_publicacion ? String(l.fecha_publicacion).slice(0, 4) : '';
     const meta = [l.editorial, anio, l.numero_paginas ? `${l.numero_paginas} págs.` : ''].filter(Boolean).join(' · ');
-    const portada = l.url_portada
-      ? `<img class="isbn-preview-cover" src="${escapeHtml(srcPortada(l.url_portada))}" alt="" loading="lazy"
-           onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'isbn-preview-cover isbn-preview-cover--vacia'}))">`
-      : `<div class="isbn-preview-cover isbn-preview-cover--vacia"><span class="ph-logo">Pdl</span></div>`;
+    const portada = imgPortada(l.url_portada, l.titulo, l.autores, 'isbn-preview-cover', 'preview');
 
     let aviso = '';
     if (d.mios?.length) {

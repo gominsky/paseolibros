@@ -184,9 +184,7 @@
     }
  
     lista_el.innerHTML = filtrados.map(e => {
-      const portada = e.url_portada
-        ? `<img class="bc-ver-cover" src="${window.API_BASE}${e.url_portada}" alt="Portada" />`
-        : `<div class="bc-ver-cover bc-ver-cover--ph">Pdl</div>`;
+      const portada = imgPortada(e.url_portada, e.titulo, e.autores, 'bc-ver-cover', 'mini');
       return `
         <div class="bc-ver-item">
           ${portada}

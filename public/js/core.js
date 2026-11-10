@@ -7,7 +7,8 @@ const API_BASE = window.API_BASE;
 let vistaEjemplares = 'lista';
  
 // Preferencias UI (persisten en el navegador)
-const VISTA_EJ_KEY = 'paseolibros_vista_ejemplares';   // 'lista' | 'grid'
+// v2: con el nuevo diseño, en móvil se empieza en cuadrícula aunque antes se guardara 'lista'
+const VISTA_EJ_KEY = 'paseolibros_vista_ejemplares_v2';   // 'lista' | 'grid' | 'estanteria'
 const SORT_EJ_KEY  = 'paseolibros_sort_ejemplares';    // { key, dir }
  
 const SORT_EJ_KEYS_VALIDAS = new Set([
@@ -27,6 +28,7 @@ function restaurarPreferenciasUI() {
   try {
     const v = localStorage.getItem(VISTA_EJ_KEY);
     if (v === 'lista' || v === 'grid' || v === 'estanteria') vistaEjemplares = v;
+    else if (window.matchMedia?.('(max-width: 820px)').matches) vistaEjemplares = 'grid'; // móvil: portadas grandes
   } catch {}
  
   // Ordenación

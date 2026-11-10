@@ -1,0 +1,347 @@
+/* css/nuevo-look.css — Rediseño nov. 2026: portadas generadas, tarjetas limpias,
+   cuadrícula de portadas grandes, pestañas inferiores en móvil y ajustes de escritorio.
+   Va al final de css/orden.json, así que manda sobre las reglas anteriores.
+   (El servidor une todos los ficheros de css/ en /styles.css según css/orden.json) */
+
+/* ══════════════════════════════════════════════════════════
+   PORTADAS TIPOGRÁFICAS GENERADAS (.tapa)
+   ══════════════════════════════════════════════════════════ */
+.tapa {
+  --tapa: #2f5d50;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  aspect-ratio: 2 / 3;
+  padding: 12% 10% 10% 16%;
+  border-radius: 3px 6px 6px 3px;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.22) 0, rgba(0,0,0,.05) 7%, rgba(255,255,255,.07) 8.5%, transparent 12%),
+    var(--tapa);
+  color: #f6efe0;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.08), var(--shadow-sm);
+  text-align: left;
+}
+/* Filetes dorados de encuadernación */
+.tapa::before,
+.tapa::after {
+  content: '';
+  position: absolute;
+  left: 16%;
+  right: 10%;
+  height: 1px;
+  background: rgba(230, 200, 130, .55);
+}
+.tapa::before { top: 7%; }
+.tapa::after  { bottom: 6%; }
+.tapa-titulo {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.tapa-autor {
+  font-family: var(--font-body);
+  font-size: .62em;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  opacity: .82;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Tamaños */
+.tapa--grid    { width: 100%; font-size: clamp(.82rem, 3.6vw, 1rem); }
+.tapa--grid .tapa-titulo { -webkit-line-clamp: 5; }
+.tapa--card    { width: 52px; font-size: .5rem; padding: 10% 8% 8% 16%; flex: none; }
+.tapa--card .tapa-titulo { -webkit-line-clamp: 4; }
+.tapa--card .tapa-autor, .tapa--mini .tapa-autor { display: none; }
+.tapa--mini    { width: 40px; font-size: .38rem; padding: 10% 8% 8% 16%; }
+.tapa--mini .tapa-titulo { -webkit-line-clamp: 4; }
+.tapa--mini::before, .tapa--mini::after, .tapa--card::before, .tapa--card::after { display: none; }
+.tapa--preview { width: 52px; flex: 0 0 52px; font-size: .5rem; padding: 10% 8% 8% 16%; }
+.tapa--preview .tapa-titulo { -webkit-line-clamp: 4; }
+.tapa--preview .tapa-autor { display: none; }
+.tapa--ficha   { width: 100%; font-size: 1.15rem; border-radius: 4px 8px 8px 4px; box-shadow: 4px 4px 16px rgba(0,0,0,.2); }
+.tapa--ficha .tapa-titulo { -webkit-line-clamp: 6; }
+.modal-cover-img[hidden] { display: none !important; }
+
+/* ══════════════════════════════════════════════════════════
+   CUADRÍCULA DE PORTADAS GRANDES
+   ══════════════════════════════════════════════════════════ */
+.ej-grid {
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 22px 16px;
+  padding: 4px 4px 8px 2px;
+}
+.ej-grid-item {
+  background: none;
+  border: 0;
+  padding: 0;
+  border-radius: 0;
+  outline-offset: 4px;
+}
+.ej-grid-item:hover { transform: none; box-shadow: none; border-color: transparent; }
+.ej-grid-cover-wrap { position: relative; }
+.ej-grid-cover,
+.ej-grid-cover-wrap .tapa {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 3px 6px 6px 3px;
+  border: 0;
+  box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 6px 14px rgba(28,36,32,.14);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.ej-grid-item:hover .ej-grid-cover,
+.ej-grid-item:hover .tapa,
+.ej-grid-item:focus-visible .ej-grid-cover,
+.ej-grid-item:focus-visible .tapa {
+  transform: translateY(-3px);
+  box-shadow: 0 2px 4px rgba(0,0,0,.10), 0 12px 24px rgba(28,36,32,.20);
+}
+/* Insignias (⭐ / 📝) sobre la portada */
+.ej-grid-cover-wrap .badge:empty { display: none; }
+.ej-grid-cover-wrap .badge {
+  position: absolute;
+  top: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(255,253,248,.92);
+  color: #1c2420;
+  font-size: .72rem;
+  line-height: 1.5;
+  box-shadow: var(--shadow-sm);
+}
+.ej-grid-cover-wrap .badge-fav   { right: 6px; }
+.ej-grid-cover-wrap .badge-notes { left: 6px; }
+.ej-grid-title {
+  margin-top: 10px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: .9rem;
+  line-height: 1.22;
+}
+.ej-grid-autor {
+  margin-top: 3px;
+  font-size: .78rem;
+  color: var(--ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 820px) {
+  .ej-grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 18px 12px; }
+}
+@media (max-width: 360px) {
+  .ej-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ══════════════════════════════════════════════════════════
+   TARJETAS DE LA LISTA (móvil)
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 820px) {
+  .ej-card {
+    grid-template-columns: 52px minmax(0, 1fr) 14px;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 12px;
+    cursor: pointer;
+    box-shadow: none;
+  }
+  .ej-card:active { background: var(--surface-2); }
+  .ej-cover { width: 52px; height: 78px; border-radius: 3px 5px 5px 3px; border: 0; box-shadow: var(--shadow-sm); }
+  .ej-title { font-family: var(--font-display); font-weight: 600; font-size: 1rem; }
+  .ej-chevron { color: var(--ink-3); font-size: 1.4rem; line-height: 1; }
+}
+.portada-mini-img { border-radius: 2px 4px 4px 2px; }
+
+/* ══════════════════════════════════════════════════════════
+   PESTAÑAS INFERIORES (móvil)
+   ══════════════════════════════════════════════════════════ */
+.tabbar { display: none; }
+
+@media (max-width: 820px) {
+  .tabbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 8000;
+    display: grid;
+    grid-template-columns: 1fr 1fr 72px 1fr 1fr;
+    align-items: stretch;
+    height: calc(62px + env(safe-area-inset-bottom));
+    padding: 0 6px env(safe-area-inset-bottom);
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -4px 16px rgba(0,0,0,.05);
+  }
+  body.sin-sesion .tabbar { display: none; }
+  .tabbar-btn {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    border: 0;
+    background: none;
+    color: var(--ink-3);
+    font: inherit;
+    font-size: .68rem;
+    font-weight: 500;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tabbar-ico { font-size: 1.25rem; line-height: 1; filter: grayscale(1); opacity: .65; transition: filter .15s, opacity .15s, transform .15s; }
+  .tabbar-btn.is-active { color: var(--accent); font-weight: 700; }
+  .tabbar-btn.is-active .tabbar-ico { filter: none; opacity: 1; transform: translateY(-1px); }
+  .tabbar-btn.is-active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 28%;
+    right: 28%;
+    height: 3px;
+    border-radius: 0 0 3px 3px;
+    background: var(--accent);
+  }
+  .tabbar-num {
+    position: absolute;
+    top: 7px;
+    left: calc(50% + 6px);
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--gold);
+    color: #fff;
+    font-size: .62rem;
+    font-weight: 700;
+    line-height: 17px;
+    text-align: center;
+  }
+  .tabbar-num[hidden] { display: none; }
+
+  /* El + va en el hueco central de la barra */
+  #btn-toggle-alta.fab-plus {
+    left: 50% !important;
+    right: auto !important;
+    bottom: calc(14px + env(safe-area-inset-bottom)) !important;
+    transform: translateX(-50%);
+    width: 58px !important;
+    height: 58px !important;
+    z-index: 8100 !important;
+    box-shadow: 0 0 0 5px var(--bg), 0 6px 16px var(--accent-glow) !important;
+  }
+  body.alta-visible #btn-toggle-alta.fab-plus { transform: translateX(-50%); }
+  body.alta-visible .column-left .card { bottom: calc(80px + env(safe-area-inset-bottom)) !important; }
+
+  /* Una sección cada vez, con scroll normal de página (sin scroll dentro de la tarjeta) */
+  body { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
+  body[data-pestana] .card-ejemplares,
+  body[data-pestana] #card-lecturas,
+  body[data-pestana] #card-prestamos,
+  body[data-pestana] #card-stats-lecturas { display: none; }
+  body[data-pestana="biblioteca"]   .card-ejemplares     { display: block; }
+  body[data-pestana="leyendo"]      #card-lecturas       { display: block; }
+  body[data-pestana="prestamos"]    #card-prestamos      { display: block; }
+  body[data-pestana="estadisticas"] #card-stats-lecturas { display: block; }
+  body[data-pestana]:not([data-pestana="leyendo"]):not([data-pestana="prestamos"]) .grid-two { margin-top: 0; }
+  body[data-pestana="leyendo"] .grid-two,
+  body[data-pestana="prestamos"] .grid-two { margin-top: 0; }
+  .card { margin-top: 0; }
+
+  #ejemplares-list,
+  #ejemplares-grid,
+  #ejemplares-estanteria { max-height: none !important; overflow: visible !important; }
+  .grid-two .table-wrapper { max-height: none !important; }
+  .app-footer { display: none; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   ESCRITORIO
+   ══════════════════════════════════════════════════════════ */
+@media (min-width: 821px) {
+  /* Cabecera más baja, con el buscador dentro */
+  .app-header { padding: 8px 14px 8px 18px; gap: 18px; }
+  .app-header .logo-img { height: 46px; width: auto; }
+  .app-header .header-search {
+    flex: 1;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+  .app-header .header-search input { width: 100%; }
+}
+/* Las tarjetas de dos columnas no se salen por la derecha */
+.grid-two > .card { min-width: 0; }
+.grid-two .table-wrapper { overflow-x: auto; }
+
+/* Cabeceras de tabla uniformes: versalitas discretas */
+.table th, table th {
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-size: .7rem;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+/* Toque dorado en los títulos de sección */
+.card h2 { position: relative; }
+.card > h2::after,
+.card-header h2::after,
+.card-header-inline h2::after {
+  content: '';
+  display: block;
+  width: 28px;
+  height: 2px;
+  margin-top: 6px;
+  background: var(--gold);
+  border-radius: 2px;
+}
+
+/* ── Ajustes tras revisar capturas ─────────────────────────── */
+/* Los botones de ordenar de la cabecera no heredaban las versalitas */
+.th-sort { text-transform: inherit; letter-spacing: inherit; font-size: inherit; }
+/* Filas de la tabla alineadas al centro (el título iba arriba) */
+#tabla-ejemplares td, .cell-title { vertical-align: middle; }
+.cell-title .title-text { font-weight: 600; }
+
+/* Insignias en la parte inferior de la portada, sin tapar el título */
+.ej-grid-cover-wrap .badge { top: auto; bottom: 6px; }
+
+@media (max-width: 820px) {
+  /* Tarjetas con menos margen interior: más sitio para los libros */
+  .card { padding: 16px 14px; border-radius: var(--r-md); }
+  /* Tres portadas por fila en el móvil */
+  .ej-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 10px; }
+  .tapa--grid { font-size: .7rem; padding: 12% 9% 10% 15%; }
+  .tapa--grid .tapa-autor { font-size: .56rem; }
+  .ej-grid-title { font-size: .8rem; margin-top: 7px; -webkit-line-clamp: 2; }
+  .ej-grid-autor { font-size: .72rem; }
+  /* Tarjeta de lista sin el borde izquierdo de color antiguo */
+  .ej-card, .ej-card:hover { border-left: 1px solid var(--border); }
+  .ej-card:hover { box-shadow: none; }
+  #ejemplares-list { display: grid; gap: 8px; }
+}
+@media (max-width: 340px) {
+  .ej-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* Insignias como "pegatina" en la esquina, fuera del texto de la tapa */
+.ej-grid-cover-wrap .badge { top: -6px; bottom: auto; }
+.ej-grid-cover-wrap .badge-fav   { right: -6px; left: auto; }
+.ej-grid-cover-wrap .badge-notes { right: 26px; left: auto; }
+.ej-grid-cover-wrap .badge-fav:empty + .badge-notes { right: -6px; }
+/* Las ventanas (ficha, préstamo…) van por encima de la barra de pestañas y del + */
+@media (max-width: 820px) {
+  .tabbar { z-index: 4900; }
+  #btn-toggle-alta.fab-plus { z-index: 4950 !important; }
+}
+.table-wrapper[hidden] { display: none !important; }

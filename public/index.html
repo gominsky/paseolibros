@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <!-- PWA -->
   <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#b85c6e" />
+  <meta name="theme-color" content="#2f5d50" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="PaseoLibros" />
@@ -276,7 +276,7 @@
         <!-- Resumen de lecturas y préstamos abiertos -->
         <div class="grid-two">
           <!-- Lecturas en curso -->
-          <div class="card">
+          <div class="card" id="card-lecturas">
             <div class="card-header-inline">
               <h2>Lecturas en curso</h2>
             </div>
@@ -340,7 +340,7 @@
 </div>
 
           <!-- Préstamos activos -->
-          <div class="card">
+          <div class="card" id="card-prestamos">
             <div class="card-header-inline">
               <h2>Préstamos activos</h2>
             </div>
@@ -671,6 +671,25 @@
     </div><!-- /modal-dialog -->
   </div><!-- /modal-ficha -->
   <button id="btn-toggle-alta" class="fab-plus" type="button" aria-label="Añadir ejemplar">+</button>
+
+  <!-- Navegación inferior (solo móvil): una sección cada vez -->
+  <nav id="tabbar" class="tabbar" aria-label="Secciones">
+    <button type="button" class="tabbar-btn" data-pestana="biblioteca" aria-label="Biblioteca">
+      <span class="tabbar-ico" aria-hidden="true">📚</span><span class="tabbar-txt">Biblioteca</span>
+    </button>
+    <button type="button" class="tabbar-btn" data-pestana="leyendo" aria-label="Leyendo">
+      <span class="tabbar-ico" aria-hidden="true">📖</span><span class="tabbar-txt">Leyendo</span>
+      <span class="tabbar-num" data-num="leyendo" hidden></span>
+    </button>
+    <span class="tabbar-hueco" aria-hidden="true"></span>
+    <button type="button" class="tabbar-btn" data-pestana="prestamos" aria-label="Préstamos">
+      <span class="tabbar-ico" aria-hidden="true">🤝</span><span class="tabbar-txt">Préstamos</span>
+      <span class="tabbar-num" data-num="prestamos" hidden></span>
+    </button>
+    <button type="button" class="tabbar-btn" data-pestana="estadisticas" aria-label="Estadísticas">
+      <span class="tabbar-ico" aria-hidden="true">📊</span><span class="tabbar-txt">Estadísticas</span>
+    </button>
+  </nav>
   <!-- Modal Deseos -->
 <div id="deseos-overlay" class="deseos-overlay" style="display:none;">
   <div class="deseos-dialog" role="dialog" aria-modal="true" aria-label="Lista de deseos">

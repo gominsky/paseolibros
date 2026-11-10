@@ -66,5 +66,9 @@
   {
     "fichero": "vista-previa.css",
     "descripcion": "Vista previa del libro y aviso de duplicado al dar de alta"
+  },
+  {
+    "fichero": "nuevo-look.css",
+    "descripcion": "Rediseño: portadas generadas, cuadrícula, tarjetas, pestañas móviles y escritorio"
   }
 ]

@@ -169,3 +169,21 @@ Ahora:
 - A los 4 s avisa: «El servidor se está despertando, puede tardar hasta un minuto…».
 - Si el servidor no acepta la sesión → formulario de login. Si la acepta → la app.
 - Sin conexión: «No se puede conectar con el servidor» con botones **Reintentar** y **Entrar con otra cuenta**.
+
+---
+
+# Cuarta tanda — nuevo aspecto (10/11)
+
+- **Paleta verde tinta** (#2F5D50) con detalles dorados (#B8913A) sobre papel; tema oscuro a juego.
+  Botones lisos sin degradado, sombras más suaves, sin el marco de color alrededor de la página.
+  Los colores están en `css/base.css` (variables `--accent`, `--gold`, `--on-accent`…).
+- **Portadas tipográficas generadas** (`js/tapas.js`): si un libro no tiene portada, o la imagen no carga,
+  se dibuja una tapa de tela con el título y el autor. El color sale del título (siempre el mismo para cada libro).
+- **Cuadrícula de portadas grandes**, por defecto en el móvil (3 por fila). Insignias ⭐/📝 en la esquina.
+- **Tarjetas de lista limpias**: portada, título, autor y solo los datos rellenos. Fuera las pastillas «—» y el ISBN.
+  La antigua «✕» de las tarjetas (en realidad abría la ficha) es ahora una flecha; toda la tarjeta abre la ficha.
+- **Pestañas inferiores en el móvil** (`js/navegacion.js`): Biblioteca · Leyendo · + · Préstamos · Estadísticas,
+  con el número de lecturas en curso y préstamos activos. Recuerda la pestaña al recargar.
+- **Escritorio**: cabecera más baja con el buscador dentro; «Préstamos activos» ya no se sale por la derecha;
+  cabeceras de tabla uniformes; filas alineadas.
+- Estilos nuevos en `css/nuevo-look.css` (último de `css/orden.json`).

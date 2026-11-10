@@ -154,11 +154,7 @@ function renderEjemplares() {
  
    tr.innerHTML = `
   <td>
-    ${
-      e.url_portada
-        ? `<img src="${srcPortada(e.url_portada)}" alt="Portada" class="portada-mini-img" loading="lazy" decoding="async" width="40" height="60" />`
-        : `<div class="portada-placeholder-mini" aria-hidden="true"><span class="ph-logo">Pdl</span></div>`
-    }
+    ${imgPortada(e.url_portada, e.titulo, e.autores, 'portada-mini-img', 'mini', 'width="40" height="60"')}
   </td>
   <td class="cell-title">
      <!-- título -->
@@ -207,39 +203,27 @@ function renderEjemplaresMobileList(filtrados){
   const isMobile = window.matchMedia && window.matchMedia('(max-width: 820px)').matches;
   if (!isMobile || vistaEjemplares !== 'lista') { list.innerHTML = ''; return; }
  
+  // Tarjeta limpia: portada, título, autor y solo los datos que existen.
+  // (El ISBN y el borrado están en la ficha; toda la tarjeta abre la ficha.)
   list.innerHTML = (filtrados || []).map(e => {
-    const portada = e.url_portada ? srcPortada(e.url_portada) : '';
-    const notas = (e.notas || '').trim();
+    const pills = [e.ubicacion, e.estado && e.estado !== 'disponible' ? e.estado : '']
+      .filter(Boolean)
+      .map(v => `<span class="ej-pill">${escapeHtml(v)}</span>`)
+      .join('');
  
     return `
-      <div class="ej-card" data-libro-id="${e.libro_id}" data-ejemplar-id="${e.ejemplar_id}">
-        ${portada
-          ? `<img class="ej-cover" src="${portada}" alt="Portada" loading="lazy" decoding="async" />`
-          : `<div class="portada-placeholder-mini" aria-hidden="true">
-  <span class="ph-logo">Pdl</span>
-</div>`
-        }
- 
+      <div class="ej-card" data-libro-id="${e.libro_id}" data-ejemplar-id="${e.ejemplar_id}" role="button" tabindex="0">
+        ${imgPortada(e.url_portada, e.titulo, e.autores, 'ej-cover', 'card')}
         <div class="ej-main">
           <div class="ej-title" data-badge-libro="${e.libro_id}">
-  <span class="badge badge-fav" aria-hidden="true"></span>
-  <span class="badge badge-notes" aria-hidden="true"></span>
-  ${escapeHtml(e.titulo || '—')}
-</div>
- 
-          <div class="ej-author">${escapeHtml(e.autores || '—')}</div>
- 
-          <div class="ej-meta">
-            <span class="ej-pill">ISBN: ${escapeHtml(e.isbn || '—')}</span>
-            <span class="ej-pill">${escapeHtml(e.estado || '—')}</span>
-            <span class="ej-pill">${escapeHtml(e.ubicacion || '—')}</span>
-            ${notas ? `<span class="ej-pill">${escapeHtml(notas)}</span>` : ''}
+            <span class="badge badge-fav" aria-hidden="true"></span>
+            <span class="badge badge-notes" aria-hidden="true"></span>
+            ${escapeHtml(e.titulo || 'Sin título')}
           </div>
+          ${e.autores ? `<div class="ej-author">${escapeHtml(e.autores)}</div>` : ''}
+          ${pills ? `<div class="ej-meta">${pills}</div>` : ''}
         </div>
- 
-        <div class="ej-actions">
-          <button class="icon-btn m-open" type="button" title="Ver ficha"><span class="icon-circle">✕</span></button>
-        </div>
+        <span class="ej-chevron" aria-hidden="true">›</span>
       </div>
     `;
   }).join('');
