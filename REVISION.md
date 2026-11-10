@@ -192,3 +192,4 @@ Ahora:
 - **Icono de la app (acceso directo)**: nuevo, en verde tinta con «Paseo de los / LIBROS» y filete dorado.
   Versiones normales (192/512), «maskable» con margen para los móviles que recortan en círculo, icono de iPhone (180)
   y favicon. Para verlo en el móvil hay que quitar el acceso directo y volver a añadirlo.
+- **Pestañas del móvil**: iconos de línea propios (SVG) en lugar de emojis: estante de libros, libro abierto con marcapáginas, flechas de ida y vuelta y barras. Activa = verde con relleno suave.

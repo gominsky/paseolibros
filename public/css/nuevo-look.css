@@ -360,3 +360,26 @@
 }
 /* Pantalla de acceso: logo grande y centrado */
 .auth-logo-img { width: min(100%, 360px); height: auto; margin: 0 auto; }
+
+/* ── Iconos de línea de la barra de pestañas (sustituyen a los emojis) ── */
+@media (max-width: 820px) {
+  .tabbar-ico {
+    width: 24px;
+    height: 24px;
+    font-size: 0;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: none;
+    opacity: 1;
+    transition: transform .15s ease;
+  }
+  .tabbar-btn.is-active .tabbar-ico { transform: translateY(-1px); filter: none; }
+  /* Activa: relleno suave del color de acento dentro del trazo */
+  .tabbar-btn.is-active .tabbar-ico rect,
+  .tabbar-btn.is-active .tabbar-ico path:not([d^="M4 20"]):not([d^="M12 6.5v"]) { fill: var(--accent-soft); }
+  .tabbar-btn[data-pestana="prestamos"].is-active .tabbar-ico path { fill: none; }
+  .tabbar-btn:active .tabbar-ico { transform: scale(.92); }
+}
