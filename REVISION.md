@@ -187,3 +187,5 @@ Ahora:
 - **Escritorio**: cabecera más baja con el buscador dentro; «Préstamos activos» ya no se sale por la derecha;
   cabeceras de tabla uniformes; filas alineadas.
 - Estilos nuevos en `css/nuevo-look.css` (último de `css/orden.json`).
+- **Logo**: «Paseo de los» ocupa ahora casi toda la altura de «LIBROS» y con trazo más grueso; logo más grande
+  en la cabecera (66 px escritorio, 44 px móvil) y en la pantalla de acceso. Imagen 1000×220 px, 56 KB.
