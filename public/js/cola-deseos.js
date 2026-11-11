@@ -222,6 +222,11 @@ function cerrarOverlay(id) {
   document.documentElement.style.overflow = '';
 }
  
+// ---------- Lista de deseos ----------
+const PRIORIDADES = { 1: 'Alta', 2: 'Media', 3: 'Baja' };
+let deseosCache = new Map();      // id -> deseo (para editar sin volver a pedirlo)
+let deseoEditandoId = null;       // null = nuevo deseo
+
 async function cargarDeseos() {
   if (!usuarioActual?.id) return;
  
@@ -231,15 +236,13 @@ async function cargarDeseos() {
  
   const q = document.getElementById('deseos-q')?.value?.trim() || '';
   const tipo = document.getElementById('deseos-tipo')?.value || '';
-  const ubicacion = document.getElementById('deseos-ubicacion')?.value?.trim() || '';
+  const order = document.getElementById('deseos-orden')?.value || 'prioridad';
  
-  info.textContent = 'Cargando...';
-  lista.innerHTML = '';
+  if (!lista.children.length) info.textContent = 'Cargando...';
  
-  const params = new URLSearchParams();
+  const params = new URLSearchParams({ order });
   if (q) params.set('q', q);
   if (tipo) params.set('tipo', tipo);
-  if (ubicacion) params.set('ubicacion', ubicacion);
  
   const res = await fetch(`${API_BASE}/api/usuarios/${usuarioActual.id}/deseos?${params.toString()}`, {
     headers: getHeaders(false),
@@ -251,26 +254,77 @@ async function cargarDeseos() {
     return;
   }
  
-  info.textContent = `Deseos: ${data.length}`;
-  lista.innerHTML = data.map(d => `
-    <div class="deseo-item deseo-item--portada" data-id="${d.id}">
+  deseosCache = new Map(data.map((d) => [Number(d.id), d]));
+  const filtrando = q || tipo;
+  info.textContent = data.length
+    ? `${data.length} deseo${data.length === 1 ? '' : 's'}`
+    : (filtrando ? 'Ningún deseo coincide con la búsqueda.' : 'Tu lista está vacía. Pulsa «Añadir deseo» para buscar libros en internet.');
+  lista.innerHTML = data.map((d) => {
+    const prio = [1, 2, 3].includes(Number(d.prioridad)) ? Number(d.prioridad) : 2;
+    return `
+    <div class="deseo-item deseo-item--portada deseo-prio-${prio}" data-id="${d.id}">
       <div class="deseo-portada">${imgPortada(d.url_portada, d.titulo, d.autores, 'deseo-portada-img', 'mini')}</div>
       <div class="deseo-cuerpo">
-        <div class="deseo-title">${escapeHtml(d.titulo || '—')}</div>
+        <button type="button" class="deseo-title deseo-editar" title="Editar deseo">${escapeHtml(d.titulo || '—')}</button>
         <div class="deseo-meta">
           ${d.autores ? `<span>${escapeHtml(d.autores)}</span>` : ''}
-          ${d.tipo ? `<span class="deseo-pill">${escapeHtml(d.tipo)}</span>` : ''}
-          ${d.ubicacion ? `<span class="deseo-pill">${escapeHtml(d.ubicacion)}</span>` : ''}
-          <span class="deseo-pill">Prioridad: ${d.prioridad ?? 2}</span>
+          ${d.tipo && d.tipo !== 'libro' ? `<span class="deseo-pill">${escapeHtml(d.tipo)}</span>` : ''}
         </div>
-        ${d.notas ? `<div style="margin-top:6px; opacity:.85;">${escapeHtml(d.notas)}</div>` : ''}
+        ${d.notas ? `<div class="deseo-notas">${escapeHtml(d.notas)}</div>` : ''}
       </div>
       <div class="deseo-actions">
-        <button class="icon-btn deseo-del" type="button" title="Eliminar"><span class="icon-circle">${icono('cerrar')}</span></button>
+        <select class="deseo-prio-sel" aria-label="Prioridad de ${escapeHtml(d.titulo || '')}" title="Prioridad">
+          ${[1, 2, 3].map((p) => `<option value="${p}" ${p === prio ? 'selected' : ''}>${PRIORIDADES[p]}</option>`).join('')}
+        </select>
+        <button class="icon-btn deseo-editar" type="button" title="Editar" aria-label="Editar"><span class="icon-circle">${icono('editar')}</span></button>
+        <button class="icon-btn deseo-del" type="button" title="Eliminar" aria-label="Eliminar"><span class="icon-circle">${icono('cerrar')}</span></button>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
+
+async function cambiarPrioridadDeseo(id, prioridad, item) {
+  const res = await fetch(`${API_BASE}/api/deseos/${id}`, {
+    method: 'PATCH',
+    headers: getHeaders(true),
+    body: JSON.stringify({ prioridad }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) { alert(data.error || 'No se pudo cambiar la prioridad'); return cargarDeseos(); }
+  deseosCache.set(id, data);
+  item?.classList.remove('deseo-prio-1', 'deseo-prio-2', 'deseo-prio-3');
+  item?.classList.add(`deseo-prio-${prioridad}`);
+  // Ordenada por prioridad: recolocar
+  if ((document.getElementById('deseos-orden')?.value || 'prioridad') === 'prioridad') cargarDeseos();
+}
+
+// Abre el formulario: sin deseo = nuevo (con buscador de internet); con deseo = editar
+function abrirFormDeseo(d = null) {
+  deseoEditandoId = d?.id ?? null;
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v ?? ''; };
+  set('deseo-titulo', d?.titulo);
+  set('deseo-autores', d?.autores);
+  set('deseo-isbn', d?.isbn);
+  set('deseo-notas', d?.notas);
+  set('deseo-portada', d?.url_portada);
+  set('deseo-prioridad', String(d?.prioridad || 2));
+  set('deseo-tipo', d?.tipo || 'libro');
+
+  const editar = Boolean(d);
+  const titulo = document.getElementById('deseo-form-titulo');
+  if (titulo) titulo.textContent = editar ? 'Editar deseo' : 'Nuevo deseo';
+  document.querySelector('#deseo-form-overlay .deseo-buscar')?.toggleAttribute('hidden', editar);
+  document.querySelector('#deseo-form-overlay .deseo-sep')?.toggleAttribute('hidden', editar);
+  const guardar = document.getElementById('btn-guardar-deseo');
+  if (guardar) guardar.textContent = editar ? 'Guardar cambios' : 'Guardar';
+
+  limpiarBuscadorDeseos();
+  cerrarOverlay('deseos-overlay');
+  abrirOverlay('deseo-form-overlay');
+  document.querySelector('#deseo-form-overlay .deseo-form')?.scrollTo(0, 0);
+  document.getElementById(editar ? 'deseo-titulo' : 'deseo-buscar-q')?.focus();
+}
+
 function setScanButtonState(isOn) {
   const btn = document.getElementById('btn-escanear');
   if (!btn) return;
@@ -282,41 +336,39 @@ function setScanButtonState(isOn) {
 }
  
 async function crearDeseoDesdeForm() {
-  const titulo = document.getElementById('deseo-titulo')?.value?.trim() || '';
-  const autores = document.getElementById('deseo-autores')?.value?.trim() || '';
-  const isbn = document.getElementById('deseo-isbn')?.value?.trim() || '';
-  const tipo = document.getElementById('deseo-tipo')?.value || 'libro';
-  const ubicacion = document.getElementById('deseo-ubicacion')?.value?.trim() || '';
-  const prioridad = Number(document.getElementById('deseo-prioridad')?.value || 2);
-  const notas = document.getElementById('deseo-notas')?.value?.trim() || '';
-  const url_portada = document.getElementById('deseo-portada')?.value?.trim() || '';
- 
+  const val = (id) => document.getElementById(id)?.value?.trim() || '';
+  const titulo = val('deseo-titulo');
   if (!titulo) {
     alert('El título es obligatorio.');
+    document.getElementById('deseo-titulo')?.focus();
     return;
   }
- 
-  const res = await fetch(`${API_BASE}/api/deseos`, {
-    method: 'POST',
+  const prioridad = Number(val('deseo-prioridad') || 2);
+  const cuerpo = {
+    titulo,
+    autores: val('deseo-autores'),
+    isbn: val('deseo-isbn'),
+    tipo: val('deseo-tipo') || 'libro',
+    prioridad: [1, 2, 3].includes(prioridad) ? prioridad : 2,
+    notas: val('deseo-notas'),
+    url_portada: val('deseo-portada'),
+  };
+  const editando = deseoEditandoId != null;
+  if (!editando) Object.keys(cuerpo).forEach((k) => { if (cuerpo[k] === '') cuerpo[k] = null; });
+
+  const res = await fetch(`${API_BASE}/api/deseos${editando ? `/${deseoEditandoId}` : ''}`, {
+    method: editando ? 'PATCH' : 'POST',
     headers: getHeaders(true),
-    body: JSON.stringify({
-      titulo,
-      autores: autores || null,
-      isbn: isbn || null,
-      tipo: tipo || 'libro',
-      ubicacion: ubicacion || null,
-      prioridad: Number.isFinite(prioridad) ? prioridad : 2,
-      notas: notas || null,
-      url_portada: url_portada || null
-    })
+    body: JSON.stringify(cuerpo),
   });
  
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    alert(data.error || 'Error creando deseo');
+    alert(data.error || 'Error guardando el deseo');
     return;
   }
  
+  deseoEditandoId = null;
   cerrarOverlay('deseo-form-overlay');
   abrirOverlay('deseos-overlay');
   await cargarDeseos();
@@ -479,32 +531,22 @@ function wireDeseosUI() {
  
   // Buscar/filtros (debounce simple)
   let t = null;
-  ['deseos-q', 'deseos-ubicacion'].forEach(id => {
+  ['deseos-q'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', () => {
       clearTimeout(t);
       t = setTimeout(cargarDeseos, 200);
     });
   });
   document.getElementById('deseos-tipo')?.addEventListener('change', cargarDeseos);
+  document.getElementById('deseos-orden')?.addEventListener('change', cargarDeseos);
  
   // Abrir formulario nuevo deseo
-  document.getElementById('btn-nuevo-deseo')?.addEventListener('click', () => {
-    // limpiar
-    ['deseo-titulo','deseo-autores','deseo-isbn','deseo-ubicacion','deseo-notas','deseo-portada'].forEach(id=>{
-      const el = document.getElementById(id); if (el) el.value = '';
-    });
-    const pr = document.getElementById('deseo-prioridad'); if (pr) pr.value = '2';
-    const tp = document.getElementById('deseo-tipo'); if (tp) tp.value = 'libro';
- 
-    limpiarBuscadorDeseos();
-    cerrarOverlay('deseos-overlay');
-    abrirOverlay('deseo-form-overlay');
-    document.getElementById('deseo-buscar-q')?.focus();
-  });
+  document.getElementById('btn-nuevo-deseo')?.addEventListener('click', () => abrirFormDeseo());
  
   // Cerrar formulario
   // (al cerrar el formulario se vuelve a la lista, ya con lo añadido desde la búsqueda)
   const volverALista = () => {
+    deseoEditandoId = null;
     cerrarOverlay('deseo-form-overlay');
     abrirOverlay('deseos-overlay');
     cargarDeseos();
@@ -523,13 +565,22 @@ function wireDeseosUI() {
   document.getElementById('btn-guardar-deseo')?.addEventListener('click', crearDeseoDesdeForm);
  
   // Delegación eliminar
-  document.getElementById('deseos-lista')?.addEventListener('click', (e) => {
-    const btn = e.target.closest('.deseo-del');
-    if (!btn) return;
+  const listaDeseos = document.getElementById('deseos-lista');
+  listaDeseos?.addEventListener('click', (e) => {
     const item = e.target.closest('.deseo-item');
     const id = Number(item?.dataset?.id);
     if (!id) return;
-    if (confirm('¿Eliminar este deseo?')) borrarDeseo(id);
+    if (e.target.closest('.deseo-del')) {
+      if (confirm('¿Eliminar este deseo?')) borrarDeseo(id);
+      return;
+    }
+    if (e.target.closest('.deseo-editar')) abrirFormDeseo(deseosCache.get(id));
+  });
+  listaDeseos?.addEventListener('change', (e) => {
+    const sel = e.target.closest('.deseo-prio-sel');
+    if (!sel) return;
+    const item = sel.closest('.deseo-item');
+    cambiarPrioridadDeseo(Number(item?.dataset?.id), Number(sel.value), item);
   });
  
   // ESC para cerrar overlays

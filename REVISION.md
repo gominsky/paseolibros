@@ -257,3 +257,13 @@ Ahora:
 
 - «Más → Lista de deseos»: cómo buscar en internet y añadir con + o revisando el formulario.
 - «Empezar → Buscador»: búsqueda por voz. «Más → Sesión»: entrar con Intro.
+
+## Lista de deseos: prioridad editable y barra nueva — 11/11
+
+- Botón «Añadir deseo» destacado (abre el buscador de internet) separado de los filtros
+  (buscar en mi lista, tipo y orden: por prioridad / recientes / título).
+- Fuera «Ubicación» (filtro y formulario): un deseo aún no está en casa.
+- Prioridad Alta/Media/Baja editable en cada deseo; franja de color según prioridad.
+- Editar cualquier deseo (título o lápiz) con el mismo formulario.
+- API: `PATCH /api/deseos/:id` solo cambia los campos enviados (texto vacío = borrar);
+  `order=prioridad` en el listado.

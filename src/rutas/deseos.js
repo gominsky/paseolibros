@@ -146,6 +146,8 @@ router.get('/usuarios/:usuarioId/deseos', verificarToken, soloPropio('usuarioId'
   }
 
   let orderSql = 'd.creado_en DESC';
+  // prioridad: 1 = alta, 2 = media, 3 = baja → las importantes primero
+  if (order === 'prioridad') orderSql = 'd.prioridad ASC, d.creado_en DESC';
   if (order === 'prioridad_desc') orderSql = 'd.prioridad DESC, d.creado_en DESC';
   if (order === 'titulo_asc') orderSql = 'd.titulo_norm ASC, d.creado_en DESC';
 
@@ -223,7 +225,7 @@ router.post('/deseos', verificarToken, async (req, res) => {
         isbn ? String(isbn).trim() : null,
         tipo ? String(tipo).trim() : null,
         ubicacion ? String(ubicacion).trim() : null,
-        Number.isFinite(Number(prioridad)) ? Number(prioridad) : null,
+        [1, 2, 3].includes(Number(prioridad)) ? Number(prioridad) : null,
         notas ? String(notas).trim() : null,
         url_portada ? String(url_portada).trim() : null,
       ]
@@ -241,6 +243,8 @@ router.post('/deseos', verificarToken, async (req, res) => {
 });
 
 // PATCH /api/deseos/:id
+// Solo cambia los campos que vienen en el cuerpo. Un texto vacío borra el campo
+// (excepto el título, que es obligatorio). prioridad: 1 alta, 2 media, 3 baja.
 router.patch('/deseos/:id', verificarToken, async (req, res) => {
   const usuario_id = req.usuario?.id;
   if (!usuario_id) return res.status(401).json({ error: 'Usuario no autenticado' });
@@ -248,40 +252,39 @@ router.patch('/deseos/:id', verificarToken, async (req, res) => {
   const id = Number(req.params.id);
   if (!id) return res.status(400).json({ error: 'ID no válido' });
 
-  const { titulo, autores, isbn, tipo, ubicacion, prioridad, notas, url_portada } = req.body;
+  const TEXTOS = ['titulo', 'autores', 'isbn', 'tipo', 'ubicacion', 'notas', 'url_portada'];
+  const sets = [];
+  const params = [];
+
+  for (const campo of TEXTOS) {
+    if (!(campo in req.body)) continue;
+    let v = req.body[campo] == null ? '' : String(req.body[campo]).trim();
+    if (campo === 'titulo' && !v) return res.status(400).json({ error: 'El título es obligatorio' });
+    if (campo === 'tipo' && !v) v = 'libro';
+    params.push(v || null);
+    sets.push(`${campo} = $${params.length}`);
+  }
+  if ('prioridad' in req.body) {
+    const p = Number(req.body.prioridad);
+    if (![1, 2, 3].includes(p)) return res.status(400).json({ error: 'Prioridad no válida (1, 2 o 3)' });
+    params.push(p);
+    sets.push(`prioridad = $${params.length}`);
+  }
+  if (!sets.length) return res.status(400).json({ error: 'Nada que actualizar' });
 
   try {
+    params.push(id, usuario_id);
     const r = await pool.query(
-      `UPDATE deseos
-       SET
-         titulo = COALESCE($1, titulo),
-         autores = COALESCE($2, autores),
-         isbn = COALESCE($3, isbn),
-         tipo = COALESCE($4, tipo),
-         ubicacion = COALESCE($5, ubicacion),
-         prioridad = COALESCE($6, prioridad),
-         notas = COALESCE($7, notas),
-         url_portada = COALESCE($8, url_portada)
-       WHERE id = $9 AND usuario_id = $10
+      `UPDATE deseos SET ${sets.join(', ')}
+       WHERE id = $${params.length - 1} AND usuario_id = $${params.length}
        RETURNING *`,
-      [
-        titulo ?? null,
-        autores ?? null,
-        isbn ?? null,
-        tipo ?? null,
-        ubicacion ?? null,
-        Number.isFinite(Number(prioridad)) ? Number(prioridad) : null,
-        notas ?? null,
-        url_portada ?? null,
-        id,
-        usuario_id,
-      ]
+      params
     );
-
     if (r.rowCount === 0) return res.status(404).json({ error: 'Deseo no encontrado' });
     res.json(r.rows[0]);
   } catch (err) {
     console.error(err);
+    if (err.code === '23505') return res.status(400).json({ error: 'Ya tienes un deseo con ese ISBN' });
     res.status(500).json({ error: 'Error actualizando deseo' });
   }
 });
