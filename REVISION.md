@@ -224,3 +224,9 @@ Ahora:
   Los mensajes usan «✓» de texto en lugar de ✅/⚠️/❌.
 - Corregido: el botón de búsqueda por voz mostraba una raya larga al escuchar (estropeado al limpiar separadores).
 - Marcapáginas: los botones ya no se salen por los lados en el móvil.
+
+## Migraciones automáticas — 11/11
+
+- Nuevo `src/migraciones.js`: al arrancar, el servidor aplica `db/add3.sql` y `db/add4.sql`
+  (idempotentes). En Render ya no hace falta conectarse con psql: basta con desplegar.
+- Para futuras migraciones: crear `db/addN.sql` idempotente y añadirlo a la lista `MIGRACIONES`.
