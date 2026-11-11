@@ -246,3 +246,14 @@ Ahora:
 - «+» lo añade directamente (con el tipo y la prioridad elegidos abajo); tocar el libro rellena
   el formulario para revisarlo antes de guardar.
 - La lista de deseos muestra ahora la portada de cada libro.
+
+## Tema claro «blanco limpio» — 11/11
+
+- Fondo gris muy claro (#f2f3ef), tarjetas y cabecera blancas, campos blancos con borde visible,
+  texto con más contraste y menos grano de papel. El tema oscuro no cambia.
+- Tokens en `css/base.css` (:root) y ajustes de campos en `css/nuevo-look.css`.
+
+## Ayuda actualizada — 11/11
+
+- «Más → Lista de deseos»: cómo buscar en internet y añadir con + o revisando el formulario.
+- «Empezar → Buscador»: búsqueda por voz. «Más → Sesión»: entrar con Intro.

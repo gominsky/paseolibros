@@ -15,13 +15,13 @@
    TOKENS
    ══════════════════════════════════════════════════════════ */
 :root {
-  /* Paleta base — verde tinta sobre papel */
-  --bg:          #f6f1e7;
-  --surface:     #fffdf8;
-  --surface-2:   #efe8da;
-  --ink:         #1c2420;
-  --ink-2:       #46504b;
-  --ink-3:       #7c847f;
+  /* Paleta base — verde tinta sobre blanco limpio (tema claro «A», nov. 2026) */
+  --bg:          #f2f3ef;
+  --surface:     #ffffff;
+  --surface-2:   #f4f5f2;
+  --ink:         #141c18;
+  --ink-2:       #3d4842;
+  --ink-3:       #6f7873;
 
   /* Acento: verde tinta + detalle dorado */
   --accent:      #2f5d50;
@@ -33,14 +33,14 @@
   --gold-soft:   rgba(184, 145, 58, .14);
 
   /* Borders */
-  --border:      rgba(28, 36, 32, .10);
-  --border-2:    rgba(28, 36, 32, .18);
-  --border-acc:  rgba(47, 93, 80, .35);
+  --border:      rgba(20, 28, 24, .10);
+  --border-2:    rgba(20, 28, 24, .18);
+  --border-acc:  rgba(47, 93, 80, .40);
 
   /* Sombras (suaves) */
-  --shadow-sm:   0 1px 3px rgba(28, 36, 32, .06);
-  --shadow-md:   0 4px 14px rgba(28, 36, 32, .07);
-  --shadow-lg:   0 14px 36px rgba(28, 36, 32, .12);
+  --shadow-sm:   0 1px 2px rgba(20, 28, 24, .06), 0 0 0 1px rgba(20, 28, 24, .03);
+  --shadow-md:   0 6px 18px rgba(20, 28, 24, .07);
+  --shadow-lg:   0 16px 40px rgba(20, 28, 24, .12);
 
   /* Radios */
   --r-sm:  10px;
@@ -144,7 +144,7 @@ a:hover { text-decoration: underline; }
   justify-content: space-between;
   gap: 8px;
   padding: 10px 14px;
-  background: #ffffff;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-md);
