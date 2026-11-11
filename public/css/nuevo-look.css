@@ -549,3 +549,33 @@ input[type="search"] { -webkit-appearance: none; appearance: none; }
 input[type="search"]::-webkit-search-decoration,
 input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }
 #form-login { margin: 0; }
+
+/* ---------- Lista de deseos: portadas y búsqueda en internet ---------- */
+.deseo-item--portada { grid-template-columns: 40px 1fr auto; align-items: start; }
+.deseo-portada img, .deseo-res-portada img { width: 40px; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 4px; display: block; box-shadow: 0 1px 3px rgba(0,0,0,.18); }
+.deseo-cuerpo { min-width: 0; }
+
+.deseo-buscar { display: grid; gap: 8px; margin-bottom: 4px; }
+.deseo-buscar > label { font-weight: 600; font-size: .85rem; color: var(--ink-2); }
+.deseo-buscar-fila { display: flex; gap: 8px; margin: 0; }
+.deseo-buscar-fila input { flex: 1; min-width: 0; }
+.deseo-buscar-fila .btn { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.deseo-buscar-info { margin: 0; font-size: .8rem; }
+.deseo-resultados { display: grid; gap: 6px; max-height: min(46vh, 420px); overflow: auto; transition: opacity .15s; }
+.deseo-resultados:empty { display: none; }
+.deseo-resultados.is-cargando { opacity: .5; }
+.deseo-res {
+  display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; align-items: center;
+  padding: 8px 10px; border-radius: var(--r-md); background: var(--surface-2);
+  border: 1px solid var(--border); cursor: pointer; transition: border-color .15s, background .15s;
+}
+.deseo-res:hover, .deseo-res:focus-visible { border-color: var(--border-acc); outline: none; }
+.deseo-res-info { min-width: 0; }
+.deseo-res-titulo { font-weight: 600; font-size: .9rem; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.deseo-res-meta { font-size: .78rem; color: var(--ink-2); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.deseo-res-estado { margin-top: 4px; }
+.deseo-res-estado .deseo-pill { display: inline-flex; align-items: center; gap: 4px; }
+.deseo-res-add .icon-circle { font-size: 1.2rem; font-weight: 600; }
+.deseo-res-add:disabled { opacity: .55; cursor: default; }
+.deseo-sep { display: flex; align-items: center; gap: 10px; margin: 14px 0 8px; color: var(--ink-3, var(--ink-2)); font-size: .78rem; }
+.deseo-sep::before, .deseo-sep::after { content: ""; flex: 1; height: 1px; background: var(--border); }

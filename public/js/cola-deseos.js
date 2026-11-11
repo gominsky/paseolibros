@@ -253,8 +253,9 @@ async function cargarDeseos() {
  
   info.textContent = `Deseos: ${data.length}`;
   lista.innerHTML = data.map(d => `
-    <div class="deseo-item" data-id="${d.id}">
-      <div>
+    <div class="deseo-item deseo-item--portada" data-id="${d.id}">
+      <div class="deseo-portada">${imgPortada(d.url_portada, d.titulo, d.autores, 'deseo-portada-img', 'mini')}</div>
+      <div class="deseo-cuerpo">
         <div class="deseo-title">${escapeHtml(d.titulo || '—')}</div>
         <div class="deseo-meta">
           ${d.autores ? `<span>${escapeHtml(d.autores)}</span>` : ''}
@@ -334,6 +335,133 @@ async function borrarDeseo(id) {
   await cargarDeseos();
 }
  
+// ---------- Buscar libros en internet para la lista de deseos ----------
+let resultadosDeseos = [];
+let busquedaDeseosId = 0;
+
+function limpiarBuscadorDeseos() {
+  busquedaDeseosId++;
+  resultadosDeseos = [];
+  const q = document.getElementById('deseo-buscar-q'); if (q) q.value = '';
+  const r = document.getElementById('deseo-resultados'); if (r) r.innerHTML = '';
+  const info = document.getElementById('deseo-buscar-info');
+  if (info) info.innerHTML = 'Busca el libro y pulsa <strong>+</strong> para añadirlo, o tócalo para revisar los datos antes de guardar.';
+}
+
+function pintarResultadosDeseos() {
+  const cont = document.getElementById('deseo-resultados');
+  if (!cont) return;
+  cont.innerHTML = resultadosDeseos.map((r, i) => {
+    const meta = [r.autores, r.anio, r.editorial].filter(Boolean).map(escapeHtml).join(' · ');
+    let estado = '';
+    if (r.anadido) estado = `<span class="deseo-pill deseo-pill--ok">${icono('check')} Añadido</span>`;
+    else if (r.ya_deseado) estado = '<span class="deseo-pill">Ya en deseos</span>';
+    else if (r.ya_tengo) estado = '<span class="deseo-pill deseo-pill--warn">Ya lo tienes</span>';
+    const bloqueado = r.anadido || r.ya_deseado;
+    return `
+      <div class="deseo-res" data-i="${i}" role="button" tabindex="0" title="Revisar datos antes de guardar">
+        <div class="deseo-res-portada">${imgPortada(r.url_portada, r.titulo, r.autores, 'deseo-res-img', 'mini')}</div>
+        <div class="deseo-res-info">
+          <div class="deseo-res-titulo">${escapeHtml(r.titulo)}</div>
+          ${meta ? `<div class="deseo-res-meta">${meta}</div>` : ''}
+          ${estado ? `<div class="deseo-res-estado">${estado}</div>` : ''}
+        </div>
+        <button type="button" class="icon-btn deseo-res-add" data-i="${i}" ${bloqueado ? 'disabled' : ''}
+          title="Añadir a la lista de deseos" aria-label="Añadir ${escapeHtml(r.titulo)} a la lista de deseos">
+          <span class="icon-circle">${r.anadido ? icono('check') : '+'}</span>
+        </button>
+      </div>`;
+  }).join('');
+}
+
+async function buscarDeseosEnInternet() {
+  const q = document.getElementById('deseo-buscar-q')?.value?.trim() || '';
+  const info = document.getElementById('deseo-buscar-info');
+  const cont = document.getElementById('deseo-resultados');
+  if (q.length < 2) { if (info) info.textContent = 'Escribe al menos 2 letras.'; return; }
+
+  const id = ++busquedaDeseosId;
+  if (info) info.textContent = 'Buscando…';
+  if (cont) cont.classList.add('is-cargando');
+  try {
+    const res = await fetch(`${API_BASE}/api/deseos/buscar-internet?q=${encodeURIComponent(q)}`, { headers: getHeaders(false) });
+    const data = await res.json();
+    if (id !== busquedaDeseosId) return; // llegó otra búsqueda más nueva
+    if (!res.ok) { if (info) info.textContent = data.error || 'No se pudo buscar.'; return; }
+    resultadosDeseos = data;
+    if (info) info.textContent = data.length
+      ? `${data.length} resultado${data.length === 1 ? '' : 's'}. Pulsa + para añadir o toca un libro para revisar sus datos.`
+      : 'No se ha encontrado nada. Prueba con otras palabras o escribe los datos a mano.';
+    pintarResultadosDeseos();
+  } catch {
+    if (id === busquedaDeseosId && info) info.textContent = 'Sin conexión: no se puede buscar ahora.';
+  } finally {
+    if (id === busquedaDeseosId) cont?.classList.remove('is-cargando');
+  }
+}
+
+// Rellena el formulario con un resultado (para revisar tipo, prioridad, notas…)
+function rellenarFormDeseo(r) {
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+  set('deseo-titulo', r.titulo);
+  set('deseo-autores', r.autores);
+  set('deseo-isbn', r.isbn);
+  set('deseo-portada', r.url_portada);
+  const t = document.getElementById('deseo-titulo');
+  t?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  t?.focus({ preventScroll: true });
+}
+
+// Añade directamente con la prioridad y el tipo elegidos en el formulario
+async function anadirDeseoRapido(i) {
+  const r = resultadosDeseos[i];
+  if (!r || r.anadido) return;
+  const res = await fetch(`${API_BASE}/api/deseos`, {
+    method: 'POST',
+    headers: getHeaders(true),
+    body: JSON.stringify({
+      titulo: r.titulo,
+      autores: r.autores || null,
+      isbn: r.isbn || null,
+      tipo: document.getElementById('deseo-tipo')?.value || 'libro',
+      prioridad: Number(document.getElementById('deseo-prioridad')?.value || 2),
+      url_portada: r.url_portada || null,
+    }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    if (res.status === 400 && /ISBN/i.test(data.error || '')) { r.ya_deseado = true; pintarResultadosDeseos(); return; }
+    alert(data.error || 'Error añadiendo el deseo');
+    return;
+  }
+  r.anadido = true;
+  pintarResultadosDeseos();
+}
+
+function wireBuscadorDeseos() {
+  document.getElementById('deseo-buscar-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    buscarDeseosEnInternet();
+  });
+  let t = null;
+  document.getElementById('deseo-buscar-q')?.addEventListener('input', (e) => {
+    clearTimeout(t);
+    if (e.target.value.trim().length >= 3) t = setTimeout(buscarDeseosEnInternet, 600);
+  });
+  const cont = document.getElementById('deseo-resultados');
+  cont?.addEventListener('click', (e) => {
+    const add = e.target.closest('.deseo-res-add');
+    if (add) { e.stopPropagation(); anadirDeseoRapido(Number(add.dataset.i)); return; }
+    const fila = e.target.closest('.deseo-res');
+    if (fila) rellenarFormDeseo(resultadosDeseos[Number(fila.dataset.i)]);
+  });
+  cont?.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' || !e.target.classList.contains('deseo-res')) return;
+    e.preventDefault();
+    rellenarFormDeseo(resultadosDeseos[Number(e.target.dataset.i)]);
+  });
+}
+
 function wireDeseosUI() {
   // Abrir desde herramientas
   document.getElementById('btn-open-deseos')?.addEventListener('click', () => {
@@ -368,19 +496,28 @@ function wireDeseosUI() {
     const pr = document.getElementById('deseo-prioridad'); if (pr) pr.value = '2';
     const tp = document.getElementById('deseo-tipo'); if (tp) tp.value = 'libro';
  
+    limpiarBuscadorDeseos();
     cerrarOverlay('deseos-overlay');
     abrirOverlay('deseo-form-overlay');
-    document.getElementById('deseo-titulo')?.focus();
+    document.getElementById('deseo-buscar-q')?.focus();
   });
  
   // Cerrar formulario
-  document.getElementById('btn-cerrar-deseo-form')?.addEventListener('click', () => cerrarOverlay('deseo-form-overlay'));
-  document.getElementById('btn-cancelar-deseo')?.addEventListener('click', () => cerrarOverlay('deseo-form-overlay'));
+  // (al cerrar el formulario se vuelve a la lista, ya con lo añadido desde la búsqueda)
+  const volverALista = () => {
+    cerrarOverlay('deseo-form-overlay');
+    abrirOverlay('deseos-overlay');
+    cargarDeseos();
+  };
+  document.getElementById('btn-cerrar-deseo-form')?.addEventListener('click', volverALista);
+  document.getElementById('btn-cancelar-deseo')?.addEventListener('click', volverALista);
  
   // Click fuera en form
   document.getElementById('deseo-form-overlay')?.addEventListener('click', (e) => {
-    if (e.target.id === 'deseo-form-overlay') cerrarOverlay('deseo-form-overlay');
+    if (e.target.id === 'deseo-form-overlay') volverALista();
   });
+
+  wireBuscadorDeseos();
  
   // Guardar
   document.getElementById('btn-guardar-deseo')?.addEventListener('click', crearDeseoDesdeForm);

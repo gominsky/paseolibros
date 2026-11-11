@@ -237,3 +237,12 @@ Ahora:
 - El login es ahora un `<form>` real (Intro para entrar; el navegador sabe dónde va el usuario).
 - Buscadores con `type="search"` y `autocomplete="off"`; al iniciar sesión el buscador se vacía
   y, si aparece el nombre de usuario sin que estés escribiendo, se descarta.
+
+## Lista de deseos: buscar en internet — 11/11
+
+- En «Nuevo deseo» hay un buscador (título, autor o ISBN) que consulta Google Books y,
+  si hay pocos resultados, Open Library. Ruta: `GET /api/deseos/buscar-internet?q=`.
+- Cada resultado muestra portada, autor, año y editorial, y avisa si «Ya lo tienes» o «Ya en deseos».
+- «+» lo añade directamente (con el tipo y la prioridad elegidos abajo); tocar el libro rellena
+  el formulario para revisarlo antes de guardar.
+- La lista de deseos muestra ahora la portada de cada libro.

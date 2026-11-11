@@ -770,6 +770,21 @@
     </div>
 
     <div class="deseo-form">
+      <div class="deseo-buscar">
+        <label for="deseo-buscar-q">Buscar en internet</label>
+        <form id="deseo-buscar-form" class="deseo-buscar-fila" role="search">
+          <input id="deseo-buscar-q" type="search" autocomplete="off" spellcheck="false"
+                 placeholder="Título, autor o ISBN…" />
+          <button id="btn-deseo-buscar" class="btn btn-secondary btn-sm" type="submit">
+            <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-lupa"/></svg> Buscar
+          </button>
+        </form>
+        <p id="deseo-buscar-info" class="muted deseo-buscar-info">Busca el libro y pulsa <strong>+</strong> para añadirlo, o tócalo para revisar los datos antes de guardar.</p>
+        <div id="deseo-resultados" class="deseo-resultados" aria-live="polite"></div>
+      </div>
+
+      <div class="deseo-sep"><span>o escribe los datos</span></div>
+
       <div class="form-group">
         <label for="deseo-titulo">Título</label>
         <input id="deseo-titulo" type="text" placeholder="Ej: Sandman" />
