@@ -37,6 +37,32 @@ router.get('/usuarios/:id/lecturas/estadisticas', soloPropio('id'), async (req, 
         WHERE usuario_id = $1
           AND fin IS NOT NULL
         GROUP BY anio
+
+        UNION ALL
+
+        -- libros que me prestaron: empezados (al empezar a leerlos, o al marcarlos leídos)…
+        SELECT
+          EXTRACT(YEAR FROM COALESCE(fecha_inicio_lectura, fecha_leido))::int AS anio,
+          COUNT(*) AS empezadas,
+          0        AS terminadas
+        FROM libros_recibidos
+        WHERE usuario_id = $1
+          AND (leyendo = TRUE OR leido = TRUE)
+          AND COALESCE(fecha_inicio_lectura, fecha_leido) IS NOT NULL
+        GROUP BY anio
+
+        UNION ALL
+
+        -- …y terminados (marcados como leídos)
+        SELECT
+          EXTRACT(YEAR FROM fecha_leido)::int AS anio,
+          0        AS empezadas,
+          COUNT(*) AS terminadas
+        FROM libros_recibidos
+        WHERE usuario_id = $1
+          AND leido = TRUE
+          AND fecha_leido IS NOT NULL
+        GROUP BY anio
       ) t
       GROUP BY anio
       ORDER BY anio DESC;
@@ -83,6 +109,29 @@ router.get('/usuarios/:id/lecturas/estadisticas/:anio', soloPropio('id'), async 
 
     const { rows } = await pool.query(sql, [usuarioId, anio]);
 
+    // Libros prestados por otros: empezados y/o terminados ese año
+    const { rows: prestados } = await pool.query(
+      `SELECT id, titulo, autores, prestador, leido, fecha_leido,
+              COALESCE(fecha_inicio_lectura, fecha_leido) AS inicio
+       FROM libros_recibidos
+       WHERE usuario_id = $1
+         AND (leyendo = TRUE OR leido = TRUE)
+         AND (EXTRACT(YEAR FROM COALESCE(fecha_inicio_lectura, fecha_leido))::int = $2
+              OR (leido = TRUE AND EXTRACT(YEAR FROM fecha_leido)::int = $2))
+       ORDER BY COALESCE(fecha_leido, fecha_inicio_lectura) DESC, titulo`,
+      [usuarioId, anio]
+    );
+    const base = (p) => ({
+      id: `r${p.id}`, libro_id: null, ejemplar_id: null,
+      titulo: p.titulo, autores: p.autores, prestado_por: p.prestador,
+    });
+    const prestEmpezados = prestados
+      .filter(p => p.inicio && new Date(p.inicio).getFullYear() === anio)
+      .map(p => ({ ...base(p), inicio: p.inicio }));
+    const prestTerminados = prestados
+      .filter(p => p.leido && p.fecha_leido && new Date(p.fecha_leido).getFullYear() === anio)
+      .map(p => ({ ...base(p), fin: p.fecha_leido }));
+
     const empezadas = rows
       .filter(r => r.empezada_en_anio)
       .map(r => ({
@@ -92,7 +141,9 @@ router.get('/usuarios/:id/lecturas/estadisticas/:anio', soloPropio('id'), async 
         titulo: r.titulo,
         autores: r.autores,
         inicio: r.inicio,
-      }));
+      }))
+      .concat(prestEmpezados)
+      .sort((a, b) => new Date(b.inicio) - new Date(a.inicio));
 
     const terminadas = rows
       .filter(r => r.terminada_en_anio)
@@ -103,7 +154,9 @@ router.get('/usuarios/:id/lecturas/estadisticas/:anio', soloPropio('id'), async 
         titulo: r.titulo,
         autores: r.autores,
         fin: r.fin,
-      }));
+      }))
+      .concat(prestTerminados)
+      .sort((a, b) => new Date(b.fin) - new Date(a.fin));
 
     res.json({ anio, empezadas, terminadas });
   } catch (err) {
@@ -237,7 +290,20 @@ router.get('/usuarios/:usuarioId/lecturas-abiertas', soloPropio('usuarioId'), as
       [usuarioId]
     );
 
-    res.json(resultado.rows);
+    // Libros que me han prestado y estoy leyendo
+    const prestados = await pool.query(
+      `SELECT id AS recibido_id, titulo, autores, prestador,
+              fecha_inicio_lectura AS inicio, pagina_actual
+       FROM libros_recibidos
+       WHERE usuario_id = $1 AND leyendo = TRUE`,
+      [usuarioId]
+    );
+
+    const todas = resultado.rows
+      .concat(prestados.rows.map(p => ({ ...p, id: null, libro_id: null, ejemplar_id: null, prestado: true })))
+      .sort((a, b) => new Date(b.inicio || 0) - new Date(a.inicio || 0));
+
+    res.json(todas);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error obteniendo lecturas abiertas del usuario' });

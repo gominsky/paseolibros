@@ -108,7 +108,7 @@
       barra = document.createElement('div');
       barra.className = 'scanner-acciones';
       barra.innerHTML = `
-        <button type="button" class="btn btn-secondary scanner-btn-luz" hidden>💡 Linterna</button>
+        <button type="button" class="btn btn-secondary scanner-btn-luz" hidden>${window.icono ? window.icono('bombilla') : ''} Linterna</button>
         <button type="button" class="btn btn-secondary scanner-btn-cancelar">Cancelar</button>`;
       cont.appendChild(barra);
       barra.querySelector('.scanner-btn-cancelar').addEventListener('click', () => stop());

@@ -92,7 +92,7 @@ window.VistaPreviaISBN = (function () {
     let aviso = '';
     if (d.mios?.length) {
       const donde = d.mios.map((m) => m.ubicacion ? escapeHtml(m.ubicacion) : 'sin ubicación').join(', ');
-      aviso = `<div class="isbn-preview-duplicado">⚠️ Ya lo tienes${d.mios.length > 1 ? ` (${d.mios.length} ejemplares)` : ''}: ${donde}
+      aviso = `<div class="isbn-preview-duplicado">${icono('alerta')} Ya lo tienes${d.mios.length > 1 ? ` (${d.mios.length} ejemplares)` : ''}: ${donde}
         <button type="button" class="isbn-preview-ver" data-libro-id="${l.id}" data-ejemplar-id="${d.mios[0].ejemplar_id}">Ver ficha</button></div>`;
     }
 

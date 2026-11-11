@@ -64,24 +64,65 @@ router.get('/biblioteca-compartida/compartidas', requireAuth, async (req, res) =
   }
 });
 
+// ── GET /api/biblioteca-compartida/usuarios
+// Usuarios que han elegido aparecer en la lista para compartir (nunca el propio),
+// indicando si ya les compartes tu biblioteca. Incluye mi preferencia de visibilidad.
+router.get('/biblioteca-compartida/usuarios', requireAuth, async (req, res) => {
+  try {
+    const yo = await pool.query('SELECT visible_compartir FROM usuarios WHERE id = $1', [req.usuario.id]);
+    const { rows } = await pool.query(
+      `SELECT u.id, u.nombre_usuario,
+              EXISTS (SELECT 1 FROM biblioteca_compartida bc
+                       WHERE bc.propietario_id = $1 AND bc.invitado_id = u.id) AS ya_compartido
+       FROM usuarios u
+       WHERE u.visible_compartir = TRUE AND u.id <> $1
+       ORDER BY lower(u.nombre_usuario)`,
+      [req.usuario.id]
+    );
+    res.json({ visible: Boolean(yo.rows[0]?.visible_compartir), usuarios: rows });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Error obteniendo la lista de usuarios' });
+  }
+});
+
+// ── PUT /api/biblioteca-compartida/visibilidad  { visible: true|false }
+// Aparecer (o dejar de aparecer) en la lista para que otros compartan conmigo
+router.put('/biblioteca-compartida/visibilidad', requireAuth, async (req, res) => {
+  const visible = req.body?.visible === true;
+  try {
+    await pool.query('UPDATE usuarios SET visible_compartir = $1 WHERE id = $2', [visible, req.usuario.id]);
+    res.json({ ok: true, visible });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Error guardando la preferencia' });
+  }
+});
+
 // ── POST /api/biblioteca-compartida
-// Compartir biblioteca con otro usuario { nombre_usuario }
+// Compartir biblioteca con otro usuario { usuario_id } (desde la lista) o { nombre_usuario }
 router.post('/biblioteca-compartida', requireAuth, async (req, res) => {
   const { nombre_usuario } = req.body;
-  if (!nombre_usuario?.trim()) {
+  const usuarioId = Number(req.body?.usuario_id) || null;
+  if (!usuarioId && !nombre_usuario?.trim()) {
     return res.status(400).json({ error: 'Indica el nombre de usuario' });
   }
 
-  if (nombre_usuario.trim() === req.usuario.nombre_usuario) {
+  if (usuarioId === req.usuario.id || nombre_usuario?.trim() === req.usuario.nombre_usuario) {
     return res.status(400).json({ error: 'No puedes compartir contigo mismo' });
   }
 
   try {
-    // Buscar el usuario invitado
-    const { rows: found } = await pool.query(
-      'SELECT id, nombre_usuario FROM usuarios WHERE nombre_usuario = $1',
-      [nombre_usuario.trim()]
-    );
+    // Buscar el usuario invitado (por id solo entre los que aparecen en la lista)
+    const { rows: found } = usuarioId
+      ? await pool.query(
+          'SELECT id, nombre_usuario FROM usuarios WHERE id = $1 AND visible_compartir = TRUE',
+          [usuarioId]
+        )
+      : await pool.query(
+          'SELECT id, nombre_usuario FROM usuarios WHERE nombre_usuario = $1',
+          [nombre_usuario.trim()]
+        );
     if (!found.length) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }

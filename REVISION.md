@@ -193,3 +193,34 @@ Ahora:
   Versiones normales (192/512), «maskable» con margen para los móviles que recortan en círculo, icono de iPhone (180)
   y favicon. Para verlo en el móvil hay que quitar el acceso directo y volver a añadirlo.
 - **Pestañas del móvil**: iconos de línea propios (SVG) en lugar de emojis: estante de libros, libro abierto con marcapáginas, flechas de ida y vuelta y barras. Activa = verde con relleno suave.
+
+---
+
+# Quinta tanda — 11/11
+
+**⚠️ Antes de desplegar, ejecutar en Render:** `psql "<External Database URL>" -f db/add4.sql`
+(añade `libros_recibidos.leido`, `libros_recibidos.fecha_leido` y `usuarios.visible_compartir`; se puede repetir).
+
+- **Libros que me han prestado → 📖 Leído**: cuentan en las estadísticas (total, año, racha, gráfico, autores)
+  como libro terminado en la fecha elegida (hoy por defecto, editable). En el detalle del año salen con
+  la etiqueta «prestado por …». «No leído» lo quita de las estadísticas.
+- **Compartir biblioteca con una lista de usuarios**: en «Las que yo comparto» se elige a la persona de una lista
+  (con filtro) y se pulsa Compartir. En la lista solo salen quienes lo han elegido voluntariamente con la casilla
+  «Aparecer en la lista de usuarios» (pestaña «Compartidas conmigo»); solo se muestra el nombre de usuario.
+  Sigue existiendo la opción de escribir el nombre a mano.
+- **Quitado «Buscar portadas faltantes»** del menú ⚙ (las tapas generadas cubren los libros sin portada; se puede
+  seguir buscando portada libro a libro desde la ficha).
+- **Ayuda rehecha**: contenido al día (botón +, vista previa, pestañas, tapas generadas, compartir con lista,
+  libros prestados leídos, instalar en el móvil, sesión) y pestañas en dos filas en el móvil (antes se cortaban).
+- Las estadísticas se recalculan siempre al recargarse (antes el detalle por año se quedaba en caché).
+- Eliminadas 29 reglas CSS que ya no se usaban.
+- **Libros prestados en curso**: «Empezar a leer» los pone en **Leyendo** (con la etiqueta «prestado por…»). Al tocarlos
+  se abre el marcapáginas, que para estos libros tiene además **Lo he terminado**. «Dejar» los saca sin contarlos.
+  En estadísticas cuentan como empezados al empezar a leerlos y como terminados al acabarlos.
+  (Columnas nuevas en `db/add4.sql`: `leyendo`, `fecha_inicio_lectura`, `pagina_actual`; si ya lo ejecutaste, vuelve a
+  ejecutarlo: no pasa nada por repetirlo.)
+- **Iconos de línea en toda la app** (`js/iconos.js` + dibujos al principio de `index.html`): cabecera, ficha, portadas,
+  notas de voz, insignias, ayuda, cerrar, ordenar, cola… Sin emojis de colores; toman el color del texto.
+  Los mensajes usan «✓» de texto en lugar de ✅/⚠️/❌.
+- Corregido: el botón de búsqueda por voz mostraba una raya larga al escuchar (estropeado al limpiar separadores).
+- Marcapáginas: los botones ya no se salen por los lados en el móvil.

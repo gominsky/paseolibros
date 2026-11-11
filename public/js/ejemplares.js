@@ -53,7 +53,7 @@ function actualizarIconosOrden(table) {
     if (!icon) return;
  
     if (key === sortEjemplares.key) {
-      icon.textContent = sortEjemplares.dir === 'asc' ? '☑' : '☒';
+      icon.innerHTML = icono(sortEjemplares.dir === 'asc' ? 'arriba' : 'abajo');
     } else {
       icon.textContent = '';
     }

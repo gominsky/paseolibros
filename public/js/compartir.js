@@ -35,7 +35,7 @@
           p.classList.toggle('is-active', p.id === 'bc-panel-' + tab.dataset.bcTab);
         });
         if (tab.dataset.bcTab === 'conmigo') cargarConmigo();
-        else cargarMisCompartidas();
+        else { cargarMisCompartidas(); cargarUsuariosVisibles(); }
       });
     });
   }
@@ -108,28 +108,90 @@
     }
   }
  
-  // ══ Compartir con un usuario ══════════════════════════════════════════════════════════
-  async function compartirCon() {
+  // ══ Lista de usuarios que quieren aparecer + mi visibilidad ══════════════════
+  let usuariosVisibles = [];
+ 
+  async function cargarUsuariosVisibles() {
+    const lista = document.getElementById('bc-lista-usuarios');
+    if (lista) lista.innerHTML = '<p class="muted bc-info">Cargando…</p>';
+    try {
+      const res = await bcFetch('/api/biblioteca-compartida/usuarios');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      usuariosVisibles = data.usuarios || [];
+      const chk = document.getElementById('bc-visible');
+      if (chk) chk.checked = Boolean(data.visible);
+      renderUsuariosVisibles();
+    } catch (e) {
+      if (lista) lista.innerHTML = `<p class="muted bc-info">Error: ${escHtml(e.message)}</p>`;
+    }
+  }
+ 
+  function renderUsuariosVisibles() {
+    const lista = document.getElementById('bc-lista-usuarios');
+    if (!lista) return;
+    const q = (document.getElementById('bc-filtro-usuarios')?.value || '').toLowerCase().trim();
+    const filtrados = usuariosVisibles.filter(u => !q || u.nombre_usuario.toLowerCase().includes(q));
+    if (!usuariosVisibles.length) {
+      lista.innerHTML = '<p class="muted bc-info">Todavía nadie ha elegido aparecer en la lista.</p>';
+      return;
+    }
+    if (!filtrados.length) {
+      lista.innerHTML = '<p class="muted bc-info">Ningún usuario coincide.</p>';
+      return;
+    }
+    lista.innerHTML = filtrados.map(u => `
+      <div class="bc-item bc-item-usuario">
+        <span class="bc-avatar" aria-hidden="true">${escHtml(u.nombre_usuario.charAt(0).toUpperCase())}</span>
+        <div class="bc-item-info"><span class="bc-item-nombre">${escHtml(u.nombre_usuario)}</span></div>
+        ${u.ya_compartido
+          ? '<span class="deseo-pill deseo-pill--ok">Compartida ✓</span>'
+          : `<button class="btn btn-primary btn-sm bc-btn-compartir-con" type="button" data-usuario-id="${u.id}" data-nombre="${escHtml(u.nombre_usuario)}">Compartir</button>`}
+      </div>`).join('');
+  }
+ 
+  async function guardarVisibilidad(visible) {
+    const msg = document.getElementById('bc-info-conmigo');
+    try {
+      const res = await bcFetch('/api/biblioteca-compartida/visibilidad', {
+        method: 'PUT',
+        body: JSON.stringify({ visible })
+      });
+      if (!res.ok) throw new Error((await res.json()).error);
+      if (typeof setUserStatusOk === 'function') {
+        setUserStatusOk(visible ? 'Ahora apareces en la lista de usuarios.' : 'Ya no apareces en la lista de usuarios.');
+      }
+    } catch (e) {
+      const chk = document.getElementById('bc-visible');
+      if (chk) chk.checked = !visible;
+      if (msg) msg.textContent = e.message;
+    }
+  }
+ 
+  // ══ Compartir con un usuario (de la lista o escribiendo su nombre) ═══════════
+  async function compartirCon(destino) {
     const input = document.getElementById('bc-input-usuario');
     const msg   = document.getElementById('bc-msg-compartir');
-    const nombre = (input?.value || '').trim();
+    const desdeLista = destino && destino.usuario_id;
+    const nombre = desdeLista ? destino.nombre : (input?.value || '').trim();
     if (!nombre) return;
+    if (desdeLista && !confirm(`¿Compartir tu biblioteca con ${nombre}? Podrá verla (solo lectura).`)) return;
  
     msg.textContent = 'Enviando…';
     try {
       const res  = await bcFetch('/api/biblioteca-compartida', {
         method: 'POST',
-        body: JSON.stringify({ nombre_usuario: nombre })
+        body: JSON.stringify(desdeLista ? { usuario_id: destino.usuario_id } : { nombre_usuario: nombre })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
  
-      msg.textContent = '✅ ' + data.mensaje;
-      input.value = '';
-      await cargarMisCompartidas();
+      msg.textContent = '✓ ' + data.mensaje;
+      if (!desdeLista && input) input.value = '';
+      await Promise.all([cargarMisCompartidas(), cargarUsuariosVisibles()]);
       setTimeout(() => { msg.textContent = ''; }, 3000);
     } catch (e) {
-      msg.textContent = '⚠️ ' + e.message;
+      msg.textContent = e.message;
     }
   }
  
@@ -139,7 +201,7 @@
     try {
       const res = await bcFetch(`/api/biblioteca-compartida/${bcId}`, { method: 'DELETE' });
       if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
-      await cargarMisCompartidas();
+      await Promise.all([cargarMisCompartidas(), cargarUsuariosVisibles()]);
     } catch (e) {
       alert('Error: ' + e.message);
     }
@@ -210,6 +272,18 @@
     document.getElementById('btn-open-biblioteca-compartida')?.addEventListener('click', () => {
       abrirBC();
       cargarConmigo();
+      cargarUsuariosVisibles(); // también trae mi preferencia de visibilidad
+    });
+ 
+    // Aparecer / no aparecer en la lista
+    document.getElementById('bc-visible')?.addEventListener('change', e => guardarVisibilidad(e.target.checked));
+ 
+    // Lista de usuarios: filtrar y compartir
+    document.getElementById('bc-filtro-usuarios')?.addEventListener('input', renderUsuariosVisibles);
+    document.getElementById('bc-lista-usuarios')?.addEventListener('click', e => {
+      const btn = e.target.closest('.bc-btn-compartir-con');
+      if (!btn) return;
+      compartirCon({ usuario_id: Number(btn.dataset.usuarioId), nombre: btn.dataset.nombre });
     });
  
     // Cerrar modales
@@ -219,7 +293,7 @@
     document.getElementById('bc-ver-overlay')?.addEventListener('click', e => { if (e.target.id === 'bc-ver-overlay') cerrarBCVer(); });
  
     // Compartir
-    document.getElementById('bc-btn-compartir')?.addEventListener('click', compartirCon);
+    document.getElementById('bc-btn-compartir')?.addEventListener('click', () => compartirCon());
     document.getElementById('bc-input-usuario')?.addEventListener('keydown', e => { if (e.key === 'Enter') compartirCon(); });
  
     // Delegación: ver biblioteca / revocar

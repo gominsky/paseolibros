@@ -80,7 +80,7 @@ async function cargarLecturas(libroId) {
       const fin = l.fin ? new Date(l.fin).toLocaleDateString('es-ES') : '—';
       const pag = (l.pagina_actual ?? '—');
  
-      const badge = mia ? '📖' : (esActiva ? '📚' : '↩');
+      const badge = mia ? '▶' : (esActiva ? '•' : '✓'); // leyendo yo · en curso · terminada
       const user = l.nombre_usuario || `Usuario ${l.usuario_id}`;
       return `${badge} ${user} · ${l.estado || '—'} · pág ${pag} · ${inicio} → ${fin}`;
     });
@@ -493,13 +493,20 @@ async function cargarLecturasAbiertas() {
     for (const l of lecturas) {
       const tr = document.createElement('tr');
       tr.classList.add('row-link');
-      tr.dataset.libroId = l.libro_id;
-      if (l.ejemplar_id) tr.dataset.ejemplarId = l.ejemplar_id;
-      tr.dataset.lecturaId = l.id;                      //  ID de la lectura
+      if (l.prestado) {
+        // Libro que me han prestado y estoy leyendo
+        tr.dataset.recibidoId = l.recibido_id;
+        tr.dataset.titulo = l.titulo || '';
+        tr.dataset.prestador = l.prestador || '';
+      } else {
+        tr.dataset.libroId = l.libro_id;
+        if (l.ejemplar_id) tr.dataset.ejemplarId = l.ejemplar_id;
+        tr.dataset.lecturaId = l.id;                      //  ID de la lectura
+      }
       tr.dataset.paginaActual = (l.pagina_actual ?? ''); //  para prellenar modal
       const fecha = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : '—';
       tr.innerHTML = `
-  <td>${l.titulo || 'Sin título'}</td>
+  <td>${escapeHtml(l.titulo || 'Sin título')}${l.prestado ? ` <span class="stats-prestado">prestado por ${escapeHtml(l.prestador || '')}</span>` : ''}</td>
   <td class="cell-pagina">${l.pagina_actual ?? '—'}</td>
   <td>${fecha}</td>
 `;
@@ -569,9 +576,12 @@ function crearUIMarcapagina() {
     <div class="mp-backdrop" data-close="1"></div>
     <div class="mp-dialog" role="dialog" aria-modal="true" aria-label="Marcapáginas">
       <div class="mp-header">
-        <h3>Marcapáginas</h3>
+        <div>
+          <h3>Marcapáginas</h3>
+          <p id="mp-sub" class="mp-sub" hidden></p>
+        </div>
         <button class="icon-btn" type="button" id="mp-close" title="Cerrar" aria-label="Cerrar">
-          <span class="icon-circle">✕</span>
+          <span class="icon-circle">${icono('cerrar')}</span>
         </button>
       </div>
  
@@ -594,6 +604,7 @@ function crearUIMarcapagina() {
       </div>
  
       <div class="mp-actions">
+        <button class="btn btn-ghost" type="button" id="mp-finish" hidden>Lo he terminado</button>
         <button class="btn btn-ghost" type="button" id="mp-skip">Omitir</button>
         <button class="btn btn-secondary" type="button" id="mp-save">Guardar</button>
       </div>
@@ -667,6 +678,13 @@ function abrirUIMarcapagina(ctx) {
     cerrarUIMarcapagina('save', v);
   };
   document.getElementById('mp-skip').onclick = () => cerrarUIMarcapagina('skip');
+  // Opcional: terminar la lectura desde aquí (libros prestados) y subtítulo
+  const btnFin = document.getElementById('mp-finish');
+  btnFin.hidden = typeof ctx?.onFinish !== 'function';
+  btnFin.onclick = () => { const f = ctx.onFinish; cerrarUIMarcapagina('skip'); f(); };
+  const sub = document.getElementById('mp-sub');
+  sub.hidden = !ctx?.subtitulo;
+  sub.textContent = ctx?.subtitulo || '';
  
   overlay.style.display = 'flex';
   document.documentElement.style.overflow = 'hidden';

@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dups = titulosDuplicadosEnCache(tituloInput.value, libroSeleccionadoId);
  
     if (dups.length > 0) {
-      setModalMsg(`⚠️ Ojo: ya tienes ${dups.length} libro(s) con ese título en tu biblioteca.`);
+      setModalMsg(`Ojo: ya tienes ${dups.length} libro(s) con ese título en tu biblioteca.`);
     } else {
       // no borres otros mensajes importantes si los usas; si quieres, comenta esta línea
       setModalMsg('');
@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
           text: title,
           url,
         });
-        if (status) status.textContent = 'Compartido ✅';
+        if (status) status.textContent = 'Compartido ✓';
         return;
       } catch (err) {
         // Si el usuario cancela o falla, seguimos con copiar
@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navigator.clipboard?.writeText) {
       try {
         await navigator.clipboard.writeText(url);
-        if (status) status.textContent = 'Copiado al portapapeles ✅';
+        if (status) status.textContent = 'Copiado al portapapeles ✓';
         return;
       } catch (e) {
         // seguimos al fallback clásico
@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (input) {
       input.select();
       document.execCommand?.('copy');
-      if (status) status.textContent = 'Copiado (modo compatibilidad) ✅';
+      if (status) status.textContent = 'Copiado (modo compatibilidad) ✓';
     } else {
       // Último recurso: un prompt
       prompt('Copia este enlace:', url);
@@ -321,6 +321,34 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('#tabla-lecturas-abiertas tbody')?.addEventListener('click', async (e) => {
     const tr = e.target.closest('tr');
     if (!tr) return;
+ 
+    // Libro que me han prestado: marcapáginas propio + «Lo he terminado»
+    if (tr.dataset.recibidoId) {
+      const id = Number(tr.dataset.recibidoId);
+      abrirUIMarcapagina({
+        paginaInicial: tr.dataset.paginaActual ? Number(tr.dataset.paginaActual) : null,
+        subtitulo: `${tr.dataset.titulo} · prestado por ${tr.dataset.prestador}`,
+        onSave: async (pagina) => {
+          const res = await fetch(`${API_BASE}/api/libros-recibidos/${id}/pagina`, {
+            method: 'PATCH', headers: getHeaders(true), body: JSON.stringify({ pagina_actual: pagina }),
+          });
+          if (!res.ok) return setUserStatusErr('No se pudo guardar la página.');
+          tr.dataset.paginaActual = String(pagina ?? '');
+          const td = tr.querySelector('.cell-pagina');
+          if (td) td.textContent = (pagina ?? '—');
+        },
+        onFinish: async () => {
+          const res = await fetch(`${API_BASE}/api/libros-recibidos/${id}/leido`, {
+            method: 'POST', headers: getHeaders(true), body: JSON.stringify({ leido: true }),
+          });
+          if (!res.ok) return setUserStatusErr('No se pudo marcar como leído.');
+          setUserStatusOk(`Terminado: ${tr.dataset.titulo}`);
+          cargarLecturasAbiertas();
+          window.refrescarEstadisticas?.();
+        },
+      });
+      return;
+    }
   
     const lecturaId = tr.dataset.lecturaId ? Number(tr.dataset.lecturaId) : null;
     const libroId = Number(tr.dataset.libroId);
@@ -555,7 +583,7 @@ btnRegister?.addEventListener('click', async (e) => {
       return;
     }
  
-    if (msg) msg.textContent = 'Cuenta creada ✅ Ya puedes iniciar sesión.';
+    if (msg) msg.textContent = 'Cuenta creada ✓ Ya puedes iniciar sesión.';
     // opcional: limpiar campos
     document.getElementById('reg-usuario').value = '';
     document.getElementById('reg-correo').value = '';

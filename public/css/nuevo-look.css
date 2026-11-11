@@ -383,3 +383,163 @@
   .tabbar-btn[data-pestana="prestamos"].is-active .tabbar-ico path { fill: none; }
   .tabbar-btn:active .tabbar-ico { transform: scale(.92); }
 }
+
+/* ── Libros que me han prestado: leído ─────────────────────── */
+.deseo-pill--leido {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--border-acc);
+  cursor: pointer;
+}
+.lr-fecha-leido {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: .78rem;
+  padding: 0;
+  width: 7.6em;
+  cursor: pointer;
+}
+.lr-item-actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.stats-prestado {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--gold-soft);
+  color: var(--ink-2);
+  font-size: .7rem;
+  font-weight: 500;
+  font-family: var(--font-body);
+  vertical-align: 1px;
+}
+
+/* ── Bibliotecas compartidas: lista de usuarios y visibilidad ── */
+.bc-visible {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 4px 0 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-acc);
+  border-radius: var(--r-sm);
+  background: var(--accent-soft);
+  cursor: pointer;
+}
+.bc-visible input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--accent); flex: none; }
+.bc-visible span { display: grid; gap: 3px; }
+.bc-visible strong { font-size: .92rem; color: var(--ink); }
+.bc-visible small { font-size: .8rem; color: var(--ink-3); line-height: 1.35; }
+.bc-subtitulo {
+  margin: 14px 0 8px;
+  font-family: var(--font-display);
+  font-size: .95rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.bc-filtro { margin-bottom: 8px; }
+.bc-filtro input { width: 100%; }
+.bc-lista-usuarios { max-height: 260px; overflow-y: auto; }
+.bc-item-usuario { display: flex; align-items: center; gap: 10px; }
+.bc-item-usuario .bc-item-info { flex: 1; min-width: 0; }
+.bc-avatar {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+  font-size: .85rem;
+}
+.bc-manual { margin: 10px 0 4px; }
+.bc-manual summary { cursor: pointer; font-size: .85rem; color: var(--ink-3); }
+.bc-manual .bc-share-form { margin-top: 8px; }
+
+/* ── Ayuda: en el móvil las pestañas pasan a etiquetas en dos filas (antes se cortaban) ── */
+@media (max-width: 820px) {
+  .ayuda-tabs {
+    flex-wrap: wrap;
+    overflow: visible;
+    gap: 6px;
+    padding: 10px 14px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ayuda-tab {
+    flex: 0 0 auto;
+    padding: 6px 12px;
+    border: 1px solid var(--border-2);
+    border-radius: 999px;
+    font-size: .82rem;
+  }
+  .ayuda-tab.is-active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+  }
+  .ayuda-tab.is-active::after { display: none; }
+  .ayuda-body { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+}
+.ayuda-header h3 { margin: 0; }
+/* Paneles de compartir: margen lateral y scroll del panel entero (no de cada lista) */
+#bc-panel-miscompartidas,
+#bc-panel-conmigo { overflow-y: auto; }
+#bc-panel-miscompartidas .bc-lista,
+#bc-panel-conmigo .bc-lista { flex: none; overflow: visible; }
+.bc-lista-usuarios { max-height: none; }
+.bc-visible { margin: 14px 16px 4px; }
+.bc-subtitulo { margin: 16px 16px 8px; }
+.bc-filtro { margin: 0 16px 4px; }
+.bc-manual { margin: 4px 16px 4px; }
+.bc-manual .bc-share-form { padding: 8px 0 4px; }
+.bc-msg:empty { display: none; }
+
+/* ══════════════════════════════════════════════════════════
+   ICONOS DE LÍNEA (sustituyen a los emojis de colores)
+   ══════════════════════════════════════════════════════════ */
+.ico {
+  width: 1.15em;
+  height: 1.15em;
+  display: inline-block;
+  vertical-align: -0.2em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+.icon-circle .ico { width: 19px; height: 19px; vertical-align: middle; }
+.btn .ico { margin-right: 2px; }
+.modal-accion-icon .ico { width: 24px; height: 24px; }
+.modal-fav-star .ico { width: 20px; height: 20px; }
+.modal-fav-btn[aria-pressed="true"] .ico, .reader-fav.is-on .ico { color: var(--gold); }
+.ayuda-logo .ico { width: 30px; height: 30px; color: var(--accent); }
+.ayuda-card-icon .ico { width: 20px; height: 20px; }
+.ayuda-section .ico { color: var(--accent); }
+.ico-titulo { width: 1.1em; height: 1.1em; color: var(--accent); vertical-align: -0.15em; }
+.th-sort-icon .ico { width: 13px; height: 13px; }
+.isbn-preview-duplicado .ico { color: #b07a1f; }
+.modal-cover-delete-btn .ico { width: 14px; height: 14px; }
+/* Insignias del listado (favorito, notas, audios) */
+.badge .ico { width: 13px; height: 13px; vertical-align: -2px; }
+.badge-fav .ico { color: var(--gold); }
+.badge-notes { color: var(--ink-3); }
+.ej-grid-cover-wrap .badge { display: inline-flex; align-items: center; gap: 2px; }
+.ej-grid-cover-wrap .badge-fav .ico { width: 12px; height: 12px; }
+
+/* Marcapáginas: nada se sale por los lados en el móvil */
+.mp-sub { margin: 4px 0 0; font-size: .9rem; color: var(--ink-2); }
+.mp-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) minmax(72px, 1.4fr) repeat(2, minmax(0, 1fr)); gap: 6px; }
+.mp-row .mp-step { min-width: 0; padding-left: 0; padding-right: 0; }
+.mp-row #mp-num { width: 100%; min-width: 0; }
+.mp-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.mp-actions #mp-finish { flex: 1 1 100%; order: 3; border-color: var(--border-acc); color: var(--accent); }
+.mp-actions #mp-finish[hidden] { display: none; }
+.mp-row input[type="number"]#mp-num { min-width: 0; font-size: 1.8rem; padding: 6px 4px; }

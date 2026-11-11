@@ -120,7 +120,6 @@
     white-space: nowrap;
     max-width: 100%;
   }
-  .ej-actions { display: grid; gap: 6px; align-content: start; }
 
   /* Tabla wrapper de lecturas/préstamos: visible */
   .grid-two .table-wrapper { display: block !important; max-height: 280px; }
@@ -156,8 +155,6 @@
   /* Grid-two vertical */
   .grid-two { grid-template-columns: 1fr !important; }
 
-  /* Portada mini placeholder */
-  .portada-placeholder-mini { width: 32px; height: 46px; }
 }
 
 /* ══════════════════════════════════════════════════════════

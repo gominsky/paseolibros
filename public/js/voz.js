@@ -56,7 +56,7 @@
       if (btn) {
         btn.classList.add('btn-voz--activo');
         btn.title = 'Escuchando… (pulsa para parar)';
-        btn.querySelector('.icon-circle').textContent = '══════════════════════════════════════════════════════════';
+        btn.querySelector('.icon-circle').innerHTML = icono('stop');
       }
       if (input) {
         input.value = '';
@@ -93,7 +93,7 @@
     if (btn) {
       btn.classList.remove('btn-voz--activo');
       btn.title = 'Buscar por voz';
-      btn.querySelector('.icon-circle').textContent = '🎤';
+      btn.querySelector('.icon-circle').innerHTML = icono('micro');
     }
     if (input && input.placeholder === 'Escuchando…') {
       input.placeholder = 'Buscar por título, autor, ISBN, notas.';

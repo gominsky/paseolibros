@@ -162,8 +162,8 @@ function escapeHtml(s){
     .replaceAll("'","&#039;");
 }
  
-function setUserStatusOk(msg) { setUserStatus(msg ? `✅ ${msg}` : ''); }
-function setUserStatusErr(msg) { setUserStatus(msg ? `⚠️ ${msg}` : ''); }
+function setUserStatusOk(msg) { setUserStatus(msg ? `✓ ${msg}` : ''); }
+function setUserStatusErr(msg) { setUserStatus(msg ? msg : ''); }
 function normalizarTitulo(t) {
   return (t || '')
     .toLowerCase()
@@ -384,15 +384,15 @@ function applyBadgesForLibro(libroId) {
     const notes = el.querySelector('.badge-notes');
  
     if (fav) {
-      fav.textContent = meta.favorite ? '⭐' : '';
+      fav.innerHTML = meta.favorite ? icono('estrella-llena') : '';
       fav.title = meta.favorite ? 'Favorito' : 'No favorito';
       fav.classList.toggle('is-on', meta.favorite);
     }
    if (notes) {
   const parts = [];
-  if (meta.notesCount) parts.push(`📝${meta.notesCount}`);
-  if (meta.audiosCount) parts.push(`🎙️${meta.audiosCount}`);
-  notes.textContent = parts.join(' ');
+  if (meta.notesCount) parts.push(`${icono('nota')}${meta.notesCount}`);
+  if (meta.audiosCount) parts.push(`${icono('micro')}${meta.audiosCount}`);
+  notes.innerHTML = parts.join(' ');
   notes.title = parts.length ? `Notas: ${meta.notesCount || 0} · Audios: ${meta.audiosCount || 0}` : '';
 }
   });

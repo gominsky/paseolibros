@@ -5,8 +5,9 @@
 --
 -- Contiene: el volcado original de producción + db/add1.sql (deseos, cola)
 -- + db/add2.sql (favoritos, etiquetas, notas, audios)
--- + db/add3.sql (biblioteca compartida, libros recibidos, índices).
--- Para una base YA existente basta con ejecutar db/add3.sql.
+-- + db/add3.sql (biblioteca compartida, libros recibidos, índices)
+-- + db/add4.sql (libros recibidos leídos, visibilidad para compartir).
+-- Para una base YA existente basta con ejecutar db/add3.sql y db/add4.sql.
 -- ============================================================
 
 --
@@ -918,3 +919,27 @@ CREATE INDEX IF NOT EXISTS idx_lr_usuario ON public.libros_recibidos (usuario_id
 -- Rendimiento: listado de ejemplares del usuario y comprobaciones de acceso
 CREATE INDEX IF NOT EXISTS idx_ejemplares_usuario_activo
   ON public.ejemplares (usuario_id, libro_id) WHERE activo = TRUE;
+
+-- ============================================================
+-- db/add4.sql — Libros recibidos leídos y visibilidad para compartir
+-- ============================================================
+SET search_path = public;
+
+-- db/add4.sql
+-- 1) Libros que me han prestado: poder marcarlos como leídos (cuentan en las estadísticas)
+-- 2) Bibliotecas compartidas: aparecer voluntariamente en la lista de usuarios
+-- Se puede ejecutar varias veces sin problema.
+
+ALTER TABLE public.libros_recibidos
+  ADD COLUMN IF NOT EXISTS leido       BOOLEAN NOT NULL DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS fecha_leido DATE,
+  -- también pueden estar «en curso» (aparecen en Leyendo, con marcapáginas)
+  ADD COLUMN IF NOT EXISTS leyendo              BOOLEAN NOT NULL DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS fecha_inicio_lectura DATE,
+  ADD COLUMN IF NOT EXISTS pagina_actual        INTEGER;
+
+CREATE INDEX IF NOT EXISTS idx_lr_usuario_leido
+  ON public.libros_recibidos (usuario_id) WHERE leido = TRUE;
+
+ALTER TABLE public.usuarios
+  ADD COLUMN IF NOT EXISTS visible_compartir BOOLEAN NOT NULL DEFAULT FALSE;

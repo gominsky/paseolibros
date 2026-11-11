@@ -4,6 +4,10 @@
     "descripcion": "Estado global, temas, utilidades, modal e insignias del lector"
   },
   {
+    "fichero": "iconos.js",
+    "descripcion": "Iconos de línea propios (SVG, monocromos)"
+  },
+  {
     "fichero": "tapas.js",
     "descripcion": "Portadas tipográficas generadas (libros sin portada o con imagen rota)"
   },
@@ -71,4 +75,4 @@
     "fichero": "navegacion.js",
     "descripcion": "Pestañas inferiores en móvil y buscador en la cabecera en escritorio"
   }
-]
+]

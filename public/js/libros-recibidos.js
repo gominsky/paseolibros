@@ -73,6 +73,15 @@
       var fechaDevuelto = d.fecha_devuelto
         ? new Date(d.fecha_devuelto).toLocaleDateString('es-ES', {day:'numeric', month:'short', year:'numeric'})
         : '';
+      // Leído: pastilla con la fecha (editable) y cuenta en las estadísticas
+      var fechaLeidoISO = d.fecha_leido ? String(d.fecha_leido).slice(0, 10) : '';
+      var leidoHtml = d.leyendo
+        ? '<span class="deseo-pill deseo-pill--leido">' + icono('libro-abierto') + ' Leyendo' + (d.pagina_actual ? ' · pág. ' + d.pagina_actual : '') + '</span>'
+        : d.leido
+        ? '<label class="deseo-pill deseo-pill--leido" title="Cambiar la fecha en que lo terminaste">' + icono('check') + ' Leído ' +
+            '<input type="date" class="lr-fecha-leido" value="' + fechaLeidoISO + '" max="' + new Date().toISOString().slice(0, 10) + '" aria-label="Fecha en que lo terminaste">' +
+          '</label>'
+        : '';
  
       return '<div class="lr-item' + (vencido ? ' lr-item--vencido' : '') + '" data-id="' + d.id + '">' +
         '<div class="lr-item-info">' +
@@ -82,12 +91,20 @@
             '<span class="deseo-pill">De: ' + esc(d.prestador) + '</span>' +
             (d.fecha_devolver ? '<span class="deseo-pill' + (vencido ? ' deseo-pill--warn' : '') + '">Devolver: ' + fechaDev + '</span>' : '') +
             (d.devuelto ? '<span class="deseo-pill deseo-pill--ok">Devuelto ' + fechaDevuelto + '</span>' : '') +
+            leidoHtml +
           '</div>' +
           (d.notas ? '<div class="lr-item-notas">' + esc(d.notas) + '</div>' : '') +
         '</div>' +
         '<div class="lr-item-actions">' +
-          (!d.devuelto ? '<button class="btn btn-secondary btn-sm lr-btn-devolver" type="button">✓ Devuelto</button>' : '') +
-          '<button class="btn btn-ghost btn-sm lr-btn-eliminar" type="button">✕</button>' +
+          (d.leido
+            ? '<button class="btn btn-ghost btn-sm lr-btn-leido" data-leido="0" type="button" title="Quitar de las estadísticas">No leído</button>'
+            : (d.leyendo
+                ? '<button class="btn btn-secondary btn-sm lr-btn-leido" data-leido="1" type="button" title="Lo he terminado: cuenta en tus estadísticas">' + icono('check') + ' Terminado</button>' +
+                  '<button class="btn btn-ghost btn-sm lr-btn-lectura" data-accion="dejar" type="button" title="Sacarlo de Leyendo sin terminarlo">Dejar</button>'
+                : '<button class="btn btn-secondary btn-sm lr-btn-lectura" data-accion="empezar" type="button" title="Aparecerá en Leyendo, con marcapáginas">' + icono('libro-abierto') + ' Empezar a leer</button>' +
+                  '<button class="btn btn-ghost btn-sm lr-btn-leido" data-leido="1" type="button" title="Ya lo leí: cuenta en tus estadísticas">' + icono('check') + ' Ya leído</button>')) +
+          (!d.devuelto ? '<button class="btn btn-secondary btn-sm lr-btn-devolver" type="button">' + icono('check') + ' Devuelto</button>' : '') +
+          '<button class="btn btn-ghost btn-sm lr-btn-eliminar" type="button" aria-label="Eliminar">' + icono('cerrar') + '</button>' +
         '</div>' +
       '</div>';
     }).join('');
@@ -120,7 +137,7 @@
       // Limpiar formulario
       ['lr-titulo','lr-autores','lr-prestador','lr-fecha-devolver','lr-notas']
         .forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
-      if (msg) msg.textContent = '✅ Registrado';
+      if (msg) msg.textContent = '✓ Registrado';
       setTimeout(function() { if (msg) msg.textContent = ''; }, 2000);
  
       tabActual = 'pendientes';
@@ -129,7 +146,7 @@
       });
       await cargar();
     } catch (e) {
-      if (msg) msg.textContent = '❌ ' + e.message;
+      if (msg) msg.textContent = e.message;
     } finally {
       if (btn) btn.disabled = false;
     }
@@ -140,6 +157,34 @@
       var res = await apiFetch('/api/libros-recibidos/' + id + '/devolver', { method: 'POST' });
       if (!res.ok) { var d = await res.json(); throw new Error(d.error); }
       await cargar();
+    } catch (e) { alert('Error: ' + e.message); }
+  }
+ 
+  // Empezar a leer / dejar (aparece o desaparece de «Leyendo»)
+  async function cambiarLectura(id, accion) {
+    try {
+      var res = await apiFetch('/api/libros-recibidos/' + id + '/lectura', { method: 'POST', body: { accion: accion } });
+      var d = await res.json();
+      if (!res.ok) throw new Error(d.error);
+      await cargar();
+      if (window.cargarLecturasAbiertas) window.cargarLecturasAbiertas();
+      if (window.refrescarEstadisticas) window.refrescarEstadisticas();
+      if (accion === 'empezar' && window.setUserStatusOk) window.setUserStatusOk('Lo tienes en Leyendo: tócalo allí para apuntar la página.');
+    } catch (e) { alert('Error: ' + e.message); }
+  }
+ 
+  // Marcar / desmarcar como leído (y refrescar las estadísticas de lectura)
+  async function marcarLeido(id, leido, fecha) {
+    try {
+      var res = await apiFetch('/api/libros-recibidos/' + id + '/leido', {
+        method: 'POST',
+        body: { leido: leido, fecha_leido: fecha || null }
+      });
+      var d = await res.json();
+      if (!res.ok) throw new Error(d.error);
+      await cargar();
+      if (window.refrescarEstadisticas) window.refrescarEstadisticas();
+      if (window.cargarLecturasAbiertas) window.cargarLecturasAbiertas();
     } catch (e) { alert('Error: ' + e.message); }
   }
  
@@ -174,8 +219,19 @@
       var item = e.target.closest('.lr-item');
       if (!item) return;
       var id = item.dataset.id;
-      if (e.target.closest('.lr-btn-devolver')) marcarDevuelto(id);
+      var btnLeido = e.target.closest('.lr-btn-leido');
+      var btnLect = e.target.closest('.lr-btn-lectura');
+      if (btnLect) cambiarLectura(id, btnLect.dataset.accion);
+      else if (btnLeido) marcarLeido(id, btnLeido.dataset.leido === '1');
+      else if (e.target.closest('.lr-btn-devolver')) marcarDevuelto(id);
       else if (e.target.closest('.lr-btn-eliminar')) eliminar(id);
+    });
+ 
+    // Cambiar la fecha de lectura desde la pastilla «Leído»
+    document.getElementById('lr-lista')?.addEventListener('change', function(e) {
+      var input = e.target.closest('.lr-fecha-leido');
+      if (!input || !input.value) return;
+      marcarLeido(input.closest('.lr-item').dataset.id, true, input.value);
     });
  
     document.addEventListener('keydown', function(e) {

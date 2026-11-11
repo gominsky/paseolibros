@@ -41,13 +41,13 @@ async function cargarCola() {
       </div>
       <div class="deseo-actions">
   <button class="icon-btn cola-up" type="button" title="Subir">
-    <span class="icon-circle">☑</span>
+    <span class="icon-circle"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-arriba"/></svg></span>
   </button>
   <button class="icon-btn cola-down" type="button" title="Bajar">
-    <span class="icon-circle">☒</span>
+    <span class="icon-circle"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-abajo"/></svg></span>
   </button>
   <button class="icon-btn cola-del" type="button" title="Quitar">
-    <span class="icon-circle">✕</span>
+    <span class="icon-circle">${icono('cerrar')}</span>
   </button>
 </div>
     </div>
@@ -265,7 +265,7 @@ async function cargarDeseos() {
         ${d.notas ? `<div style="margin-top:6px; opacity:.85;">${escapeHtml(d.notas)}</div>` : ''}
       </div>
       <div class="deseo-actions">
-        <button class="icon-btn deseo-del" type="button" title="Eliminar"><span class="icon-circle">✕</span></button>
+        <button class="icon-btn deseo-del" type="button" title="Eliminar"><span class="icon-circle">${icono('cerrar')}</span></button>
       </div>
     </div>
   `).join('');

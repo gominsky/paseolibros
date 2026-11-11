@@ -50,7 +50,7 @@
  
   function setFavUI(isFav){
     els.fav.setAttribute("aria-pressed", String(!!isFav));
-    els.fav.textContent = isFav ? "★ Favorito" : "☆ Favorito";
+    els.fav.innerHTML = `<span class="modal-fav-star">${icono(isFav ? "estrella-llena" : "estrella")}</span><span class="modal-fav-label">Favorito</span>`;
   }
  
   function renderTags(tagsRows){
@@ -218,7 +218,7 @@
     await api(`/api/libros/${currentLibroId}/audios`, { method: "POST", body: fd });
  
     discardRec();
-    els.audioStatus.textContent = "Guardado ✔";
+    els.audioStatus.textContent = "Guardado ✓";
     await refresh();
   }
  

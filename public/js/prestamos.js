@@ -233,7 +233,7 @@ async function cargarPrestamos(libroId) {
  
     const lineas = prestamos.map((p) => {
       const activo = p.estado !== 'devuelto' && !p.fecha_devolucion;
-      const badge = activo ? '📚' : '↩';
+      const badge = activo ? '•' : '✓'; // prestado · devuelto
  
       const receptor = p.nombre_receptor_usuario || p.nombre_receptor || '—';
       const prestado = p.fecha_prestamo ? new Date(p.fecha_prestamo).toLocaleDateString('es-ES') : '—';

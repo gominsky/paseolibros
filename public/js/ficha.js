@@ -140,7 +140,7 @@ async function guardarLibroEditado() {
   const data = await res.json();
   if (!res.ok) { if (msg) msg.textContent = data.error || 'Error guardando libro.'; return; }
  
-  if (msg) msg.textContent = 'Libro guardado ✅';
+  if (msg) msg.textContent = 'Libro guardado ✓';
   if (usuarioActual?.id) await cargarEjemplares(usuarioActual.id);
   await cargarFormEdicion();   // ✅ refresca inputs + header del modal
 }
@@ -181,7 +181,7 @@ async function guardarEjemplarEditado() {
       return;
     }
  
-    if (msg) msg.textContent = 'Ejemplar guardado ✅';
+    if (msg) msg.textContent = 'Ejemplar guardado ✓';
     if (usuarioActual?.id) await cargarEjemplares(usuarioActual.id);
     await cargarFormEdicion();   // ✅ para que el tipo/estado/notas y header se actualicen
   } catch (err) {
@@ -224,7 +224,7 @@ async function subirPortadaArchivo(file) {
         setModalMsg(msg);
         return;
       }
-    setModalMsg('Portada actualizada ✅');
+    setModalMsg('Portada actualizada ✓');
  
     const img = document.getElementById('ficha-portada-img');
     if (data.url_portada) marcarPortadaCambiada(data.url_portada);
@@ -362,7 +362,7 @@ async function compartirLista(tipo) {
  
   try {
     await navigator.clipboard.writeText(url);
-    alert('Enlace copiado ✅');
+    alert('Enlace copiado ✓');
   } catch {
     prompt('Copia este enlace:', url);
   }
@@ -412,5 +412,5 @@ async function crearEnlaceCompartir(tipo) {
   }
  
   if (input) input.value = data.url || '';
-  if (status) status.textContent = 'Enlace listo ✅';
+  if (status) status.textContent = 'Enlace listo ✓';
 }

@@ -20,6 +20,35 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body class="sin-sesion">
+<!-- Iconos de línea (ver js/iconos.js). Trazo = color del texto -->
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+  <defs>
+    <symbol id="i-libros" viewBox="0 0 24 24"><path d="M4 20h16"/><rect x="5" y="5" width="3.6" height="15" rx="1"/><rect x="10.2" y="8" width="3.6" height="12" rx="1"/><path d="M15.6 9.2l3.4-1 3 11.6-3.4.9z"/></symbol>
+    <symbol id="i-libro-abierto" viewBox="0 0 24 24"><path d="M12 6.5C10 5 7.2 4.6 4 5v13c3.2-.4 6 0 8 1.5 2-1.5 4.8-1.9 8-1.5V5c-3.2-.4-6 0-8 1.5z"/><path d="M12 6.5v13"/></symbol>
+    <symbol id="i-intercambio" viewBox="0 0 24 24"><path d="M4 9h13"/><path d="M14 5.5L17.5 9 14 12.5"/><path d="M20 15H7"/><path d="M10 11.5L6.5 15l3.5 3.5"/></symbol>
+    <symbol id="i-barras" viewBox="0 0 24 24"><path d="M4 20h16"/><rect x="5.5" y="12" width="3" height="8" rx="1.5"/><rect x="10.5" y="7" width="3" height="13" rx="1.5"/><rect x="15.5" y="3.5" width="3" height="16.5" rx="1.5"/></symbol>
+    <symbol id="i-estrella" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5.1 5.6.8-4 3.9.9 5.6-5-2.6-5 2.6.9-5.6-4-3.9 5.6-.8z"/></symbol>
+    <symbol id="i-estrella-llena" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5.1 5.6.8-4 3.9.9 5.6-5-2.6-5 2.6.9-5.6-4-3.9 5.6-.8z" fill="currentColor"/></symbol>
+    <symbol id="i-nota" viewBox="0 0 24 24"><path d="M6 3.5h8.5L19 8v12.5H6z"/><path d="M14 3.5V8h5"/><path d="M9 12.5h7M9 16h5"/></symbol>
+    <symbol id="i-micro" viewBox="0 0 24 24"><rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0013 0"/><path d="M12 18v2.5"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/></symbol>
+    <symbol id="i-bombilla" viewBox="0 0 24 24"><path d="M9 17.5h6M10 20.5h4"/><path d="M12 3.5a6 6 0 00-3.6 10.8c.7.6 1.1 1.4 1.1 2.2v1h5v-1c0-.8.4-1.6 1.1-2.2A6 6 0 0012 3.5z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-alerta" viewBox="0 0 24 24"><path d="M12 4l9 15.5H3z"/><path d="M12 10v4.2"/><path d="M12 17.2v.1"/></symbol>
+    <symbol id="i-engranaje" viewBox="0 0 24 24"><path d="M18.86 10.61 L21.12 10.81 L21.12 13.19 L18.86 13.39 L17.83 15.87 L19.29 17.61 L17.61 19.29 L15.87 17.83 L13.39 18.86 L13.19 21.12 L10.81 21.12 L10.61 18.86 L8.13 17.83 L6.39 19.29 L4.71 17.61 L6.17 15.87 L5.14 13.39 L2.88 13.19 L2.88 10.81 L5.14 10.61 L6.17 8.13 L4.71 6.39 L6.39 4.71 L8.13 6.17 L10.61 5.14 L10.81 2.88 L13.19 2.88 L13.39 5.14 L15.87 6.17 L17.61 4.71 L19.29 6.39 L17.83 8.13 Z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-tema" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 010 16z" fill="currentColor"/></symbol>
+    <symbol id="i-lupa" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></symbol>
+    <symbol id="i-subir" viewBox="0 0 24 24"><path d="M12 15V4.5"/><path d="M7.5 9L12 4.5 16.5 9"/><path d="M4.5 15v4.5h15V15"/></symbol>
+    <symbol id="i-enlace" viewBox="0 0 24 24"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/></symbol>
+    <symbol id="i-externo" viewBox="0 0 24 24"><path d="M14 4.5h5.5V10"/><path d="M19.5 4.5L11 13"/><path d="M17 14v5.5H4.5V7H10"/></symbol>
+    <symbol id="i-arriba" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M6.5 10.5L12 5l5.5 5.5"/></symbol>
+    <symbol id="i-abajo" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M6.5 13.5L12 19l5.5-5.5"/></symbol>
+    <symbol id="i-cerrar" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+    <symbol id="i-volver" viewBox="0 0 24 24"><path d="M9 14L4.5 9.5 9 5"/><path d="M4.5 9.5H14a5.5 5.5 0 010 11h-3"/></symbol>
+    <symbol id="i-ayuda" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.5a2.5 2.5 0 014.8.8c0 1.7-2.4 2.2-2.4 3.7"/><path d="M12 17v.1"/></symbol>
+  </defs>
+</svg>
+
   <div class="app">
       <header class="app-header">
   <div class="logo header-center" aria-label="Paseo de los libros">
@@ -28,7 +57,7 @@
 
   <div class="header-right">
           <button id="btn-ayuda" class="icon-btn" type="button" title="Ayuda" aria-label="Abrir ayuda">
-            <span class="icon-circle" style="font-size:15px; font-weight:600;">?</span>
+            <span class="icon-circle"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-ayuda"/></svg></span>
           </button>
 
 <button
@@ -38,11 +67,11 @@
     title="Cambiar tema"
     aria-label="Cambiar tema"
     >
-    <span class="icon-circle">🌗</span>
+    <span class="icon-circle"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-tema"/></svg></span>
     </button>
 <div class="tools-menu">
       <button id="btn-tools" class="icon-btn" type="button" aria-label="Herramientas" title="Herramientas">
-        <span class="icon-circle">⚙</span>
+        <span class="icon-circle"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-engranaje"/></svg></span>
       </button>
       
       <div id="tools-dropdown" class="tools-dropdown" aria-hidden="true">
@@ -62,7 +91,6 @@
 
 <div class="tools-sep" aria-hidden="true"></div>
 <button id="btn-open-biblioteca-compartida" class="tools-item" type="button">Bibliotecas compartidas</button>
-<button id="btn-rellenar-portadas" class="tools-item" type="button">Buscar portadas faltantes</button>
 <div class="tools-sep" aria-hidden="true"></div>
 <button id="btn-open-libros-recibidos" class="tools-item" type="button">Libros que me han prestado</button>
 
@@ -232,7 +260,7 @@
                 placeholder="Buscar por título, autor, ISBN, notas."
               />
               <button id="btn-voz" class="icon-btn btn-voz" type="button" title="Buscar por voz" aria-label="Buscar por voz">
-                <span class="icon-circle">🎤</span>
+                <span class="icon-circle"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-micro"/></svg></span>
               </button>
             </div>
             <div class="sort-mini" aria-label="Ordenar ejemplares">
@@ -308,7 +336,7 @@
     <div class="deseos-header">
       <h3>Cola de lecturas</h3>
       <button id="btn-cerrar-cola" class="icon-btn" type="button" title="Cerrar" aria-label="Cerrar">
-        <span class="icon-circle">✕</span>
+        <span class="icon-circle"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-cerrar"/></svg></span>
       </button>
     </div>
 
@@ -328,7 +356,7 @@
     <div class="deseos-header">
       <h3>Añadir a cola</h3>
       <button id="btn-cerrar-cola-pick" class="icon-btn" type="button" title="Cerrar" aria-label="Cerrar">
-        <span class="icon-circle">✕</span>
+        <span class="icon-circle"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-cerrar"/></svg></span>
       </button>
     </div>
 
@@ -437,7 +465,7 @@
         <div class="modal-cover">
           <div class="modal-cover-img-wrap">
             <img id="ficha-portada-img" src="" alt="Portada del libro" class="modal-cover-img" />
-            <button id="btn-eliminar-portada" class="modal-cover-delete-btn" type="button" title="Eliminar portada" aria-label="Eliminar portada">✕</button>
+            <button id="btn-eliminar-portada" class="modal-cover-delete-btn" type="button" title="Eliminar portada" aria-label="Eliminar portada"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-cerrar"/></svg></button>
           </div>
           <div class="modal-cover-actions">
             <label class="modal-cover-action-btn" title="Subir imagen desde tu dispositivo">
@@ -445,10 +473,10 @@
               <input type="file" id="ficha-portada-file" accept="image/*" hidden />
             </label>
             <button id="btn-buscar-portada" class="modal-cover-action-btn" type="button" title="Buscar portada automáticamente">
-              ⚲ Buscar
+              <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-lupa"/></svg> Buscar
             </button>
             <button id="btn-portada-manual" class="modal-cover-action-btn" type="button" title="Pegar URL de imagen">
-              ⊕ URL
+              <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-enlace"/></svg> URL
             </button>
           </div>
         </div>
@@ -471,7 +499,7 @@
 
           <!-- Botón favorito destacado en la cabecera -->
           <button id="reader-fav" class="modal-fav-btn" type="button" aria-pressed="false">
-            <span class="modal-fav-star">☆</span>
+            <span class="modal-fav-star"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-estrella"/></svg></span>
             <span class="modal-fav-label">Favorito</span>
           </button>
         </div>
@@ -500,8 +528,8 @@
               <span>↑ Subir</span>
               <input type="file" id="ficha-portada-file-movil" accept="image/*" hidden />
             </label>
-            <button id="btn-buscar-portada-movil" class="modal-cover-action-btn" type="button">⚲ Buscar</button>
-            <button id="btn-portada-manual-movil" class="modal-cover-action-btn" type="button">⊕ URL</button>
+            <button id="btn-buscar-portada-movil" class="modal-cover-action-btn" type="button"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-lupa"/></svg> Buscar</button>
+            <button id="btn-portada-manual-movil" class="modal-cover-action-btn" type="button"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-enlace"/></svg> URL</button>
           </div>
           <div class="form-grid">
             <div class="form-group">
@@ -563,8 +591,8 @@
             <div class="reader-block">
               <label class="reader-label">Notas de audio</label>
               <div class="reader-audio-row">
-                <button id="reader-rec" class="btn btn-secondary btn-sm" type="button">🎙 Grabar</button>
-                <button id="reader-stop" class="btn btn-ghost btn-sm" type="button" disabled>⏹ Parar</button>
+                <button id="reader-rec" class="btn btn-secondary btn-sm" type="button"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-micro"/></svg> Grabar</button>
+                <button id="reader-stop" class="btn btn-ghost btn-sm" type="button" disabled><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-stop"/></svg> Parar</button>
                 <span id="reader-audio-status" class="muted"></span>
               </div>
               <audio id="reader-audio-preview" controls style="display:none; width:100%; margin-top:8px;"></audio>
@@ -583,11 +611,11 @@
           <!-- Acciones rápidas -->
           <div class="modal-acciones">
             <button id="btn-leer-modal" class="modal-accion" type="button">
-              <span class="modal-accion-icon">▶</span>
+              <span class="modal-accion-icon"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-libro-abierto"/></svg></span>
               <span class="modal-accion-label">Iniciar lectura</span>
             </button>
             <button id="btn-prestar-modal" class="modal-accion" type="button">
-              <span class="modal-accion-icon">⇄</span>
+              <span class="modal-accion-icon"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-intercambio"/></svg></span>
               <span class="modal-accion-label">Registrar préstamo</span>
             </button>
           </div>
@@ -632,7 +660,7 @@
               <div class="historial-card-header">
                 <h3>Lecturas</h3>
                 <button id="btn-terminar-lectura" class="btn btn-sm btn-secondary" type="button" title="Terminar lectura activa">
-                  ✓ Terminar
+                  <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg> Terminar
                 </button>
               </div>
               <p id="info-lecturas" class="helper-text"></p>
@@ -644,7 +672,7 @@
               <div class="historial-card-header">
                 <h3>Préstamos</h3>
                 <button id="btn-marcar-devuelto-global" class="btn btn-sm btn-secondary" type="button" title="Marcar devuelto">
-                  ✓ Devuelto
+                  <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg> Devuelto
                 </button>
               </div>
               <p id="info-prestamos" class="helper-text"></p>
@@ -697,7 +725,7 @@
     <div class="deseos-header">
       <h3>Lista de deseos</h3>
       <button id="btn-cerrar-deseos" class="icon-btn" type="button" title="Cerrar" aria-label="Cerrar">
-        <span class="icon-circle">✕</span>
+        <span class="icon-circle"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-cerrar"/></svg></span>
       </button>
     </div>
 
@@ -727,7 +755,7 @@
     <div class="deseos-header">
       <h3>Nuevo deseo</h3>
       <button id="btn-cerrar-deseo-form" class="icon-btn" type="button" title="Cerrar" aria-label="Cerrar">
-        <span class="icon-circle">✕</span>
+        <span class="icon-circle"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-cerrar"/></svg></span>
       </button>
     </div>
 
@@ -794,7 +822,7 @@
     <div class="deseos-header">
       <h3 id="share-title">Compartir</h3>
       <button id="btn-cerrar-share" class="icon-btn" type="button" aria-label="Cerrar">
-        <span class="icon-circle">✕</span>
+        <span class="icon-circle"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-cerrar"/></svg></span>
       </button>
     </div>
 
@@ -870,7 +898,7 @@
     <div class="deseos-header">
       <h3>Bibliotecas compartidas</h3>
       <button id="bc-cerrar" class="icon-btn" type="button" aria-label="Cerrar">
-        <span class="icon-circle">✕</span>
+        <span class="icon-circle"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-cerrar"/></svg></span>
       </button>
     </div>
 
@@ -882,18 +910,38 @@
 
     <!-- Panel: bibliotecas que otros comparten conmigo -->
     <div class="bc-panel is-active" id="bc-panel-conmigo">
+      <!-- Aparecer voluntariamente en la lista para que otros compartan conmigo -->
+      <label class="bc-visible">
+        <input id="bc-visible" type="checkbox" />
+        <span>
+          <strong>Aparecer en la lista de usuarios</strong>
+          <small>Así otros podrán elegirte para compartir su biblioteca contigo. Solo se muestra tu nombre de usuario.</small>
+        </span>
+      </label>
       <p id="bc-info-conmigo" class="muted bc-info">Cargando…</p>
       <div id="bc-lista-conmigo" class="bc-lista"></div>
     </div>
 
     <!-- Panel: a quién he compartido yo mi biblioteca -->
     <div class="bc-panel" id="bc-panel-miscompartidas">
-      <!-- Formulario para compartir -->
-      <div class="bc-share-form">
-        <input id="bc-input-usuario" type="text" placeholder="Nombre de usuario…" />
-        <button id="bc-btn-compartir" class="btn btn-primary btn-sm" type="button">Compartir</button>
+      <!-- Usuarios que han elegido aparecer en la lista -->
+      <h4 class="bc-subtitulo">Elige con quién compartir</h4>
+      <div class="table-search bc-filtro">
+        <input id="bc-filtro-usuarios" type="text" placeholder="Filtrar usuarios…" autocomplete="off" />
       </div>
+      <div id="bc-lista-usuarios" class="bc-lista bc-lista-usuarios"></div>
       <p id="bc-msg-compartir" class="muted bc-msg"></p>
+
+      <!-- Alternativa: escribir el nombre (para quien no aparece en la lista) -->
+      <details class="bc-manual">
+        <summary>¿No aparece? Escribe su nombre de usuario</summary>
+        <div class="bc-share-form">
+          <input id="bc-input-usuario" type="text" placeholder="Nombre de usuario…" autocomplete="off" />
+          <button id="bc-btn-compartir" class="btn btn-primary btn-sm" type="button">Compartir</button>
+        </div>
+      </details>
+
+      <h4 class="bc-subtitulo">Ya la compartes con</h4>
       <p id="bc-info-miscompartidas" class="muted bc-info">Cargando…</p>
       <div id="bc-lista-miscompartidas" class="bc-lista"></div>
     </div>
@@ -908,7 +956,7 @@
     <div class="deseos-header">
       <h3 id="bc-ver-titulo">Biblioteca de …</h3>
       <button id="bc-ver-cerrar" class="icon-btn" type="button" aria-label="Cerrar">
-        <span class="icon-circle">✕</span>
+        <span class="icon-circle"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-cerrar"/></svg></span>
       </button>
     </div>
 
@@ -927,42 +975,13 @@
 </div>
 
 <!-- ── Modal: progreso búsqueda de portadas ──────────── -->
-<div id="portadas-overlay" class="deseos-overlay" style="display:none;">
-  <div class="deseos-dialog portadas-dialog" role="dialog" aria-modal="true" aria-label="Buscando portadas">
-    <div class="deseos-header">
-      <h3>Buscar portadas faltantes</h3>
-      <button id="portadas-cerrar" class="icon-btn" type="button" aria-label="Cerrar">
-        <span class="icon-circle">✕</span>
-      </button>
-    </div>
-    <div class="portadas-body">
-      <p class="portadas-desc">
-        Busca automáticamente en Google Books y Open Library las portadas de todos tus libros que no tienen imagen.
-      </p>
-      <div id="portadas-sin-portada-info" class="portadas-stat"></div>
-      <div id="portadas-progreso" class="portadas-progreso" style="display:none;">
-        <div class="portadas-progreso-bar">
-          <div id="portadas-progreso-fill" class="portadas-progreso-fill"></div>
-        </div>
-        <p id="portadas-progreso-msg" class="muted" style="font-size:.85rem; margin-top:6px;"></p>
-      </div>
-      <div id="portadas-lista-sin" class="portadas-lista"></div>
-      <div class="portadas-footer">
-        <button id="btn-lanzar-busqueda" class="btn btn-primary" type="button">
-          Buscar todas las portadas
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- ── Modal: pegar URL de portada manualmente ───────── -->
 <div id="portada-url-overlay" class="deseos-overlay" style="display:none;">
   <div class="deseos-dialog portada-url-dialog" role="dialog" aria-modal="true" aria-label="Añadir portada por URL">
     <div class="deseos-header">
       <h3>Añadir portada por URL</h3>
       <button id="portada-url-cerrar" class="icon-btn" type="button" aria-label="Cerrar">
-        <span class="icon-circle">✕</span>
+        <span class="icon-circle"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-cerrar"/></svg></span>
       </button>
     </div>
     <div class="portada-url-body">
@@ -970,10 +989,10 @@
         Busca la portada en Google Images y pega aquí la URL directa de la imagen.
       </p>
       <a id="portada-url-google-link" href="#" target="_blank" rel="noopener" class="btn btn-ghost btn-sm portada-url-google">
-        Buscar en Google Images ↗
+        Buscar en Google Images <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-externo"/></svg>
       </a>
       <a id="portada-url-bing-link" href="#" target="_blank" rel="noopener" class="btn btn-ghost btn-sm portada-url-google">
-        Buscar en Bing Images ↗
+        Buscar en Bing Images <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-externo"/></svg>
       </a>
       <div class="form-group" style="margin-top:14px;">
         <label for="portada-url-input">URL de la imagen</label>
@@ -992,190 +1011,201 @@
 </div>
 
 <!-- ── Modal: Ayuda / Manual ─────────────────────────── -->
-<div id="ayuda-overlay" class="deseos-overlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Manual de ayuda">
+<div id="ayuda-overlay" class="deseos-overlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Ayuda de PaseoLibros">
   <div class="ayuda-dialog">
 
-    <div class="deseos-header">
+    <div class="deseos-header ayuda-header">
       <div class="ayuda-header-titulo">
-        <span class="ayuda-logo">📚</span>
-        <h3>Manual de PaseoLibros</h3>
+        <span class="ayuda-logo" aria-hidden="true"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-libros"/></svg></span>
+        <h3>Ayuda de PaseoLibros</h3>
       </div>
       <button id="ayuda-cerrar" class="icon-btn" type="button" aria-label="Cerrar ayuda">
-        <span class="icon-circle">✕</span>
+        <span class="icon-circle"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-cerrar"/></svg></span>
       </button>
     </div>
 
-    <!-- Pestañas -->
-    <nav class="ayuda-tabs" role="tablist">
-      <button class="ayuda-tab is-active" data-ayuda-tab="inicio" role="tab">Primeros pasos</button>
-      <button class="ayuda-tab" data-ayuda-tab="biblioteca" role="tab">Biblioteca</button>
-      <button class="ayuda-tab" data-ayuda-tab="lecturas" role="tab">Lecturas</button>
-      <button class="ayuda-tab" data-ayuda-tab="prestamos" role="tab">Préstamos</button>
-      <button class="ayuda-tab" data-ayuda-tab="extras" role="tab">Extras</button>
+    <nav class="ayuda-tabs" role="tablist" aria-label="Secciones de la ayuda">
+      <button class="ayuda-tab is-active" data-ayuda-tab="inicio" role="tab" type="button">Empezar</button>
+      <button class="ayuda-tab" data-ayuda-tab="biblioteca" role="tab" type="button">Biblioteca</button>
+      <button class="ayuda-tab" data-ayuda-tab="lecturas" role="tab" type="button">Lecturas</button>
+      <button class="ayuda-tab" data-ayuda-tab="prestamos" role="tab" type="button">Préstamos</button>
+      <button class="ayuda-tab" data-ayuda-tab="compartir" role="tab" type="button">Compartir</button>
+      <button class="ayuda-tab" data-ayuda-tab="extras" role="tab" type="button">Más</button>
     </nav>
 
-    <!-- Contenido -->
     <div class="ayuda-body">
 
-      <!-- ── PRIMEROS PASOS ───────────────────────── -->
-      <div class="ayuda-panel is-active" id="ayuda-panel-inicio">
+      <!-- ── EMPEZAR ─────────────────────────────── -->
+      <div class="ayuda-panel is-active" id="ayuda-panel-inicio" role="tabpanel">
         <div class="ayuda-section">
           <h4>¿Qué es PaseoLibros?</h4>
-          <p>PaseoLibros es tu biblioteca personal digital. Registra tus libros escaneando el código de barras o introduciendo el ISBN, lleva el seguimiento de tus lecturas, gestiona préstamos y comparte tu colección con otros usuarios.</p>
+          <p>Tu biblioteca de casa en el bolsillo: registra tus libros escaneando el código de barras, lleva la cuenta de lo que lees, apunta a quién prestas cada libro (y quién te los presta a ti) y comparte tu colección con otros usuarios.</p>
         </div>
+
         <div class="ayuda-section">
-          <h4>Añadir tu primer libro</h4>
+          <h4>Añadir un libro</h4>
           <ol>
-            <li>En el panel izquierdo, introduce el <strong>ISBN</strong> del libro (lo encontrarás en el código de barras de la contraportada).</li>
-            <li>Pulsa <strong>Buscar</strong> — la app consulta Google Books y Open Library automáticamente.</li>
-            <li>Revisa los datos y pulsa <strong>Añadir ejemplar</strong>.</li>
-            <li>¿Tienes el libro a mano? Pulsa el botón <strong>Escanear</strong> para leer el código de barras con la cámara.</li>
+            <li>Pulsa el botón <strong>+</strong> (en el móvil, en el centro de la barra de abajo; en el ordenador, el panel de la izquierda).</li>
+            <li>Pulsa <strong>Escanear</strong> y centra el código de barras dentro del recuadro, a unos 15–20 cm. También puedes escribir el ISBN a mano.</li>
+            <li>Aparece una <strong>vista previa</strong> con la portada, el título y el autor. Si ya tienes ese libro, te avisa de dónde está.</li>
+            <li>Si quieres, indica la <strong>ubicación</strong> (p. ej. «Salón, estantería 2») y pulsa <strong>Crear ejemplar</strong>.</li>
           </ol>
+          <p>Si hay poca luz, usa el botón <strong><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-bombilla"/></svg> Linterna</strong> del escáner (mejor apagada con portadas brillantes, por los reflejos).</p>
         </div>
+
         <div class="ayuda-section">
-          <h4>Navegar por la app</h4>
+          <h4>Moverse por la app</h4>
           <div class="ayuda-grid">
             <div class="ayuda-card">
-              <div class="ayuda-card-icon">≡</div>
-              <div>
-                <strong>Vista lista</strong>
-                <p>Tabla con todos los datos del ejemplar.</p>
-              </div>
+              <div class="ayuda-card-icon"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-libros"/></svg></div>
+              <div><strong>Pestañas de abajo (móvil)</strong><p>Biblioteca, Leyendo, Préstamos y Estadísticas. El número dorado indica cuántos tienes en curso.</p></div>
             </div>
             <div class="ayuda-card">
-              <div class="ayuda-card-icon">⊞</div>
-              <div>
-                <strong>Vista portadas</strong>
-                <p>Cuadrícula visual de portadas.</p>
-              </div>
+              <div class="ayuda-card-icon"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-engranaje"/></svg></div>
+              <div><strong>Menú <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-engranaje"/></svg></strong><p>Lista de deseos, cola de lectura, bibliotecas compartidas, libros que te han prestado, exportar e importar.</p></div>
             </div>
             <div class="ayuda-card">
-              <div class="ayuda-card-icon">⚙</div>
-              <div>
-                <strong>Menú herramientas</strong>
-                <p>Deseos, préstamos, compartir, portadas…</p>
-              </div>
+              <div class="ayuda-card-icon"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-tema"/></svg></div>
+              <div><strong>Tema claro u oscuro</strong><p>El botón <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-tema"/></svg> de arriba a la derecha.</p></div>
             </div>
             <div class="ayuda-card">
-              <div class="ayuda-card-icon">☀</div>
-              <div>
-                <strong>Tema claro/oscuro</strong>
-                <p>Cambia el aspecto visual de la app.</p>
-              </div>
+              <div class="ayuda-card-icon"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-lupa"/></svg></div>
+              <div><strong>Buscador</strong><p>Filtra al instante por título, autor, ISBN o notas.</p></div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ── BIBLIOTECA ────────────────────────────── -->
-      <div class="ayuda-panel" id="ayuda-panel-biblioteca">
+      <!-- ── BIBLIOTECA ──────────────────────────── -->
+      <div class="ayuda-panel" id="ayuda-panel-biblioteca" role="tabpanel">
+        <div class="ayuda-section">
+          <h4>Tres formas de ver tus libros</h4>
+          <ul>
+            <li><strong>Portadas</strong>: cuadrícula de portadas grandes (la vista por defecto en el móvil).</li>
+            <li><strong>Lista</strong>: tarjetas con portada, título, autor y ubicación (en el ordenador, una tabla que puedes ordenar pulsando en las columnas).</li>
+            <li><strong>Estantería</strong>: tus libros como lomos en una balda.</li>
+          </ul>
+          <p>Los libros sin portada muestran una <strong>tapa de color</strong> con su título; cada libro tiene siempre el mismo color.</p>
+        </div>
+
         <div class="ayuda-section">
           <h4>La ficha del libro</h4>
-          <p>Haz clic en cualquier fila o portada para abrir la ficha completa. Desde ahí puedes:</p>
+          <p>Toca cualquier libro para abrir su ficha. Tiene cuatro pestañas:</p>
           <ul>
-            <li><strong>Pestaña Libro</strong> — editar título, autor, editorial, año, páginas y descripción.</li>
-            <li><strong>Pestaña Mi lectura</strong> — añadir etiquetas personales, notas escritas y notas de audio.</li>
-            <li><strong>Pestaña Ejemplar</strong> — cambiar estado, tipo y ubicación física. También puedes iniciar una lectura, registrar un préstamo o eliminar el ejemplar.</li>
-            <li><strong>Pestaña Historial</strong> — ver el registro completo de lecturas y préstamos pasados.</li>
+            <li><strong>Libro</strong>: título, autor, editorial, año, páginas y descripción. Pulsa <strong>Guardar libro</strong> tras cambiarlos.</li>
+            <li><strong>Mi lectura</strong>: favorito <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-estrella"/></svg>, etiquetas, notas escritas <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-nota"/></svg> y notas de voz <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-micro"/></svg>.</li>
+            <li><strong>Ejemplar</strong>: estado y ubicación, y los botones <strong>Iniciar lectura</strong>, <strong>Registrar préstamo</strong> y <strong>Eliminar ejemplar</strong>.</li>
+            <li><strong>Historial</strong>: todas las lecturas y préstamos de ese libro.</li>
           </ul>
         </div>
+
         <div class="ayuda-section">
           <h4>Portadas</h4>
-          <p>Bajo la portada en la ficha tienes tres botones:</p>
+          <p>Bajo la portada de la ficha tienes tres botones:</p>
           <ul>
-            <li><strong>↑ Subir</strong> — sube una imagen desde tu dispositivo.</li>
-            <li><strong>⚲ Buscar</strong> — busca automáticamente en Google Books, Open Library y Bing.</li>
-            <li><strong>⊕ URL</strong> — abre un buscador preconfigurado y pega la URL de la imagen que quieras. Esta URL se guarda de forma permanente en la base de datos.</li>
-          </ul>
-          <p>También puedes usar <strong>Buscar portadas faltantes</strong> en el menú ⚙ para rellenar todas las que falten de una vez.</p>
-        </div>
-        <div class="ayuda-section">
-          <h4>Buscar y filtrar</h4>
-          <ul>
-            <li>Usa la barra de búsqueda central para filtrar por título, autor o ISBN en tiempo real.</li>
-            <li>El menú desplegable de la derecha ordena por recientes, título o autor.</li>
-            <li>En móvil, el ordenado está dentro del menú ⚙.</li>
+            <li><strong><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-subir"/></svg> Subir</strong>: una foto o imagen de tu móvil u ordenador.</li>
+            <li><strong><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-lupa"/></svg> Buscar</strong>: la busca en Google Books, Open Library y Bing.</li>
+            <li><strong><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-enlace"/></svg> URL</strong>: pega la dirección de una imagen que hayas encontrado en internet.</li>
           </ul>
         </div>
       </div>
 
-      <!-- ── LECTURAS ───────────────────────────────── -->
-      <div class="ayuda-panel" id="ayuda-panel-lecturas">
+      <!-- ── LECTURAS ────────────────────────────── -->
+      <div class="ayuda-panel" id="ayuda-panel-lecturas" role="tabpanel">
         <div class="ayuda-section">
-          <h4>Iniciar una lectura</h4>
+          <h4>Empezar y terminar una lectura</h4>
           <ol>
-            <li>Abre la ficha del libro.</li>
-            <li>Ve a la pestaña <strong>Ejemplar</strong>.</li>
-            <li>Pulsa <strong>Iniciar lectura</strong>.</li>
+            <li>Abre la ficha del libro → pestaña <strong>Ejemplar</strong> → <strong>Iniciar lectura</strong>.</li>
+            <li>La verás en <strong>Leyendo</strong>. Toca la lectura para apuntar la <strong>página</strong> por la que vas (marcapáginas).</li>
+            <li>Al acabarlo, en la ficha → <strong>Historial</strong> → <strong><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg> Terminar</strong>.</li>
           </ol>
-          <p>La lectura aparecerá en la sección <strong>Lecturas en curso</strong> de la pantalla principal.</p>
         </div>
-        <div class="ayuda-section">
-          <h4>Actualizar el marcapáginas</h4>
-          <p>Haz clic en una lectura en curso para abrir el marcapáginas. Escribe la página actual o usa el deslizador. El progreso se guarda automáticamente.</p>
-        </div>
-        <div class="ayuda-section">
-          <h4>Terminar una lectura</h4>
-          <p>Desde la ficha del libro, pestaña <strong>Historial</strong>, pulsa <strong>✓ Terminar</strong>. También puedes hacerlo desde el panel de lecturas en curso de la pantalla principal.</p>
-        </div>
+
         <div class="ayuda-section">
           <h4>Estadísticas</h4>
-          <p>La sección <strong>Estadísticas de lectura</strong> muestra métricas de tu actividad lectora: total histórico, libros este año, racha de años consecutivos y gráfico por año. Haz clic en una barra del gráfico para ver el listado de títulos de ese año. El panel de autores más leídos se calcula automáticamente de tu historial.</p>
+          <p>Libros terminados en total y este año, comparación con el año anterior, racha de años seguidos, gráfico por años y autores más leídos. Elige un año para ver la lista de títulos.</p>
+          <p>Los <strong>libros que te han prestado</strong> también pueden estar en <strong>Leyendo</strong>, y los que marques como <strong>Leído</strong> también cuentan (aparecen con la etiqueta «prestado por…»).</p>
         </div>
-        <div class="ayuda-section">
-          <h4>Marcapáginas</h4>
-          <p>Haz clic en cualquier fila de la sección <strong>Lecturas en curso</strong> para abrir el marcapáginas de esa lectura. Verás la página actual precargada — puedes actualizarla escribiendo el número directamente o usando el deslizador. Al pulsar <strong>Guardar</strong> la tabla se actualiza al instante.</p>
-        </div>
+
         <div class="ayuda-section">
           <h4>Cola de lectura</h4>
-          <p>Organiza los libros que quieres leer a continuación. Accede desde el menú ⚙ → <strong>Cola de lecturas</strong>. Puedes reordenarlos según tus prioridades.</p>
+          <p>Menú <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-engranaje"/></svg> → <strong>Cola de lecturas</strong>: los libros que quieres leer a continuación, en el orden que prefieras.</p>
         </div>
       </div>
 
-      <!-- ── PRÉSTAMOS ──────────────────────────────── -->
-      <div class="ayuda-panel" id="ayuda-panel-prestamos">
+      <!-- ── PRÉSTAMOS ───────────────────────────── -->
+      <div class="ayuda-panel" id="ayuda-panel-prestamos" role="tabpanel">
         <div class="ayuda-section">
-          <h4>Registrar un préstamo</h4>
+          <h4>Prestar uno de tus libros</h4>
           <ol>
-            <li>Abre la ficha del libro.</li>
-            <li>Ve a la pestaña <strong>Ejemplar</strong>.</li>
-            <li>Pulsa <strong>Registrar préstamo</strong>.</li>
-            <li>Indica a quién se lo prestas y la fecha límite de devolución.</li>
+            <li>Ficha del libro → pestaña <strong>Ejemplar</strong> → <strong>Registrar préstamo</strong>.</li>
+            <li>Indica a quién se lo prestas y, si quieres, hasta cuándo.</li>
+            <li>Lo verás en la pestaña <strong>Préstamos</strong>. Cuando te lo devuelvan, toca el préstamo para abrir la ficha → <strong>Historial</strong> → <strong><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg> Devuelto</strong>.</li>
           </ol>
         </div>
+
         <div class="ayuda-section">
-          <h4>Seguimiento de préstamos</h4>
-          <p>Los préstamos activos aparecen en la sección <strong>Préstamos activos</strong> de la pantalla principal con el nombre del receptor y la fecha límite.</p>
-        </div>
-        <div class="ayuda-section">
-          <h4>Marcar como devuelto</h4>
-          <p>Desde la ficha del libro, pestaña <strong>Historial</strong>, pulsa <strong>✓ Devuelto</strong>.</p>
+          <h4>Libros que te han prestado a ti</h4>
+          <p>Menú <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-engranaje"/></svg> → <strong>Libros que me han prestado</strong>. Apunta el título, quién te lo deja y cuándo tienes que devolverlo; los que se pasan de fecha se marcan en rojo.</p>
+          <ul>
+            <li><strong><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-libro-abierto"/></svg> Empezar a leer</strong>: aparece en <strong>Leyendo</strong>; tócalo allí para apuntar la página o pulsar <strong>Lo he terminado</strong>.</li>
+            <li><strong><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg> Terminado</strong> / <strong>Ya leído</strong>: cuenta en tus estadísticas de lectura. Toca la fecha de la etiqueta «Leído» para cambiarla.</li>
+            <li><strong><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg> Devuelto</strong>: cuando se lo devuelvas a su dueño.</li>
+          </ul>
         </div>
       </div>
 
-      <!-- ── EXTRAS ────────────────────────────────── -->
-      <div class="ayuda-panel" id="ayuda-panel-extras">
+      <!-- ── COMPARTIR ───────────────────────────── -->
+      <div class="ayuda-panel" id="ayuda-panel-compartir" role="tabpanel">
+        <div class="ayuda-section">
+          <h4>Compartir tu biblioteca con otro usuario</h4>
+          <p>Le das acceso de <strong>solo lectura</strong>: verá tus libros, pero no podrá cambiar nada.</p>
+          <ol>
+            <li>Menú <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-engranaje"/></svg> → <strong>Bibliotecas compartidas</strong> → pestaña <strong>Las que yo comparto</strong>.</li>
+            <li>Elige a la persona en la lista y pulsa <strong>Compartir</strong>. ¿No aparece? Abre «Escribe su nombre de usuario».</li>
+            <li>Puedes quitarle el acceso cuando quieras con <strong>Revocar</strong>.</li>
+          </ol>
+        </div>
+
+        <div class="ayuda-section">
+          <h4>Aparecer en la lista</h4>
+          <p>En la pestaña <strong>Compartidas conmigo</strong>, marca <strong>Aparecer en la lista de usuarios</strong> para que otros puedan elegirte. Es voluntario: solo se muestra tu nombre de usuario, y puedes desmarcarlo en cualquier momento.</p>
+        </div>
+
+        <div class="ayuda-section">
+          <h4>Ver bibliotecas de otros</h4>
+          <p>En <strong>Compartidas conmigo</strong> aparecen las que otros te han compartido. Pulsa <strong>Ver biblioteca</strong> y usa el buscador.</p>
+        </div>
+
+        <div class="ayuda-section">
+          <h4>Enlace público (sin cuenta)</h4>
+          <p>Menú <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-engranaje"/></svg> → <strong>Compartir ejemplares</strong> o <strong>Compartir deseos</strong> genera un enlace que puede abrir cualquiera, aunque no tenga cuenta. Caduca a los 30 días.</p>
+        </div>
+      </div>
+
+      <!-- ── MÁS ─────────────────────────────────── -->
+      <div class="ayuda-panel" id="ayuda-panel-extras" role="tabpanel">
         <div class="ayuda-section">
           <h4>Lista de deseos</h4>
-          <p>Guarda los libros que quieres conseguir. Accede desde el menú ⚙ → <strong>Lista de deseos</strong>. Puedes añadir título, autor, ISBN, tipo, ubicación donde encontrarlo y prioridad.</p>
+          <p>Menú <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-engranaje"/></svg> → <strong>Lista de deseos</strong>: libros que quieres conseguir, con dónde encontrarlos y su prioridad.</p>
         </div>
+
         <div class="ayuda-section">
-          <h4>Compartir tu biblioteca</h4>
-          <p>Puedes dar acceso de solo lectura a tu biblioteca completa a otros usuarios registrados en PaseoLibros:</p>
-          <ol>
-            <li>Menú ⚙ → <strong>Bibliotecas compartidas</strong>.</li>
-            <li>Pestaña <strong>Las que yo comparto</strong>.</li>
-            <li>Escribe el nombre de usuario y pulsa <strong>Compartir</strong>.</li>
-          </ol>
-          <p>Para ver una biblioteca que alguien ha compartido contigo, ve a la pestaña <strong>Compartidas conmigo</strong> y pulsa <strong>Ver biblioteca</strong>.</p>
+          <h4>Exportar e importar</h4>
+          <p>Menú <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-engranaje"/></svg> → <strong>Exportar CSV</strong> descarga tu biblioteca en una hoja de cálculo. <strong>Importar CSV</strong> añade libros desde un fichero con una columna <em>isbn</em> (los que ya tienes se cuentan aparte y no se duplican).</p>
         </div>
+
         <div class="ayuda-section">
-          <h4>Compartir listas públicas</h4>
-          <p>Genera un enlace público para compartir tu biblioteca o lista de deseos con cualquier persona, aunque no tenga cuenta. Menú ⚙ → <strong>Compartir ejemplares</strong> o <strong>Compartir deseos</strong>. El enlace caduca a los 30 días.</p>
+          <h4>Instalar la app en el móvil</h4>
+          <ul>
+            <li><strong>Android (Chrome)</strong>: menú ⋮ → <em>Añadir a pantalla de inicio</em> o <em>Instalar aplicación</em>.</li>
+            <li><strong>iPhone (Safari)</strong>: botón Compartir → <em>Añadir a pantalla de inicio</em>.</li>
+          </ul>
         </div>
+
         <div class="ayuda-section">
-          <h4>Escáner de ISBN</h4>
-          <p>Pulsa <strong>Escanear</strong> en el panel de alta para activar la cámara. Centra el código de barras del libro dentro del recuadro, a unos 15–20 cm. La app lo lee sola y comprueba que es un ISBN válido. Si hay poca luz usa el botón 💡 Linterna (evita reflejos en portadas brillantes).</p>
+          <h4>Sesión</h4>
+          <p>La sesión dura 7 días. Al abrir la app se comprueba con el servidor; si tarda («El servidor se está despertando…») espera unos segundos. Para salir: menú <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-engranaje"/></svg> → <strong>Cerrar sesión</strong>. ¿Olvidaste la contraseña? En la pantalla de acceso, <strong>¿Olvidaste tu contraseña?</strong> te envía un enlace por correo.</p>
         </div>
       </div>
 
@@ -1197,9 +1227,9 @@
   <div class="deseos-dialog lr-dialog">
 
     <div class="deseos-header">
-      <h3>📚 Libros que me han prestado</h3>
+      <h3><svg class="ico ico-titulo" aria-hidden="true" focusable="false"><use href="#i-libros"/></svg> Libros que me han prestado</h3>
       <button id="lr-cerrar" class="icon-btn" type="button" aria-label="Cerrar">
-        <span class="icon-circle">✕</span>
+        <span class="icon-circle"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-cerrar"/></svg></span>
       </button>
     </div>
 

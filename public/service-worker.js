@@ -9,7 +9,7 @@
 //  · App (html/js/css) → stale-while-revalidate: abre al instante desde caché
 //    y se actualiza en segundo plano. Ya no hace falta subir la versión a mano
 //    para que el móvil reciba los cambios (basta con recargar una vez).
-const CACHE_VERSION = 'paseolibros-v22';
+const CACHE_VERSION = 'paseolibros-v24';
 const CACHE_STATIC = `${CACHE_VERSION}-static`;
 const CACHE_IMG = `${CACHE_VERSION}-img`;
 const MAX_IMGS = 600;
