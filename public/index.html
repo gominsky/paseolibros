@@ -130,16 +130,18 @@
               <h2 class="auth-title">Accede a tu biblioteca</h2>
               <p class="auth-subtitle">Inicia sesión para ver tus ejemplares.</p>
 
+              <form id="form-login" autocomplete="on" novalidate>
               <div class="form-group">
                 <label for="login-usuario">Usuario</label>
-                <input id="login-usuario" placeholder="Tu nombre de usuario" autocomplete="username" />
+                <input id="login-usuario" name="username" placeholder="Tu nombre de usuario" autocomplete="username" />
               </div>
               <div class="form-group">
                 <label for="login-contrasena">Contraseña</label>
-                <input id="login-contrasena" type="password" placeholder="••••••••" autocomplete="current-password" />
+                <input id="login-contrasena" name="password" type="password" placeholder="••••••••" autocomplete="current-password" />
               </div>
 
-              <button id="btn-login" class="btn btn-primary btn-full" type="button">Entrar</button>
+              <button id="btn-login" class="btn btn-primary btn-full" type="submit">Entrar</button>
+              </form>
 
               <div class="auth-links">
                 <a href="#" id="link-show-register">Crear cuenta</a>
@@ -199,6 +201,8 @@
               <input
                 type="text"
                 id="isbn"
+                autocomplete="off"
+                inputmode="numeric"
                 placeholder="Escanea o escribe el código ISBN"
               />
               <button id="btn-escanear" class="btn btn-secondary">
@@ -256,7 +260,13 @@
 <div class="table-search" style="display:flex; align-items:center; gap:6px;">
               <input
                 id="buscador-ejemplares"
-                type="text"
+                type="search"
+                name="buscar-ejemplares"
+                autocomplete="off"
+                autocorrect="off"
+                spellcheck="false"
+                data-lpignore="true"
+                data-1p-ignore
                 placeholder="Buscar por título, autor, ISBN, notas."
               />
               <button id="btn-voz" class="icon-btn btn-voz" type="button" title="Buscar por voz" aria-label="Buscar por voz">
@@ -341,7 +351,7 @@
     </div>
 
     <div class="deseos-toolbar">
-      <input id="cola-q" type="text" placeholder="Buscar por título/autor/ISBN…" />
+      <input id="cola-q" type="search" autocomplete="off" placeholder="Buscar por título/autor/ISBN…" />
       <button id="btn-add-cola" class="btn btn-secondary btn-sm" type="button">+ Añadir desde ejemplares</button>
     </div>
 
@@ -361,7 +371,7 @@
     </div>
 
     <div class="deseos-toolbar">
-      <input id="cola-pick-q" type="text" placeholder="Filtrar tus ejemplares…" />
+      <input id="cola-pick-q" type="search" autocomplete="off" placeholder="Filtrar tus ejemplares…" />
     </div>
 
     <div id="cola-pick-lista" class="deseos-lista"></div>
@@ -730,7 +740,7 @@
     </div>
 
     <div class="deseos-toolbar">
-      <input id="deseos-q" type="text" placeholder="Buscar por título o autor…" />
+      <input id="deseos-q" type="search" autocomplete="off" placeholder="Buscar por título o autor…" />
       <select id="deseos-tipo">
         <option value="">Tipo: todos</option>
         <option value="libro">Libro</option>
@@ -963,7 +973,7 @@
     <!-- Buscador -->
     <div class="bc-ver-toolbar">
       <div class="table-search" style="flex:1;">
-        <input id="bc-ver-q" type="text" placeholder="Buscar por título, autor, ISBN…" />
+        <input id="bc-ver-q" type="search" autocomplete="off" placeholder="Buscar por título, autor, ISBN…" />
       </div>
       <span id="bc-ver-info" class="muted" style="font-size:.85rem; white-space:nowrap;"></span>
     </div>

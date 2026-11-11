@@ -97,7 +97,11 @@ document.addEventListener('DOMContentLoaded', () => {
     crearEjemplar();
   });
   
-  document.getElementById('btn-login')?.addEventListener('click', hacerLogin);
+  // Formulario real: Intro para entrar y el navegador sabe dónde va el usuario guardado
+  document.getElementById('form-login')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    hacerLogin();
+  });
   document.getElementById('btn-logout')?.addEventListener('click', hacerLogout);
   // Stats lecturas: desplegar años (desktop + móvil)
   document.getElementById('tabla-stats-lecturas')?.addEventListener('click', manejarClickStatsToggle);
@@ -277,6 +281,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (buscador) {
     let tBusqueda = null;
     buscador.addEventListener('input', () => {
+      // El autorrelleno del navegador a veces mete aquí el nombre de usuario guardado:
+      // si el texto aparece sin que el usuario esté escribiendo en el buscador, se descarta.
+      const nombre = window.usuarioActual?.nombre_usuario || document.getElementById('login-usuario')?.value || '';
+      if (document.activeElement !== buscador && nombre && buscador.value.trim() === nombre.trim()) {
+        buscador.value = '';
+        if (ejemplaresQuery) { ejemplaresQuery = ''; renderEjemplares(); }
+        return;
+      }
       clearTimeout(tBusqueda);
       tBusqueda = setTimeout(() => {
         ejemplaresQuery = buscador.value || '';

@@ -230,3 +230,10 @@ Ahora:
 - Nuevo `src/migraciones.js`: al arrancar, el servidor aplica `db/add3.sql` y `db/add4.sql`
   (idempotentes). En Render ya no hace falta conectarse con psql: basta con desplegar.
 - Para futuras migraciones: crear `db/addN.sql` idempotente y añadirlo a la lista `MIGRACIONES`.
+
+## Buscador autorrellenado con el usuario (PC) — 11/11
+
+- Chrome metía el nombre de usuario guardado en el buscador de la cabecera y lanzaba una búsqueda.
+- El login es ahora un `<form>` real (Intro para entrar; el navegador sabe dónde va el usuario).
+- Buscadores con `type="search"` y `autocomplete="off"`; al iniciar sesión el buscador se vacía
+  y, si aparece el nombre de usuario sin que estés escribiendo, se descarta.

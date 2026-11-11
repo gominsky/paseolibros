@@ -543,3 +543,9 @@
 .mp-actions #mp-finish { flex: 1 1 100%; order: 3; border-color: var(--border-acc); color: var(--accent); }
 .mp-actions #mp-finish[hidden] { display: none; }
 .mp-row input[type="number"]#mp-num { min-width: 0; font-size: 1.8rem; padding: 6px 4px; }
+
+/* Buscadores type="search": mismo aspecto que antes (sin adornos del navegador) */
+input[type="search"] { -webkit-appearance: none; appearance: none; }
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }
+#form-login { margin: 0; }

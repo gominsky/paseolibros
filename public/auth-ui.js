@@ -30,6 +30,12 @@ window.actualizarUIAutenticacion = function actualizarUIAutenticacion() {
 
   // Si logueado: dispara cargas (estas funciones ya existen en main.js)
   if (loggedIn) {
+    // El buscador siempre empieza vacío (evita que quede el usuario autorrellenado)
+    const buscador = document.getElementById('buscador-ejemplares');
+    if (buscador && buscador.value) {
+      buscador.value = '';
+      if (typeof ejemplaresQuery !== 'undefined') ejemplaresQuery = ''; // variable global de core.js
+    }
     if (window.usuarioActual?.id && window.cargarEjemplares) window.cargarEjemplares(window.usuarioActual.id);
     if (window.cargarLecturasAbiertas) window.cargarLecturasAbiertas();
     if (window.cargarPrestamosActivos) window.cargarPrestamosActivos();
