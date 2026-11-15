@@ -1,5 +1,7 @@
 // src/rutas/libros_recibidos.js
-// Libros ajenos que me han prestado — para no olvidar devolverlos
+// Libros ajenos que me han prestado — para no olvidar devolverlos.
+// También los libros electrónicos (electronico = TRUE): misma lectura y estadísticas,
+// pero sin prestador ni devolución, y fuera de la biblioteca real.
 
 import { Router } from 'express';
 import pool from '../bd.js';
@@ -13,13 +15,17 @@ function requireAuth(req, res, next) {
 
 // ── GET /api/libros-recibidos ─────────────────────────────
 // Lista de libros que me han prestado (pendientes de devolver primero)
+// ?electronico=1 → mis libros electrónicos (leyendo primero, luego por leer, luego leídos)
 router.get('/libros-recibidos', requireAuth, async (req, res) => {
+  const electronico = ['1', 'true', 'si'].includes(String(req.query.electronico || '').toLowerCase());
   try {
     const { rows } = await pool.query(
       `SELECT * FROM libros_recibidos
-       WHERE usuario_id = $1
-       ORDER BY devuelto ASC, fecha_devolver ASC NULLS LAST, creado_en DESC`,
-      [req.usuario.id]
+       WHERE usuario_id = $1 AND electronico = $2
+       ORDER BY ${electronico
+         ? 'leyendo DESC, leido ASC, fecha_leido DESC NULLS LAST, creado_en DESC'
+         : 'devuelto ASC, fecha_devolver ASC NULLS LAST, creado_en DESC'}`,
+      [req.usuario.id, electronico]
     );
     res.json(rows);
   } catch (e) {
@@ -31,25 +37,28 @@ router.get('/libros-recibidos', requireAuth, async (req, res) => {
 // ── POST /api/libros-recibidos ────────────────────────────
 // Registrar un libro que me han prestado
 router.post('/libros-recibidos', requireAuth, async (req, res) => {
-  const { titulo, autores, prestador, fecha_recibido, fecha_devolver, notas } = req.body;
+  const { titulo, autores, prestador, fecha_recibido, fecha_devolver, notas, formato } = req.body;
+  const electronico = req.body.electronico === true || req.body.electronico === 1 || req.body.electronico === '1';
 
   if (!titulo?.trim()) return res.status(400).json({ error: 'El título es obligatorio' });
-  if (!prestador?.trim()) return res.status(400).json({ error: 'Indica quién te lo prestó' });
+  if (!electronico && !prestador?.trim()) return res.status(400).json({ error: 'Indica quién te lo prestó' });
 
   try {
     const { rows } = await pool.query(
       `INSERT INTO libros_recibidos
-         (usuario_id, titulo, autores, prestador, fecha_recibido, fecha_devolver, notas)
-       VALUES ($1, $2, $3, $4, COALESCE($5::date, CURRENT_DATE), $6, $7)
+         (usuario_id, titulo, autores, prestador, fecha_recibido, fecha_devolver, notas, electronico, formato)
+       VALUES ($1, $2, $3, $4, COALESCE($5::date, CURRENT_DATE), $6, $7, $8, $9)
        RETURNING *`,
       [
         req.usuario.id,
         titulo.trim(),
         autores?.trim() || null,
-        prestador.trim(),
+        electronico ? null : prestador.trim(),
         fecha_recibido || null,
-        fecha_devolver || null,
+        electronico ? null : (fecha_devolver || null),
         notas?.trim() || null,
+        electronico,
+        electronico ? (formato?.trim() || null) : null,
       ]
     );
     res.status(201).json(rows[0]);

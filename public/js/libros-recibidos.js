@@ -1,4 +1,5 @@
-// js/libros-recibidos.js — Libros que me han prestado
+// js/libros-recibidos.js — Libros que me han prestado y libros electrónicos
+// (misma ventana en dos modos: los electrónicos no tienen prestador ni devolución)
 // (El servidor une todos los ficheros de js/ en /main.js según js/orden.json)
 
 // ══════════════════════════════════════════════════════════
@@ -8,6 +9,37 @@
  
   var tabActual = 'pendientes';
   var datos = [];
+  var modo = 'prestados';   // 'prestados' | 'electronicos'
+  function esEbook() { return modo === 'electronicos'; }
+
+  var TEXTOS = {
+    prestados: {
+      titulo: 'Libros que me han prestado', icono: 'libros',
+      tabs: ['Pendientes de devolver', 'Devueltos'],
+      vacio: ['No tienes libros pendientes de devolver.', 'No has devuelto ningún libro aún.'],
+    },
+    electronicos: {
+      titulo: 'Libros electrónicos', icono: 'ebook',
+      tabs: ['Por leer y leyendo', 'Leídos'],
+      vacio: ['No tienes libros electrónicos por leer. Añade uno arriba.', 'Aún no has terminado ningún libro electrónico.'],
+    },
+  };
+
+  // Ajusta la ventana al modo (título, campos y pestañas)
+  function aplicarModo() {
+    var t = TEXTOS[modo];
+    var txt = document.getElementById('lr-titulo-texto'); if (txt) txt.textContent = t.titulo;
+    var ico = document.getElementById('lr-titulo-icono'); if (ico) ico.setAttribute('href', '#i-' + t.icono);
+    document.querySelectorAll('#lr-overlay .lr-solo-prestados').forEach(function (el) { el.hidden = esEbook(); });
+    document.querySelectorAll('#lr-overlay .lr-solo-ebook').forEach(function (el) { el.hidden = !esEbook(); });
+    document.querySelectorAll('#lr-overlay .lr-tab').forEach(function (b, i) {
+      b.textContent = t.tabs[i];
+      b.classList.toggle('is-active', i === 0);
+    });
+    tabActual = 'pendientes';
+    var msg = document.getElementById('lr-msg'); if (msg) msg.textContent = '';
+    var lista = document.getElementById('lr-lista'); if (lista) lista.innerHTML = '';
+  }
  
   function apiFetch(path, opts) {
     opts = opts || {};
@@ -24,7 +56,9 @@
  
   function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
  
-  function abrir() {
+  function abrir(m) {
+    modo = m === 'electronicos' ? 'electronicos' : 'prestados';
+    aplicarModo();
     document.getElementById('lr-overlay').style.display = 'flex';
     document.documentElement.style.overflow = 'hidden';
     cargar();
@@ -38,7 +72,7 @@
     var info = document.getElementById('lr-info');
     if (info) info.textContent = 'Cargando…';
     try {
-      var res = await apiFetch('/api/libros-recibidos');
+      var res = await apiFetch('/api/libros-recibidos' + (esEbook() ? '?electronico=1' : ''));
       datos = await res.json();
       if (!res.ok) throw new Error(datos.error);
       renderLista();
@@ -53,20 +87,19 @@
     if (!lista) return;
  
     var filtrados = datos.filter(function(d) {
-      return tabActual === 'pendientes' ? !d.devuelto : d.devuelto;
+      var hecho = esEbook() ? d.leido : d.devuelto;
+      return tabActual === 'pendientes' ? !hecho : hecho;
     });
  
     if (!filtrados.length) {
-      info.textContent = tabActual === 'pendientes'
-        ? 'No tienes libros pendientes de devolver.'
-        : 'No has devuelto ningún libro aún.';
+      info.textContent = TEXTOS[modo].vacio[tabActual === 'pendientes' ? 0 : 1];
       lista.innerHTML = '';
       return;
     }
  
     info.textContent = filtrados.length + ' libro' + (filtrados.length !== 1 ? 's' : '');
     lista.innerHTML = filtrados.map(function(d) {
-      var vencido = !d.devuelto && d.fecha_devolver && new Date(d.fecha_devolver) < new Date();
+      var vencido = !esEbook() && !d.devuelto && d.fecha_devolver && new Date(d.fecha_devolver) < new Date();
       var fechaDev = d.fecha_devolver
         ? new Date(d.fecha_devolver).toLocaleDateString('es-ES', {day:'numeric', month:'short', year:'numeric'})
         : '—';
@@ -88,9 +121,11 @@
           '<div class="lr-item-titulo">' + esc(d.titulo) + '</div>' +
           (d.autores ? '<div class="lr-item-autor">' + esc(d.autores) + '</div>' : '') +
           '<div class="lr-item-meta">' +
-            '<span class="deseo-pill">De: ' + esc(d.prestador) + '</span>' +
-            (d.fecha_devolver ? '<span class="deseo-pill' + (vencido ? ' deseo-pill--warn' : '') + '">Devolver: ' + fechaDev + '</span>' : '') +
-            (d.devuelto ? '<span class="deseo-pill deseo-pill--ok">Devuelto ' + fechaDevuelto + '</span>' : '') +
+            (esEbook()
+              ? (d.formato ? '<span class="deseo-pill">' + esc(d.formato) + '</span>' : '')
+              : '<span class="deseo-pill">De: ' + esc(d.prestador) + '</span>') +
+            (!esEbook() && d.fecha_devolver ? '<span class="deseo-pill' + (vencido ? ' deseo-pill--warn' : '') + '">Devolver: ' + fechaDev + '</span>' : '') +
+            (!esEbook() && d.devuelto ? '<span class="deseo-pill deseo-pill--ok">Devuelto ' + fechaDevuelto + '</span>' : '') +
             leidoHtml +
           '</div>' +
           (d.notas ? '<div class="lr-item-notas">' + esc(d.notas) + '</div>' : '') +
@@ -103,7 +138,7 @@
                   '<button class="btn btn-ghost btn-sm lr-btn-lectura" data-accion="dejar" type="button" title="Sacarlo de Leyendo sin terminarlo">Dejar</button>'
                 : '<button class="btn btn-secondary btn-sm lr-btn-lectura" data-accion="empezar" type="button" title="Aparecerá en Leyendo, con marcapáginas">' + icono('libro-abierto') + ' Empezar a leer</button>' +
                   '<button class="btn btn-ghost btn-sm lr-btn-leido" data-leido="1" type="button" title="Ya lo leí: cuenta en tus estadísticas">' + icono('check') + ' Ya leído</button>')) +
-          (!d.devuelto ? '<button class="btn btn-secondary btn-sm lr-btn-devolver" type="button">' + icono('check') + ' Devuelto</button>' : '') +
+          (!esEbook() && !d.devuelto ? '<button class="btn btn-secondary btn-sm lr-btn-devolver" type="button">' + icono('check') + ' Devuelto</button>' : '') +
           '<button class="btn btn-ghost btn-sm lr-btn-eliminar" type="button" aria-label="Eliminar">' + icono('cerrar') + '</button>' +
         '</div>' +
       '</div>';
@@ -119,7 +154,8 @@
     var msg       = document.getElementById('lr-msg');
  
     if (!titulo) { if (msg) msg.textContent = 'El título es obligatorio.'; return; }
-    if (!prestador) { if (msg) msg.textContent = 'Indica quién te lo prestó.'; return; }
+    if (!esEbook() && !prestador) { if (msg) msg.textContent = 'Indica quién te lo prestó.'; return; }
+    var formato   = document.getElementById('lr-formato')?.value || '';
  
     var btn = document.getElementById('lr-btn-guardar');
     if (btn) btn.disabled = true;
@@ -128,14 +164,16 @@
     try {
       var res = await apiFetch('/api/libros-recibidos', {
         method: 'POST',
-        body: { titulo: titulo, autores: autores, prestador: prestador,
-                fecha_devolver: fechaDev || null, notas: notas }
+        body: esEbook()
+          ? { titulo: titulo, autores: autores, notas: notas, electronico: true, formato: formato || null }
+          : { titulo: titulo, autores: autores, prestador: prestador,
+              fecha_devolver: fechaDev || null, notas: notas }
       });
       var data = await res.json();
       if (!res.ok) throw new Error(data.error);
  
       // Limpiar formulario
-      ['lr-titulo','lr-autores','lr-prestador','lr-fecha-devolver','lr-notas']
+      ['lr-titulo','lr-autores','lr-prestador','lr-fecha-devolver','lr-notas','lr-formato']
         .forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
       if (msg) msg.textContent = '✓ Registrado';
       setTimeout(function() { if (msg) msg.textContent = ''; }, 2000);
@@ -198,7 +236,8 @@
   }
  
   document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('btn-open-libros-recibidos')?.addEventListener('click', abrir);
+    document.getElementById('btn-open-libros-recibidos')?.addEventListener('click', function () { abrir('prestados'); });
+    document.getElementById('btn-open-libros-electronicos')?.addEventListener('click', function () { abrir('electronicos'); });
     document.getElementById('lr-cerrar')?.addEventListener('click', cerrar);
     document.getElementById('lr-overlay')?.addEventListener('click', function(e) {
       if (e.target.id === 'lr-overlay') cerrar();

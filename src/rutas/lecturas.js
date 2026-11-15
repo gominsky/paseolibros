@@ -111,7 +111,7 @@ router.get('/usuarios/:id/lecturas/estadisticas/:anio', soloPropio('id'), async 
 
     // Libros prestados por otros: empezados y/o terminados ese año
     const { rows: prestados } = await pool.query(
-      `SELECT id, titulo, autores, prestador, leido, fecha_leido,
+      `SELECT id, titulo, autores, prestador, electronico, leido, fecha_leido,
               COALESCE(fecha_inicio_lectura, fecha_leido) AS inicio
        FROM libros_recibidos
        WHERE usuario_id = $1
@@ -123,7 +123,8 @@ router.get('/usuarios/:id/lecturas/estadisticas/:anio', soloPropio('id'), async 
     );
     const base = (p) => ({
       id: `r${p.id}`, libro_id: null, ejemplar_id: null,
-      titulo: p.titulo, autores: p.autores, prestado_por: p.prestador,
+      titulo: p.titulo, autores: p.autores,
+      prestado_por: p.electronico ? null : p.prestador, electronico: p.electronico,
     });
     const prestEmpezados = prestados
       .filter(p => p.inicio && new Date(p.inicio).getFullYear() === anio)
@@ -292,7 +293,7 @@ router.get('/usuarios/:usuarioId/lecturas-abiertas', soloPropio('usuarioId'), as
 
     // Libros que me han prestado y estoy leyendo
     const prestados = await pool.query(
-      `SELECT id AS recibido_id, titulo, autores, prestador,
+      `SELECT id AS recibido_id, titulo, autores, prestador, electronico, formato,
               fecha_inicio_lectura AS inicio, pagina_actual
        FROM libros_recibidos
        WHERE usuario_id = $1 AND leyendo = TRUE`,

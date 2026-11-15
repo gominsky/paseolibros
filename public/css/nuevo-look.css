@@ -622,3 +622,6 @@ body.theme-rose textarea { background: #fff; border-color: var(--border-2); }
   .deseo-item--portada .deseo-actions { grid-column: 2; justify-content: flex-start; }
 }
 .deseo-buscar[hidden], .deseo-sep[hidden] { display: none; }
+
+/* Ventana de prestados / electrónicos: campos que solo se ven en un modo */
+#lr-overlay .lr-solo-prestados[hidden], #lr-overlay .lr-solo-ebook[hidden] { display: none !important; }

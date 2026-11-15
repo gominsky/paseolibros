@@ -196,7 +196,7 @@
       return items.map(l => {
         const fecha = l[campo] ? new Date(l[campo]).toLocaleDateString('es-ES', { day:'numeric', month:'short' }) : '—';
         return `<div class="stats-detalle-item">
-          <span class="stats-detalle-titulo">${esc(l.titulo || 'Sin título')}${l.prestado_por ? ` <span class="stats-prestado" title="Libro prestado">prestado por ${esc(l.prestado_por)}</span>` : ''}</span>
+          <span class="stats-detalle-titulo">${esc(l.titulo || 'Sin título')}${l.prestado_por ? ` <span class="stats-prestado" title="Libro prestado">prestado por ${esc(l.prestado_por)}</span>` : ''}${l.electronico ? ' <span class="stats-prestado" title="Libro electrónico">electrónico</span>' : ''}</span>
           <span class="stats-detalle-autor">${esc(l.autores || '')}</span>
           <span class="stats-detalle-fecha">${fecha}</span>
         </div>`;

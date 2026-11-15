@@ -334,12 +334,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const tr = e.target.closest('tr');
     if (!tr) return;
  
-    // Libro que me han prestado: marcapáginas propio + «Lo he terminado»
+    // Libro prestado o electrónico: marcapáginas propio + «Lo he terminado»
     if (tr.dataset.recibidoId) {
       const id = Number(tr.dataset.recibidoId);
       abrirUIMarcapagina({
         paginaInicial: tr.dataset.paginaActual ? Number(tr.dataset.paginaActual) : null,
-        subtitulo: `${tr.dataset.titulo} · prestado por ${tr.dataset.prestador}`,
+        subtitulo: `${tr.dataset.titulo} · ${tr.dataset.etiqueta}`,
         onSave: async (pagina) => {
           const res = await fetch(`${API_BASE}/api/libros-recibidos/${id}/pagina`, {
             method: 'PATCH', headers: getHeaders(true), body: JSON.stringify({ pagina_actual: pagina }),

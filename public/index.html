@@ -46,6 +46,7 @@
     <symbol id="i-cerrar" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
     <symbol id="i-volver" viewBox="0 0 24 24"><path d="M9 14L4.5 9.5 9 5"/><path d="M4.5 9.5H14a5.5 5.5 0 010 11h-3"/></symbol>
     <symbol id="i-editar" viewBox="0 0 24 24"><path d="M15.5 5.5l3 3L9 18H6v-3z"/><path d="M13.5 7.5l3 3"/></symbol>
+    <symbol id="i-ebook" viewBox="0 0 24 24"><rect x="5.5" y="3" width="13" height="18" rx="2"/><path d="M9 7h6M9 10.5h6M9 14h3.5"/><path d="M11 18h2"/></symbol>
     <symbol id="i-ayuda" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.5a2.5 2.5 0 014.8.8c0 1.7-2.4 2.2-2.4 3.7"/><path d="M12 17v.1"/></symbol>
   </defs>
 </svg>
@@ -94,6 +95,7 @@
 <button id="btn-open-biblioteca-compartida" class="tools-item" type="button">Bibliotecas compartidas</button>
 <div class="tools-sep" aria-hidden="true"></div>
 <button id="btn-open-libros-recibidos" class="tools-item" type="button">Libros que me han prestado</button>
+<button id="btn-open-libros-electronicos" class="tools-item" type="button">Libros electrónicos</button>
 
 <div class="tools-sep" aria-hidden="true"></div>
         <!-- Logout aquí (mantenemos el ID para tu JS) -->
@@ -1182,6 +1184,7 @@
             <li><strong><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg> Terminado</strong> / <strong>Ya leído</strong>: cuenta en tus estadísticas de lectura. Toca la fecha de la etiqueta «Leído» para cambiarla.</li>
             <li><strong><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg> Devuelto</strong>: cuando se lo devuelvas a su dueño.</li>
           </ul>
+          <p>Menú <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-engranaje"/></svg> → <strong>Libros electrónicos</strong>: tus ebooks y audiolibros, aparte de la biblioteca de papel. Funcionan igual que los prestados (<strong>Empezar a leer</strong>, marcapáginas en Leyendo, <strong>Terminado</strong> y estadísticas) pero sin préstamo ni devolución. Pestañas: <strong>Por leer y leyendo</strong> y <strong>Leídos</strong>.</p>
         </div>
       </div>
 
@@ -1261,11 +1264,11 @@
   </script>
 
 <!-- ── Modal: Libros que me han prestado ─────────────── -->
-<div id="lr-overlay" class="deseos-overlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Libros que me han prestado">
+<div id="lr-overlay" class="deseos-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="lr-titulo-dialogo">
   <div class="deseos-dialog lr-dialog">
 
     <div class="deseos-header">
-      <h3><svg class="ico ico-titulo" aria-hidden="true" focusable="false"><use href="#i-libros"/></svg> Libros que me han prestado</h3>
+      <h3 id="lr-titulo-dialogo"><svg class="ico ico-titulo" aria-hidden="true" focusable="false"><use id="lr-titulo-icono" href="#i-libros"/></svg> <span id="lr-titulo-texto">Libros que me han prestado</span></h3>
       <button id="lr-cerrar" class="icon-btn" type="button" aria-label="Cerrar">
         <span class="icon-circle"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-cerrar"/></svg></span>
       </button>
@@ -1283,7 +1286,7 @@
           <input id="lr-autores" type="text" placeholder="Autor" />
         </div>
       </div>
-      <div class="lr-form-row">
+      <div class="lr-form-row lr-solo-prestados">
         <div class="form-group" style="flex:1;">
           <label for="lr-prestador">Me lo presta *</label>
           <input id="lr-prestador" type="text" placeholder="Nombre de quien me lo prestó" />
@@ -1291,6 +1294,19 @@
         <div class="form-group" style="flex:1;">
           <label for="lr-fecha-devolver">Devolver antes del</label>
           <input id="lr-fecha-devolver" type="date" />
+        </div>
+      </div>
+      <div class="lr-form-row lr-solo-ebook" hidden>
+        <div class="form-group" style="flex:1;">
+          <label for="lr-formato">Formato</label>
+          <select id="lr-formato">
+            <option value="">—</option>
+            <option value="ePub">ePub</option>
+            <option value="PDF">PDF</option>
+            <option value="Kindle">Kindle</option>
+            <option value="Audiolibro">Audiolibro</option>
+            <option value="Otro">Otro</option>
+          </select>
         </div>
       </div>
       <div class="form-group">
@@ -1305,8 +1321,8 @@
 
     <!-- Lista -->
     <div class="lr-tabs">
-      <button class="lr-tab is-active" data-lr-tab="pendientes">Pendientes de devolver</button>
-      <button class="lr-tab" data-lr-tab="devueltos">Devueltos</button>
+      <button class="lr-tab is-active" data-lr-tab="pendientes" type="button">Pendientes de devolver</button>
+      <button class="lr-tab" data-lr-tab="devueltos" type="button">Devueltos</button>
     </div>
 
     <p id="lr-info" class="muted" style="padding: 6px 16px; font-size:.85rem;">Cargando…</p>

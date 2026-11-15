@@ -275,3 +275,14 @@ Ahora:
   cada alta fallaba con «llave duplicada»). Solo los adelanta.
 - La fecha de recepción se guarda como hoy si no se indica (antes quedaba vacía).
 - Si vuelve a fallar, el mensaje en pantalla incluye el motivo exacto de la base de datos.
+
+## Libros electrónicos — 15/11
+
+- Menú → «Libros electrónicos»: ebooks y audiolibros, aparte de la biblioteca de papel.
+  Misma ventana que «Libros que me han prestado» pero sin prestador ni devolución; con formato
+  (ePub, PDF, Kindle, Audiolibro, Otro). Pestañas «Por leer y leyendo» / «Leídos».
+- Empezar a leer → aparecen en Leyendo con la etiqueta «libro electrónico»; marcapáginas,
+  «Lo he terminado» y estadísticas igual que los prestados.
+- BD: `db/add6.sql` (automática): columnas `electronico` y `formato` en `libros_recibidos`,
+  `prestador` deja de ser obligatorio. API: `GET /api/libros-recibidos?electronico=1`,
+  `POST` con `electronico: true`.

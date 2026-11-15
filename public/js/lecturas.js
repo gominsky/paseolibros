@@ -497,7 +497,10 @@ async function cargarLecturasAbiertas() {
         // Libro que me han prestado y estoy leyendo
         tr.dataset.recibidoId = l.recibido_id;
         tr.dataset.titulo = l.titulo || '';
-        tr.dataset.prestador = l.prestador || '';
+        // Etiqueta: «prestado por X» o «libro electrónico»
+        tr.dataset.etiqueta = l.electronico
+          ? (l.formato ? `libro electrónico · ${l.formato}` : 'libro electrónico')
+          : `prestado por ${l.prestador || ''}`;
       } else {
         tr.dataset.libroId = l.libro_id;
         if (l.ejemplar_id) tr.dataset.ejemplarId = l.ejemplar_id;
@@ -506,7 +509,7 @@ async function cargarLecturasAbiertas() {
       tr.dataset.paginaActual = (l.pagina_actual ?? ''); //  para prellenar modal
       const fecha = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : '—';
       tr.innerHTML = `
-  <td>${escapeHtml(l.titulo || 'Sin título')}${l.prestado ? ` <span class="stats-prestado">prestado por ${escapeHtml(l.prestador || '')}</span>` : ''}</td>
+  <td>${escapeHtml(l.titulo || 'Sin título')}${l.prestado ? ` <span class="stats-prestado">${escapeHtml(tr.dataset.etiqueta)}</span>` : ''}</td>
   <td class="cell-pagina">${l.pagina_actual ?? '—'}</td>
   <td>${fecha}</td>
 `;
