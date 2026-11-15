@@ -40,7 +40,7 @@ router.post('/libros-recibidos', requireAuth, async (req, res) => {
     const { rows } = await pool.query(
       `INSERT INTO libros_recibidos
          (usuario_id, titulo, autores, prestador, fecha_recibido, fecha_devolver, notas)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       VALUES ($1, $2, $3, $4, COALESCE($5::date, CURRENT_DATE), $6, $7)
        RETURNING *`,
       [
         req.usuario.id,
@@ -54,8 +54,9 @@ router.post('/libros-recibidos', requireAuth, async (req, res) => {
     );
     res.status(201).json(rows[0]);
   } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: 'Error registrando libro recibido' });
+    console.error('[libros-recibidos] Error al registrar:', e.code, e.message);
+    // Se muestra el motivo para poder diagnosticarlo desde la propia app
+    res.status(500).json({ error: `Error registrando libro recibido (${e.code || 'sin código'}): ${e.message}` });
   }
 });
 

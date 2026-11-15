@@ -267,3 +267,11 @@ Ahora:
 - Editar cualquier deseo (título o lápiz) con el mismo formulario.
 - API: `PATCH /api/deseos/:id` solo cambia los campos enviados (texto vacío = borrar);
   `order=prioridad` en el listado.
+
+## Error al registrar libros prestados — 15/11
+
+- `db/add5.sql` (automática al arrancar): completa/repara la tabla `libros_recibidos` y pone al día
+  los contadores de id de todas las tablas (si se quedaron por detrás tras restaurar una copia,
+  cada alta fallaba con «llave duplicada»). Solo los adelanta.
+- La fecha de recepción se guarda como hoy si no se indica (antes quedaba vacía).
+- Si vuelve a fallar, el mensaje en pantalla incluye el motivo exacto de la base de datos.
