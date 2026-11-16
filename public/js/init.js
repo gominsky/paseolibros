@@ -374,6 +374,14 @@ document.addEventListener('DOMContentLoaded', () => {
           cargarLecturasAbiertas();
           window.refrescarEstadisticas?.();
         },
+        onPause: async () => {
+          try { await cambiarLecturaRecibido(id, 'posponer'); trasCambioLectura(`En pausa: ${tr.dataset.titulo}`); }
+          catch (err) { setUserStatusErr(err.message); }
+        },
+        onAbandon: async () => {
+          try { await cambiarLecturaRecibido(id, 'dejar'); trasCambioLectura(`Abandonada: ${tr.dataset.titulo}`); }
+          catch (err) { setUserStatusErr(err.message); }
+        },
       });
       return;
     }
@@ -393,9 +401,26 @@ document.addEventListener('DOMContentLoaded', () => {
   
     const paginaInicial = tr.dataset.paginaActual ? Number(tr.dataset.paginaActual) : null;
   
+    const tituloLectura = tr.querySelector('.lect-titulo')?.textContent || '';
     abrirUIMarcapagina({
       lecturaId,
       paginaInicial,
+      subtitulo: tituloLectura,
+      onFinish: async () => {
+        const res = await fetch(`${API_BASE}/api/lecturas/${lecturaId}/finalizar`, {
+          method: 'PATCH', headers: getHeaders(true), body: JSON.stringify({}),
+        });
+        if (!res.ok) return setUserStatusErr('No se pudo terminar la lectura.');
+        trasCambioLectura(`Terminado: ${tituloLectura}`);
+      },
+      onPause: async () => {
+        try { await cambiarEstadoLectura(lecturaId, 'pospuesto'); trasCambioLectura(`En pausa: ${tituloLectura}`); }
+        catch (err) { setUserStatusErr(err.message); }
+      },
+      onAbandon: async () => {
+        try { await cambiarEstadoLectura(lecturaId, 'abandonado'); trasCambioLectura(`Abandonada: ${tituloLectura}`); }
+        catch (err) { setUserStatusErr(err.message); }
+      },
       onSave: async (pagina) => {
         await actualizarPaginaLectura(lecturaId, pagina);
  

@@ -292,3 +292,14 @@ Ahora:
 - La fecha de inicio ya no se parte en dos líneas (formato corto 10/11/26, sin cortes). Igual en préstamos.
 - La fila ya no es un único enlace: el título abre la ficha del libro (los prestados/electrónicos
   abren su lista) y el botón de página con el marcapáginas abre el marcapáginas.
+
+## Posponer o abandonar lecturas — 16/11
+
+- Marcapáginas (desde Leyendo): «Lo he terminado» (ahora también para tus libros), «Posponer» y «Abandonar».
+- Posponer: sale de Leyendo y pasa a «En pausa» (debajo), conservando la página; desde ahí «Retomar» o abandonar.
+  Si empiezas a leer desde la ficha un libro que tenías en pausa, se retoma (no se duplica).
+- Abandonar: queda en el historial de la ficha como «abandonada»; cuenta como empezada, no como terminada.
+- Prestados y electrónicos: botones «Posponer» / «Retomar» / «Dejar» en su lista.
+- BD `db/add7.sql` (automática): `lecturas.fecha_estado`; `libros_recibidos.pospuesto` y `fecha_pospuesto`.
+- API: `PATCH /api/lecturas/:id/estado`, `GET /api/usuarios/:id/lecturas-en-pausa`,
+  `POST /api/libros-recibidos/:id/lectura` con `accion: 'posponer'`.

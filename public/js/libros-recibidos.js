@@ -110,6 +110,8 @@
       var fechaLeidoISO = d.fecha_leido ? String(d.fecha_leido).slice(0, 10) : '';
       var leidoHtml = d.leyendo
         ? '<span class="deseo-pill deseo-pill--leido">' + icono('libro-abierto') + ' Leyendo' + (d.pagina_actual ? ' · pág. ' + d.pagina_actual : '') + '</span>'
+        : d.pospuesto
+        ? '<span class="deseo-pill">' + icono('pausa') + ' En pausa' + (d.pagina_actual ? ' · pág. ' + d.pagina_actual : '') + '</span>'
         : d.leido
         ? '<label class="deseo-pill deseo-pill--leido" title="Cambiar la fecha en que lo terminaste">' + icono('check') + ' Leído ' +
             '<input type="date" class="lr-fecha-leido" value="' + fechaLeidoISO + '" max="' + new Date().toISOString().slice(0, 10) + '" aria-label="Fecha en que lo terminaste">' +
@@ -135,7 +137,11 @@
             ? '<button class="btn btn-ghost btn-sm lr-btn-leido" data-leido="0" type="button" title="Quitar de las estadísticas">No leído</button>'
             : (d.leyendo
                 ? '<button class="btn btn-secondary btn-sm lr-btn-leido" data-leido="1" type="button" title="Lo he terminado: cuenta en tus estadísticas">' + icono('check') + ' Terminado</button>' +
-                  '<button class="btn btn-ghost btn-sm lr-btn-lectura" data-accion="dejar" type="button" title="Sacarlo de Leyendo sin terminarlo">Dejar</button>'
+                  '<button class="btn btn-ghost btn-sm lr-btn-lectura" data-accion="posponer" type="button" title="Dejarlo para más adelante, conservando la página">' + icono('pausa') + ' Posponer</button>' +
+                  '<button class="btn btn-ghost btn-sm lr-btn-lectura" data-accion="dejar" type="button" title="Abandonarlo sin terminarlo">Dejar</button>'
+                : d.pospuesto
+                ? '<button class="btn btn-secondary btn-sm lr-btn-lectura" data-accion="empezar" type="button" title="Vuelve a Leyendo por la misma página">' + icono('libro-abierto') + ' Retomar</button>' +
+                  '<button class="btn btn-ghost btn-sm lr-btn-lectura" data-accion="dejar" type="button" title="Abandonarlo sin terminarlo">Dejar</button>'
                 : '<button class="btn btn-secondary btn-sm lr-btn-lectura" data-accion="empezar" type="button" title="Aparecerá en Leyendo, con marcapáginas">' + icono('libro-abierto') + ' Empezar a leer</button>' +
                   '<button class="btn btn-ghost btn-sm lr-btn-leido" data-leido="1" type="button" title="Ya lo leí: cuenta en tus estadísticas">' + icono('check') + ' Ya leído</button>')) +
           (!esEbook() && !d.devuelto ? '<button class="btn btn-secondary btn-sm lr-btn-devolver" type="button">' + icono('check') + ' Devuelto</button>' : '') +
@@ -208,6 +214,7 @@
       if (window.cargarLecturasAbiertas) window.cargarLecturasAbiertas();
       if (window.refrescarEstadisticas) window.refrescarEstadisticas();
       if (accion === 'empezar' && window.setUserStatusOk) window.setUserStatusOk('Lo tienes en Leyendo: tócalo allí para apuntar la página.');
+      if (accion === 'posponer' && window.setUserStatusOk) window.setUserStatusOk('En pausa: lo verás en Leyendo → En pausa para retomarlo.');
     } catch (e) { alert('Error: ' + e.message); }
   }
  
@@ -262,7 +269,10 @@
       var id = item.dataset.id;
       var btnLeido = e.target.closest('.lr-btn-leido');
       var btnLect = e.target.closest('.lr-btn-lectura');
-      if (btnLect) cambiarLectura(id, btnLect.dataset.accion);
+      if (btnLect) {
+        if (btnLect.dataset.accion === 'dejar' && !confirm('¿Abandonar esta lectura? Se olvida la página por la que ibas.')) return;
+        cambiarLectura(id, btnLect.dataset.accion);
+      }
       else if (btnLeido) marcarLeido(id, btnLeido.dataset.leido === '1');
       else if (e.target.closest('.lr-btn-devolver')) marcarDevuelto(id);
       else if (e.target.closest('.lr-btn-eliminar')) eliminar(id);

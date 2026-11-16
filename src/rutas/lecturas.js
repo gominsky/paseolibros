@@ -47,7 +47,7 @@ router.get('/usuarios/:id/lecturas/estadisticas', soloPropio('id'), async (req, 
           0        AS terminadas
         FROM libros_recibidos
         WHERE usuario_id = $1
-          AND (leyendo = TRUE OR leido = TRUE)
+          AND (leyendo = TRUE OR leido = TRUE OR pospuesto = TRUE)
           AND COALESCE(fecha_inicio_lectura, fecha_leido) IS NOT NULL
         GROUP BY anio
 
@@ -115,7 +115,7 @@ router.get('/usuarios/:id/lecturas/estadisticas/:anio', soloPropio('id'), async 
               COALESCE(fecha_inicio_lectura, fecha_leido) AS inicio
        FROM libros_recibidos
        WHERE usuario_id = $1
-         AND (leyendo = TRUE OR leido = TRUE)
+         AND (leyendo = TRUE OR leido = TRUE OR pospuesto = TRUE)
          AND (EXTRACT(YEAR FROM COALESCE(fecha_inicio_lectura, fecha_leido))::int = $2
               OR (leido = TRUE AND EXTRACT(YEAR FROM fecha_leido)::int = $2))
        ORDER BY COALESCE(fecha_leido, fecha_inicio_lectura) DESC, titulo`,
@@ -183,6 +183,7 @@ router.get('/libros/:libroId/lecturas', requiereUsuario, async (req, res) => {
          le.estado,
          le.inicio,
          le.fin,
+         le.fecha_estado,
          le.pagina_actual,
          le.valoracion,
          le.notas
@@ -212,6 +213,17 @@ router.post('/lecturas', requiereUsuario, async (req, res) => {
   }
 
   try {
+    // Si este libro tiene una lectura mía en pausa, se retoma (conserva la página)
+    const retomada = await pool.query(
+      `UPDATE lecturas SET estado = 'leyendo', fecha_estado = NULL
+       WHERE id = (SELECT id FROM lecturas
+                   WHERE usuario_id = $1 AND libro_id = $2 AND estado = 'pospuesto'
+                   ORDER BY inicio DESC LIMIT 1)
+       RETURNING *`,
+      [usuario_id, libro_id]
+    );
+    if (retomada.rows.length) return res.status(200).json({ ...retomada.rows[0], retomada: true });
+
     const resultado = await pool.query(
       `INSERT INTO lecturas (
          usuario_id, libro_id, ejemplar_id, estado, pagina_actual, notas
@@ -286,7 +298,7 @@ router.get('/usuarios/:usuarioId/lecturas-abiertas', soloPropio('usuarioId'), as
        FROM lecturas le
        JOIN libros l ON l.id = le.libro_id
        WHERE le.usuario_id = $1
-         AND (le.estado IS NULL OR le.estado <> 'terminado')
+         AND (le.estado IS NULL OR le.estado = 'leyendo')
        ORDER BY le.inicio DESC`,
       [usuarioId]
     );
@@ -310,6 +322,59 @@ router.get('/usuarios/:usuarioId/lecturas-abiertas', soloPropio('usuarioId'), as
     res.status(500).json({ error: 'Error obteniendo lecturas abiertas del usuario' });
   }
 });
+// Posponer, abandonar o retomar una lectura de mis libros:
+// PATCH /api/lecturas/:id/estado  { estado: 'pospuesto' | 'abandonado' | 'leyendo' }
+router.patch('/lecturas/:id/estado', requiereUsuario, async (req, res) => {
+  const estado = req.body?.estado;
+  if (!['pospuesto', 'abandonado', 'leyendo'].includes(estado)) {
+    return res.status(400).json({ error: "estado debe ser 'pospuesto', 'abandonado' o 'leyendo'" });
+  }
+  try {
+    const { rows } = await pool.query(
+      `UPDATE lecturas
+       SET estado = $1::varchar,
+           fecha_estado = CASE WHEN $1::varchar = 'leyendo' THEN NULL ELSE NOW() END
+       WHERE id = $2 AND usuario_id = $3 AND estado <> 'terminado'
+       RETURNING *`,
+      [estado, req.params.id, req.usuario.id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Lectura no encontrada o ya terminada' });
+    res.json(rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error cambiando el estado de la lectura' });
+  }
+});
+
+// Lecturas en pausa (mis libros + prestados/electrónicos pospuestos)
+router.get('/usuarios/:usuarioId/lecturas-en-pausa', soloPropio('usuarioId'), async (req, res) => {
+  const { usuarioId } = req.params;
+  try {
+    const propias = await pool.query(
+      `SELECT le.id, le.libro_id, le.ejemplar_id, le.inicio, le.pagina_actual,
+              le.fecha_estado AS pausada, l.titulo, l.autores
+       FROM lecturas le
+       JOIN libros l ON l.id = le.libro_id
+       WHERE le.usuario_id = $1 AND le.estado = 'pospuesto'`,
+      [usuarioId]
+    );
+    const recibidos = await pool.query(
+      `SELECT id AS recibido_id, titulo, autores, prestador, electronico, formato,
+              fecha_inicio_lectura AS inicio, pagina_actual, fecha_pospuesto AS pausada
+       FROM libros_recibidos
+       WHERE usuario_id = $1 AND pospuesto = TRUE`,
+      [usuarioId]
+    );
+    const todas = propias.rows
+      .concat(recibidos.rows.map(p => ({ ...p, id: null, libro_id: null, ejemplar_id: null, prestado: true })))
+      .sort((a, b) => new Date(b.pausada || 0) - new Date(a.pausada || 0));
+    res.json(todas);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error obteniendo lecturas en pausa' });
+  }
+});
+
 // Actualizar marca-páginas (pagina_actual):
 // PATCH /api/lecturas/:id/pagina
 router.patch('/lecturas/:id/pagina', requiereUsuario, async (req, res) => {

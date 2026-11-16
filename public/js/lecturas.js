@@ -35,9 +35,11 @@ const libro = (ejemplaresCache || [])
   .find(e => Number(e.libro_id) === Number(libroId));
  
 flashOk(
-  `Lectura iniciada${libro?.titulo ? ': ' + libro.titulo : ''}`
+  `${data.retomada ? 'Lectura retomada' : 'Lectura iniciada'}${libro?.titulo ? ': ' + libro.titulo : ''}`
 );
-    setUserStatusOk('Lectura iniciada.');
+    setUserStatusOk(data.retomada
+      ? `Lectura retomada${data.pagina_actual ? ` por la página ${data.pagina_actual}` : ''}.`
+      : 'Lectura iniciada.');
     await cargarLecturas(libroId);
     await refrescarHome();
   } catch (err) {
@@ -73,16 +75,20 @@ async function cargarLecturas(libroId) {
  
     // Formato "fila" dentro del <pre> (compacto + resalta activas)
     const lineas = lecturas.map((l) => {
-      const esActiva = l.estado !== 'terminado';
+      const esActiva = !l.estado || l.estado === 'leyendo';
       const mia = esActiva && usuarioActual && l.usuario_id === usuarioActual.id;
  
       const inicio = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : '—';
       const fin = l.fin ? new Date(l.fin).toLocaleDateString('es-ES') : '—';
       const pag = (l.pagina_actual ?? '—');
  
-      const badge = mia ? '▶' : (esActiva ? '•' : '✓'); // leyendo yo · en curso · terminada
+      const ETIQ = { leyendo: 'leyendo', terminado: 'terminada', pospuesto: 'en pausa', abandonado: 'abandonada' };
+      const MARCA = { pospuesto: '‖', abandonado: '×', terminado: '✓' };
+      const badge = mia ? '▶' : (MARCA[l.estado] || '•');
       const user = l.nombre_usuario || `Usuario ${l.usuario_id}`;
-      return `${badge} ${user} · ${l.estado || '—'} · pág ${pag} · ${inicio} → ${fin}`;
+      const finTxt = l.estado === 'terminado' ? fin
+        : (l.fecha_estado ? new Date(l.fecha_estado).toLocaleDateString('es-ES') : '—');
+      return `${badge} ${user} · ${ETIQ[l.estado] || l.estado || '—'} · pág ${pag} · ${inicio} → ${finTxt}`;
     });
  
     if (pre) pre.textContent = lineas.join('\n');
@@ -131,7 +137,7 @@ async function terminarLecturaActual() {
     }
  
     const lecturaActiva = Array.isArray(lecturas)
-      ? lecturas.find((l) => l.usuario_id === usuarioActual.id && l.estado !== 'terminado')
+      ? lecturas.find((l) => l.usuario_id === usuarioActual.id && (!l.estado || ['leyendo', 'pospuesto'].includes(l.estado)))
       : null;
  
     if (!lecturaActiva) {
@@ -464,6 +470,103 @@ async function manejarClickStatsToggle(e) {
 }
  
 // ---------- Resumen global lecturas / préstamos ----------
+// Cambiar el estado de una lectura de mis libros: 'pospuesto' | 'abandonado' | 'leyendo'
+async function cambiarEstadoLectura(lecturaId, estado) {
+  const res = await fetch(`${API_BASE}/api/lecturas/${lecturaId}/estado`, {
+    method: 'PATCH', headers: getHeaders(true), body: JSON.stringify({ estado }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'No se pudo cambiar la lectura');
+  return data;
+}
+
+// Libros prestados / electrónicos: empezar (retomar) · posponer · dejar
+async function cambiarLecturaRecibido(id, accion) {
+  const res = await fetch(`${API_BASE}/api/libros-recibidos/${id}/lectura`, {
+    method: 'POST', headers: getHeaders(true), body: JSON.stringify({ accion }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'No se pudo cambiar la lectura');
+  return data;
+}
+
+// Tras posponer/retomar/abandonar: refrescar Leyendo, En pausa y estadísticas
+async function trasCambioLectura(msg) {
+  if (msg) setUserStatusOk(msg);
+  await cargarLecturasAbiertas();
+  window.refrescarEstadisticas?.();
+  if (libroSeleccionadoId && document.getElementById('lecturas-detalle')) cargarLecturas(libroSeleccionadoId).catch(() => {});
+}
+
+// Lista «En pausa» bajo Lecturas en curso
+async function cargarLecturasEnPausa() {
+  const caja = document.getElementById('lecturas-pausa');
+  const ul = document.getElementById('lista-lecturas-pausa');
+  if (!caja || !ul || !usuarioActual) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/usuarios/${usuarioActual.id}/lecturas-en-pausa`, { headers: getHeaders(false) });
+    const lista = await res.json();
+    if (!res.ok || !Array.isArray(lista) || !lista.length) { caja.hidden = true; ul.innerHTML = ''; return; }
+    caja.hidden = false;
+    document.getElementById('lecturas-pausa-n').textContent = `(${lista.length})`;
+    ul.innerHTML = lista.map((l) => {
+      const etiqueta = l.prestado
+        ? (l.electronico ? 'libro electrónico' : `prestado por ${l.prestador || ''}`)
+        : '';
+      const meta = [l.pagina_actual ? `pág. ${l.pagina_actual}` : '', l.pausada ? `desde ${fechaCorta(l.pausada)}` : '']
+        .filter(Boolean).join(' · ');
+      const attrs = l.prestado
+        ? `data-recibido-id="${l.recibido_id}" data-ebook="${l.electronico ? 1 : 0}"`
+        : `data-lectura-id="${l.id}" data-libro-id="${l.libro_id}" data-ejemplar-id="${l.ejemplar_id || ''}"`;
+      return `
+        <li class="pausa-item" ${attrs} data-titulo="${escapeHtml(l.titulo || '')}">
+          <div class="pausa-info">
+            <button type="button" class="lect-titulo pausa-titulo">${escapeHtml(l.titulo || 'Sin título')}</button>
+            <div class="pausa-meta">${escapeHtml(meta)}${etiqueta ? ` <span class="stats-prestado">${escapeHtml(etiqueta)}</span>` : ''}</div>
+          </div>
+          <div class="pausa-acciones">
+            <button type="button" class="btn btn-secondary btn-sm pausa-retomar">${icono('libro-abierto')} Retomar</button>
+            <button type="button" class="btn btn-ghost btn-sm pausa-abandonar" title="Abandonar" aria-label="Abandonar">${icono('cerrar')}</button>
+          </div>
+        </li>`;
+    }).join('');
+  } catch (err) {
+    console.error(err);
+    caja.hidden = true;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('lista-lecturas-pausa')?.addEventListener('click', async (e) => {
+    const li = e.target.closest('.pausa-item');
+    if (!li) return;
+    const recibido = li.dataset.recibidoId ? Number(li.dataset.recibidoId) : null;
+    const titulo = li.dataset.titulo;
+    try {
+      if (e.target.closest('.pausa-titulo')) {
+        if (recibido) return window.abrirLibrosRecibidos?.(li.dataset.ebook === '1' ? 'electronicos' : 'prestados');
+        const libroId = Number(li.dataset.libroId);
+        const ejId = li.dataset.ejemplarId ? Number(li.dataset.ejemplarId) : resolverEjemplarIdDesdeCache(libroId);
+        if (libroId && ejId) mostrarFicha(libroId, ejId);
+        return;
+      }
+      if (e.target.closest('.pausa-retomar')) {
+        if (recibido) await cambiarLecturaRecibido(recibido, 'empezar');
+        else await cambiarEstadoLectura(Number(li.dataset.lecturaId), 'leyendo');
+        return trasCambioLectura(`Retomada: ${titulo}`);
+      }
+      if (e.target.closest('.pausa-abandonar')) {
+        if (!confirm(`¿Abandonar «${titulo}»? No contará como terminado.`)) return;
+        if (recibido) await cambiarLecturaRecibido(recibido, 'dejar');
+        else await cambiarEstadoLectura(Number(li.dataset.lecturaId), 'abandonado');
+        return trasCambioLectura(`Abandonada: ${titulo}`);
+      }
+    } catch (err) {
+      setUserStatusErr(err.message);
+    }
+  });
+});
+
 // Fecha compacta para tablas estrechas: 10/11/26
 function fechaCorta(f) {
   if (!f) return '—';
@@ -490,6 +593,7 @@ async function cargarLecturasAbiertas() {
       headers: getHeaders(false),
     });
     const lecturas = await res.json();
+    cargarLecturasEnPausa();
  
     if (!Array.isArray(lecturas) || lecturas.length === 0) {
       info.textContent = 'No tienes lecturas en curso.';
@@ -622,6 +726,10 @@ function crearUIMarcapagina() {
  
       <div class="mp-actions">
         <button class="btn btn-ghost" type="button" id="mp-finish" hidden>Lo he terminado</button>
+        <div class="mp-estado" id="mp-estado" hidden>
+          <button class="btn btn-ghost" type="button" id="mp-pause" title="Dejarlo para más adelante, conservando la página">${icono('pausa')} Posponer</button>
+          <button class="btn btn-ghost" type="button" id="mp-abandon" title="No lo vas a terminar">${icono('cerrar')} Abandonar</button>
+        </div>
         <button class="btn btn-ghost" type="button" id="mp-skip">Omitir</button>
         <button class="btn btn-secondary" type="button" id="mp-save">Guardar</button>
       </div>
@@ -695,10 +803,18 @@ function abrirUIMarcapagina(ctx) {
     cerrarUIMarcapagina('save', v);
   };
   document.getElementById('mp-skip').onclick = () => cerrarUIMarcapagina('skip');
-  // Opcional: terminar la lectura desde aquí (libros prestados) y subtítulo
+  // Opcional: terminar la lectura desde aquí y subtítulo
   const btnFin = document.getElementById('mp-finish');
   btnFin.hidden = typeof ctx?.onFinish !== 'function';
   btnFin.onclick = () => { const f = ctx.onFinish; cerrarUIMarcapagina('skip'); f(); };
+  // Opcional: posponer o abandonar
+  const est = document.getElementById('mp-estado');
+  est.hidden = typeof ctx?.onPause !== 'function' && typeof ctx?.onAbandon !== 'function';
+  document.getElementById('mp-pause').onclick = () => { const f = ctx.onPause; cerrarUIMarcapagina('skip'); f?.(); };
+  document.getElementById('mp-abandon').onclick = () => {
+    if (!confirm('¿Abandonar esta lectura? No contará como terminada.')) return;
+    const f = ctx.onAbandon; cerrarUIMarcapagina('skip'); f?.();
+  };
   const sub = document.getElementById('mp-sub');
   sub.hidden = !ctx?.subtitulo;
   sub.textContent = ctx?.subtitulo || '';

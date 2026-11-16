@@ -648,3 +648,25 @@ body.theme-rose textarea { background: #fff; border-color: var(--border-2); }
 }
 .lect-pagina:hover { background: var(--accent); color: #fff; }
 .lect-pagina .ico { width: 1em; height: 1em; }
+
+/* ---------- Marcapáginas: posponer / abandonar ---------- */
+.mp-actions .mp-estado { flex: 1 1 100%; order: 4; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mp-actions .mp-estado[hidden] { display: none; }
+.mp-estado .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+#mp-abandon { color: var(--ink-3); }
+
+/* ---------- Lecturas en pausa ---------- */
+.lecturas-pausa { margin-top: 18px; border-top: 1px dashed var(--border-2); padding-top: 12px; }
+.lecturas-pausa[hidden] { display: none; }
+.lecturas-pausa-titulo { display: flex; align-items: center; gap: 6px; font-size: .95rem; margin: 0 0 8px; color: var(--ink-2); }
+.lecturas-pausa-n { color: var(--ink-3); font-weight: 400; }
+.lecturas-pausa-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.pausa-item {
+  display: flex; align-items: center; gap: 10px; justify-content: space-between;
+  padding: 8px 10px; border-radius: var(--r-md); background: var(--surface-2); border: 1px solid var(--border);
+}
+.pausa-info { min-width: 0; }
+.pausa-meta { font-size: .78rem; color: var(--ink-3); margin-top: 2px; }
+.pausa-meta .stats-prestado { margin-left: 4px; }
+.pausa-acciones { display: flex; gap: 6px; flex-shrink: 0; }
+.pausa-acciones .btn { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }

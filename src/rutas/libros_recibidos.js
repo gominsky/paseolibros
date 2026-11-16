@@ -128,7 +128,8 @@ router.post('/libros-recibidos/:id/leido', requireAuth, async (req, res) => {
       `UPDATE libros_recibidos
        SET leido = $1,
            fecha_leido = CASE WHEN $1 THEN COALESCE($2::date, fecha_leido, CURRENT_DATE) ELSE NULL END,
-           leyendo = CASE WHEN $1 THEN FALSE ELSE leyendo END   -- terminarlo lo saca de «Leyendo»
+           leyendo = CASE WHEN $1 THEN FALSE ELSE leyendo END,  -- terminarlo lo saca de «Leyendo»
+           pospuesto = CASE WHEN $1 THEN FALSE ELSE pospuesto END
        WHERE id = $3 AND usuario_id = $4
        RETURNING *`,
       [leido, fecha, req.params.id, req.usuario.id]
@@ -144,22 +145,28 @@ router.post('/libros-recibidos/:id/leido', requireAuth, async (req, res) => {
 // ── POST /api/libros-recibidos/:id/lectura  { accion: 'empezar' | 'dejar' } ──
 // Empezar a leer un libro prestado (aparece en «Leyendo») o dejarlo sin terminar
 router.post('/libros-recibidos/:id/lectura', requireAuth, async (req, res) => {
+  // empezar (o retomar) · posponer (en pausa, conserva página) · dejar (abandonar y olvidar)
   const accion = req.body?.accion;
-  if (!['empezar', 'dejar'].includes(accion)) {
-    return res.status(400).json({ error: "accion debe ser 'empezar' o 'dejar'" });
+  const SQL = {
+    empezar: `UPDATE libros_recibidos
+              SET leyendo = TRUE, pospuesto = FALSE, fecha_pospuesto = NULL,
+                  leido = FALSE, fecha_leido = NULL,
+                  fecha_inicio_lectura = COALESCE(fecha_inicio_lectura, CURRENT_DATE)
+              WHERE id = $1 AND usuario_id = $2 RETURNING *`,
+    posponer: `UPDATE libros_recibidos
+               SET leyendo = FALSE, pospuesto = TRUE, fecha_pospuesto = CURRENT_DATE,
+                   fecha_inicio_lectura = COALESCE(fecha_inicio_lectura, CURRENT_DATE)
+               WHERE id = $1 AND usuario_id = $2 AND leido = FALSE RETURNING *`,
+    dejar: `UPDATE libros_recibidos
+            SET leyendo = FALSE, pospuesto = FALSE, fecha_pospuesto = NULL,
+                fecha_inicio_lectura = NULL, pagina_actual = NULL
+            WHERE id = $1 AND usuario_id = $2 RETURNING *`,
+  };
+  if (!SQL[accion]) {
+    return res.status(400).json({ error: "accion debe ser 'empezar', 'posponer' o 'dejar'" });
   }
   try {
-    const { rows } = await pool.query(
-      accion === 'empezar'
-        ? `UPDATE libros_recibidos
-           SET leyendo = TRUE, leido = FALSE, fecha_leido = NULL,
-               fecha_inicio_lectura = COALESCE(fecha_inicio_lectura, CURRENT_DATE)
-           WHERE id = $1 AND usuario_id = $2 RETURNING *`
-        : `UPDATE libros_recibidos
-           SET leyendo = FALSE, fecha_inicio_lectura = NULL, pagina_actual = NULL
-           WHERE id = $1 AND usuario_id = $2 RETURNING *`,
-      [req.params.id, req.usuario.id]
-    );
+    const { rows } = await pool.query(SQL[accion], [req.params.id, req.usuario.id]);
     if (!rows.length) return res.status(404).json({ error: 'Registro no encontrado' });
     res.json(rows[0]);
   } catch (e) {
