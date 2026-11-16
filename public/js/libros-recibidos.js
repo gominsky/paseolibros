@@ -235,6 +235,8 @@
     } catch (e) { alert('Error: ' + e.message); }
   }
  
+  window.abrirLibrosRecibidos = abrir;
+
   document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btn-open-libros-recibidos')?.addEventListener('click', function () { abrir('prestados'); });
     document.getElementById('btn-open-libros-electronicos')?.addEventListener('click', function () { abrir('electronicos'); });

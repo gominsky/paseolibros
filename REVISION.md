@@ -286,3 +286,9 @@ Ahora:
 - BD: `db/add6.sql` (automática): columnas `electronico` y `formato` en `libros_recibidos`,
   `prestador` deja de ser obligatorio. API: `GET /api/libros-recibidos?electronico=1`,
   `POST` con `electronico: true`.
+
+## Lecturas en curso en el móvil — 16/11
+
+- La fecha de inicio ya no se parte en dos líneas (formato corto 10/11/26, sin cortes). Igual en préstamos.
+- La fila ya no es un único enlace: el título abre la ficha del libro (los prestados/electrónicos
+  abren su lista) y el botón de página con el marcapáginas abre el marcapáginas.

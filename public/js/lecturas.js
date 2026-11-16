@@ -464,6 +464,13 @@ async function manejarClickStatsToggle(e) {
 }
  
 // ---------- Resumen global lecturas / préstamos ----------
+// Fecha compacta para tablas estrechas: 10/11/26
+function fechaCorta(f) {
+  if (!f) return '—';
+  const d = new Date(f);
+  return isNaN(d) ? '—' : d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' });
+}
+
 async function cargarLecturasAbiertas() {
   const info = document.getElementById('info-lecturas-abiertas');
   const tbody = document.querySelector('#tabla-lecturas-abiertas tbody');
@@ -492,7 +499,6 @@ async function cargarLecturasAbiertas() {
     info.textContent = `Lecturas en curso: ${lecturas.length}`;
     for (const l of lecturas) {
       const tr = document.createElement('tr');
-      tr.classList.add('row-link');
       if (l.prestado) {
         // Libro que me han prestado y estoy leyendo
         tr.dataset.recibidoId = l.recibido_id;
@@ -507,11 +513,19 @@ async function cargarLecturasAbiertas() {
         tr.dataset.lecturaId = l.id;                      //  ID de la lectura
       }
       tr.dataset.paginaActual = (l.pagina_actual ?? ''); //  para prellenar modal
-      const fecha = l.inicio ? new Date(l.inicio).toLocaleDateString('es-ES') : '—';
+      // Título → ficha del libro (o su ventana si es prestado/electrónico)
+      // Página → marcapáginas
       tr.innerHTML = `
-  <td>${escapeHtml(l.titulo || 'Sin título')}${l.prestado ? ` <span class="stats-prestado">${escapeHtml(tr.dataset.etiqueta)}</span>` : ''}</td>
-  <td class="cell-pagina">${l.pagina_actual ?? '—'}</td>
-  <td>${fecha}</td>
+  <td class="cell-libro">
+    <button type="button" class="lect-titulo" title="${l.prestado ? 'Ver en su lista' : 'Abrir la ficha del libro'}">${escapeHtml(l.titulo || 'Sin título')}</button>
+    ${l.prestado ? `<span class="stats-prestado">${escapeHtml(tr.dataset.etiqueta)}</span>` : ''}
+  </td>
+  <td class="cell-pagina-btn">
+    <button type="button" class="lect-pagina" title="Apuntar página (marcapáginas)" aria-label="Apuntar página de ${escapeHtml(l.titulo || '')}">
+      ${icono('marcador')}<span class="cell-pagina">${l.pagina_actual ?? '—'}</span>
+    </button>
+  </td>
+  <td class="cell-fecha">${fechaCorta(l.inicio)}</td>
 `;
       tbody.appendChild(tr);
     }
@@ -553,12 +567,12 @@ async function cargarPrestamosActivos() {
       if (p.ejemplar_id) tr.dataset.ejemplarId = p.ejemplar_id;
  
       const nombreReceptor = p.nombre_receptor_usuario || p.nombre_receptor || '—';
-      const fechaLimite = p.fecha_limite ? new Date(p.fecha_limite).toLocaleDateString('es-ES') : '—';
+      const fechaLimite = fechaCorta(p.fecha_limite);
  
       tr.innerHTML = `
-        <td>${p.titulo || 'Sin título'}</td>
-        <td>${nombreReceptor}</td>
-        <td>${fechaLimite}</td>
+        <td>${escapeHtml(p.titulo || 'Sin título')}</td>
+        <td>${escapeHtml(nombreReceptor)}</td>
+        <td class="cell-fecha">${fechaLimite}</td>
       `;
       tbody.appendChild(tr);
     }

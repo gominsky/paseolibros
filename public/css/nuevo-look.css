@@ -625,3 +625,26 @@ body.theme-rose textarea { background: #fff; border-color: var(--border-2); }
 
 /* Ventana de prestados / electrónicos: campos que solo se ven en un modo */
 #lr-overlay .lr-solo-prestados[hidden], #lr-overlay .lr-solo-ebook[hidden] { display: none !important; }
+
+/* ---------- Lecturas en curso: título → ficha, botón de página → marcapáginas ---------- */
+#tabla-lecturas-abiertas tbody tr { cursor: default; }
+#tabla-lecturas-abiertas .cell-libro { width: 100%; }
+.lect-titulo {
+  all: unset; cursor: pointer; font-weight: 600; line-height: 1.3; color: var(--ink);
+  text-decoration: underline; text-decoration-color: var(--border-2); text-underline-offset: 3px;
+}
+.lect-titulo:hover { color: var(--accent); text-decoration-color: currentColor; }
+.lect-titulo:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+#tabla-lecturas-abiertas .cell-libro .stats-prestado { display: inline-block; margin: 4px 0 0; }
+#tabla-lecturas-abiertas td.cell-pagina-btn,
+#tabla-lecturas-abiertas td.cell-fecha,
+#tabla-prestamos-activos td.cell-fecha { white-space: nowrap; word-break: normal; width: 1%; }
+#tabla-lecturas-abiertas td.cell-libro { word-break: normal; overflow-wrap: anywhere; }
+.lect-pagina {
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  padding: 5px 10px; border-radius: 999px; font: inherit; font-variant-numeric: tabular-nums;
+  background: var(--accent-soft); color: var(--accent); border: 1px solid var(--border-acc);
+  white-space: nowrap;
+}
+.lect-pagina:hover { background: var(--accent); color: #fff; }
+.lect-pagina .ico { width: 1em; height: 1em; }

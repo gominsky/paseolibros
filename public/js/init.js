@@ -330,9 +330,25 @@ document.addEventListener('DOMContentLoaded', () => {
   });
  
   // Click en lecturas/préstamos home => abrir ficha (resuelve ejemplar si falta)
+  // Lecturas en curso: el título abre la ficha; el botón de página, el marcapáginas
   document.querySelector('#tabla-lecturas-abiertas tbody')?.addEventListener('click', async (e) => {
     const tr = e.target.closest('tr');
     if (!tr) return;
+
+    if (e.target.closest('.lect-titulo')) {
+      if (tr.dataset.recibidoId) {
+        // Prestado o electrónico: no está en la biblioteca → abrir su lista
+        const ebook = (tr.dataset.etiqueta || '').startsWith('libro electrónico');
+        window.abrirLibrosRecibidos?.(ebook ? 'electronicos' : 'prestados');
+        return;
+      }
+      const libroId = Number(tr.dataset.libroId);
+      const ejId = tr.dataset.ejemplarId ? Number(tr.dataset.ejemplarId) : resolverEjemplarIdDesdeCache(libroId);
+      if (!libroId || !ejId) return setUserStatusErr('No encuentro ese libro en tu biblioteca.');
+      mostrarFicha(libroId, ejId);
+      return;
+    }
+    if (!e.target.closest('.lect-pagina')) return;
  
     // Libro prestado o electrónico: marcapáginas propio + «Lo he terminado»
     if (tr.dataset.recibidoId) {
