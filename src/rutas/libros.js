@@ -26,6 +26,74 @@ function portadaValida(url) {
   return /^https?:\/\/[^\s"'<>]+$/i.test(u) || /^\/uploads\/[\w.-]+$/.test(u);
 }
 
+// ---------- Valoración media de lectores ----------
+// Goodreads ya no tiene API pública (desde 2020). Se usa Open Library y, si no hay
+// datos, Google Books. Se guarda en la tabla libros durante 30 días.
+const DIAS_CACHE_VALORACION = 30;
+const conTimeout = () => ({ signal: AbortSignal.timeout(6000) });
+
+async function valoracionOpenLibrary(isbn) {
+  const r = await fetch(`https://openlibrary.org/isbn/${encodeURIComponent(isbn)}.json`, conTimeout());
+  if (!r.ok) return null;
+  const ed = await r.json();
+  const work = ed?.works?.[0]?.key;               // p. ej. /works/OL45804W
+  if (!work) return null;
+  const rr = await fetch(`https://openlibrary.org${work}/ratings.json`, conTimeout());
+  if (!rr.ok) return null;
+  const s = (await rr.json())?.summary;
+  if (!s?.count || !s?.average) return null;
+  return { media: Number(s.average), votos: Number(s.count), fuente: 'Open Library', url: `https://openlibrary.org${work}` };
+}
+
+async function valoracionGoogle(isbn) {
+  const r = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(isbn)}`, conTimeout());
+  if (!r.ok) return null;
+  const v = (await r.json())?.items?.find((i) => i.volumeInfo?.averageRating)?.volumeInfo;
+  if (!v?.averageRating) return null;
+  return { media: Number(v.averageRating), votos: Number(v.ratingsCount || 0), fuente: 'Google Books', url: v.infoLink || null };
+}
+
+// GET /api/libros/:id/valoracion → { media, votos, fuente, url, goodreads }
+router.get('/:id/valoracion', requiereUsuario, async (req, res) => {
+  const libroId = Number(req.params.id);
+  if (!libroId) return res.status(400).json({ error: 'ID de libro no válido' });
+  try {
+    if (!(await tieneEjemplar(libroId, req.usuario.id))) return res.status(404).json({ error: 'Libro no encontrado' });
+    const { rows } = await pool.query(
+      `SELECT isbn, titulo, autores, valoracion_media, valoracion_votos, valoracion_fuente, valoracion_url, valoracion_en
+       FROM libros WHERE id = $1`, [libroId]);
+    const l = rows[0];
+    if (!l) return res.status(404).json({ error: 'Libro no encontrado' });
+
+    // Enlace a Goodreads: búsqueda por ISBN (o por título y autor)
+    const q = l.isbn || [l.titulo, l.autores].filter(Boolean).join(' ');
+    const goodreads = q ? `https://www.goodreads.com/search?q=${encodeURIComponent(q)}` : null;
+
+    const fresca = l.valoracion_en && (Date.now() - new Date(l.valoracion_en)) < DIAS_CACHE_VALORACION * 864e5;
+    if (fresca || !l.isbn) {
+      return res.json({
+        media: l.valoracion_media != null ? Number(l.valoracion_media) : null,
+        votos: l.valoracion_votos, fuente: l.valoracion_fuente, url: l.valoracion_url, goodreads,
+      });
+    }
+
+    let v = null;
+    try { v = await valoracionOpenLibrary(l.isbn); } catch (e) { console.warn('Valoración Open Library:', e?.message); }
+    if (!v) { try { v = await valoracionGoogle(l.isbn); } catch (e) { console.warn('Valoración Google:', e?.message); } }
+
+    await pool.query(
+      `UPDATE libros SET valoracion_media = $1, valoracion_votos = $2, valoracion_fuente = $3,
+              valoracion_url = $4, valoracion_en = NOW()
+       WHERE id = $5`,
+      [v?.media ?? null, v?.votos ?? null, v?.fuente ?? null, v?.url ?? null, libroId]
+    );
+    res.json({ media: v?.media ?? null, votos: v?.votos ?? null, fuente: v?.fuente ?? null, url: v?.url ?? null, goodreads });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error obteniendo la valoración' });
+  }
+});
+
 // Obtener un libro por ID (solo si el usuario tiene algún ejemplar de ese libro)
 router.get('/:id', async (req, res) => {
   const libroId = Number(req.params.id);

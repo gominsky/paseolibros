@@ -1014,3 +1014,16 @@ ALTER TABLE public.lecturas ADD COLUMN IF NOT EXISTS fecha_estado TIMESTAMP;
 ALTER TABLE public.libros_recibidos
   ADD COLUMN IF NOT EXISTS pospuesto       BOOLEAN NOT NULL DEFAULT FALSE,
   ADD COLUMN IF NOT EXISTS fecha_pospuesto DATE;
+
+-- ===== add8.sql =====
+-- db/add8.sql — Valoración media de lectores (17/11/2026)
+-- Goodreads cerró su API en 2020: la nota se toma de Open Library (o Google Books)
+-- y se guarda aquí 30 días para no consultarla cada vez. Automática al arrancar.
+SET search_path = public;
+
+ALTER TABLE public.libros
+  ADD COLUMN IF NOT EXISTS valoracion_media  NUMERIC(3,2),
+  ADD COLUMN IF NOT EXISTS valoracion_votos  INTEGER,
+  ADD COLUMN IF NOT EXISTS valoracion_fuente TEXT,
+  ADD COLUMN IF NOT EXISTS valoracion_url    TEXT,
+  ADD COLUMN IF NOT EXISTS valoracion_en     TIMESTAMP;

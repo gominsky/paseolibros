@@ -10,7 +10,7 @@ import pool from './bd.js';
 const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'db');
 
 // Añade aquí los ficheros nuevos, en orden
-const MIGRACIONES = ['add3.sql', 'add4.sql', 'add5.sql', 'add6.sql', 'add7.sql'];
+const MIGRACIONES = ['add3.sql', 'add4.sql', 'add5.sql', 'add6.sql', 'add7.sql', 'add8.sql'];
 
 export async function aplicarMigraciones() {
   const cliente = await pool.connect();

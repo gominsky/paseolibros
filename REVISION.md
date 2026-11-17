@@ -314,3 +314,10 @@ Ahora:
 
 - Bajo Lecturas en curso ya no se lista cada lectura pospuesta: solo un enlace «En pausa (n) ›»
   que abre una ventana con la lista (Retomar / abandonar). Así la columna no crece.
+
+## Valoración de lectores y enlace a Goodreads en la ficha — 17/11
+
+- Goodreads cerró su API pública en 2020 (no da claves nuevas), así que su nota no se puede leer.
+- En la cabecera de la ficha: «★ 4,1 /5 · 231 votos» (media de lectores de Open Library; si no hay, Google Books)
+  y un enlace «Goodreads ↗» que abre la búsqueda del libro allí por ISBN.
+- La nota se guarda 30 días en `libros` (`db/add8.sql`, automática). API: `GET /api/libros/:id/valoracion`.

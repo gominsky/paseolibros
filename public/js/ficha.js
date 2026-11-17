@@ -95,6 +95,7 @@ const portada =
     document.getElementById('ficha-titulo').textContent = libro.titulo || 'Sin título';
     document.getElementById('ficha-autores').textContent = libro.autores || 'Autor desconocido';
     document.getElementById('ficha-isbn').textContent = libro.isbn || '—';
+    cargarValoracionFicha(libro.id);
  
     const creadoSpan = document.getElementById('ficha-creado-en');
     if (creadoSpan) {
@@ -413,4 +414,29 @@ async function crearEnlaceCompartir(tipo) {
  
   if (input) input.value = data.url || '';
   if (status) status.textContent = 'Enlace listo ✓';
+}
+
+
+// ---------- Valoración media de lectores (Open Library / Google Books) + enlace a Goodreads ----------
+let valoracionPeticion = 0;
+async function cargarValoracionFicha(libroId) {
+  const pill = document.getElementById('ficha-valoracion');
+  const gr = document.getElementById('ficha-goodreads');
+  if (!pill || !gr) return;
+  const id = ++valoracionPeticion;
+  pill.hidden = true; gr.hidden = true;
+  try {
+    const res = await fetch(`${API_BASE}/api/libros/${libroId}/valoracion`, { headers: getHeaders(false) });
+    const v = await res.json();
+    if (id !== valoracionPeticion || !res.ok) return;   // ya se abrió otra ficha
+    if (v.goodreads) { gr.href = v.goodreads; gr.hidden = false; }
+    if (v.media) {
+      const nota = Number(v.media).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      const votos = v.votos ? ` · ${Number(v.votos).toLocaleString('es-ES')} votos` : '';
+      pill.innerHTML = `${icono('estrella-llena')} <strong>${nota}</strong><span class="modal-meta-label">/5${votos}</span>`;
+      pill.title = `Valoración media de los lectores en ${v.fuente}`;
+      if (v.url) pill.href = v.url; else pill.removeAttribute('href');
+      pill.hidden = false;
+    }
+  } catch { /* sin conexión: no se muestra */ }
 }

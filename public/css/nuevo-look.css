@@ -720,3 +720,12 @@ body.theme-rose textarea { background: #fff; border-color: var(--border-2); }
   #card-prestamos td { word-break: normal; overflow-wrap: anywhere; }
   #card-lecturas th, #card-prestamos th { white-space: nowrap; }
 }
+
+/* Ficha: valoración media y enlace a Goodreads */
+a.modal-meta-pill { text-decoration: none; color: inherit; display: inline-flex; align-items: center; gap: 5px; }
+.modal-meta-pill[hidden] { display: none !important; }
+.modal-meta-pill--valoracion .ico { color: var(--gold); width: 1em; height: 1em; }
+.modal-meta-pill--valoracion strong { font-weight: 700; }
+.modal-meta-pill--enlace { color: var(--accent) !important; font-weight: 600; }
+.modal-meta-pill--enlace:hover, a.modal-meta-pill--valoracion[href]:hover { border-color: var(--border-acc); }
+.modal-meta-pill--enlace .ico { width: .95em; height: .95em; }
