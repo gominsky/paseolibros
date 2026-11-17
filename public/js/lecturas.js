@@ -506,7 +506,11 @@ async function cargarLecturasEnPausa() {
   try {
     const res = await fetch(`${API_BASE}/api/usuarios/${usuarioActual.id}/lecturas-en-pausa`, { headers: getHeaders(false) });
     const lista = await res.json();
-    if (!res.ok || !Array.isArray(lista) || !lista.length) { caja.hidden = true; ul.innerHTML = ''; return; }
+    if (!res.ok || !Array.isArray(lista) || !lista.length) {
+      caja.hidden = true; ul.innerHTML = '';
+      cerrarOverlay('pausa-overlay');
+      return;
+    }
     caja.hidden = false;
     document.getElementById('lecturas-pausa-n').textContent = `(${lista.length})`;
     ul.innerHTML = lista.map((l) => {
@@ -537,6 +541,13 @@ async function cargarLecturasEnPausa() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Enlace «En pausa (n)» → ventana con la lista
+  document.getElementById('btn-ver-pausa')?.addEventListener('click', () => abrirOverlay('pausa-overlay'));
+  document.getElementById('btn-cerrar-pausa')?.addEventListener('click', () => cerrarOverlay('pausa-overlay'));
+  document.getElementById('pausa-overlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'pausa-overlay') cerrarOverlay('pausa-overlay');
+  });
+
   document.getElementById('lista-lecturas-pausa')?.addEventListener('click', async (e) => {
     const li = e.target.closest('.pausa-item');
     if (!li) return;
@@ -544,6 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const titulo = li.dataset.titulo;
     try {
       if (e.target.closest('.pausa-titulo')) {
+        cerrarOverlay('pausa-overlay');
         if (recibido) return window.abrirLibrosRecibidos?.(li.dataset.ebook === '1' ? 'electronicos' : 'prestados');
         const libroId = Number(li.dataset.libroId);
         const ejId = li.dataset.ejemplarId ? Number(li.dataset.ejemplarId) : resolverEjemplarIdDesdeCache(libroId);

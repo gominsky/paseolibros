@@ -346,8 +346,10 @@
             </div>
             <!-- Lecturas pospuestas: se pueden retomar o abandonar -->
             <div id="lecturas-pausa" class="lecturas-pausa" hidden>
-              <h3 class="lecturas-pausa-titulo"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-pausa"/></svg> En pausa <span id="lecturas-pausa-n" class="lecturas-pausa-n"></span></h3>
-              <ul id="lista-lecturas-pausa" class="lecturas-pausa-lista"></ul>
+              <button type="button" id="btn-ver-pausa" class="link-pausa" title="Ver las lecturas pospuestas">
+                <svg class="ico" aria-hidden="true" focusable="false"><use href="#i-pausa"/></svg>
+                En pausa <span id="lecturas-pausa-n" class="lecturas-pausa-n"></span> <span aria-hidden="true">›</span>
+              </button>
             </div>
           </div>
           <!-- Modal Cola de lecturas -->
@@ -1156,7 +1158,7 @@
           <ol>
             <li>Abre la ficha del libro → pestaña <strong>Ejemplar</strong> → <strong>Iniciar lectura</strong>.</li>
             <li>La verás en <strong>Leyendo</strong>. Toca el botón de la <strong>página</strong> (<svg class="ico" aria-hidden="true" focusable="false"><use href="#i-marcador"/></svg>) para apuntar por dónde vas, o el <strong>título</strong> para abrir la ficha del libro.</li>
-            <li>¿Lo dejas por ahora? En el marcapáginas pulsa <strong>Posponer</strong>: pasa a <strong>En pausa</strong> (debajo de Leyendo) con su página, y desde ahí lo <strong>retomas</strong> cuando quieras. Si no lo vas a terminar, <strong>Abandonar</strong>: queda en el historial de la ficha, pero no cuenta como terminado.</li>
+            <li>¿Lo dejas por ahora? En el marcapáginas pulsa <strong>Posponer</strong>: pasa a <strong>En pausa</strong> (enlace debajo de Leyendo) con su página, y desde ahí lo <strong>retomas</strong> cuando quieras. Si no lo vas a terminar, <strong>Abandonar</strong>: queda en el historial de la ficha, pero no cuenta como terminado.</li>
             <li>Al acabarlo, en la ficha → <strong>Historial</strong> → <strong><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-check"/></svg> Terminar</strong>.</li>
           </ol>
         </div>
@@ -1272,6 +1274,19 @@
   </script>
 
 <!-- ── Modal: Libros que me han prestado ─────────────── -->
+<div id="pausa-overlay" class="deseos-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="pausa-titulo">
+  <div class="deseos-dialog pausa-dialog">
+    <div class="deseos-header">
+      <h3 id="pausa-titulo"><svg class="ico ico-titulo" aria-hidden="true" focusable="false"><use href="#i-pausa"/></svg> Lecturas en pausa</h3>
+      <button id="btn-cerrar-pausa" class="icon-btn" type="button" title="Cerrar" aria-label="Cerrar">
+        <span class="icon-circle"><svg class="ico" aria-hidden="true" focusable="false"><use href="#i-cerrar"/></svg></span>
+      </button>
+    </div>
+    <p class="muted pausa-ayuda">Retómalas por la misma página o abandónalas.</p>
+    <ul id="lista-lecturas-pausa" class="lecturas-pausa-lista"></ul>
+  </div>
+</div>
+
 <div id="lr-overlay" class="deseos-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="lr-titulo-dialogo">
   <div class="deseos-dialog lr-dialog">
 

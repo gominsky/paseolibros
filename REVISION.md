@@ -309,3 +309,8 @@ Ahora:
 - Solo PC (≥ 981 px): columna izquierda con Añadir ejemplar, Lecturas en curso y Préstamos activos;
   Ejemplares a la derecha se estira hasta la misma altura (muestra más libros); Estadísticas debajo a lo ancho.
 - Sin cambios en el HTML ni en el móvil: solo CSS (`display: contents` + rejilla) en `nuevo-look.css`.
+
+## «En pausa» como enlace — 17/11
+
+- Bajo Lecturas en curso ya no se lista cada lectura pospuesta: solo un enlace «En pausa (n) ›»
+  que abre una ventana con la lista (Retomar / abandonar). Así la columna no crece.
