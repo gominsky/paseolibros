@@ -670,3 +670,43 @@ body.theme-rose textarea { background: #fff; border-color: var(--border-2); }
 .pausa-meta .stats-prestado { margin-left: 4px; }
 .pausa-acciones { display: flex; gap: 6px; flex-shrink: 0; }
 .pausa-acciones .btn { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+
+/* ══════════════════════════════════════════════════════════
+   ESCRITORIO: portada más equilibrada (solo PC; el móvil no cambia)
+   Columna izquierda: Añadir ejemplar + Lecturas en curso + Préstamos activos.
+   Columna derecha: Ejemplares, que se estira hasta la altura de la izquierda.
+   Debajo, a lo ancho: Estadísticas de lectura.
+   ══════════════════════════════════════════════════════════ */
+@media (min-width: 981px) {
+  .app-main {
+    grid-template-columns: 340px minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    align-items: start;
+  }
+  /* Los hijos de la columna derecha pasan a ser piezas de la rejilla principal */
+  .app-main > .column-right,
+  .app-main > .column-right > .grid-two { display: contents; }
+
+  .app-main > .column-left { grid-column: 1; grid-row: 1; position: static; }
+  #card-lecturas  { grid-column: 1; grid-row: 2; margin: 0 !important; }
+  #card-prestamos { grid-column: 1; grid-row: 3; margin: 0 !important; }
+  #card-stats-lecturas { grid-column: 1 / -1; grid-row: 4; margin: 0 !important; }
+
+  /* Ejemplares ocupa las tres filas y su lista se adapta al alto disponible */
+  .card-ejemplares {
+    grid-column: 2; grid-row: 1 / 4; margin: 0 !important;
+    align-self: stretch;
+    height: 0; min-height: 100%;          /* no empuja las filas: toma el alto de la izquierda */
+    display: flex; flex-direction: column;
+  }
+  .card-ejemplares > .table-wrapper,
+  .card-ejemplares > .ej-grid,
+  .card-ejemplares > .ej-estanteria { flex: 1 1 0; min-height: 260px; max-height: none; }
+
+  /* En la columna estrecha, tablas compactas */
+  #card-lecturas .table-wrapper, #card-prestamos .table-wrapper { max-height: 320px; overflow-x: hidden; }
+  #card-lecturas table, #card-prestamos table { min-width: 0; table-layout: auto; }
+  #card-lecturas th, #card-lecturas td, #card-prestamos th, #card-prestamos td { padding-left: 10px; padding-right: 10px; }
+  #card-prestamos td { word-break: normal; overflow-wrap: anywhere; }
+  #card-lecturas th, #card-prestamos th { white-space: nowrap; }
+}

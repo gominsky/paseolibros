@@ -303,3 +303,9 @@ Ahora:
 - BD `db/add7.sql` (automática): `lecturas.fecha_estado`; `libros_recibidos.pospuesto` y `fecha_pospuesto`.
 - API: `PATCH /api/lecturas/:id/estado`, `GET /api/usuarios/:id/lecturas-en-pausa`,
   `POST /api/libros-recibidos/:id/lectura` con `accion: 'posponer'`.
+
+## Portada de escritorio más equilibrada — 17/11
+
+- Solo PC (≥ 981 px): columna izquierda con Añadir ejemplar, Lecturas en curso y Préstamos activos;
+  Ejemplares a la derecha se estira hasta la misma altura (muestra más libros); Estadísticas debajo a lo ancho.
+- Sin cambios en el HTML ni en el móvil: solo CSS (`display: contents` + rejilla) en `nuevo-look.css`.
